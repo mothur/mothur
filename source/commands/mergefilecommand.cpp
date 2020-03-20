@@ -21,6 +21,12 @@ vector<string> MergeFileCommand::setParameters(){
         CommandParameter pfasta("fasta", "", "", "", "none", "none", "none","taxonomy",false,true,true); parameters.push_back(pfasta);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
+        
+        abort = false; calledHelp = false;   appendMode = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["merge"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -63,48 +69,16 @@ string MergeFileCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeFileCommand::MergeFileCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["merge"] = tempOutNames;
-        outputTypes["fasta"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeFileCommand", "MergeFileCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 MergeFileCommand::MergeFileCommand(string option)  {
 	try {
-        abort = false; calledHelp = false;   appendMode = true;
-		
-		if(option == "help") {
-			help();
-			abort = true; calledHelp = true;
-		}else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+ 		if(option == "help") { help(); abort = true; calledHelp = true; }
+        else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["merge"] = tempOutNames;
-            outputTypes["fasta"] = tempOutNames;
-			
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
 
             string inputDir = validParameter.valid(parameters, "inputdir");

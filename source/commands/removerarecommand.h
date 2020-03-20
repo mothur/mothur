@@ -21,7 +21,6 @@ class RemoveRareCommand : public Command {
 public:
 	
 	RemoveRareCommand(string);	
-	RemoveRareCommand();
 	~RemoveRareCommand(){}
 	
 	vector<string> setParameters();

@@ -35,7 +35,6 @@ class PairwiseSeqsCommand : public Command {
 	
 public:
 	PairwiseSeqsCommand(string);	
-	PairwiseSeqsCommand();
 	~PairwiseSeqsCommand() {}
 	
 	vector<string> setParameters();

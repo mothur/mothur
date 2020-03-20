@@ -19,6 +19,11 @@ vector<string> MakeFileCommand::setParameters(){
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         CommandParameter pdelim("delim", "String", "", "_", "", "", "","",false,false); parameters.push_back(pdelim);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["file"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -65,68 +70,34 @@ string MakeFileCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeFileCommand::MakeFileCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["file"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeFileCommand", "MakeFileCommand");
-        exit(1);
-    }
-}
-
-//**********************************************************************************************************************
-
 MakeFileCommand::MakeFileCommand(string option)  {
     try {
-        
-        abort = false; calledHelp = false;
-        
-        //allow user to run help
-        if(option == "help") { help(); abort = true; calledHelp = true; }
+         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string, string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string, string>::iterator it;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["file"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
             inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting."); m->mothurOutEndLine(); abort = true;	}
+            if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting.\n");  abort = true;	}
             else {
                 if (util.dirCheck(inputDir)) {} // all set
                 else { abort = true; }
             }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = inputDir;		}
-            
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             typeFile = validParameter.valid(parameters, "type");
             if (typeFile == "not found"){	typeFile = "fastq";		}
             
-            if ((typeFile != "fastq") && (typeFile != "gz")) { m->mothurOut(typeFile + " is not a valid type. Options are fastq or gz. I will use fastq."); m->mothurOutEndLine(); typeFile = "fastq"; }
+            if ((typeFile != "fastq") && (typeFile != "gz")) { m->mothurOut(typeFile + " is not a valid type. Options are fastq or gz. I will use fastq.\n");  typeFile = "fastq"; }
             
             string temp = validParameter.valid(parameters, "numcols");		if(temp == "not found"){	temp = "3"; }
-            if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3."); m->mothurOutEndLine(); temp = "3";  }
+            if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3.\n");  temp = "3";  }
             util.mothurConvert(temp, numCols);
             
             prefix = validParameter.valid(parameters, "prefix");		if (prefix == "not found") { prefix = "stability"; }

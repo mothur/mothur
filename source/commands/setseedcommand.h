@@ -18,7 +18,6 @@ class SetSeedCommand : public Command {
     
 public:
     SetSeedCommand(string);
-    SetSeedCommand() { abort = true; calledHelp = true; setParameters(); }
     ~SetSeedCommand(){}
     
     vector<string> setParameters();

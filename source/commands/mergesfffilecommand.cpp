@@ -20,6 +20,11 @@ vector<string> MergeSfffilesCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["sff"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -64,47 +69,18 @@ string MergeSfffilesCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeSfffilesCommand::MergeSfffilesCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-        outputTypes["sff"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MergeSfffilesCommand", "MergeSfffilesCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
-            map<string,string>::iterator it;
-			
+ 			
 			ValidParameters validParameter;
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-            outputTypes["sff"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
             
             string inputDir = validParameter.valid(parameters, "inputdir");

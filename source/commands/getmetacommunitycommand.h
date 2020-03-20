@@ -62,7 +62,6 @@
 class GetMetaCommunityCommand : public Command {
 public:
     GetMetaCommunityCommand(string);
-    GetMetaCommunityCommand();
     ~GetMetaCommunityCommand(){}
     
     vector<string> setParameters();

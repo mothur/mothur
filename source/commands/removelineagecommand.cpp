@@ -32,6 +32,20 @@ vector<string> RemoveLineageCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["alignreport"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -90,70 +104,19 @@ string RemoveLineageCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-RemoveLineageCommand::RemoveLineageCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["taxonomy"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["alignreport"] = tempOutNames;
-		outputTypes["list"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-        outputTypes["constaxonomy"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["accnos"] = tempOutNames;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 RemoveLineageCommand::RemoveLineageCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-				
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();	
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["taxonomy"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["alignreport"] = tempOutNames;
-			outputTypes["list"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["accnos"] = tempOutNames;
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
 			
 			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta");
@@ -449,7 +412,7 @@ int RemoveLineageCommand::runRemoveOTUs(string accnosFileName){
             m->mothurOut("Running command: remove.otus(" + inputString + ")\n");
             current->setMothurCalling(true);
             
-            Command* removeCommand = new RemoveOtuLabelsCommand(inputString);
+            Command* removeCommand = new RemoveOtusCommand(inputString);
             removeCommand->execute();
             
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();

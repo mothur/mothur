@@ -18,6 +18,11 @@ vector<string> DeuniqueTreeCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["tree"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -57,73 +62,43 @@ string DeuniqueTreeCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-DeuniqueTreeCommand::DeuniqueTreeCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DeuniqueTreeCommand", "DeuniqueTreeCommand");
-		exit(1);
-	}
-}
 /***********************************************************/
 DeuniqueTreeCommand::DeuniqueTreeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["tree"] = tempOutNames;
-						
-            //check for required parameters
 			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it
 				treefile = current->getTreeFile(); 
-				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }
 			}else { current->setTreeFile(treefile); }	
 			
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { 				//if there is a current design file, use it
 				namefile = current->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current name file and the name parameter is required."); m->mothurOutEndLine(); abort = true; }								
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
+				else { 	m->mothurOut("You have no current name file and the name parameter is required.\n");  abort = true; }
 			}else { current->setNameFile(namefile); }
 			
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DeuniqueTreeCommand", "DeuniqueTreeCommand");
 		exit(1);
 	}
 }
-
 /***********************************************************/
 int DeuniqueTreeCommand::execute() {
 	try {

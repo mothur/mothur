@@ -18,6 +18,12 @@ vector<string> GetDistsCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -59,48 +65,18 @@ string GetDistsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetDistsCommand::GetDistsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetDistsCommand", "GetDistsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetDistsCommand::GetDistsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["column"] = tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -129,18 +105,16 @@ GetDistsCommand::GetDistsCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n"); }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file."); m->mothurOutEndLine(); 
-						abort = true;
+						m->mothurOut("No valid current files. You must provide a phylip or column file.\n");  abort = true;
 					}
 				}
 			}
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetDistsCommand", "GetDistsCommand");

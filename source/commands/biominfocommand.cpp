@@ -24,6 +24,14 @@ vector<string> BiomInfoCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false; maxLevel = 0;
+        
+        vector<string> tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["taxsummary"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -98,52 +106,20 @@ string BiomInfoCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-BiomInfoCommand::BiomInfoCommand(){
-    try {
-        abort = true; calledHelp = true; maxLevel = 0;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["taxonomy"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["constaxonomy"] = tempOutNames;
-        outputTypes["taxsummary"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "BiomInfoCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 BiomInfoCommand::BiomInfoCommand(string option)  {
     try {
-        abort = false; calledHelp = false; maxLevel = 0;
+        maxLevel = 0;
         
         //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string, string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string, string>::iterator it;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["taxonomy"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames;
-            outputTypes["taxsummary"] = tempOutNames;
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
             //check for required parameters
@@ -156,7 +132,7 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             if (label == "not found") { label = "userLabel"; }
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
-            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n");  output = "detail"; }
             
             string temp = validParameter.valid(parameters, "relabund");		if (temp == "not found"){	temp = "false";			}
             relabund = util.isTrue(temp);

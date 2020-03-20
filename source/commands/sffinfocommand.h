@@ -21,7 +21,6 @@ class SffInfoCommand : public Command {
 	
 public:
 	SffInfoCommand(string);
-	SffInfoCommand();
 	~SffInfoCommand(){}
 	
 	vector<string> setParameters();

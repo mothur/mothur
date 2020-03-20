@@ -105,6 +105,14 @@ vector<string> MakeBiomCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         CommandParameter pmatrixtype("matrixtype", "Multiple", "sparse-dense", "sparse", "", "", "","",false,false); parameters.push_back(pmatrixtype);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["biom"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -156,52 +164,18 @@ string MakeBiomCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-MakeBiomCommand::MakeBiomCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["biom"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["relabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeBiomCommand", "MakeBiomCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 MakeBiomCommand::MakeBiomCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-        
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["biom"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["relabund"] = tempOutNames;
-			
             relabundfile = validParameter.validFile(parameters, "relabund");
             if (relabundfile == "not open") { abort = true; }
             else if (relabundfile == "not found") { relabundfile = ""; }
@@ -217,12 +191,12 @@ MakeBiomCommand::MakeBiomCommand(string option) {
                 //is there are current file available for either of these?
                 //give priority to shared, then relabund
                 sharedfile = current->getSharedFile();
-                if (sharedfile != "") {  inputFileName = sharedfile; fileFormat="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+                if (sharedfile != "") {  inputFileName = sharedfile; fileFormat="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
                 else {
                     relabundfile = current->getRelAbundFile();
-                    if (relabundfile != "") {  inputFileName = relabundfile; fileFormat="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+                    if (relabundfile != "") {  inputFileName = relabundfile; fileFormat="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
                     else {
-                        m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); abort = true;
+                        m->mothurOut("No valid current files. You must provide a shared or relabund.\n");  abort = true;
                     }
                 }
             }

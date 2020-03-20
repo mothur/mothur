@@ -47,6 +47,15 @@ vector<string> TrimSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        abort = false; calledHelp = false;  comboStarts = 0;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -123,59 +132,19 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-
-TrimSeqsCommand::TrimSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
-
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;   
-		comboStarts = 0;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-			
-			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta");
 			if (fastaFile == "not found") { 				
 				fastaFile = current->getFastaFile(); 

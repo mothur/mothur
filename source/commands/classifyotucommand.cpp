@@ -32,6 +32,12 @@ vector<string> ClassifyOtuCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+       
+        vector<string> tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["taxsummary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -91,51 +97,20 @@ string ClassifyOtuCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifyOtuCommand::ClassifyOtuCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["constaxonomy"] = tempOutNames;
-		outputTypes["taxsummary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "ClassifyOtuCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
 		allLines = true;
-		labels.clear();
 				
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
-		}else if(option == "citation") { citation(); abort = true; calledHelp = true;} 
+		}else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  } 
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["constaxonomy"] = tempOutNames;
-			outputTypes["taxsummary"] = tempOutNames;
-		
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters

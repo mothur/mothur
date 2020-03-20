@@ -20,7 +20,6 @@
 class ChimeraCcodeCommand : public Command {
 public:
 	ChimeraCcodeCommand(string);
-	ChimeraCcodeCommand();
 	~ChimeraCcodeCommand(){}
 	
 	vector<string> setParameters();

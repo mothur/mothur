@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "getotulabelscommand.h"
+#include "getotuscommand.h"
 
 //**********************************************************************************************************************
-vector<string> GetOtuLabelsCommand::setParameters(){	
+vector<string> GetOtusCommand::setParameters(){	
 	try {
         CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true, true); parameters.push_back(paccnos);
         CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none","constaxonomy",false,false, true); parameters.push_back(pconstaxonomy);
@@ -21,18 +21,27 @@ vector<string> GetOtuLabelsCommand::setParameters(){
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["otucorr"] = tempOutNames;
+        outputTypes["corraxes"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "setParameters");
+		m->errorOut(e, "GetOtusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string GetOtuLabelsCommand::getHelpString(){	
+string GetOtusCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		helpString += "The get.otus command can be used to select specific otus with the output from classify.otu, otu.association, or corr.axes commands.  It can also be used to select a set of otus from a shared or list file.\n";
@@ -46,12 +55,12 @@ string GetOtuLabelsCommand::getHelpString(){
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "getHelpString");
+		m->errorOut(e, "GetOtusCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string GetOtuLabelsCommand::getOutputPattern(string type) {
+string GetOtusCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -65,67 +74,30 @@ string GetOtuLabelsCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "GetOtuLabelsCommand", "getOutputPattern");
+        m->errorOut(e, "GetOtusCommand", "getOutputPattern");
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
-GetOtuLabelsCommand::GetOtuLabelsCommand(){	
+GetOtusCommand::GetOtusCommand(string option)  {
 	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["constaxonomy"] = tempOutNames; 
-        outputTypes["otucorr"] = tempOutNames;
-        outputTypes["corraxes"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "GetOtuLabelsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-GetOtuLabelsCommand::GetOtuLabelsCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-        
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames; 
-            outputTypes["otucorr"] = tempOutNames;
-            outputTypes["corraxes"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-            
- 			//check for parameters
             accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
-					abort = true;
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
 			
@@ -155,23 +127,23 @@ GetOtuLabelsCommand::GetOtuLabelsCommand(string option)  {
             //if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	 outputDir = ""; 	}
             
-            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list."); m->mothurOutEndLine(); abort = true; }
+            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list.\n"); abort = true; }
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");			
-                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n"); label=""; }
             }
 		}
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "GetOtuLabelsCommand");
+		m->errorOut(e, "GetOtusCommand", "GetOtusCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int GetOtuLabelsCommand::execute(){
+int GetOtusCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -218,12 +190,12 @@ int GetOtuLabelsCommand::execute(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "execute");
+		m->errorOut(e, "GetOtusCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::readClassifyOtu(){
+int GetOtusCommand::readClassifyOtu(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
@@ -276,12 +248,12 @@ int GetOtuLabelsCommand::readClassifyOtu(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "readClassifyOtu");
+		m->errorOut(e, "GetOtusCommand", "readClassifyOtu");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::readOtuAssociation(){
+int GetOtusCommand::readOtuAssociation(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(otucorrfile);  }
@@ -331,12 +303,12 @@ int GetOtuLabelsCommand::readOtuAssociation(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "readOtuAssociation");
+		m->errorOut(e, "GetOtusCommand", "readOtuAssociation");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::readCorrAxes(){
+int GetOtusCommand::readCorrAxes(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(corraxesfile);  }
@@ -386,12 +358,12 @@ int GetOtuLabelsCommand::readCorrAxes(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "readCorrAxes");
+		m->errorOut(e, "GetOtusCommand", "readCorrAxes");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::readShared(){
+int GetOtusCommand::readShared(){
 	try {
         
         SharedRAbundVectors* lookup = getShared();
@@ -436,12 +408,12 @@ int GetOtuLabelsCommand::readShared(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "readShared");
+		m->errorOut(e, "GetOtusCommand", "readShared");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::readList(){
+int GetOtusCommand::readList(){
 	try {
         getListVector();
         
@@ -492,12 +464,12 @@ int GetOtuLabelsCommand::readList(){
         return 0;
     }
     catch(exception& e) {
-            m->errorOut(e, "GetOtuLabelsCommand", "readList");
+            m->errorOut(e, "GetOtusCommand", "readList");
             exit(1);
         }
     }
 //**********************************************************************************************************************
-int GetOtuLabelsCommand::getListVector(){
+int GetOtusCommand::getListVector(){
 	try {
 		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
@@ -562,12 +534,12 @@ int GetOtuLabelsCommand::getListVector(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "getListVector");	
+		m->errorOut(e, "GetOtusCommand", "getListVector");	
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
+SharedRAbundVectors* GetOtusCommand::getShared(){
 	try {
 		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -630,7 +602,7 @@ SharedRAbundVectors* GetOtuLabelsCommand::getShared(){
 		return lookup;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "getShared");	
+		m->errorOut(e, "GetOtusCommand", "getShared");	
 		exit(1);
 	}
 }

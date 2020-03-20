@@ -34,6 +34,14 @@ vector<string> ChimeraVsearchCommand::setParameters(){
         CommandParameter pvsearchlocation("vsearch", "String", "", "", "", "", "","",false,false); parameters.push_back(pvsearchlocation);
         CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["alns"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -112,51 +120,21 @@ string ChimeraVsearchCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraVsearchCommand::ChimeraVsearchCommand() : Command(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["chimera"] = tempOutNames;
-        outputTypes["accnos"] = tempOutNames;
-        outputTypes["alns"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ChimeraVsearchCommand", "ChimeraVsearchCommand");
-        exit(1);
-    }
-}
 //***************************************************************************************************************
 ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
     try {
-        abort = false; calledHelp = false; hasCount=false;
+        hasCount=false;
         
         //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
-            ValidParameters validParameter("chimera.vsearch");
-            map<string,string>::iterator it;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["chimera"] = tempOutNames;
-            outputTypes["accnos"] = tempOutNames;
-            outputTypes["alns"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();
@@ -195,7 +173,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
             string path;
-            it = parameters.find("reference");
+            map<string,string>::iterator it = parameters.find("reference");
             //user has given a template file
             if(it != parameters.end()){
                 if (it->second == "self") {  templatefile = "self";  }

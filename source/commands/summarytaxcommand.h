@@ -18,7 +18,6 @@
 class SummaryTaxCommand : public Command {
 	public:
 		SummaryTaxCommand(string);
-		SummaryTaxCommand();
 		~SummaryTaxCommand(){}
 		
 		vector<string> setParameters();

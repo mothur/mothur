@@ -18,7 +18,6 @@
 class MergeFileCommand : public Command {
 public:
 	MergeFileCommand(string);
-	MergeFileCommand();
 	~MergeFileCommand(){}
 	
 	vector<string> setParameters();

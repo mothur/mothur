@@ -21,6 +21,11 @@ vector<string> MakeGroupCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -63,97 +68,40 @@ string MakeGroupCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeGroupCommand::MakeGroupCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["group"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeGroupCommand", "MakeGroupCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
 MakeGroupCommand::MakeGroupCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;   
-	
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["group"] = tempOutNames;
-		
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
 			if (inputDir == "not found"){	inputDir = "";		}
 
-			fastaFileName = validParameter.valid(parameters, "fasta");
-			if (fastaFileName == "not found") { 				//if there is a current fasta file, use it
-				string filename = current->getFastaFile(); 
-				if (filename != "") { fastaFileNames.push_back(filename); m->mothurOut("Using " + filename + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
-			}else { 
-				util.splitAtDash(fastaFileName, fastaFileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < fastaFileNames.size(); i++) {
-					
-					bool ignore = false;
-					if (fastaFileNames[i] == "current") { 
-						fastaFileNames[i] = current->getFastaFile(); 
-						if (fastaFileNames[i] != "") {  
-							m->mothurOut("Using " + fastaFileNames[i] + " as input file for the fasta parameter where you had given current.\n");
-						}
-						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current.\n"); ignore=true;
-							//erase from file list
-							fastaFileNames.erase(fastaFileNames.begin()+i);
-							i--;
-						}
-					}
-					
-                    if (!ignore) {
-                        filename = util.getRootName(util.getSimpleName(fastaFileNames[i]));
-                        if (util.checkLocations(fastaFileNames[i], current->getLocations())) { current->setFastaFile(fastaFileNames[i]); }
-                        else { fastaFileNames.erase(fastaFileNames.begin()+i); i--; } //erase from file list
-                    }
-				}
-				
-				//prevent giantic file name
-                map<string, string> variables; 
-                variables["[filename]"] = filename;
-				if (fastaFileNames.size() > 3) { variables["[filename]"] = "merge."; }
-				filename = getOutputFileName("group",variables);  
-				
-				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
-			}
-			
+            fastaFileNames = validParameter.validFiles(parameters, "fasta");
+            if (fastaFileNames.size() != 0) {
+                if (fastaFileNames[0] == "not open") { abort = true; }
+                else {
+                    current->setFastaFile(fastaFileNames[0]);
+                    filename = util.getRootName(util.getSimpleName(fastaFileNames[0]));
+                    //prevent giantic file name
+                    map<string, string> variables;
+                    variables["[filename]"] = filename;
+                    if (fastaFileNames.size() > 3) { variables["[filename]"] = "merge."; }
+                    filename = getOutputFileName("group",variables);
+                }
+            }
+            
+            //make sure there is at least one valid file left
+            if (fastaFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid files.\n");  abort = true; }
+            
 			output = validParameter.valid(parameters, "output");			
 			if (output == "not found") { output = "";  }
 			else{ filename = output; }

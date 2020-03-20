@@ -17,7 +17,6 @@
 class ClassifyTreeCommand : public Command {
 public:
 	ClassifyTreeCommand(string);
-	ClassifyTreeCommand();
 	~ClassifyTreeCommand(){}
 	
 	vector<string> setParameters();

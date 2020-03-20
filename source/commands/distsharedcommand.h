@@ -2,7 +2,7 @@
 #define MATRIXOUTPUTCOMMAND_H
 
 /*
- *  matrixoutputcommand.h
+ *  distsharedcommand.h
  *  Mothur
  *
  *  Created by Sarah Westcott on 5/20/09.
@@ -34,7 +34,6 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-//#include "sharedjackknife.h"
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
@@ -65,12 +64,11 @@
 	They can also use as many or as few calculators as they wish. */
 	
 
-class MatrixOutputCommand : public Command {
+class DistSharedCommand : public Command {
 	
 public:
-	MatrixOutputCommand(string);
-	MatrixOutputCommand();	
-	~MatrixOutputCommand();
+	DistSharedCommand(string);
+	~DistSharedCommand();
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "dist.shared";				}

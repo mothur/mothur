@@ -28,6 +28,13 @@ vector<string> ChimeraPerseusCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter palpha("alpha", "Number", "", "-5.54", "", "", "","",false,false); parameters.push_back(palpha);
 		CommandParameter pbeta("beta", "Number", "", "0.33", "", "", "","",false,false); parameters.push_back(pbeta);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -81,51 +88,22 @@ string ChimeraPerseusCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraPerseusCommand::ChimeraPerseusCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPerseusCommand", "ChimeraPerseusCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 	try {
-		abort = false; calledHelp = false; 
         hasCount = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			
-			ValidParameters validParameter("chimera.perseus");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
 
 			//check for required parameters
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();

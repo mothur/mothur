@@ -21,7 +21,6 @@ class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand(string);
-		UnifracWeightedCommand();
 		~UnifracWeightedCommand() {}
 	
 		vector<string> setParameters();

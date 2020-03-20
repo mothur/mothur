@@ -18,6 +18,11 @@ vector<string> MergeCountCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -42,46 +47,16 @@ string MergeCountCommand::getHelpString(){
     }
 }
 //**********************************************************************************************************************
-MergeCountCommand::MergeCountCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["count"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MergeCountCommand", "MergeCountCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-
 MergeCountCommand::MergeCountCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        
-        if(option == "help") {
-            help();
-            abort = true; calledHelp = true;
-        }else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        if(option == "help") { help(); abort = true; calledHelp = true; }
+        else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
             string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";		}
             

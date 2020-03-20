@@ -22,7 +22,7 @@
 
 class OptionParser {
 public:
-	OptionParser(string);
+	OptionParser(string, vector<string>);
     OptionParser(string, map<string, string>&);
 	~OptionParser() {}
 	map<string, string> getParameters(); //adds inputdir to parameters if indicated

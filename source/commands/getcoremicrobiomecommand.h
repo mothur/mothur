@@ -19,7 +19,6 @@
 class GetCoreMicroBiomeCommand : public Command {
 public:
     GetCoreMicroBiomeCommand(string);
-    GetCoreMicroBiomeCommand();
     ~GetCoreMicroBiomeCommand(){}
     
     vector<string> setParameters();

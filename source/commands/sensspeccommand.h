@@ -22,7 +22,6 @@ class SensSpecCommand : public Command {
 
 public:
 	SensSpecCommand(string);
-	SensSpecCommand();
 	~SensSpecCommand(){}
 
 	vector<string> setParameters();

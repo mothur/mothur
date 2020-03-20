@@ -44,6 +44,14 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "","",false,false); parameters.push_back(pmaxlen);
 		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pucl);
 		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pqueryfract);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["alns"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -116,51 +124,21 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraUchimeCommand::ChimeraUchimeCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-		outputTypes["alns"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "ChimeraUchimeCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false; hasCount=false;
+		hasCount=false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("chimera.uchime");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			outputTypes["alns"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();
@@ -198,7 +176,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
-            it = parameters.find("reference");
+            map<string, string>::iterator it = parameters.find("reference");
             //user has given a template file
             if(it != parameters.end()){
                 if (it->second == "self") {  templatefile = "self";  }

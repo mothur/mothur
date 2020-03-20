@@ -161,7 +161,6 @@ class SplitGroupCommand : public Command {
 	
 public:
 	SplitGroupCommand(string);	
-	SplitGroupCommand();
 	~SplitGroupCommand() {}
 	
 	vector<string> setParameters();

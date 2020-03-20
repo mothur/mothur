@@ -2,7 +2,7 @@
 #define SECONDARYSTRUCTURECHECKERCOMMAND_H
 
 /*
- *  secondarystructurecommand.h
+ *  aligncheckcommand.h
  *  Mothur
  *
  *  Created by westcott on 9/18/09.
@@ -33,7 +33,6 @@ class AlignCheckCommand : public Command {
 	public:
 	
 		AlignCheckCommand(string);	
-		AlignCheckCommand();
 		~AlignCheckCommand(){}
 	
 		vector<string> setParameters();

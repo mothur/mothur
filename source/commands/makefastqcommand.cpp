@@ -22,6 +22,12 @@ vector<string> MakeFastQCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+       
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -64,46 +70,18 @@ string MakeFastQCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeFastQCommand::MakeFastQCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fastq"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "MakeFastQCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeFastQCommand::MakeFastQCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fastq"] = tempOutNames;
-			
-			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; fastafile = ""; }
 			else if (fastafile == "not found") {  		
@@ -129,10 +107,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
                 m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
                 abort=true;
             }
-
-
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeFastQCommand", "MakeFastQCommand");

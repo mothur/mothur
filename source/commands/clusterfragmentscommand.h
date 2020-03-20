@@ -32,7 +32,6 @@ class ClusterFragmentsCommand : public Command {
 	
 public:
 	ClusterFragmentsCommand(string);
-	ClusterFragmentsCommand();
 	~ClusterFragmentsCommand() {}
 	
 	vector<string> setParameters();

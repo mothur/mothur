@@ -20,7 +20,6 @@ class ClassifyOtuCommand : public Command {
 
 public:
 	ClassifyOtuCommand(string);
-	ClassifyOtuCommand();
 	~ClassifyOtuCommand() {}
 	
 	vector<string> setParameters();

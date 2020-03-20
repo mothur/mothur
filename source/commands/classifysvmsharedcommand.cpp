@@ -57,11 +57,14 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "", "", false, false);
         parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 
         vector<string> myArray;
-        for (int i = 0; i < parameters.size(); i++) {
-            myArray.push_back(parameters[i].name);
-        }
+        for (int i = 0; i < parameters.size(); i++) { myArray.push_back(parameters[i].name); }
         return myArray;
     }
     catch (exception& e) {
@@ -108,103 +111,45 @@ string ClassifySvmSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-
-ClassifySvmSharedCommand::ClassifySvmSharedCommand() {
-    try {
-        abort = true;
-        calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["summary"] = tempOutNames;
-    }
-    catch (exception& e) {
-        m->errorOut(e, "ClassifySvmSharedCommand", "ClassifySvmSharedCommand");
-        exit(1);
-    }
-}
-
-//**********************************************************************************************************************
 ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
     try {
-        abort = false;
-        calledHelp = false;
         allLines = true;
 
         //allow user to run help
-        if (option == "help") {
-            help();
-            abort = true;
-            calledHelp = true;
-        }
-        else if (option == "citation") {
-            citation();
-            abort = true;
-            calledHelp = true;
-        }
+        if (option == "help") { help(); abort = true; calledHelp = true; }
+        else if (option == "citation") { citation(); abort = true; calledHelp = true; }
+        else if(option == "category") {  abort = true; calledHelp = true;  }
+        
         else {
-            //valid parameters for this command
-            vector<string> myArray = setParameters();
-
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string, string> parameters = parser.getParameters();
 
             ValidParameters validParameter;
-            map<string, string>::iterator it;
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-                    abort = true;
-                }
-            }
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-
-            //check for parameters
-            //get shared file, it is required
             sharedfile = validParameter.validFile(parameters, "shared");
-            if (sharedfile == "not open") {
-                sharedfile = "";
-                abort = true;
-            }
+            if (sharedfile == "not open") { sharedfile = ""; abort = true; }
             else if (sharedfile == "not found") {
                 //if there is a current shared file, use it
                 sharedfile = current->getSharedFile();
                 if (sharedfile != "") {
-                    m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.");
-                    m->mothurOutEndLine();
+                    m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");
                 }
-                else {
-                    m->mothurOut("You have no current sharedfile and the shared parameter is required.");
-                    m->mothurOutEndLine();
-                    abort = true;
-                }
+                else { m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
             }
-            else {
-                current->setSharedFile(sharedfile);
-            }
+            else { current->setSharedFile(sharedfile); }
 
             //get design file, it is required
             designfile = validParameter.validFile(parameters, "design");
-            if (designfile == "not open") {
-                sharedfile = "";
-                abort = true;
-            }
+            if (designfile == "not open") { designfile = ""; abort = true; }
             else if (designfile == "not found") {
                 //if there is a current shared file, use it
                 designfile = current->getDesignFile();
                 if (designfile != "") {
-                    m->mothurOut("Using " + designfile + " as input file for the design parameter.");
-                    m->mothurOutEndLine();
+                    m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");
                 }
                 else {
-                    m->mothurOut("You have no current designfile and the design parameter is required.");
-                    m->mothurOutEndLine();
-                    abort = true;
+                    m->mothurOut("You have no current designfile and the design parameter is required.\n"); abort = true;
                 }
-            }
-            else {
-                current->setDesignFile(designfile);
-            }
+            } else { current->setDesignFile(designfile); }
 
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");
@@ -223,46 +168,26 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             //Commonly used to process list, rabund, sabund, shared and relabund files.
             //Look at "smart distancing" examples below in the execute function.
             string label = validParameter.valid(parameters, "label");
-            if (label == "not found") {
-                label = "";
-            }
+            if (label == "not found") { label = ""; }
             else {
-                if (label != "all") {
-                    util.splitAtDash(label, labels);
-                    allLines = false;
-                }
-                else {
-                    allLines = true;
-                }
+                if (label != "all") { util.splitAtDash(label, labels); allLines = false; }
+                else { allLines = true; }
             }
 
             string modeOption = validParameter.valid(parameters, "mode");
-            if ( modeOption == "not found" || modeOption == "rfe" ) {
-                mode = "rfe";
-            }
-            else if ( modeOption == "classify" ) {
-                mode = "classify";
-            }
+            if ( modeOption == "not found" || modeOption == "rfe" ) { mode = "rfe"; }
+            else if ( modeOption == "classify" ) { mode = "classify"; }
             else {
-                m->mothurOut("the mode option " + modeOption + " is not recognized -- must be 'rfe' or 'classify'");
-                m->mothurOutEndLine();
-                abort = true;
+                m->mothurOut("the mode option " + modeOption + " is not recognized -- must be 'rfe' or 'classify'\n"); abort = true;
             }
 
             string ef = validParameter.valid(parameters, "evaluationfolds");
-            if ( ef == "not found") {
-                evaluationFoldCount = 3;
-            }
-            else {
-                util.mothurConvert(ef, evaluationFoldCount);
-            }
+            if ( ef == "not found") { evaluationFoldCount = 3; }
+            else { util.mothurConvert(ef, evaluationFoldCount); }
+            
             string tf = validParameter.valid(parameters, "trainingfolds");
-            if ( tf == "not found") {
-                trainingFoldCount = 5;
-            }
-            else {
-                util.mothurConvert(tf, trainingFoldCount);
-            }
+            if ( tf == "not found") { trainingFoldCount = 5; }
+            else { util.mothurConvert(tf, trainingFoldCount); }
 
             string smocOption = validParameter.valid(parameters, "smoc");
             smocList.clear();
@@ -357,23 +282,15 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 
             // get the normalization option
             string transformOption = validParameter.valid(parameters, "transform");
-            if ( transformOption == "not found" || transformOption == "unitmean") {
-                transformName = "unitmean";
-            }
-            else if ( transformOption == "zeroone" ) {
-                transformName = "zeroone";
-            }
+            if ( transformOption == "not found" || transformOption == "unitmean") { transformName = "unitmean"; }
+            else if ( transformOption == "zeroone" ) { transformName = "zeroone"; }
             else {
-                m->mothurOut("the transform option " + transformOption + " is not recognized -- must be 'unitmean' or 'zeroone'");
-                m->mothurOutEndLine();
-                abort = true;
+                m->mothurOut("the transform option " + transformOption + " is not recognized -- must be 'unitmean' or 'zeroone'\n"); abort = true;
             }
 
             // get the verbosity option
             string verbosityOption = validParameter.valid(parameters, "verbose");
-            if ( verbosityOption == "not found") {
-                verbosity = 0;
-            }
+            if ( verbosityOption == "not found") { verbosity = 0; }
             else {
                 util.mothurConvert(tf, verbosity);
                 if (verbosity < OutputFilter::QUIET || verbosity > OutputFilter::TRACE) {
@@ -383,9 +300,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 
             // get the std threshold option
             string stdthresholdOption = validParameter.valid(parameters, "stdthreshold");
-            if ( stdthresholdOption == "not found" ) {
-                stdthreshold = -1.0;
-            }
+            if ( stdthresholdOption == "not found" ) { stdthreshold = -1.0; }
             else {
                 util.mothurConvert(stdthresholdOption, stdthreshold);
                 if ( stdthreshold <= 0.0 ) {
@@ -393,14 +308,12 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             }
         }
-
     }
     catch (exception& e) {
         m->errorOut(e, "ClassifySvmSharedCommand", "ClassifySvmSharedCommand");
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 int ClassifySvmSharedCommand::execute() {
     try {

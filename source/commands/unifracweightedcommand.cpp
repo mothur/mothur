@@ -31,6 +31,15 @@ vector<string> UnifracWeightedCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["weighted"] = tempOutNames;
+        outputTypes["wsummary"] = tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        outputTypes["tree"] = tempOutNames;
+        
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -85,55 +94,19 @@ string UnifracWeightedCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-UnifracWeightedCommand::UnifracWeightedCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["weighted"] = tempOutNames;
-		outputTypes["wsummary"] = tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-        outputTypes["tree"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
-		exit(1);
-	}
-}
 /***********************************************************/
 UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-			
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters=parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["weighted"] = tempOutNames;
-			outputTypes["wsummary"] = tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			outputTypes["column"] = tempOutNames;
-            outputTypes["tree"] = tempOutNames;
-			
-			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it

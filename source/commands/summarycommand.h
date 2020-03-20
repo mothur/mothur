@@ -19,7 +19,6 @@ class SummaryCommand : public Command {
 
 public:
 	SummaryCommand(string);
-	SummaryCommand();
 	~SummaryCommand(){}
 	
 	vector<string> setParameters();

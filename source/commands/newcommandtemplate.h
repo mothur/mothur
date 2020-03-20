@@ -29,7 +29,6 @@
 class NewCommand : public Command {
 public:
     NewCommand(string);
-    NewCommand();
     ~NewCommand(){}
     
     vector<string> setParameters();

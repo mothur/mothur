@@ -18,7 +18,6 @@
 class SparccCommand : public Command {
 public:
     SparccCommand(string);
-    SparccCommand();
     ~SparccCommand(){}
     
     vector<string> setParameters();

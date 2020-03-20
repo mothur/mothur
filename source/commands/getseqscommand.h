@@ -17,7 +17,6 @@ class GetSeqsCommand : public Command {
 	public:
 	
 		GetSeqsCommand(string);
-		GetSeqsCommand();
 		~GetSeqsCommand(){}
 	
 		vector<string> setParameters();

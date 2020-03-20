@@ -34,6 +34,14 @@ vector<string> TrimFlowsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["flow"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        
+        abort = false; calledHelp = false;    comboStarts = 0;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -86,57 +94,18 @@ string TrimFlowsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-
-TrimFlowsCommand::TrimFlowsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["flow"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["file"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimFlowsCommand", "TrimFlowsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 TrimFlowsCommand::TrimFlowsCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;   
-		comboStarts = 0;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-						
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["flow"] = tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["file"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-			
-			//check for required parameters
 			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not found") { 
 				flowFileName = current->getFlowFile(); 

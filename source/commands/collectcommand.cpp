@@ -52,6 +52,36 @@ vector<string> CollectCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+      
+        vector<string> tempOutNames;
+        outputTypes["sobs"] = tempOutNames;
+        outputTypes["chao"] = tempOutNames;
+        outputTypes["nseqs"] = tempOutNames;
+        outputTypes["coverage"] = tempOutNames;
+        outputTypes["ace"] = tempOutNames;
+        outputTypes["jack"] = tempOutNames;
+        outputTypes["shannon"] = tempOutNames;
+        outputTypes["shannoneven"] = tempOutNames;
+        outputTypes["shannonrange"] = tempOutNames;
+        outputTypes["npshannon"] = tempOutNames;
+        outputTypes["heip"] = tempOutNames;
+        outputTypes["smithwilson"] = tempOutNames;
+        outputTypes["simpson"] = tempOutNames;
+        outputTypes["simpsoneven"] = tempOutNames;
+        outputTypes["invsimpson"] = tempOutNames;
+        outputTypes["bootstrap"] = tempOutNames;
+        outputTypes["geometric"] = tempOutNames;
+        outputTypes["qstat"] = tempOutNames;
+        outputTypes["logseries"] = tempOutNames;
+        outputTypes["bergerparker"] = tempOutNames;
+        outputTypes["bstick"] = tempOutNames;
+        outputTypes["goodscoverage"] = tempOutNames;
+        outputTypes["efron"] = tempOutNames;
+        outputTypes["boneh"] = tempOutNames;
+        outputTypes["solow"] = tempOutNames;
+        outputTypes["shen"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -125,97 +155,20 @@ string CollectCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CollectCommand::CollectCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["sobs"] = tempOutNames;
-		outputTypes["chao"] = tempOutNames;
-		outputTypes["nseqs"] = tempOutNames;
-		outputTypes["coverage"] = tempOutNames;
-		outputTypes["ace"] = tempOutNames;
-		outputTypes["jack"] = tempOutNames;
-		outputTypes["shannon"] = tempOutNames;
-		outputTypes["shannoneven"] = tempOutNames;
-        outputTypes["shannonrange"] = tempOutNames;
-		outputTypes["npshannon"] = tempOutNames;
-		outputTypes["heip"] = tempOutNames;
-		outputTypes["smithwilson"] = tempOutNames;
-		outputTypes["simpson"] = tempOutNames;
-		outputTypes["simpsoneven"] = tempOutNames;
-		outputTypes["invsimpson"] = tempOutNames;
-		outputTypes["bootstrap"] = tempOutNames;
-		outputTypes["geometric"] = tempOutNames;
-		outputTypes["qstat"] = tempOutNames;
-		outputTypes["logseries"] = tempOutNames;
-		outputTypes["bergerparker"] = tempOutNames;
-		outputTypes["bstick"] = tempOutNames;
-		outputTypes["goodscoverage"] = tempOutNames;
-		outputTypes["efron"] = tempOutNames;
-		outputTypes["boneh"] = tempOutNames;
-		outputTypes["solow"] = tempOutNames;
-		outputTypes["shen"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "CollectCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 CollectCommand::CollectCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); calledHelp = true; abort = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["sobs"] = tempOutNames;
-			outputTypes["chao"] = tempOutNames;
-			outputTypes["nseqs"] = tempOutNames;
-			outputTypes["coverage"] = tempOutNames;
-			outputTypes["ace"] = tempOutNames;
-			outputTypes["jack"] = tempOutNames;
-			outputTypes["shannon"] = tempOutNames;
-			outputTypes["shannoneven"] = tempOutNames;
-			outputTypes["npshannon"] = tempOutNames;
-			outputTypes["heip"] = tempOutNames;
-			outputTypes["smithwilson"] = tempOutNames;
-			outputTypes["simpson"] = tempOutNames;
-			outputTypes["simpsoneven"] = tempOutNames;
-            outputTypes["shannonrange"] = tempOutNames;
-			outputTypes["invsimpson"] = tempOutNames;
-			outputTypes["bootstrap"] = tempOutNames;
-			outputTypes["geometric"] = tempOutNames;
-			outputTypes["qstat"] = tempOutNames;
-			outputTypes["logseries"] = tempOutNames;
-			outputTypes["bergerparker"] = tempOutNames;
-			outputTypes["bstick"] = tempOutNames;
-			outputTypes["goodscoverage"] = tempOutNames;
-			outputTypes["efron"] = tempOutNames;
-			outputTypes["boneh"] = tempOutNames;
-			outputTypes["solow"] = tempOutNames;
-			outputTypes["shen"] = tempOutNames;
-			
-			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
@@ -245,19 +198,18 @@ CollectCommand::CollectCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
 						rabundfile = current->getRabundFile();
-						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 						else { 
 							sabundfile = current->getSabundFile(); 
-							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 							else { 
-								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
-								abort = true;
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command.\n"); abort = true;
 							}
 						}
 					}

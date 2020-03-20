@@ -18,7 +18,6 @@ class CountSeqsCommand : public Command {
 public:
 	
 	CountSeqsCommand(string);
-	CountSeqsCommand();	
 	~CountSeqsCommand(){}
 	
 	vector<string> setParameters();

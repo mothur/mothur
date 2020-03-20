@@ -30,7 +30,6 @@ class SplitAbundCommand : public Command {
 	
 public:
 	SplitAbundCommand(string);	
-	SplitAbundCommand();
 	~SplitAbundCommand();
 	
 	vector<string> setParameters();

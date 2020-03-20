@@ -17,29 +17,12 @@ ValidParameters::ValidParameters() {
         current = CurrentFile::getInstance();
         locations = current->getLocations();
 		initParameterRanges();
-		commandName = "";
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidParameters", "ValidParameters");
 		exit(1);
 	}
 }
-/***********************************************************************/
-
-ValidParameters::ValidParameters(string c) {
-	try {
-		m = MothurOut::getInstance();
-        current = CurrentFile::getInstance();
-        locations = current->getLocations();
-		initParameterRanges();
-		commandName = c;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ValidParameters", "ValidParameters");
-		exit(1);
-	}
-}
-
 /***********************************************************************/
 
 ValidParameters::~ValidParameters() {}
@@ -53,11 +36,11 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		for(int i = 0; i < numParams; i++) {
 			if(cParams.at(i).compare(parameter) == 0) {
 				valid = true;
-				i = numParams;
+                break;
 			}
 		}
 		if(!valid) {
-			m->mothurOut(parameter + " is not a valid parameter.\n");
+			m->mothurOut("[WARNING]: " + parameter + " is not a valid parameter, ignoring.\n");
 			m->mothurOut("The valid parameters are: ");
 			for(int i = 0; i < numParams-1; i++)
 				m->mothurOut(cParams.at(i) + ", ");
@@ -65,8 +48,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			return false;
 		}
 		
-		if(parameterRanges.count(parameter) != 1)
-			return true;
+        if(parameterRanges.count(parameter) != 1) { return true; }
 	
 		int pVal;
 		double piSentinel = 3.14159;

@@ -34,6 +34,12 @@ vector<string> RareFactSharedCommand::setParameters(){
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;    allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["sharedrarefaction"] = tempOutNames;
+        outputTypes["sharedr_nseqs"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -88,50 +94,17 @@ string RareFactSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-RareFactSharedCommand::RareFactSharedCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["sharedrarefaction"] = tempOutNames;
-		outputTypes["sharedr_nseqs"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RareFactSharedCommand", "RareFactSharedCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 RareFactSharedCommand::RareFactSharedCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
-		//allow user to run help
-		if(option == "help") {  help(); abort = true; calledHelp = true; }
+        if(option == "help") {  help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["sharedrarefaction"] = tempOutNames;
-			outputTypes["sharedr_nseqs"] = tempOutNames;
-			
-			//get shared file
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 

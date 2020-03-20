@@ -18,7 +18,6 @@
 class OTUAssociationCommand : public Command {
 public:
 	OTUAssociationCommand(string);
-	OTUAssociationCommand();
 	~OTUAssociationCommand(){}
 	
 	vector<string> setParameters();

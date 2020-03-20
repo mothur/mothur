@@ -21,7 +21,6 @@
 class PrimerDesignCommand : public Command {
 public:
     PrimerDesignCommand(string);
-    PrimerDesignCommand();
     ~PrimerDesignCommand(){}
     
     vector<string> setParameters();

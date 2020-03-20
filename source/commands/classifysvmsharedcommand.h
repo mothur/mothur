@@ -18,9 +18,8 @@
 
 class ClassifySvmSharedCommand : public Command {
 public:
-  ClassifySvmSharedCommand();
+  
   ClassifySvmSharedCommand(string);
-  //~ClassifySvmSharedCommand() throw() {};
   ~ClassifySvmSharedCommand() {};
   
   vector<string> setParameters();

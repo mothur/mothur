@@ -45,6 +45,8 @@ vector<string> RenameFileCommand::setParameters(){
         CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -73,20 +75,6 @@ string RenameFileCommand::getHelpString(){
         exit(1);
     }
 }
-
-
-//**********************************************************************************************************************
-RenameFileCommand::RenameFileCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "RenameFileCommand", "RenameFileCommand");
-        exit(1);
-    }
-}
 //**********************************************************************************************************************
 string RenameFileCommand::getOutputPattern(string type) {
     try {
@@ -102,30 +90,15 @@ string RenameFileCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 RenameFileCommand::RenameFileCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        
-        //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            //valid paramters for this command
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string,string>::iterator it;
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
             
             int numFiles = 0;

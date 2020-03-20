@@ -91,7 +91,6 @@ struct vsearchData {
 class ChimeraVsearchCommand : public Command {
 public:
     ChimeraVsearchCommand(string);
-    ChimeraVsearchCommand();
     ~ChimeraVsearchCommand() {}
     
     vector<string> setParameters();

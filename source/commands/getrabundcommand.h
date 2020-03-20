@@ -19,7 +19,6 @@
 class GetRAbundCommand : public Command {
 public:
 	GetRAbundCommand(string);
-	GetRAbundCommand();
 	~GetRAbundCommand(){}
 	
 	vector<string> setParameters();

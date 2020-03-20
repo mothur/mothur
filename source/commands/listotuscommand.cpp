@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "listotulabelscommand.h"
+#include "listotuscommand.h"
 #include "inputdata.h"
 
 //**********************************************************************************************************************
-vector<string> ListOtuLabelsCommand::setParameters(){	
+vector<string> ListOtusCommand::setParameters(){	
 	try {
         CommandParameter pshared("shared", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false,true); parameters.push_back(pshared);
 		CommandParameter prelabund("relabund", "InputTypes", "", "", "SharedRel", "SharedRel", "none","accnos",false,false); parameters.push_back(prelabund);
@@ -21,18 +21,23 @@ vector<string> ListOtuLabelsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "setParameters");
+		m->errorOut(e, "ListOtusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string ListOtuLabelsCommand::getHelpString(){	
+string ListOtusCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		helpString += "The list.otus lists otu labels from shared, relabund, list or constaxonomy file. The results can be used by the get.otus to select specific otus with the output from classify.otu, otu.association, or corr.axes.\n";
@@ -44,12 +49,12 @@ string ListOtuLabelsCommand::getHelpString(){
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "getHelpString");
+		m->errorOut(e, "ListOtusCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string ListOtuLabelsCommand::getOutputPattern(string type) {
+string ListOtusCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -59,51 +64,23 @@ string ListOtuLabelsCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "ListOtuLabelsCommand", "getOutputPattern");
+        m->errorOut(e, "ListOtusCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-ListOtuLabelsCommand::ListOtuLabelsCommand(){	
+ListOtusCommand::ListOtusCommand(string option)  {
 	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "ListOtuLabelsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-        
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["accnos"] = tempOutNames;
-            
- 			//check for parameters
             sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
@@ -167,13 +144,13 @@ ListOtuLabelsCommand::ListOtuLabelsCommand(string option)  {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "ListOtuLabelsCommand");
+		m->errorOut(e, "ListOtusCommand", "ListOtusCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::execute(){
+int ListOtusCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -240,13 +217,13 @@ int ListOtuLabelsCommand::execute(){
 		
     }
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "execute");
+		m->errorOut(e, "ListOtusCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::printList(vector<string> currentLabels, string distance){
+int ListOtusCommand::printList(vector<string> currentLabels, string distance){
 	try {
         
         map<string, string> variables; 
@@ -264,13 +241,13 @@ int ListOtuLabelsCommand::printList(vector<string> currentLabels, string distanc
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "ListOtuLabelsCommand", "printList");
+		m->errorOut(e, "ListOtusCommand", "printList");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int ListOtuLabelsCommand::createList(string constaxFile){
+int ListOtusCommand::createList(string constaxFile){
     try {
         
         map<string, string> variables;
@@ -302,7 +279,7 @@ int ListOtuLabelsCommand::createList(string constaxFile){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "ListOtuLabelsCommand", "createList");
+        m->errorOut(e, "ListOtusCommand", "createList");
         exit(1);
     }
 }

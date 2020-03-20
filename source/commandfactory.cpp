@@ -32,10 +32,10 @@
 #include "nocommands.h"
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
-#include "treegroupscommand.h"
+#include "treesharedcommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
-#include "matrixoutputcommand.h"
+#include "distsharedcommand.h"
 #include "getsabundcommand.h"
 #include "getrabundcommand.h"
 #include "seqsummarycommand.h"
@@ -47,7 +47,7 @@
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
 #include "systemcommand.h"
-#include "secondarystructurecommand.h"
+#include "aligncheckcommand.h"
 #include "getsharedotucommand.h"
 #include "getlistcountcommand.h"
 #include "classifyseqscommand.h"
@@ -106,7 +106,6 @@
 #include "getcurrentcommand.h"
 #include "setcurrentcommand.h"
 #include "sharedcommand.h"
-#include "getcommandinfocommand.h"
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
 #include "countgroupscommand.h"
@@ -122,9 +121,9 @@
 #include "createdatabasecommand.h"
 #include "makebiomcommand.h"
 #include "getcoremicrobiomecommand.h"
-#include "listotulabelscommand.h"
-#include "getotulabelscommand.h"
-#include "removeotulabelscommand.h"
+#include "listotuscommand.h"
+#include "getotuscommand.h"
+#include "removeotuscommand.h"
 #include "makecontigscommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysvmsharedcommand.h"
@@ -257,7 +256,6 @@ CommandFactory::CommandFactory(){
 	commands["merge.groups"]		= "merge.groups";
 	commands["get.current"]			= "get.current";
 	commands["set.current"]			= "set.current";
-	commands["get.commandinfo"]		= "get.commandinfo";
 	commands["deunique.tree"]		= "deunique.tree";
 	commands["count.seqs"]			= "count.seqs";
 	commands["count.groups"]		= "count.groups";
@@ -454,8 +452,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "venn")					{   command = new VennCommand(optionString);					}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand(optionString);					}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);				}
-		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);				}
-		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);			}
+		else if(commandName == "tree.shared")			{   command = new TreeSharedCommand(optionString);				}
+		else if(commandName == "dist.shared")			{   command = new DistSharedCommand(optionString);			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);				}
@@ -509,9 +507,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
-        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtuLabelsCommand(optionString);			}
-        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
-        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
+        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtusCommand(optionString);			}
+        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtusCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtusCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
@@ -531,7 +529,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "set.current")			{	command = new SetCurrentCommand(optionString);				}
 		else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
 		else if(commandName == "make.shared")			{	command = new SharedCommand(optionString);					}
-		else if(commandName == "get.commandinfo")		{	command = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	command = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}
@@ -631,8 +628,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "venn")					{   pipecommand = new VennCommand(optionString);					}
 		else if(commandName == "bin.seqs")				{   pipecommand = new BinSeqCommand(optionString);					}
 		else if(commandName == "get.oturep")			{   pipecommand = new GetOTURepCommand(optionString);				}
-		else if(commandName == "tree.shared")			{   pipecommand = new TreeGroupCommand(optionString);				}
-		else if(commandName == "dist.shared")			{   pipecommand = new MatrixOutputCommand(optionString);			}
+		else if(commandName == "tree.shared")			{   pipecommand = new TreeSharedCommand(optionString);				}
+		else if(commandName == "dist.shared")			{   pipecommand = new DistSharedCommand(optionString);			}
 		else if(commandName == "dist.seqs")				{   pipecommand = new DistanceCommand(optionString);				}
 		else if(commandName == "align.seqs")			{   pipecommand = new AlignCommand(optionString);					}
 		else if(commandName == "summary.seqs")			{	pipecommand = new SeqSummaryCommand(optionString);				}
@@ -686,9 +683,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.groups")			{	pipecommand = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "remove.groups")			{	pipecommand = new RemoveGroupsCommand(optionString);			}
-		else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	pipecommand = new GetOtuLabelsCommand(optionString);			}
-		else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	pipecommand = new RemoveOtuLabelsCommand(optionString);			}
-        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	pipecommand = new ListOtuLabelsCommand(optionString);           }
+		else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	pipecommand = new GetOtusCommand(optionString);			}
+		else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	pipecommand = new RemoveOtusCommand(optionString);			}
+        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	pipecommand = new ListOtusCommand(optionString);           }
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
@@ -708,7 +705,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.current")			{	pipecommand = new GetCurrentCommand(optionString);				}
 		else if(commandName == "set.current")			{	pipecommand = new SetCurrentCommand(optionString);				}
 		else if(commandName == "make.shared")			{	pipecommand = new SharedCommand(optionString);					}
-		else if(commandName == "get.commandinfo")		{	pipecommand = new GetCommandInfoCommand(optionString);			}
 		else if(commandName == "deunique.tree")			{	pipecommand = new DeuniqueTreeCommand(optionString);			}
 		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	pipecommand = new CountSeqsCommand(optionString);				}
 		else if(commandName == "count.groups")			{	pipecommand = new CountGroupsCommand(optionString);				}
@@ -758,168 +754,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         
 
 		return pipecommand;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CommandFactory", "getCommand");
-		exit(1);
-	}
-}
-/***********************************************************/
-
-/***********************************************************/
-//This function calls the appropriate command fucntions based on user input, this is used by the pipeline command to check a users piepline for errors before running
-Command* CommandFactory::getCommand(string commandName){
-	try {
-		Command* shellcommand = NULL;   //delete the old command
-
-		if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
-		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
-		else if(commandName == "parsimony")				{	shellcommand = new ParsimonyCommand();				}
-		else if(commandName == "help")					{	shellcommand = new HelpCommand();					}
-		else if(commandName == "quit")					{	shellcommand = new QuitCommand();					}
-		else if(commandName == "collect.single")		{	shellcommand = new CollectCommand();				}
-		else if(commandName == "collect.shared")		{	shellcommand = new CollectSharedCommand();			}
-		else if(commandName == "rarefaction.single")	{	shellcommand = new RareFactCommand();				}
-		else if(commandName == "rarefaction.shared")	{	shellcommand = new RareFactSharedCommand();			}
-		else if(commandName == "summary.single")		{	shellcommand = new SummaryCommand();				}
-		else if(commandName == "summary.shared")		{	shellcommand = new SummarySharedCommand();			}
-		else if(commandName == "unifrac.weighted")		{	shellcommand = new UnifracWeightedCommand();		}
-		else if(commandName == "unifrac.unweighted")	{	shellcommand = new UnifracUnweightedCommand();		}
-		else if(commandName == "get.group")             {   shellcommand = new GetgroupCommand();				}
-		else if(commandName == "get.label")             {   shellcommand = new GetlabelCommand();				}
-		else if(commandName == "get.sabund")            {   shellcommand = new GetSAbundCommand();				}
-		else if(commandName == "get.rabund")            {   shellcommand = new GetRAbundCommand();				}
-		else if(commandName == "libshuff")              {   shellcommand = new LibShuffCommand();				}
-		else if(commandName == "heatmap.bin")			{   shellcommand = new HeatMapCommand();				}
-		else if(commandName == "heatmap.sim")			{   shellcommand = new HeatMapSimCommand();				}
-		else if(commandName == "filter.seqs")			{   shellcommand = new FilterSeqsCommand();				}
-		else if(commandName == "venn")					{   shellcommand = new VennCommand();					}
-		else if(commandName == "bin.seqs")				{   shellcommand = new BinSeqCommand();					}
-		else if(commandName == "get.oturep")			{   shellcommand = new GetOTURepCommand();				}
-		else if(commandName == "tree.shared")			{   shellcommand = new TreeGroupCommand();				}
-		else if(commandName == "dist.shared")			{   shellcommand = new MatrixOutputCommand();			}
-		else if(commandName == "dist.seqs")				{   shellcommand = new DistanceCommand();				}
-		else if(commandName == "align.seqs")			{   shellcommand = new AlignCommand();					}
-		else if(commandName == "summary.seqs")			{	shellcommand = new SeqSummaryCommand();				}
-		else if(commandName == "screen.seqs")			{	shellcommand = new ScreenSeqsCommand();				}
-		else if(commandName == "reverse.seqs")			{	shellcommand = new ReverseSeqsCommand();			}
-		else if(commandName == "trim.seqs")				{	shellcommand = new TrimSeqsCommand();				}
-		else if(commandName == "trim.flows")			{	shellcommand = new TrimFlowsCommand();				}
-		else if(commandName == "shhh.flows")			{	shellcommand = new ShhherCommand();					}
-		else if(commandName == "list.seqs")				{	shellcommand = new ListSeqsCommand();				}
-		else if(commandName == "get.seqs")				{	shellcommand = new GetSeqsCommand();				}
-		else if(commandName == "remove.seqs")			{	shellcommand = new RemoveSeqsCommand();				}
-		else if(commandName == "merge.files")			{	shellcommand = new MergeFileCommand();				}
-		else if(commandName == "system")				{	shellcommand = new SystemCommand();					}
-		else if(commandName == "align.check")			{	shellcommand = new AlignCheckCommand();				}
-		else if(commandName == "get.sharedseqs")		{	shellcommand = new GetSharedOTUCommand();			}
-		else if(commandName == "get.otulist")			{	shellcommand = new GetListCountCommand();			}
-		else if(commandName == "classify.seqs")			{	shellcommand = new ClassifySeqsCommand();			}
-		else if(commandName == "chimera.ccode")			{	shellcommand = new ChimeraCcodeCommand();			}
-		else if(commandName == "chimera.check")			{	shellcommand = new ChimeraCheckCommand();			}
-		else if(commandName == "chimera.slayer")		{	shellcommand = new ChimeraSlayerCommand();			}
-		else if(commandName == "chimera.uchime")		{	shellcommand = new ChimeraUchimeCommand();			}
-		else if(commandName == "chimera.pintail")		{	shellcommand = new ChimeraPintailCommand();			}
-		else if(commandName == "chimera.bellerophon")	{	shellcommand = new ChimeraBellerophonCommand();		}
-        else if(commandName == "chimera.vsearch")       {	shellcommand = new ChimeraVsearchCommand();         }
-		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}
-		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
-		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}
-		else if(commandName == "pcoa")					{	shellcommand = new PCOACommand();					}
-		else if(commandName == "pca")					{	shellcommand = new PCACommand();					}
-		else if(commandName == "nmds")					{	shellcommand = new NMDSCommand();					}
-		else if(commandName == "otu.hierarchy")			{	shellcommand = new OtuHierarchyCommand();			}
-		else if(commandName == "set.dir")				{	shellcommand = new SetDirectoryCommand();			}
-		else if(commandName == "set.logfile")			{	shellcommand = new SetLogFileCommand();				}
-		else if(commandName == "phylo.diversity")		{	shellcommand = new PhyloDiversityCommand();			}
-		else if(commandName == "make.group")			{	shellcommand = new MakeGroupCommand();				}
-		else if(commandName == "chop.seqs")				{	shellcommand = new ChopSeqsCommand();				}
-		else if(commandName == "clearcut")				{	shellcommand = new ClearcutCommand();				}
-		else if(commandName == "split.abund")			{	shellcommand = new SplitAbundCommand();				}
-		else if(commandName == "cluster.split")			{	shellcommand = new ClusterSplitCommand();			}
-		else if(commandName == "classify.otu")			{	shellcommand = new ClassifyOtuCommand();			}
-		else if(commandName == "degap.seqs")			{	shellcommand = new DegapSeqsCommand();				}
-		else if(commandName == "get.relabund")			{	shellcommand = new GetRelAbundCommand();			}
-		else if(commandName == "sens.spec")				{	shellcommand = new SensSpecCommand();				}
-		else if(commandName == "seq.error")				{	shellcommand = new SeqErrorCommand();				}
-		else if(commandName == "sffinfo")				{	shellcommand = new SffInfoCommand();				}
-		else if(commandName == "normalize.shared")		{	shellcommand = new NormalizeSharedCommand();		}
-		else if(commandName == "metastats")				{	shellcommand = new MetaStatsCommand();				}
-		else if(commandName == "split.groups")			{	shellcommand = new SplitGroupCommand();				}
-		else if(commandName == "cluster.fragments")		{	shellcommand = new ClusterFragmentsCommand();		}
-		else if(commandName == "get.lineage")			{	shellcommand = new GetLineageCommand();				}
-		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
-		else if(commandName == "get.groups")			{	shellcommand = new GetGroupsCommand();				}
-		else if(commandName == "remove.groups")			{	shellcommand = new RemoveGroupsCommand();			}
-        else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	shellcommand = new GetOtuLabelsCommand();			}
-        else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	shellcommand = new RemoveOtuLabelsCommand();			}
-        else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	shellcommand = new ListOtuLabelsCommand();           }
-		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
-		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
-		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
-		else if(commandName == "cluster.classic")		{	shellcommand = new ClusterDoturCommand();			}
-		else if(commandName == "sub.sample")			{	shellcommand = new SubSampleCommand();				}
-		else if(commandName == "indicator")				{	shellcommand = new IndicatorCommand();				}
-		else if(commandName == "consensus.seqs")		{	shellcommand = new ConsensusSeqsCommand();			}
-		else if(commandName == "corr.axes")				{	shellcommand = new CorrAxesCommand();				}
-		else if(commandName == "remove.rare")			{	shellcommand = new RemoveRareCommand();				}
-		else if(commandName == "merge.groups")			{	shellcommand = new MergeGroupsCommand();			}
-        else if(commandName == "merge.count")			{	shellcommand = new MergeCountCommand();				}
-		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
-		else if(commandName == "homova")				{	shellcommand = new HomovaCommand();					}
-		else if(commandName == "mantel")				{	shellcommand = new MantelCommand();					}
-		else if(commandName == "anosim")				{	shellcommand = new AnosimCommand();					}
-		else if(commandName == "make.fastq")			{	shellcommand = new MakeFastQCommand();				}
-		else if(commandName == "get.current")			{	shellcommand = new GetCurrentCommand();				}
-		else if(commandName == "set.current")			{	shellcommand = new SetCurrentCommand();				}
-		else if(commandName == "make.shared")			{	shellcommand = new SharedCommand();					}
-		else if(commandName == "get.commandinfo")		{	shellcommand = new GetCommandInfoCommand();			}
-		else if(commandName == "deunique.tree")			{	shellcommand = new DeuniqueTreeCommand();			}
-		else if((commandName == "count.seqs") || (commandName == "make.table"))			{	shellcommand = new CountSeqsCommand();				}
-		else if(commandName == "count.groups")			{	shellcommand = new CountGroupsCommand();			}
-		else if(commandName == "summary.tax")			{	shellcommand = new SummaryTaxCommand();				}
-		else if(commandName == "summary.qual")			{	shellcommand = new SummaryQualCommand();			}
-		else if(commandName == "chimera.perseus")		{	shellcommand = new ChimeraPerseusCommand();			}
-		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhhSeqsCommand();				}
-		else if(commandName == "otu.association")		{	shellcommand = new OTUAssociationCommand();			}
-        else if(commandName == "sort.seqs")             {	shellcommand = new SortSeqsCommand();               }
-        else if(commandName == "classify.tree")         {	shellcommand = new ClassifyTreeCommand();           }
-        else if(commandName == "cooccurrence")          {	shellcommand = new CooccurrenceCommand();           }
-        else if(commandName == "pcr.seqs")              {	shellcommand = new PcrSeqsCommand();                }
-        else if(commandName == "create.database")       {	shellcommand = new CreateDatabaseCommand();         }
-        else if(commandName == "make.biom")             {	shellcommand = new MakeBiomCommand();               }
-        else if(commandName == "get.coremicrobiome")    {	shellcommand = new GetCoreMicroBiomeCommand();      }
-        else if(commandName == "make.contigs")          {	shellcommand = new MakeContigsCommand();            }
-        else if(commandName == "sff.multiple")          {	shellcommand = new SffMultipleCommand();            }
-        else if(commandName == "filter.shared")         {	shellcommand = new FilterSharedCommand();           }
-        else if(commandName == "primer.design")         {	shellcommand = new PrimerDesignCommand();           }
-        else if(commandName == "get.dists")             {	shellcommand = new GetDistsCommand();               }
-        else if(commandName == "remove.dists")          {	shellcommand = new RemoveDistsCommand();            }
-        else if(commandName == "merge.taxsummary")      {	shellcommand = new MergeTaxSummaryCommand();        }
-        else if(commandName == "get.communitytype")     {	shellcommand = new GetMetaCommunityCommand();       }
-        else if(commandName == "sparcc")                {	shellcommand = new SparccCommand();                 }
-        else if(commandName == "make.lookup")			{	shellcommand = new MakeLookupCommand();				}
-        else if(commandName == "rename.seqs")			{	shellcommand = new RenameSeqsCommand();				}
-        else if(commandName == "make.lefse")			{	shellcommand = new MakeLefseCommand();				}
-        else if(commandName == "lefse")                 {	shellcommand = new LefseCommand();                  }
-        else if(commandName == "kruskal.wallis")        {	shellcommand = new KruskalWallisCommand();          }
-        else if(commandName == "classify.svm")          {   shellcommand = new ClassifySvmSharedCommand();      }
-        else if(commandName == "make.sra")              {	shellcommand = new SRACommand();                    }
-        else if(commandName == "merge.sfffiles")        {	shellcommand = new MergeSfffilesCommand();          }
-        else if(commandName == "get.mimarkspackage")    {	shellcommand = new GetMIMarksPackageCommand();      }
-        else if(commandName == "mimarks.attributes")    {	shellcommand = new MimarksAttributesCommand();      }
-        else if(commandName == "set.seed")              {	shellcommand = new SetSeedCommand();                }
-        else if(commandName == "make.file")             {	shellcommand = new MakeFileCommand();               }
-        else if(commandName == "biom.info")             {	shellcommand = new BiomInfoCommand();               }
-        else if(commandName == "rename.file")           {	shellcommand = new RenameFileCommand();             }
-        else if(commandName == "cluster.fit")           {	shellcommand = new ClusterFitCommand();             }
-        else if(commandName == "merge.otus")            {	shellcommand = new MergeOTUsCommand();              }
-        else if(commandName == "estimator.single")      {	shellcommand = new EstimatorSingleCommand();        }
-        else if(commandName == "sra.info")              {   shellcommand = new SRAInfoCommand();                }
-        else if(commandName == "make.clr")              {   shellcommand = new MakeCLRCommand();                }
-		else											{	shellcommand = new NoCommand();						}
-
-		return shellcommand;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CommandFactory", "getCommand");
@@ -987,7 +821,7 @@ void CommandFactory::printCommandsCategories(ostream& out) {
         //loop through each command outputting info
         for (it = commands.begin(); it != commands.end(); it++) {
 
-            Command* thisCommand = getCommand(it->first);
+            Command* thisCommand = getCommand(it->first, "category");
 
             //don't add hidden commands
             if (thisCommand->getCommandCategory() != "Hidden") {

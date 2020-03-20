@@ -23,7 +23,6 @@ class BinSeqCommand : public Command {
 	
 public:
 	BinSeqCommand(string);	
-	BinSeqCommand();
 	~BinSeqCommand();
 	
 	vector<string> setParameters();

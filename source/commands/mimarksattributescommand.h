@@ -68,7 +68,6 @@ struct Attribute {
 class MimarksAttributesCommand : public Command {
 public:
     MimarksAttributesCommand(string);
-    MimarksAttributesCommand();
    ~MimarksAttributesCommand(){}
     
     vector<string> setParameters();

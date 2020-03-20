@@ -11,10 +11,13 @@
 
 /***********************************************************************/
 
-OptionParser::OptionParser(string option) {
+OptionParser::OptionParser(string option, vector<string> parametersAllowedByThisCommand) {
 	try {
 		m = MothurOut::getInstance();
         current = CurrentFile::getInstance();
+        
+        ValidParameters validParameter;
+        
 		if (option != "") {
 			
 			string key, value;		
@@ -30,7 +33,9 @@ OptionParser::OptionParser(string option) {
                 else {
                     value = util.splitWhiteSpace(value).front();
                 }
-				parameters[key] = value;
+				
+                if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, value)) {} //ignore invalid parameters
+                else { parameters[key] = value; }
 			}
 			
 			//in case there is no comma and to get last parameter after comma
@@ -43,7 +48,9 @@ OptionParser::OptionParser(string option) {
             else {
                 option = util.splitWhiteSpace(option).front();
             }
-			parameters[key] = option;
+            
+			if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, value)) {} //ignore invalid parameters
+            else { parameters[key] = value; }
 		}
 	}
 	catch(exception& e) {

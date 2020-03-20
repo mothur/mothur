@@ -22,6 +22,11 @@ vector<string> CountGroupsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -66,46 +71,19 @@ string CountGroupsCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-CountGroupsCommand::CountGroupsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CountGroupsCommand", "CountGroupsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 CountGroupsCommand::CountGroupsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -136,32 +114,31 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
             else { 
                 current->setCountFile(countfile); 
                 CountTable ct;
-                if (!ct.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have any group information, aborting."); m->mothurOutEndLine(); abort=true; }
+                if (!ct.testGroups(countfile)) { m->mothurOut("[ERROR]: Your count file does not have any group information, aborting.\n");  abort=true; }
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			
 			if ((sharedfile == "") && (groupfile == "") && (countfile == "")) { 
 				//give priority to shared, then group
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					groupfile = current->getGroupFile(); 
-					if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+					if (groupfile != "") { m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
 					else { 
 						countfile = current->getCountFile(); 
-                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required.\n");  abort = true;
                         }
 					}
 				}
 			}
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CountGroupsCommand", "CountGroupsCommand");

@@ -20,7 +20,6 @@ class RenameFileCommand : public Command {
 public:
     
     RenameFileCommand(string);
-    RenameFileCommand();
     ~RenameFileCommand(){}
     
     vector<string> setParameters();

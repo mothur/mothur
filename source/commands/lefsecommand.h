@@ -33,7 +33,6 @@
 class LefseCommand : public Command {
 public:
     LefseCommand(string);
-    LefseCommand();
     ~LefseCommand(){}
     
     vector<string> setParameters();

@@ -31,7 +31,6 @@ class NMDSCommand : public Command {
 	
 public:
 	NMDSCommand(string);	
-	NMDSCommand();
 	~NMDSCommand(){}
 	
 	vector<string> setParameters();

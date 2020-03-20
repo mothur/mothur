@@ -30,7 +30,6 @@ class PreClusterCommand : public Command {
 
 public:
 	PreClusterCommand(string);
-	PreClusterCommand();
 	~PreClusterCommand(){}
 
 	vector<string> setParameters();

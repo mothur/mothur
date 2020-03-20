@@ -14,7 +14,7 @@
 #include "sharedrabundvectors.hpp"
 #include "listvector.hpp"
 #include "getseqscommand.h"
-#include "getotulabelscommand.h"
+#include "getotuscommand.h"
 #include "taxonomy.hpp"
 
 class GetLineageCommand : public Command {
@@ -22,7 +22,6 @@ class GetLineageCommand : public Command {
 	public:
 	
 		GetLineageCommand(string);
-		GetLineageCommand();
 		~GetLineageCommand(){}
 	
 		vector<string> setParameters();

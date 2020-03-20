@@ -19,6 +19,11 @@ vector<string> GetListCountCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["otu"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -65,55 +70,26 @@ string GetListCountCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetListCountCommand::GetListCountCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["otu"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "GetListCountCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["otu"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found")  { 				
 				listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n"); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
 			else { current->setListFile(listfile); }
@@ -122,7 +98,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			sort = validParameter.valid(parameters, "sort");	  if (sort == "not found") { sort = "otu"; }
-			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu."); m->mothurOutEndLine(); sort = "otu"; }
+			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu.\n");  sort = "otu"; }
 			
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }

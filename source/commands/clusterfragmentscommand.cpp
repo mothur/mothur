@@ -36,6 +36,13 @@ vector<string> ClusterFragmentsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -86,55 +93,23 @@ string ClusterFragmentsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClusterFragmentsCommand::ClusterFragmentsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
-				if (!validParameter.isValidParameter(it2->first, myArray, it2->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-
-			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else { current->setFastaFile(fastafile); }
@@ -169,9 +144,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
                     if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
-			
 		}
-				
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");

@@ -16,7 +16,6 @@ class MakeGroupCommand : public Command {
 	
 public:
 	MakeGroupCommand(string);
-	MakeGroupCommand();	
 	~MakeGroupCommand(){}
 	
 	vector<string> setParameters();

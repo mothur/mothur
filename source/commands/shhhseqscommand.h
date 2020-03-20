@@ -23,7 +23,6 @@ class ShhhSeqsCommand : public Command {
 	
 public:
 	ShhhSeqsCommand(string);
-	ShhhSeqsCommand();
 	~ShhhSeqsCommand() {}
 	
 	vector<string> setParameters();

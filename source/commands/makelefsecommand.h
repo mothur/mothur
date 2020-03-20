@@ -20,7 +20,6 @@
 class MakeLefseCommand : public Command {
 public:
     MakeLefseCommand(string);
-    MakeLefseCommand();
     ~MakeLefseCommand(){}
     
     vector<string> setParameters();

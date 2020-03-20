@@ -39,6 +39,15 @@ vector<string> NewCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        //set output file types
+        vector<string> tempOutNames;
+        outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
+        outputTypes["fileType2"] = tempOutNames;
+        outputTypes["FileType3"] = tempOutNames;
+        
+        //set abort and called Help
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -83,47 +92,25 @@ string NewCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-NewCommand::NewCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
-		outputTypes["fileType2"] = tempOutNames;
-		outputTypes["FileType3"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NewCommand", "NewCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 NewCommand::NewCommand(string option)  {
 	try {
 ////////////////////////////////////////////////////////
 /////////////////// start leave alone block ////////////
 ////////////////////////////////////////////////////////
-		abort = false; calledHelp = false;   
+		  
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
 			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
 			
-            
             ///variables for examples below that you will most likely want to put in the header for 
             //use by the other class functions.
             string phylipfile, columnfile, namefile, fastafile, sharedfile, method, countfile;

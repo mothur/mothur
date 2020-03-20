@@ -21,7 +21,6 @@ class ClusterDoturCommand : public Command {
 	
 public:
 	ClusterDoturCommand(string);
-	ClusterDoturCommand();
 	~ClusterDoturCommand(){}
 	
 	vector<string> setParameters();

@@ -20,7 +20,6 @@ class HeatMapSimCommand : public Command {
 
 public:
 	HeatMapSimCommand(string);
-	HeatMapSimCommand();
 	~HeatMapSimCommand(){}
 	
 	vector<string> setParameters();

@@ -25,7 +25,6 @@ class ParseFastaQCommand : public Command {
 
 public:
 	ParseFastaQCommand(string);
-	ParseFastaQCommand();
 	~ParseFastaQCommand() {}
 	
 	vector<string> setParameters();

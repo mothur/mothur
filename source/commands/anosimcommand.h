@@ -19,7 +19,6 @@ class AnosimCommand : public Command {
 	
 public:
 	AnosimCommand(string);
-	AnosimCommand();
 	~AnosimCommand(){}
 	
 	vector<string> setParameters();

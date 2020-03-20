@@ -30,7 +30,6 @@ class CollectCommand : public Command {
 	
 public:
 	CollectCommand(string);	
-	CollectCommand();
 	~CollectCommand(){}
 	
 	vector<string> setParameters();

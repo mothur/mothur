@@ -26,6 +26,12 @@ vector<string> DistanceCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+       
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -76,61 +82,29 @@ string DistanceCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-DistanceCommand::DistanceCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "DistanceCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 DistanceCommand::DistanceCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("dist.seqs");
-			map<string, string>::iterator it2;
-		
-			//check to make sure all parameters are valid for command
-			for (it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
-				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			outputTypes["column"] = tempOutNames;
-		
-			//check for required parameters
+			ValidParameters validParameter;
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); 
-					ifstream inFASTA;
-					util.openInputFile(fastafile, inFASTA);
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");
+					ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
 					alignDB = SequenceDB(inFASTA); 
 					inFASTA.close();
-				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
 			}else if (fastafile == "not open") { abort = true; }	
 			else{
-				ifstream inFASTA;
-				util.openInputFile(fastafile, inFASTA);
+				ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
 				current->setFastaFile(fastafile);
@@ -187,7 +161,6 @@ DistanceCommand::DistanceCommand(string option) {
             if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps")) { m->mothurOut(calc + " is not a valid output form. Options are eachgap, onegap and nogaps. I'll use onegap.\n");  calc = "onegap";  }
 
 		}
-				
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "DistanceCommand");

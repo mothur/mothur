@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "removeotulabelscommand.h"
+#include "removeotuscommand.h"
 
 //**********************************************************************************************************************
-vector<string> RemoveOtuLabelsCommand::setParameters(){	
+vector<string> RemoveOtusCommand::setParameters(){	
 	try {
         CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
         CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none","constaxonomy",false,false); parameters.push_back(pconstaxonomy);
@@ -21,18 +21,27 @@ vector<string> RemoveOtuLabelsCommand::setParameters(){
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["otucorr"] = tempOutNames;
+        outputTypes["corraxes"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "setParameters");
+		m->errorOut(e, "RemoveOtusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string RemoveOtuLabelsCommand::getHelpString(){	
+string RemoveOtusCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		helpString += "The remove.otus command can be used to remove specific otus with the output from classify.otu, otu.association, or corr.axes. It can also be used to select a set of otus from a shared or list file.\n";
@@ -46,12 +55,12 @@ string RemoveOtuLabelsCommand::getHelpString(){
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getHelpString");
+		m->errorOut(e, "RemoveOtusCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string RemoveOtuLabelsCommand::getOutputPattern(string type) {
+string RemoveOtusCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -65,58 +74,22 @@ string RemoveOtuLabelsCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "RemoveOtuLabelsCommand", "getOutputPattern");
+        m->errorOut(e, "RemoveOtusCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(){	
+RemoveOtusCommand::RemoveOtusCommand(string option)  {
 	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["constaxonomy"] = tempOutNames; 
-        outputTypes["otucorr"] = tempOutNames;
-        outputTypes["corraxes"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "RemoveOtuLabelsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-        
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames; 
-            outputTypes["otucorr"] = tempOutNames;
-            outputTypes["corraxes"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-            
- 			//check for parameters
             accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
@@ -163,13 +136,13 @@ RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "RemoveOtuLabelsCommand");
+		m->errorOut(e, "RemoveOtusCommand", "RemoveOtusCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int RemoveOtuLabelsCommand::execute(){
+int RemoveOtusCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -218,12 +191,12 @@ int RemoveOtuLabelsCommand::execute(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "execute");
+		m->errorOut(e, "GetOtusCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readClassifyOtu(){
+int RemoveOtusCommand::readClassifyOtu(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
@@ -273,12 +246,12 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readClassifyOtu");
+		m->errorOut(e, "RemoveOtusCommand", "readClassifyOtu");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readOtuAssociation(){
+int RemoveOtusCommand::readOtuAssociation(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(otucorrfile);  }
@@ -326,12 +299,12 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readOtuAssociation");
+		m->errorOut(e, "RemoveOtusCommand", "readOtuAssociation");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readCorrAxes(){
+int RemoveOtusCommand::readCorrAxes(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(corraxesfile);  }
@@ -379,12 +352,12 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readCorrAxes");
+		m->errorOut(e, "RemoveOtusCommand", "readCorrAxes");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readShared(){
+int RemoveOtusCommand::readShared(){
 	try {
         
         SharedRAbundVectors* lookup = getShared();
@@ -428,12 +401,12 @@ int RemoveOtuLabelsCommand::readShared(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readShared");
+		m->errorOut(e, "RemoveOtusCommand", "readShared");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readList(){
+int RemoveOtusCommand::readList(){
 	try {
         getListVector();
         
@@ -483,12 +456,12 @@ int RemoveOtuLabelsCommand::readList(){
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "RemoveOtuLabelsCommand", "readList");
+        m->errorOut(e, "RemoveOtusCommand", "readList");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::getListVector(){
+int RemoveOtusCommand::getListVector(){
 	try {
 		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
@@ -553,12 +526,12 @@ int RemoveOtuLabelsCommand::getListVector(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getListVector");	
+		m->errorOut(e, "RemoveOtusCommand", "getListVector");	
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
+SharedRAbundVectors* RemoveOtusCommand::getShared(){
 	try {
 		InputData input(sharedfile, "sharedfile",nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -628,7 +601,7 @@ SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
 		return lookup;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getShared");	
+		m->errorOut(e, "RemoveOtusCommand", "getShared");	
 		exit(1);
 	}
 }

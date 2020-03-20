@@ -15,7 +15,6 @@ class MakeFileCommand : public Command {
     
 public:
     MakeFileCommand(string);
-    MakeFileCommand();
     ~MakeFileCommand(){}
     
     vector<string> setParameters();

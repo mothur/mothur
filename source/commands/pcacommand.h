@@ -20,7 +20,6 @@ class PCACommand : public Command {
 	
 public:
 	PCACommand(string);	
-	PCACommand();
 	~PCACommand() {}
 	
 	vector<string> setParameters();

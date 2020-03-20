@@ -23,6 +23,11 @@ vector<string> GetCoreMicroBiomeCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["coremicrobiome"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,45 +74,20 @@ string GetCoreMicroBiomeCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["coremicrobiome"] = tempOutNames; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCoreMicroBiomeCommand", "GetCoreMicroBiomeCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   allLines = true;
+		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["coremicrobiome"] = tempOutNames; 
-
-			//check for parameters
             sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
@@ -122,13 +102,12 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
-						abort = true;
+						m->mothurOut("No valid current files. You must provide a shared or relabund.\n");  abort = true;
 					}
 				}
 			}
@@ -172,15 +151,11 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                     factor = 100;
                     abund /= 100;
                 }
-            }else {
-                factor = 100;
-            }
+            }else { factor = 100; }
             
             temp = validParameter.valid(parameters, "samples");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, samples);
-
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetCoreMicroBiomeCommand", "GetCoreMicroBiomeCommand");

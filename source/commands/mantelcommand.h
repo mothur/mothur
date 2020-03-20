@@ -16,7 +16,6 @@
 class MantelCommand : public Command {
 public:
 	MantelCommand(string);
-	MantelCommand();
 	~MantelCommand(){}
 	
 	vector<string> setParameters();

@@ -24,7 +24,6 @@ class ClearcutCommand : public Command {
 
 public:
 	ClearcutCommand(string);
-	ClearcutCommand();
 	~ClearcutCommand() {}
 	
 	vector<string> setParameters();

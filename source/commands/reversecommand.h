@@ -15,7 +15,6 @@
 class ReverseSeqsCommand : public Command {
 public:
 	ReverseSeqsCommand(string);
-	ReverseSeqsCommand();
 	~ReverseSeqsCommand() {}
 	
 	vector<string> setParameters();

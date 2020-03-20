@@ -19,7 +19,6 @@ class SetDirectoryCommand : public Command {
 	
 public:
 	SetDirectoryCommand(string);
-	SetDirectoryCommand() { abort = true; calledHelp = true; setParameters(); }
 	~SetDirectoryCommand(){}
 	
 	vector<string> setParameters();

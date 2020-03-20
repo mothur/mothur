@@ -28,6 +28,21 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["errorsummary"] = tempOutNames;
+        outputTypes["errorseq"] = tempOutNames;
+        outputTypes["errorquality"] = tempOutNames;
+        outputTypes["errorqualforward"] = tempOutNames;
+        outputTypes["errorqualreverse"] = tempOutNames;
+        outputTypes["errorforward"] = tempOutNames;
+        outputTypes["errorreverse"] = tempOutNames;
+        outputTypes["errorcount"] = tempOutNames;
+        outputTypes["errormatrix"] = tempOutNames;
+        outputTypes["errorchimera"] = tempOutNames;
+        outputTypes["errorref-query"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -90,73 +105,19 @@ string SeqErrorCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-
-SeqErrorCommand::SeqErrorCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["errorsummary"] = tempOutNames;
-		outputTypes["errorseq"] = tempOutNames;
-		outputTypes["errorquality"] = tempOutNames;
-		outputTypes["errorqualforward"] = tempOutNames;
-		outputTypes["errorqualreverse"] = tempOutNames;
-		outputTypes["errorforward"] = tempOutNames;
-		outputTypes["errorreverse"] = tempOutNames;
-		outputTypes["errorcount"] = tempOutNames;
-		outputTypes["errormatrix"] = tempOutNames;
-        outputTypes["errorchimera"] = tempOutNames;
-        outputTypes["errorref-query"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "SeqErrorCommand");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
 
 SeqErrorCommand::SeqErrorCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			string temp;
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["errorsummary"] = tempOutNames;
-			outputTypes["errorseq"] = tempOutNames;
-			outputTypes["errorquality"] = tempOutNames;
-			outputTypes["errorqualforward"] = tempOutNames;
-			outputTypes["errorqualreverse"] = tempOutNames;
-			outputTypes["errorforward"] = tempOutNames;
-			outputTypes["errorreverse"] = tempOutNames;
-			outputTypes["errorcount"] = tempOutNames;
-			outputTypes["errormatrix"] = tempOutNames;
-            outputTypes["errorchimera"] = tempOutNames;
-            outputTypes["errorref-query"] = tempOutNames;
-
-			//check for required parameters
 			queryFileName = validParameter.validFile(parameters, "fasta");
 			if (queryFileName == "not found") { 
 				queryFileName = current->getFastaFile(); 
@@ -199,7 +160,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			temp = validParameter.valid(parameters, "threshold");	if (temp == "not found") { temp = "1.00"; }
+			string temp = validParameter.valid(parameters, "threshold");	if (temp == "not found") { temp = "1.00"; }
 			util.mothurConvert(temp, threshold);
 			
 			temp = validParameter.valid(parameters, "ignorechimeras");	if (temp == "not found") { temp = "T"; }

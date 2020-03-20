@@ -21,7 +21,6 @@ class ParsimonyCommand : public Command {
 
 public:
 	ParsimonyCommand(string);	
-	ParsimonyCommand();
 	~ParsimonyCommand(){}
 	
 	vector<string> setParameters();

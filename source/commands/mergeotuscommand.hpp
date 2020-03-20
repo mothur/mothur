@@ -17,7 +17,6 @@ class MergeOTUsCommand : public Command {
     
 public:
     MergeOTUsCommand(string);
-    MergeOTUsCommand();
     ~MergeOTUsCommand();
     
     vector<string> setParameters();

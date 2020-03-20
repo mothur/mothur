@@ -22,6 +22,11 @@ vector<string> GetMIMarksPackageCommand::setParameters(){
   		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["tsv"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -68,45 +73,18 @@ string GetMIMarksPackageCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetMIMarksPackageCommand::GetMIMarksPackageCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["tsv"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetMIMarksPackageCommand", "GetMIMarksPackageCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
 	try {
-        
-        abort = false; calledHelp = false;
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-			outputTypes["tsv"] = tempOutNames;
-            
 			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not open") {  groupfile = "";  abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
@@ -125,12 +103,12 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
             
             if ((groupfile == "") && (oligosfile == "") && (file == "")) {
                 oligosfile = current->getOligosFile();
-                if (oligosfile != "") { inputfile = oligosfile;  m->mothurOut("Using " + oligosfile + " as input file for the oligos parameter."); m->mothurOutEndLine(); }
+                if (oligosfile != "") { inputfile = oligosfile;  m->mothurOut("Using " + oligosfile + " as input file for the oligos parameter.\n");  }
                 else {
                     groupfile = current->getGroupFile();
-                    if (groupfile != "") { inputfile = groupfile;  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                    if (groupfile != "") { inputfile = groupfile;  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n"); }
                     else {
-                        m->mothurOut("[ERROR]: You must provide file, groupfile or oligos file for the get.mimarkspackage command."); m->mothurOutEndLine(); abort = true;
+                        m->mothurOut("[ERROR]: You must provide file, groupfile or oligos file for the get.mimarkspackage command.\n");  abort = true;
                     }
                 }
             }
@@ -145,13 +123,9 @@ GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
                 m->mothurOut("[ERROR]: " + package + " is not a valid package selection. Choices are: air, host_associated, human_associated, human_gut, human_oral, human_skin, human_vaginal, microbial, miscellaneous, plant_associated, sediment, soil, wastewater or water. Aborting.\n."); abort = true;
             }
             
-            
-            
-            string temp;
-			temp = validParameter.valid(parameters, "requiredonly");	if(temp == "not found"){	temp = "F";	}
+            string temp = validParameter.valid(parameters, "requiredonly");	if(temp == "not found"){	temp = "F";	}
 			requiredonly = util.isTrue(temp);
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetMIMarksPackageCommand", "GetMIMarksPackageCommand");

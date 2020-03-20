@@ -23,6 +23,15 @@ vector<string> ShhherCommand::setParameters(){
         CommandParameter porder("order", "Multiple", "A-B-I", "A", "", "", "","",false,false, true); parameters.push_back(porder);		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["counts"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -70,61 +79,17 @@ string ShhherCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-
-ShhherCommand::ShhherCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		
-		//initialize outputTypes
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["name"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-        outputTypes["counts"] = tempOutNames;
-        outputTypes["qfile"] = tempOutNames;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhherCommand", "ShhherCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
 ShhherCommand::ShhherCommand(string option) {
 	try {
-        
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+            OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["fasta"] = tempOutNames;
-            outputTypes["name"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-            outputTypes["counts"] = tempOutNames;
-            outputTypes["qfile"] = tempOutNames;
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
 			//check for required parameters

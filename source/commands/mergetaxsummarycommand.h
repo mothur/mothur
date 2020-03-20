@@ -16,7 +16,6 @@
 class MergeTaxSummaryCommand : public Command {
 public:
 	MergeTaxSummaryCommand(string);
-	MergeTaxSummaryCommand();
 	~MergeTaxSummaryCommand(){}
 	
 	vector<string> setParameters();

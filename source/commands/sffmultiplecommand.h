@@ -20,7 +20,6 @@ class SffMultipleCommand : public Command {
 	
 public:
 	SffMultipleCommand(string);
-	SffMultipleCommand();
 	~SffMultipleCommand(){}
 	
 	vector<string> setParameters();

@@ -18,7 +18,6 @@ class ScreenSeqsCommand : public Command {
 	
 public:
 	ScreenSeqsCommand(string);
-	ScreenSeqsCommand();
 	~ScreenSeqsCommand() {}
 	
 	vector<string> setParameters();

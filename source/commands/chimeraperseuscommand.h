@@ -24,7 +24,6 @@
 class ChimeraPerseusCommand : public Command {
 public:
 	ChimeraPerseusCommand(string);
-	ChimeraPerseusCommand();
 	~ChimeraPerseusCommand() {}
 	
 	vector<string> setParameters();

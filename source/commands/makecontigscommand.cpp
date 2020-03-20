@@ -116,6 +116,16 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
+        abort = false; calledHelp = false;
+        createFileGroup = false; createOligosGroup = false; gz = false;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["report"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -186,52 +196,18 @@ string MakeContigsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeContigsCommand::MakeContigsCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["qfile"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-        outputTypes["report"] = tempOutNames;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "MakeContigsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeContigsCommand::MakeContigsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-        createFileGroup = false; createOligosGroup = false; gz = false;
 
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 
 		else {
-			vector<string> myArray = setParameters();
-
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 
-			ValidParameters validParameter("pairwise.seqs");
-			map<string, string>::iterator it;
-
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["qfile"] = tempOutNames;
-            outputTypes["report"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-
+			ValidParameters validParameter;
             ffastqfile = validParameter.validFile(parameters, "ffastq");
 			if (ffastqfile == "not open") {  abort = true; }
 			else if (ffastqfile == "not found") { ffastqfile = ""; }

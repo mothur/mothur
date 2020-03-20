@@ -20,7 +20,6 @@
 class ChimeraBellerophonCommand : public Command {
 public:
 	ChimeraBellerophonCommand(string);
-	ChimeraBellerophonCommand();
 	~ChimeraBellerophonCommand(){}
 	
 	vector<string> setParameters();

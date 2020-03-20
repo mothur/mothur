@@ -18,11 +18,17 @@ vector<string> MergeOTUsCommand::setParameters(){
         CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,true,true); parameters.push_back(plist);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter ptaxlevel("taxlevel", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(ptaxlevel);
-        
-        
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
         
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -67,52 +73,17 @@ string MergeOTUsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeOTUsCommand::MergeOTUsCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-        outputTypes["relabund"] = tempOutNames;
-        outputTypes["constaxonomy"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MergeOTUsCommand", "MergeOTUsCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-
 MergeOTUsCommand::MergeOTUsCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        allLines = true;
-        
-        //allow user to run help
         if(option == "help") {  help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters  = parser.getParameters();
-            map<string,string>::iterator it;
             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-            outputTypes["relabund"] = tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames;
-            
             sharedfile = validParameter.validFile(parameters, "shared");
             if (sharedfile == "not found") { sharedfile = ""; }
             else if (sharedfile == "not open") { sharedfile = ""; abort = true; }

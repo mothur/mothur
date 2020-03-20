@@ -21,6 +21,11 @@ vector<string> MakeLookupCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["lookup"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,45 +74,17 @@ string MakeLookupCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeLookupCommand::MakeLookupCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["lookup"] = tempOutNames; 
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MakeLookupCommand", "MakeLookupCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeLookupCommand::MakeLookupCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["lookup"] = tempOutNames; 
-			
-			//check for parameters
             errorFileName = validParameter.validFile(parameters, "error");
 			if (errorFileName == "not open") { errorFileName = ""; abort = true; }
 			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required."); m->mothurOutEndLine();  abort = true; }

@@ -21,6 +21,11 @@ vector<string> CooccurrenceCommand::setParameters() {
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -66,48 +71,20 @@ string CooccurrenceCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CooccurrenceCommand::CooccurrenceCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CooccurrenceCommand", "CooccurrenceCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 CooccurrenceCommand::CooccurrenceCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
 		allLines = true;
 				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-		
-	        //check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -121,10 +98,9 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
 			}else { current->setSharedFile(sharedfile); }
-			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
@@ -133,13 +109,13 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 			metric = validParameter.valid(parameters, "metric");				if (metric == "not found") { metric = "cscore"; }
 			
 			if ((metric != "cscore") && (metric != "checker") && (metric != "combo") && (metric != "vratio")) {
-				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio."); m->mothurOutEndLine(); abort = true; 
+				m->mothurOut("[ERROR]: " + metric + " is not a valid metric option for the cooccurrence command. Choices are cscore, checker, combo, vratio.\n");  abort = true;
 			}
 			
 			matrix = validParameter.valid(parameters, "matrixmodel");				if (matrix == "not found") { matrix = "sim2"; }
 			
 			if ((matrix != "sim1") && (matrix != "sim2") && (matrix != "sim3") && (matrix != "sim4") && (matrix != "sim5" ) && (matrix != "sim6" ) && (matrix != "sim7" ) && (matrix != "sim8" ) && (matrix != "sim9" )) {
-				m->mothurOut("[ERROR]: " + matrix + " is not a valid matrix option for the cooccurrence command. Choices are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8, sim9."); m->mothurOutEndLine(); abort = true; 
+				m->mothurOut("[ERROR]: " + matrix + " is not a valid matrix option for the cooccurrence command. Choices are sim1, sim2, sim3, sim4, sim5, sim6, sim7, sim8, sim9.\n");  abort = true;
 			}
             
             groups = validParameter.valid(parameters, "groups");			
@@ -151,9 +127,7 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
             
             string temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
 			util.mothurConvert(temp, runs); 
-
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CooccurrenceCommand", "CooccurrenceCommand");

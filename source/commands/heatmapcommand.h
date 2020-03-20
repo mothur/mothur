@@ -22,7 +22,6 @@ class HeatMapCommand : public Command {
 
 public:
 	HeatMapCommand(string);
-	HeatMapCommand();
 	~HeatMapCommand(){}
 	
 	vector<string> setParameters();

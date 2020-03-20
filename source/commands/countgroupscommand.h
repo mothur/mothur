@@ -17,7 +17,6 @@ class CountGroupsCommand : public Command {
 public:
 	
 	CountGroupsCommand(string);
-	CountGroupsCommand();	
 	~CountGroupsCommand(){}
 	
 	vector<string> setParameters();

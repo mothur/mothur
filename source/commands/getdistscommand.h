@@ -16,7 +16,6 @@ class GetDistsCommand : public Command {
 public:
 	
 	GetDistsCommand(string);	
-	GetDistsCommand();
 	~GetDistsCommand(){}
 	
 	vector<string> setParameters();

@@ -23,7 +23,6 @@ class BiomInfoCommand : public Command {
     
 public:
     BiomInfoCommand(string);
-    BiomInfoCommand();
     ~BiomInfoCommand() {}
     
     vector<string> setParameters();

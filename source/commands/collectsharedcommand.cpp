@@ -65,6 +65,51 @@ vector<string> CollectSharedCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+ 
+        vector<string> tempOutNames;
+        outputTypes["sharedchao"] = tempOutNames;
+        outputTypes["sharedsobs"] = tempOutNames;
+        outputTypes["sharedace"] = tempOutNames;
+        outputTypes["jabund"] = tempOutNames;
+        outputTypes["sorabund"] = tempOutNames;
+        outputTypes["jclass"] = tempOutNames;
+        outputTypes["sorclass"] = tempOutNames;
+        outputTypes["jest"] = tempOutNames;
+        outputTypes["sorest"] = tempOutNames;
+        outputTypes["thetayc"] = tempOutNames;
+        outputTypes["thetan"] = tempOutNames;
+        outputTypes["kstest"] = tempOutNames;
+        outputTypes["whittaker"] = tempOutNames;
+        outputTypes["sharednseqs"] = tempOutNames;
+        outputTypes["ochiai"] = tempOutNames;
+        outputTypes["anderberg"] = tempOutNames;
+        outputTypes["kulczynski"] = tempOutNames;
+        outputTypes["kulczynskicody"] = tempOutNames;
+        outputTypes["lennon"] = tempOutNames;
+        outputTypes["morisitahorn"] = tempOutNames;
+        outputTypes["braycurtis"] = tempOutNames;
+        outputTypes["odum"] = tempOutNames;
+        outputTypes["canberra"] = tempOutNames;
+        outputTypes["structeuclidean"] = tempOutNames;
+        outputTypes["structchord"] = tempOutNames;
+        outputTypes["hellinger"] = tempOutNames;
+        outputTypes["manhattan"] = tempOutNames;
+        outputTypes["structpearson"] = tempOutNames;
+        outputTypes["soergel"] = tempOutNames;
+        outputTypes["spearman"] = tempOutNames;
+        outputTypes["structkulczynski"] = tempOutNames;
+        outputTypes["structchi2"] = tempOutNames;
+        outputTypes["speciesprofile"] = tempOutNames;
+        outputTypes["hamming"] = tempOutNames;
+        outputTypes["gower"] = tempOutNames;
+        outputTypes["memchi2"] = tempOutNames;
+        outputTypes["memchord"] = tempOutNames;
+        outputTypes["memeuclidean"] = tempOutNames;
+        outputTypes["mempearson"] = tempOutNames;
+        outputTypes["jsd"] = tempOutNames;
+        outputTypes["rjsd"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -155,130 +200,21 @@ string CollectSharedCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-CollectSharedCommand::CollectSharedCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["sharedchao"] = tempOutNames;
-		outputTypes["sharedsobs"] = tempOutNames;
-		outputTypes["sharedace"] = tempOutNames;
-		outputTypes["jabund"] = tempOutNames;
-		outputTypes["sorabund"] = tempOutNames;
-		outputTypes["jclass"] = tempOutNames;
-		outputTypes["sorclass"] = tempOutNames;
-		outputTypes["jest"] = tempOutNames;
-		outputTypes["sorest"] = tempOutNames;
-		outputTypes["thetayc"] = tempOutNames;
-		outputTypes["thetan"] = tempOutNames;
-		outputTypes["kstest"] = tempOutNames;
-		outputTypes["whittaker"] = tempOutNames;
-		outputTypes["sharednseqs"] = tempOutNames;
-		outputTypes["ochiai"] = tempOutNames;
-		outputTypes["anderberg"] = tempOutNames;
-		outputTypes["kulczynski"] = tempOutNames;
-		outputTypes["kulczynskicody"] = tempOutNames;
-		outputTypes["lennon"] = tempOutNames;
-		outputTypes["morisitahorn"] = tempOutNames;
-		outputTypes["braycurtis"] = tempOutNames;
-		outputTypes["odum"] = tempOutNames;
-		outputTypes["canberra"] = tempOutNames;
-		outputTypes["structeuclidean"] = tempOutNames;
-		outputTypes["structchord"] = tempOutNames;
-		outputTypes["hellinger"] = tempOutNames;
-		outputTypes["manhattan"] = tempOutNames;
-		outputTypes["structpearson"] = tempOutNames;
-		outputTypes["soergel"] = tempOutNames;
-		outputTypes["spearman"] = tempOutNames;
-		outputTypes["structkulczynski"] = tempOutNames;
-		outputTypes["structchi2"] = tempOutNames;
-		outputTypes["speciesprofile"] = tempOutNames;
-		outputTypes["hamming"] = tempOutNames;
-		outputTypes["gower"] = tempOutNames;
-		outputTypes["memchi2"] = tempOutNames;
-		outputTypes["memchord"] = tempOutNames;
-		outputTypes["memeuclidean"] = tempOutNames;
-		outputTypes["mempearson"] = tempOutNames;
-        outputTypes["jsd"] = tempOutNames;
-        outputTypes["rjsd"] = tempOutNames;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters=parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-	
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["sharedchao"] = tempOutNames;
-			outputTypes["sharedsobs"] = tempOutNames;
-			outputTypes["sharedace"] = tempOutNames;
-			outputTypes["jabund"] = tempOutNames;
-			outputTypes["sorabund"] = tempOutNames;
-			outputTypes["jclass"] = tempOutNames;
-			outputTypes["sorclass"] = tempOutNames;
-			outputTypes["jest"] = tempOutNames;
-			outputTypes["sorest"] = tempOutNames;
-			outputTypes["thetayc"] = tempOutNames;
-			outputTypes["thetan"] = tempOutNames;
-			outputTypes["kstest"] = tempOutNames;
-			outputTypes["whittaker"] = tempOutNames;
-			outputTypes["sharednseqs"] = tempOutNames;
-			outputTypes["ochiai"] = tempOutNames;
-			outputTypes["anderberg"] = tempOutNames;
-			outputTypes["kulczynski"] = tempOutNames;
-			outputTypes["kulczynskicody"] = tempOutNames;
-			outputTypes["lennon"] = tempOutNames;
-			outputTypes["morisitahorn"] = tempOutNames;
-			outputTypes["braycurtis"] = tempOutNames;
-			outputTypes["odum"] = tempOutNames;
-			outputTypes["canberra"] = tempOutNames;
-			outputTypes["structeuclidean"] = tempOutNames;
-			outputTypes["structchord"] = tempOutNames;
-			outputTypes["hellinger"] = tempOutNames;
-			outputTypes["manhattan"] = tempOutNames;
-			outputTypes["structpearson"] = tempOutNames;
-			outputTypes["soergel"] = tempOutNames;
-			outputTypes["spearman"] = tempOutNames;
-			outputTypes["structkulczynski"] = tempOutNames;
-			outputTypes["speciesprofile"] = tempOutNames;
-			outputTypes["structchi2"] = tempOutNames;
-			outputTypes["hamming"] = tempOutNames;
-			outputTypes["gower"] = tempOutNames;
-			outputTypes["memchi2"] = tempOutNames;
-			outputTypes["memchord"] = tempOutNames;
-			outputTypes["memeuclidean"] = tempOutNames;
-			outputTypes["mempearson"] = tempOutNames;
-            outputTypes["jsd"] = tempOutNames;
-            outputTypes["rjsd"] = tempOutNames;
-			
-			//get shared file
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 

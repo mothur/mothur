@@ -19,7 +19,6 @@ class GetListCountCommand : public Command {
 	
 public:
 	GetListCountCommand(string);
-	GetListCountCommand();	
 	~GetListCountCommand(){}
 	
 	vector<string> setParameters();

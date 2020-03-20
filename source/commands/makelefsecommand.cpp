@@ -23,6 +23,11 @@ vector<string> MakeLefseCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["lefse"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -69,45 +74,18 @@ string MakeLefseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeLefseCommand::MakeLefseCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["lefse"] = tempOutNames; 
-			}
-	catch(exception& e) {
-		m->errorOut(e, "MakeLefseCommand", "MakeLefseCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeLefseCommand::MakeLefseCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-            outputTypes["lefse"] = tempOutNames;
-            
-			//check for parameters
 			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { abort = true; }
 			else if (designfile == "not found") { designfile = ""; }

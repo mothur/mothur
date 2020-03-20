@@ -18,7 +18,6 @@
 class GetMIMarksPackageCommand : public Command {
 public:
     GetMIMarksPackageCommand(string);
-    GetMIMarksPackageCommand();
     ~GetMIMarksPackageCommand(){}
     
     vector<string> setParameters();

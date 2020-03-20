@@ -17,7 +17,6 @@
 class CreateDatabaseCommand : public Command {
 public:
 	CreateDatabaseCommand(string);
-	CreateDatabaseCommand();
 	~CreateDatabaseCommand(){}
 	
 	vector<string> setParameters();

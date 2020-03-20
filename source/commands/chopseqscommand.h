@@ -21,7 +21,6 @@ class ChopSeqsCommand : public Command {
 	public:
 	
 		ChopSeqsCommand(string);
-		ChopSeqsCommand();	
 		~ChopSeqsCommand(){};
 	
 		vector<string> setParameters();

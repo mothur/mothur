@@ -34,6 +34,21 @@ vector<string> GetSeqsCommand::setParameters(){
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter paccnos2("accnos2", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos2);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["alignreport"] = tempOutNames;
+        outputTypes["contigsreport"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["accnosreport"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -60,30 +75,6 @@ string GetSeqsCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "getHelpString");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-GetSeqsCommand::GetSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["fastq"] = tempOutNames;
-		outputTypes["taxonomy"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["alignreport"] = tempOutNames;
-        outputTypes["contigsreport"] = tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-		outputTypes["accnosreport"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
 		exit(1);
 	}
 }
@@ -115,41 +106,16 @@ string GetSeqsCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 GetSeqsCommand::GetSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["fastq"] = tempOutNames;
-			outputTypes["taxonomy"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["alignreport"] = tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-			outputTypes["accnosreport"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            outputTypes["contigsreport"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -157,10 +123,9 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
-					abort = true;
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
 			

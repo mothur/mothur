@@ -34,7 +34,6 @@ class ClusterCommand : public Command {
 	
 public:
 	ClusterCommand(string);
-	ClusterCommand();
 	~ClusterCommand();
 	
 	vector<string> setParameters();

@@ -20,7 +20,6 @@ class QuitCommand : public Command {
 	
 public:
 	QuitCommand(string);
-	QuitCommand() {}
 	~QuitCommand();
 	
 	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	

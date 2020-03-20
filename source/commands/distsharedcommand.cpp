@@ -1,5 +1,5 @@
 /*
- *  matrixoutputcommand.cpp
+ *  distsharedcommand.cpp
  *  Mothur
  *
  *  Created by Sarah Westcott on 5/20/09.
@@ -7,11 +7,11 @@
  *
  */
 
-#include "matrixoutputcommand.h"
+#include "distsharedcommand.h"
 #include "subsample.h"
 
 //**********************************************************************************************************************
-vector<string> MatrixOutputCommand::setParameters(){	
+vector<string> DistSharedCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","phylip",false,true,true); parameters.push_back(pshared);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
@@ -26,18 +26,23 @@ vector<string> MatrixOutputCommand::setParameters(){
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        
+        abort = false; calledHelp = false;   allLines = true;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "setParameters");
+		m->errorOut(e, "DistSharedCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string MatrixOutputCommand::getHelpString(){	
+string DistSharedCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
@@ -59,12 +64,12 @@ string MatrixOutputCommand::getHelpString(){
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "getHelpString");
+		m->errorOut(e, "DistSharedCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string MatrixOutputCommand::getOutputPattern(string type) {
+string DistSharedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -74,52 +79,23 @@ string MatrixOutputCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "getOutputPattern");
+        m->errorOut(e, "DistSharedCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-MatrixOutputCommand::MatrixOutputCommand(){	
+DistSharedCommand::DistSharedCommand(string option)  {
 	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
-MatrixOutputCommand::MatrixOutputCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
-		//allow user to run help
 		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters  = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not found") { 			
 				//if there is a current shared file, use it
@@ -190,18 +166,18 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
         }
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
+		m->errorOut(e, "DistSharedCommand", "DistSharedCommand");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-MatrixOutputCommand::~MatrixOutputCommand(){}
+DistSharedCommand::~DistSharedCommand(){}
 
 //**********************************************************************************************************************
 
-int MatrixOutputCommand::execute(){
+int DistSharedCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
@@ -259,12 +235,12 @@ int MatrixOutputCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "execute");
+		m->errorOut(e, "DistSharedCommand", "execute");
 		exit(1);
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::printDists(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
+void DistSharedCommand::printDists(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
     try {
         
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -296,7 +272,7 @@ void MatrixOutputCommand::printDists(ostream& out, vector< vector<double> >& sim
         }
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "printSims");
+        m->errorOut(e, "DistSharedCommand", "printSims");
         exit(1);
     }
 }
@@ -338,7 +314,7 @@ int driver(vector<SharedRAbundVector*>& thisLookup, vector< vector<seqDist> >& c
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "driver");
+        m->errorOut(e, "DistSharedCommand", "driver");
         exit(1);
     }
 }
@@ -503,12 +479,12 @@ int process(distSharedData* params){
 		return 0;
 	}
 	catch(exception& e) {
-		params->m->errorOut(e, "MatrixOutputCommand", "process");
+		params->m->errorOut(e, "DistSharedCommand", "process");
 		exit(1);
 	}
 }
 /***********************************************************/
-int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
+int DistSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup){
     try {
         
         vector<string> groupNames = thisLookup->getNamesGroups();
@@ -645,7 +621,7 @@ int MatrixOutputCommand::createProcesses(SharedRAbundVectors*& thisLookup){
         
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "createProcesses");
+        m->errorOut(e, "DistSharedCommand", "createProcesses");
         exit(1);
     }
 }
