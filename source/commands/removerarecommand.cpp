@@ -441,7 +441,7 @@ int RemoveRareCommand::processList(){
             outputTypes["count"].push_back(outputCountFileName); outputNames.push_back(outputCountFileName); 
         }
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only rare sequences."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only rare sequences.\n");   }
 		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		return 0;

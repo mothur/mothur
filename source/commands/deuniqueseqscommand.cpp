@@ -86,8 +86,8 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 			if (fastaFile == "not open") { abort = true; }
 			else if (fastaFile == "not found") { 				
 				fastaFile = current->getFastaFile(); 
-				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastaFile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -178,7 +178,7 @@ int DeUniqueSeqsCommand::execute() {
                     //look for sequence name in nameMap
                     map<string, string>::iterator it = nameMap.find(seq.getName());
                     
-                    if (it == nameMap.end()) {	m->mothurOut("[ERROR]: Your namefile does not contain " + seq.getName() + ", aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                    if (it == nameMap.end()) {	m->mothurOut("[ERROR]: Your namefile does not contain " + seq.getName() + ", aborting.\n");  m->setControl_pressed(true); }
                     else {
                         vector<string> names;
                         util.splitAtComma(it->second, names);

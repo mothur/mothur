@@ -25,7 +25,7 @@ FullMatrix::FullMatrix(ifstream& filehandle, GroupMap* g, bool s) : groupmap(g),
 			matrix[i].resize(numSeqs, 0.0);
 		}
 		group = groupmap->getGroup(name);
-		if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
+		if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct.\n");  exit(1); }
 		index.resize(numSeqs);
 		index[0].seqName = name;
 		index[0].groupName = group;
@@ -85,7 +85,7 @@ int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			index[i].seqName = name;
 			index[i].groupName = group;
 			
-			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct.\n");  exit(1); }
 				
 			for(int j=0;j<numSeqs;j++){
 				if (m->getControl_pressed()) {   return 0; }
@@ -124,7 +124,7 @@ int FullMatrix::readLTMatrix(ifstream& filehandle) {
 			index[i].seqName = name;
 			index[i].groupName = group;
 	
-			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct.\n");   exit(1); }
 				
 			for(int j=0;j<i;j++){
 				if (m->getControl_pressed()) {   return 0; }

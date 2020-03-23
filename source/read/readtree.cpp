@@ -287,7 +287,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T, CountTable* ct) {
 				else {;}
 			}
 		
-			if (childrenNodes.size() < 2) {  m->mothurOut("Error in tree, please correct."); m->mothurOutEndLine(); return -1; }
+			if (childrenNodes.size() < 2) {  m->mothurOut("Error in tree, please correct.\n");  return -1; }
 			
 			//then force into 2 node structure
 			for (int i = 1; i < childrenNodes.size(); i++) {

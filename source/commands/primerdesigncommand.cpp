@@ -115,8 +115,8 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			if (fastafile == "not open") { fastafile = ""; abort=true;  }
 			else if (fastafile == "not found") {  
                 fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
             }else  { current->setFastaFile(fastafile); }
             
             //get listfile - it is required
@@ -124,13 +124,13 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			if (listfile == "not open") { listfile = ""; abort=true;  }
 			else if (listfile == "not found") {  
                 listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current listfile and the list parameter is required.\n");  abort = true; }
             }else  { current->setListFile(listfile); }
 
             
 			if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             
@@ -161,7 +161,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			processors = current->setProcessors(temp);
             
             label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
         
             if (countfile == "") { 
                 if (namefile == "") {
@@ -986,7 +986,7 @@ char PrimerDesignCommand::getBase(vector<unsigned int> counts, int size){  //A,T
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] != 0)) {  conBase = '-'; }
 		//cutoff removed all counts
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] == 0)) {  conBase = 'N'; }
-		else{ m->mothurOut("[ERROR]: cannot find consensus base."); m->mothurOutEndLine(); }
+		else{ m->mothurOut("[ERROR]: cannot find consensus base.\n");  }
 		
 		return conBase;
 		

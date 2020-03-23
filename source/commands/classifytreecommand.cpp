@@ -134,7 +134,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
             string temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "51"; }
 			util.mothurConvert(temp, cutoff); 
 			
-			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
+			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100.\n");  abort = true;  }
             
             output = validParameter.valid(parameters, "output");
             if (output == "not found") { output = "node"; }
@@ -200,7 +200,7 @@ int ClassifyTreeCommand::execute(){
 			}
 		}
 		
-		m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the concensus taxonomies."); m->mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the concensus taxonomies.\n"); 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
         
@@ -314,7 +314,7 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
 				map<string, string>::iterator it2 = nameMap.find(*it);
 				
 				if (it2 == nameMap.end()) { //this name is not in name file, skip it
-					m->mothurOut((*it) + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
+					m->mothurOut((*it) + " is not in your name file.  I will not include it in the consensus.\n"); 
 				}else{
 					
 					//is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
@@ -322,8 +322,8 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
                     
 					if (itTax == taxMap.end()) { //this name is not in taxonomy file, skip it
                         
-						if ((*it) != (it2->second)) { m->mothurOut((*it) + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
-						else {  m->mothurOut((*it) + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+						if ((*it) != (it2->second)) { m->mothurOut((*it) + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus.\n");  }
+						else {  m->mothurOut((*it) + " is not in your taxonomy file.  I will not include it in the consensus.\n");  }
 					}else{
 						//add seq to tree
                         int num = nameCount[(*it)]; // we know its there since we found it in nameMap
@@ -337,7 +337,7 @@ string ClassifyTreeCommand::getTaxonomy(set<string> names, int& size) {
 				map<string, string>::iterator itTax = taxMap.find((*it));
                 
 				if (itTax == taxMap.end()) { //this name is not in taxonomy file, skip it
-					m->mothurOut((*it) + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+					m->mothurOut((*it) + " is not in your taxonomy file.  I will not include it in the consensus.\n"); 
 				}else{
 					if (countfile != "") {
                         int numDups = ct->getNumSeqs((*it)); 

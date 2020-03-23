@@ -81,22 +81,22 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			ValidParameters validParameter;
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not open") { abort = true; }
-			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command.\n");  abort = true;  }	
 			else { current->setFastaFile(fastaFileName); }
 			
 			qualFileName = validParameter.validFile(parameters, "qfile");
 			if (qualFileName == "not open") { abort = true; }
-			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command.\n");  abort = true;  }	
 			else { current->setQualFile(qualFileName); }
 			
 			if((fastaFileName == "") && (qualFileName == "")){
 				fastaFileName = current->getFastaFile(); 
-				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter.\n");  }
 				else { 
 					qualFileName = current->getQualFile(); 
-					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
+					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter.\n");  }
 					else { 
-						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command."); m->mothurOutEndLine();
+						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command.\n"); 
 						abort = true;
 					}
 				}

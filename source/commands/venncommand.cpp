@@ -116,12 +116,12 @@ VennCommand::VennCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a list or shared file."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a list or shared file.\n");  
 						abort = true;
 					}
 				}
@@ -183,7 +183,7 @@ VennCommand::VennCommand(string option)  {
             }
 			util.mothurConvert(temp, perm);
             if ((perm == 1) || (perm == 2) || (perm == 3) || (perm == 4)) { }
-            else { m->mothurOut("[ERROR]: Not a valid permute value.  Valid values are 1, 2, 3, 4 and true."); m->mothurOutEndLine(); abort = true;  }
+            else { m->mothurOut("[ERROR]: Not a valid permute value.  Valid values are 1, 2, 3, 4 and true.\n");  abort = true;  }
             
             temp = validParameter.valid(parameters, "sharedotus");		if (temp == "not found"){	temp = "t";				}
 			sharedOtus = util.isTrue(temp); 
@@ -349,10 +349,10 @@ int VennCommand::execute(){
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + ".\n"); 
 					needToRun = true;
 				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
 				}
 			}
 		
@@ -452,10 +452,10 @@ int VennCommand::execute(){
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + ".\n"); 
 					needToRun = true;
 				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
 				}
 			}
 		

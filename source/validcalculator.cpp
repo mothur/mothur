@@ -212,8 +212,8 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "jsd") { Calculator* temp = new JSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "rjsd") { Calculator* temp = new RJSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
-				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations."); m->mothurOutEndLine(); }
-			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given."); m->mothurOutEndLine(); }
+				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations.\n");  }
+			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given.\n");  }
 		}
 			
 	}

@@ -95,8 +95,8 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastafile); }
@@ -109,8 +109,8 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { 			
 				namefile = current->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
+				else { 	m->mothurOut("You have no current namefile and the name parameter is required.\n");  abort = true; }
 			}
 			else if (namefile == "not open") { namefile =  ""; abort = true; }	
 			else {  current->setNameFile(namefile); }
@@ -607,12 +607,12 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
 //**********************************************************************************************************************
 int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 	try {
-		m->mothurOutEndLine(); m->mothurOut("Deconvoluting results:"); m->mothurOutEndLine(); m->mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOut("Deconvoluting results:\n");  m->mothurOutEndLine();
 		
 		//use unique.seqs to create new name and fastafile
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+		m->mothurOut("/******************************************/\n");  
+		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");  
 		current->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
@@ -622,7 +622,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		
 		delete uniqueCommand;
 		current->setMothurCalling(false);
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+		m->mothurOut("/******************************************/\n");  
 		
 		string newnameFile = filenames["name"][0];
 		string newfastaFile = filenames["fasta"][0];

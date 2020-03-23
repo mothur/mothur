@@ -131,26 +131,26 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
             }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
 			//do you have all files needed
 			if ((listfile == "") && (namefile == "") && (countfile == "") && (fastafile == "")) {
 				namefile = current->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 				else { 				
 					listfile = current->getListFile(); 
-					if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 	
                         countfile  = current->getCountFile(); 
-                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
                             fastafile = current->getFastaFile();
-                        if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                        if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
                         else {     m->mothurOut("You have no current fastafile file, and a fasta, list, name or count file is required.\n"); abort = true; } }
                     }
 				}

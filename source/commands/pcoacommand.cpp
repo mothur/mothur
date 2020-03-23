@@ -85,8 +85,8 @@ PCOACommand::PCOACommand(string option)  {
 			else if (phylipfile == "not found") { 			
 				//if there is a current phylip file, use it
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required.\n");  abort = true; }
 			}else { current->setPhylipFile(phylipfile); }	
 			
 			filename = phylipfile;  

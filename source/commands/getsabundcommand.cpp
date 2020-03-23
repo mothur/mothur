@@ -109,12 +109,12 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				listfile = current->getListFile(); 
-				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 				else { 
 					rabundfile = current->getRabundFile(); 
-					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a list or rabund file."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a list or rabund file.\n");  
 						abort = true;
 					}
 				}

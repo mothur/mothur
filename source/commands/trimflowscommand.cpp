@@ -109,9 +109,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not found") { 
 				flowFileName = current->getFlowFile(); 
-				if (flowFileName != "") {  m->mothurOut("Using " + flowFileName + " as input file for the flow parameter."); m->mothurOutEndLine(); }
+				if (flowFileName != "") {  m->mothurOut("Using " + flowFileName + " as input file for the flow parameter.\n");  }
 				else { 
-					m->mothurOut("No valid current flow file. You must provide a flow file."); m->mothurOutEndLine(); 
+					m->mothurOut("No valid current flow file. You must provide a flow file.\n");  
 					abort = true;
 				} 
 			}else if (flowFileName == "not open") { flowFileName = ""; abort = true; }	

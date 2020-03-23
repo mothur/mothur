@@ -1324,7 +1324,7 @@ vector<countTableItem> CountTable::getItems(string seqName) {
             if (it == indexNameMap.end()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                 }
                 m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
             }else {
@@ -1372,7 +1372,7 @@ int CountTable::getGroupCount(string seqName, string groupName) {
                 if (it2 == indexNameMap.end()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
                     if (util.inUsersGroups(seqName, groups)) {
-                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                     }
                     m->mothurOut("[ERROR]: seq " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else {
@@ -1401,7 +1401,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                 if (it2 == indexNameMap.end()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
                     if (util.inUsersGroups(seqName, groups)) {
-                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                     }
                     m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
                 }else {
@@ -1598,7 +1598,7 @@ int CountTable::renameSeq(string oldSeqName, string newSeqName) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(oldSeqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + oldSeqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + oldSeqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                 }
             }
             m->mothurOut("[ERROR]: " + oldSeqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -1626,7 +1626,7 @@ int CountTable::getNumSeqs(string seqName) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seqName, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seqName + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                 }
             }
             m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -2032,7 +2032,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
             if (hasGroupInfo()) {
                 //look for it in names of groups to see if the user accidently used the wrong file
                 if (util.inUsersGroups(seq1, groups)) {
-                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq1 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq1 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                 }
             }
             m->mothurOut("[ERROR]: " + seq1 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
@@ -2042,7 +2042,7 @@ int CountTable::mergeCounts(string seq1, string seq2) {
                 if (hasGroupInfo()) {
                     //look for it in names of groups to see if the user accidently used the wrong file
                     if (util.inUsersGroups(seq2, groups)) {
-                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq2 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group."); m->mothurOutEndLine();
+                        m->mothurOut("[WARNING]: Your group or design file contains a group named " + seq2 + ".  Perhaps you are used a group file instead of a design file? A common cause of this is using a tree file that relates your groups (created by the tree.shared command) with a group file that assigns sequences to a group.\n"); 
                     }
                 }
                 m->mothurOut("[ERROR]: " + seq2 + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);

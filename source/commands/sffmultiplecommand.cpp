@@ -270,7 +270,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				in2.close();
 				lookupFileName = tryPath;
 				
-				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + ".\n");  abort=true;  }
 			}else						{	lookupFileName = temp;	}
 		}
 	}

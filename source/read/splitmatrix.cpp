@@ -52,7 +52,7 @@ int SplitMatrix::split(){
 		}else if ((method == "classify") || (method == "fasta") || (method == "vsearch")) {
 			splitClassify();
 		}else {
-			m->mothurOut("Unknown splitting method, aborting split."); m->mothurOutEndLine();
+			m->mothurOut("Unknown splitting method, aborting split.\n"); 
 			map<string, string> temp;
 			if (namefile != "") {  temp[distFile] = namefile; }
             else { temp[distFile] = countfile; }
@@ -178,7 +178,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
         bool error = false;
 		//warn about sequence in groups that are not in fasta file
 		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
-			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate an error."); m->mothurOutEndLine();
+			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate an error.\n"); 
             error = true;
 		}
 		copyGroups.clear();

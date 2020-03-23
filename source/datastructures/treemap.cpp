@@ -54,7 +54,7 @@ int TreeMap::readMap(string gf) {
                     setNamesOfGroups(seqGroup);
                     
                     map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");   }
                     else {
                         namesOfSeqs.push_back(seqName);
                         treemap[seqName].groupname = seqGroup;	//store data in map
@@ -83,7 +83,7 @@ int TreeMap::readMap(string gf) {
                     setNamesOfGroups(seqGroup);
                     
                     map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");   }
                     else {
                         namesOfSeqs.push_back(seqName);
                         treemap[seqName].groupname = seqGroup;	//store data in map
@@ -133,7 +133,7 @@ int TreeMap::readMap() {
                     setNamesOfGroups(seqGroup);
                     
                     map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");   }
                     else {
                         namesOfSeqs.push_back(seqName);
                         treemap[seqName].groupname = seqGroup;	//store data in map
@@ -162,7 +162,7 @@ int TreeMap::readMap() {
                     setNamesOfGroups(seqGroup);
                     
                     map<string, GroupIndex>::iterator itCheck = treemap.find(seqName);
-                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
+                    if (itCheck != treemap.end()) { error = 1; m->mothurOut("[WARNING]: Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct.\n");   }
                     else {
                         namesOfSeqs.push_back(seqName);
                         treemap[seqName].groupname = seqGroup;	//store data in map

@@ -127,21 +127,21 @@ HeatMapCommand::HeatMapCommand(string option) {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
 						rabundfile = current->getRabundFile(); 
-						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 						else { 
 							sabundfile = current->getSabundFile(); 
-							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 							else { 
 								relabundfile = current->getRelAbundFile(); 
-								if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+								if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 								else { 
-									m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
+									m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file.\n");  
 									abort = true;
 								}
 							}
@@ -184,7 +184,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 		 
 			scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "log10"; }
 			
-			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup"); m->mothurOutEndLine(); abort=true;  }
+			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup\n");  abort=true;  }
 		}
 
 	}

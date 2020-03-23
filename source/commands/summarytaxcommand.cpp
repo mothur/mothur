@@ -113,11 +113,11 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -134,7 +134,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
-            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n");  output = "detail"; }
 			
             temp = validParameter.valid(parameters, "threshold");			if (temp == "not found") { temp = "0"; }
             util.mothurConvert(temp, threshold);
@@ -203,7 +203,7 @@ int SummaryTaxCommand::execute(){
                 itNames = nameMap.find(name);
                 
                 if (itNames == nameMap.end()) {
-                    m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                    m->mothurOut(name + " is not in your name file please correct.\n");  exit(1);
                 }else{
                     for (int i = 0; i < itNames->second.size(); i++) {
                         taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
@@ -238,7 +238,7 @@ int SummaryTaxCommand::execute(){
 		if (m->getControl_pressed()) {  util.mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n");  m->mothurOutEndLine();
 		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();

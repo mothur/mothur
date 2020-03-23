@@ -137,7 +137,6 @@ AlignCommand::AlignCommand(string option)  {
 			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter
             ValidParameters validParameter;
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 

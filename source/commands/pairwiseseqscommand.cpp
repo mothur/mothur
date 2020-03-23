@@ -170,7 +170,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output=="phylip") { output = "lt"; }
-			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
+			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column.\n");  output = "column"; }
 			
 			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "onegap";  }

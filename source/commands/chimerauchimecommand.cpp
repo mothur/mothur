@@ -194,7 +194,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			processors = current->setProcessors(temp);
 			
 			abskew = validParameter.valid(parameters, "abskew");	if (abskew == "not found"){	useAbskew = false;  abskew = "1.9";	}else{  useAbskew = true;  }
-			if (useAbskew && templatefile != "self") { m->mothurOut("The abskew parameter is only valid with template=self, ignoring."); m->mothurOutEndLine(); useAbskew = false; }
+			if (useAbskew && templatefile != "self") { m->mothurOut("The abskew parameter is only valid with template=self, ignoring.\n");  useAbskew = false; }
 			
 			temp = validParameter.valid(parameters, "chimealns");			if (temp == "not found") { temp = "f"; }
 			chimealns = util.isTrue(temp); 
@@ -217,7 +217,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			ucl = util.isTrue(temp);
 			
 			queryfract = validParameter.valid(parameters, "queryfract");			if (queryfract == "not found")		{ useQueryfract = false; queryfract = "0.5";		}	else{ useQueryfract = true;		}
-			if (!ucl && useQueryfract) { m->mothurOut("queryfact may only be used when ucl=t, ignoring."); m->mothurOutEndLine(); useQueryfract = false; }
+			if (!ucl && useQueryfract) { m->mothurOut("queryfact may only be used when ucl=t, ignoring.\n");  useQueryfract = false; }
 			
 			temp = validParameter.valid(parameters, "skipgaps");					if (temp == "not found") { temp = "t"; }
 			skipgaps = util.isTrue(temp); 
@@ -1047,8 +1047,8 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
 							else { out3 << line[i]; }
 						}
 						
-						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + ".\n");  m->setControl_pressed(true); }
+						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + ".\n");  m->setControl_pressed(true); }
 						else {
 							out << line[spot] << line[spot+1];
 							

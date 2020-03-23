@@ -38,7 +38,7 @@ public:
 	virtual bool getNeedsAll()      {   return needsAll;    }
     
 	virtual string getCitation() = 0;
-	void citation() { m->mothurOut(getCitation()); m->mothurOutEndLine(); }
+	void citation() { m->mothurOut(getCitation()+"\n");}
     
 protected:
     Utils util;
@@ -68,7 +68,7 @@ public:
     
     virtual string getName()		{	return name;        }
     virtual string getCitation() = 0;
-    void citation() { m->mothurOut(getCitation()); m->mothurOutEndLine(); }
+    void citation() { m->mothurOut(getCitation()+"\n");  }
     
 protected:
     MothurOut* m;

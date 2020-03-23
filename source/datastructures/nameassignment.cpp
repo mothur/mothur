@@ -35,7 +35,7 @@ void NameAssignment::readMap(){
 				list.push_back(secondCol);		//adds data's value to list
 				reverse[rowIndex] = firstCol;
 				
-			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
+			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition.\n");   }
 			
 			util.gobble(fileHandle);
 		}

@@ -98,8 +98,8 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				if (treefile == "not open") { treefile = ""; abort = true; }
 				else if (treefile == "not found") { 				//if there is a current design file, use it
 					treefile = current->getTreeFile(); 
-					if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-					else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+					if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+					else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }								
 				}else { current->setTreeFile(treefile); }	
 				
 				//check for required parameters
@@ -119,11 +119,11 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
                 else { current->setCountFile(countfile); }
                 
                 if ((namefile != "") && (countfile != "")) {
-                    m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                    m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
                 }
                 
                 if ((groupfile != "") && (countfile != "")) {
-                    m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                    m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
                 }
 
 			}
@@ -206,7 +206,7 @@ int ParsimonyCommand::execute() {
         //check that groups are valid
         for (int i = 0; i < Groups.size(); i++) {
             if (!util.inUsersGroups(Groups[i], tGroups)) {
-                m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+                m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded.\n"); 
                 // erase the invalid group from userGroups
                 Groups.erase(Groups.begin()+i);
                 i--;

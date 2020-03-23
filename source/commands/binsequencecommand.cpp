@@ -92,8 +92,8 @@ BinSeqCommand::BinSeqCommand(string option) {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				//if there is a current phylip file, use it
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastafile); }
@@ -101,8 +101,8 @@ BinSeqCommand::BinSeqCommand(string option) {
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") { 			
 				listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listfile == "not open") { listfile = ""; abort = true; }	
 			else { current->setListFile(listfile); }

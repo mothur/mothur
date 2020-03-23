@@ -186,7 +186,7 @@ int DistanceCommand::execute(){
 		
 		numSeqs = alignDB.getNumSeqs();
 		
-		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting."); m->mothurOutEndLine(); return 0; }
+		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting.\n");  return 0; }
 		
 		string outputFile;
         map<string, string> variables; 
@@ -266,8 +266,8 @@ int DistanceCommand::execute(){
 		m->mothurOut(outputFile+"\n\n");
 		
 		if (util.isTrue(compress)) {
-			m->mothurOut("Compressing..."); m->mothurOutEndLine();
-			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)"); m->mothurOutEndLine();
+			m->mothurOut("Compressing...\n"); 
+			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)\n"); 
 			system(("gzip -v " + outputFile).c_str());
 			outputNames.push_back(outputFile + ".gz");
 		}else { outputNames.push_back(outputFile); }
@@ -663,7 +663,7 @@ bool DistanceCommand::sanityCheck() {
 		}
 		in2.close();
 		
-		if (fastaAlignLength != oldfastaAlignLength) { m->mothurOut("fasta files do not have the same alignment length."); m->mothurOutEndLine(); return false;  }
+		if (fastaAlignLength != oldfastaAlignLength) { m->mothurOut("fasta files do not have the same alignment length.\n");  return false;  }
 		
         //read fasta file and save names as well as adding them to the alignDB
         set<string> namesOldFasta;

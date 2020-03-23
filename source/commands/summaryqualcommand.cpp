@@ -83,8 +83,8 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			if (qualfile == "not open") { qualfile = ""; abort = true; }
 			else if (qualfile == "not found") { 				
 				qualfile = current->getQualFile(); 
-				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current quality file and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter.\n");  }
+				else { 	m->mothurOut("You have no current quality file and the qfile parameter is required.\n");  abort = true; }
 			}else { current->setQualFile(qualfile); }	
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -97,7 +97,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	

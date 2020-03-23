@@ -997,7 +997,7 @@ void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& 
 
 					Groups.push_back((myIt->second)->getGroup());
 				}else{
-					m->mothurOut("Can't find shared info for " + order[i] + ", skipping."); m->mothurOutEndLine();
+					m->mothurOut("Can't find shared info for " + order[i] + ", skipping.\n"); 
 				}
 			}
 
@@ -1035,15 +1035,15 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
 				if (num == 0) {
                     error = 1;
                     if (groupfile != "") {
-                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	}
-                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct."); m->mothurOutEndLine();	}
+                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct.\n"); 	}
+                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct.\n"); 	}
                 }else { groupNamesSeqs.erase(listNames[j]); }
 			}
 		}
 
 		for (set<string>::iterator itGroupSet = groupNamesSeqs.begin(); itGroupSet != groupNamesSeqs.end(); itGroupSet++) {
 			error = 1;
-			m->mothurOut("[ERROR]: " + (*itGroupSet) + " is in your groupfile and not your listfile. Please correct."); m->mothurOutEndLine();
+			m->mothurOut("[ERROR]: " + (*itGroupSet) + " is in your groupfile and not your listfile. Please correct.\n"); 
 		}
 
 		return error;

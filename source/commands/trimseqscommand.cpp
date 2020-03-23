@@ -148,8 +148,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			fastaFile = validParameter.validFile(parameters, "fasta");
 			if (fastaFile == "not found") { 				
 				fastaFile = current->getFastaFile(); 
-				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else if (fastaFile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastaFile); }
 			
@@ -216,7 +216,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			temp = validParameter.valid(parameters, "qthreshold");	if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, qThreshold);
@@ -261,15 +261,15 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			processors = current->setProcessors(temp);
 			
 			if(allFiles && (oligoFile == "")){
-				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request."); m->mothurOutEndLine();
+				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request.\n"); 
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
-				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); m->mothurOutEndLine();
+				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored.\n"); 
 				qAverage=0;
 				qThreshold=0;
 			}
 			if(!flip && oligoFile=="" && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP && qFileName == ""){		
-				m->mothurOut("You didn't set any options... quiting command."); m->mothurOutEndLine();
+				m->mothurOut("You didn't set any options... quiting command.\n"); 
 				abort = true;
 			}
 			
@@ -1132,7 +1132,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             
             if (firstSeqNames.size() != 0) { 
                 for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
-                    m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file."); m->mothurOutEndLine();
+                    m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file.\n"); 
                 }
                 qFileName = "";
                 return processors;
@@ -1175,7 +1175,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                 qfileFilePos = util.setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->setControl_pressed(true); 
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file.\n");  m->setControl_pressed(true); 
                 }
             }
         

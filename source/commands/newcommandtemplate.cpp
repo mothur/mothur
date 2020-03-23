@@ -148,24 +148,24 @@ NewCommand::NewCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command.\n");  
 						abort = true;
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column.\n");  abort = true; }
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format.\n");  
 						abort = true; 
 					}	
 				}
@@ -177,8 +177,8 @@ NewCommand::NewCommand(string option)  {
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -196,7 +196,7 @@ NewCommand::NewCommand(string option)  {
 			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted.\n");  abort = true; }
             
             //use more than one multiple type. do not check to make sure the entry is valid.
             string calc = validParameter.valid(parameters, "calc");			

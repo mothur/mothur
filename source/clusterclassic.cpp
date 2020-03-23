@@ -44,7 +44,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
         string numTest;
 		fileHandle >> numTest >> name;
         
-        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
         else { convert(numTest, nseqs); }
 
 
@@ -56,7 +56,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		}
 		else{
 				list = new ListVector(nameMap->getListVector());
-				if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+				if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 		}
 		
 		//initialize distance matrix to cutoff
@@ -117,7 +117,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 				
 						}
 						else{
-								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 				
 								for(int j=0;j<i;j++){
 										fileHandle >> distance;
@@ -173,7 +173,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 						
 						}
 						else{
-								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 				
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
@@ -230,7 +230,7 @@ int ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
         string numTest;
 		fileHandle >> numTest >> name;
         
-        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
         else { convert(numTest, nseqs); }
         
         

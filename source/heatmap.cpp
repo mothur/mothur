@@ -235,7 +235,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundVector*> lookup, ve
 			place = orderTopOtu(lookup);	
 		}else if (sorted == "topgroup") {
 			place = orderTopGroup(lookup);	
-		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();   }
+		}else { m->mothurOut("Error: invalid sort option.\n");    }
 				
 		
 		/******************* create copy of lookup *********************/
@@ -544,7 +544,7 @@ vector<string> HeatMap::sortSharedVectors(vector<SharedRAbundFloatVector*> looku
 			place = orderTopOtu(lookup);	
 		}else if (sorted == "topgroup") {
 			place = orderTopGroup(lookup);	
-		}else { m->mothurOut("Error: invalid sort option."); m->mothurOutEndLine();  return sortedLabels; }
+		}else { m->mothurOut("Error: invalid sort option.\n");   return sortedLabels; }
 				
 		
 		/******************* create copy of lookup *********************/

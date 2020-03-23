@@ -134,35 +134,35 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
                 //is there are current file available for either of these?
 				//give priority to shared, then list
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else {
 					listfile = current->getListFile();
-					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else {
-						m->mothurOut("No valid current files. You must provide a shared or list file."); m->mothurOutEndLine();
+						m->mothurOut("No valid current files. You must provide a shared or list file.\n"); 
 						abort = true;
 					}
 				}
             }else if ((sharedfile != "") && (listfile != "")) {
-                m->mothurOut("You may enter ONLY ONE of the following: shared or list."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("You may enter ONLY ONE of the following: shared or list.\n");  abort = true;
             }
 			
             if (listfile != "") {
                 if ((groupfile == "") && (countfile == "")) {
                     groupfile = current->getGroupFile();
-                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
                     else {
                         countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
-                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
+                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format.\n"); 
                             abort = true;
                         }
                     }
                 }
 			}
 
-			if ((sharedfile != "") && (fastafile != "")) { m->mothurOut("You cannot use the fasta file with the shared file."); m->mothurOutEndLine(); abort = true; }
+			if ((sharedfile != "") && (fastafile != "")) { m->mothurOut("You cannot use the fasta file with the shared file.\n");  abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -349,7 +349,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + binLabels[i]));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
-				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
+				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct.\n");  exit(1);  }
 				
                 if (groupfile != "") {
                     //is this seq in one of hte groups we care about

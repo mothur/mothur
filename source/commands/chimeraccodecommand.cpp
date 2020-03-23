@@ -223,7 +223,7 @@ int ChimeraCcodeCommand::driver(string outputFName, string filename, string accn
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
-					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
+					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping.\n"); 
 				}else{
 					//find chimeras
 					chimera->getChimeras(candidateSeq);

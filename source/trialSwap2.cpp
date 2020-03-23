@@ -317,7 +317,7 @@ double TrialSwap2::get_zscore (double sd, double nullMean, double initscore)
 int TrialSwap2::print_matrix(vector<vector<int> > &matrix, int nrows, int ncols)
 {
     try {
-        m->mothurOut("matrix:"); m->mothurOutEndLine();
+        m->mothurOut("matrix:\n"); 
         
         for (int i = 0; i < nrows; i++)
         {

@@ -121,14 +121,14 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			queryFileName = validParameter.validFile(parameters, "fasta");
 			if (queryFileName == "not found") { 
 				queryFileName = current->getFastaFile(); 
-				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (queryFileName == "not open") { queryFileName = ""; abort = true; }	
 			else { current->setFastaFile(queryFileName); }
 			
 			referenceFileName = validParameter.validFile(parameters, "reference");
-			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
+			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command.\n");  abort = true; }
 			else if (referenceFileName == "not open") { abort = true; }	
 			
 			//check for optional parameters
@@ -156,7 +156,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if (outputDir == "not found"){ //if user entered a file with a path then preserve it
 				outputDir = util.hasPath(queryFileName); }
 			
-            if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

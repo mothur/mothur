@@ -61,7 +61,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
             if (inputDir == "not found"){	inputDir = "";		}
             
             string fileList = validParameter.valid(parameters, "count");
-            if(fileList == "not found") { m->mothurOut("[ERROR]: you must enter two or more count file names"); m->mothurOutEndLine();  abort=true;  }
+            if(fileList == "not found") { m->mothurOut("[ERROR]: you must enter two or more count file names\n");   abort=true;  }
             else{ 	util.splitAtDash(fileList, fileNames);	}
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -71,7 +71,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
             numInputFiles = fileNames.size();
             ifstream testFile;
             if(numInputFiles == 0){
-                m->mothurOut("you must enter two or more file names and you entered " + toString(fileNames.size()) +  " file names"); m->mothurOutEndLine();
+                m->mothurOut("you must enter two or more file names and you entered " + toString(fileNames.size()) +  " file names\n"); 
                 abort=true;
             }
             else{
@@ -89,7 +89,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
             }
             
             outputFileName = validParameter.valid(parameters, "output");
-            if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
+            if (outputFileName == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
             else if (outputDir != "") { outputFileName = outputDir + util.getSimpleName(outputFileName);  }
         }
         
@@ -186,7 +186,7 @@ int MergeCountCommand::execute(){
         current->setCountFile(outputFileName);
         
         m->mothurOutEndLine();
-        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("Output File Names: \n"); 
         m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["merge"].push_back(outputFileName);
         m->mothurOutEndLine();
         

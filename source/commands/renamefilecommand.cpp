@@ -233,7 +233,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
             
             outputfile = validParameter.valid(parameters, "new");
             if (outputfile == "not found") {
-                if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
+                if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name\n");   abort=true; }
                 outputfile = "";
             }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  } }
             
@@ -385,7 +385,7 @@ int RenameFileCommand::execute(){
             renameOrCopy(inputfile, newName);
         }
         
-        m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
+        m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
         if (current->hasCurrentFiles()) {  current->printCurrentFiles(""); }
         
         return 0;	
@@ -457,15 +457,15 @@ string RenameFileCommand::renameOrCopy(string oldName, string newName){
             #endif
             
             string inputString = command + oldName + " " + newName;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: system(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
+            m->mothurOut("Running command: system(" + inputString + ")\n"); 
             current->setMothurCalling(true);
             
             Command* systemCommand = new SystemCommand(inputString);
             systemCommand->execute();
             delete systemCommand;
             current->setMothurCalling(false);
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
         }
         
         return newName;

@@ -132,7 +132,7 @@ SRACommand::SRACommand(string option)  {
 			else {	current->setOligosFile(oligosfile); setOligosParameter = true; }
             
             contactfile = validParameter.validFile(parameters, "project");
-			if (contactfile == "not found")      {	contactfile = ""; m->mothurOut("[ERROR]: You must provide a project file before you can use the sra command."); m->mothurOutEndLine(); abort = true;	}
+			if (contactfile == "not found")      {	contactfile = ""; m->mothurOut("[ERROR]: You must provide a project file before you can use the sra command.\n");  abort = true;	}
 			else if(contactfile == "not open")	{	abort = true;		}
             
             mimarksfile = validParameter.validFile(parameters, "mimark");
@@ -191,7 +191,7 @@ SRACommand::SRACommand(string option)  {
             orientation = validParameter.valid(parameters, "orientation");         if (orientation == "not found") { orientation = "forward"; }
             
             if ((orientation == "forward") || (orientation == "reverse")) {  }
-            else {  m->mothurOut("[ERROR]: " + orientation + " is not a valid orientation option. Choices are: forward and reverse.\n"); m->mothurOutEndLine(); abort = true; }
+            else {  m->mothurOut("[ERROR]: " + orientation + " is not a valid orientation option. Choices are: forward and reverse.\n\n");  abort = true; }
 
             
             string temp = validParameter.valid(parameters, "bdiffs");		if (temp == "not found"){	temp = "0";		}
@@ -583,12 +583,12 @@ int SRACommand::readContactFile(){
                 centerType = value;
                 for (int i = 0; i < centerType.length(); i++) { centerType[i] = tolower(centerType[i]); }
                 if ((centerType == "consortium") || (centerType == "center") ||  (centerType == "institute") ||  (centerType == "lab")) {}
-                else { m->mothurOut("[ERROR]: " + centerType + " is not a center type option.  Valid center type options are consortium, center, institute and lab. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                else { m->mothurOut("[ERROR]: " + centerType + " is not a center type option.  Valid center type options are consortium, center, institute and lab. This is a controlled vocabulary section in the XML file that will be generated.\n");  m->setControl_pressed(true); }
             }else if (key == "OWNERSHIP")         {
                     ownership = value;
                     for (int i = 0; i < ownership.length(); i++) { ownership[i] = tolower(ownership[i]); }
                     if ((ownership == "owner") || (ownership == "participant")) {}
-                    else { m->mothurOut("[ERROR]: " + ownership + " is not a ownership option.  Valid ownership options are owner or participant. This is a controlled vocabulary section in the XML file that will be generated."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                    else { m->mothurOut("[ERROR]: " + ownership + " is not a ownership option.  Valid ownership options are owner or participant. This is a controlled vocabulary section in the XML file that will be generated.\n");  m->setControl_pressed(true); }
             }else if (key == "DESCRIPTION")     {   description = value;    }
             else if (key == "WEBSITE")          {   website = value;        }
             else if (key == "PROJECTNAME")      {   projectName = value;    }
@@ -621,15 +621,15 @@ int SRACommand::readContactFile(){
         }
         in.close();
         
-        if (lastName == "") { m->mothurOut("[ERROR]: missing last name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (firstName == "") { m->mothurOut("[ERROR]: missing first name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (submissionName == "") { m->mothurOut("[ERROR]: missing submission name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (email == "") { m->mothurOut("[ERROR]: missing email from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (centerName == "") { m->mothurOut("[ERROR]: missing center name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (centerType == "") { m->mothurOut("[ERROR]: missing center type from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (description == "") { m->mothurOut("[ERROR]: missing description from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (projectTitle == "") { m->mothurOut("[ERROR]: missing project title from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-        if (projectName == "") { m->mothurOut("[ERROR]: missing project name from project file, quitting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+        if (lastName == "") { m->mothurOut("[ERROR]: missing last name from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (firstName == "") { m->mothurOut("[ERROR]: missing first name from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (submissionName == "") { m->mothurOut("[ERROR]: missing submission name from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (email == "") { m->mothurOut("[ERROR]: missing email from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (centerName == "") { m->mothurOut("[ERROR]: missing center name from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (centerType == "") { m->mothurOut("[ERROR]: missing center type from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (description == "") { m->mothurOut("[ERROR]: missing description from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (projectTitle == "") { m->mothurOut("[ERROR]: missing project title from project file, quitting.\n");  m->setControl_pressed(true); }
+        if (projectName == "") { m->mothurOut("[ERROR]: missing project name from project file, quitting.\n");  m->setControl_pressed(true); }
 
         return 0;
     }
@@ -1042,8 +1042,8 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         if (util.isTrue(trim)) { commandString += ", trim=" + trim; }
         
         m->mothurOutEndLine();
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-        m->mothurOut("Running command: sffinfo(" + commandString + ")"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n"); 
+        m->mothurOut("Running command: sffinfo(" + commandString + ")\n"); 
         current->setMothurCalling(true);
         
         Command* sffinfoCommand = new SffInfoCommand(commandString);
@@ -1056,7 +1056,7 @@ int SRACommand::parseSffFile(map<string, vector<string> >& files){
         
         delete sffinfoCommand;
         current->setMothurCalling(false);
-        m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+        m->mothurOut("/******************************************/\n"); 
         
         for (int i = 0; i < theseFiles.size(); i++) { outputNames.push_back(theseFiles[i]); }
         
@@ -1271,7 +1271,7 @@ bool SRACommand::checkCasesPlatforms(string& platform){
             if (isOkay) {
                 if (platform == "454")   {  platform = "_LS454"; }
             }else {
-                m->mothurOut("[ERROR]: " + original + " is not a valid platform option.  Valid platform options are _LS454, ILLUMINA-ION, TORRENT or PACBIO_SMRT."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: " + original + " is not a valid platform option.  Valid platform options are _LS454, ILLUMINA-ION, TORRENT or PACBIO_SMRT.\n");  abort = true;
             }
             
             return isOkay;
@@ -1300,7 +1300,7 @@ bool SRACommand::checkCasesInstrumentModels(string& instrumentModel){
                 if (instrumentModel == "454_GS_JUNIOR")         {  instrumentModel = "454_GS_Junior";       }
                 if (instrumentModel == "UNSPECIFIED")           {  instrumentModel = "unspecified";         }
             }else {
-                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are 454_GS, 454_GS_20, 454_GS_FLX, 454_GS_FLX_Titanium, 454_GS_Junior or unspecified."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are 454_GS, 454_GS_20, 454_GS_FLX, 454_GS_FLX_Titanium, 454_GS_Junior or unspecified.\n");  abort = true;
             }
             
         }else if (platform == "ILLUMINA") { //instrument model options are Illumina_Genome_Analyzer-Illumina_Genome_Analyzer_II-Illumina_Genome_Analyzer_IIx-Illumina_HiSeq_2000-Illumina_HiSeq_1000-Illumina_MiSeq-unspecified
@@ -1316,7 +1316,7 @@ bool SRACommand::checkCasesInstrumentModels(string& instrumentModel){
                 if (instrumentModel == "ILLUMINA_MISEQ")                    {  instrumentModel = "Illumina_MiSeq";                  }
                 if (instrumentModel == "UNSPECIFIED")                       {  instrumentModel = "unspecified";                     }
             }else {
-                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are Illumina_Genome_Analyzer, Illumina_Genome_Analyzer_II, Illumina_Genome_Analyzer_IIx, Illumina_HiSeq_2000, Illumina_HiSeq_1000, Illumina_MiSeq or unspecified."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are Illumina_Genome_Analyzer, Illumina_Genome_Analyzer_II, Illumina_Genome_Analyzer_IIx, Illumina_HiSeq_2000, Illumina_HiSeq_1000, Illumina_MiSeq or unspecified.\n");  abort = true;
             }
             
         }else if (platform == "ION_TORRENT") { //instrument model options are Ion_Torrent_PGM-unspecified
@@ -1327,7 +1327,7 @@ bool SRACommand::checkCasesInstrumentModels(string& instrumentModel){
                 if (instrumentModel == "ION_TORRENT_PGM")          {  instrumentModel = "Ion_Torrent_PGM";        }
                 if (instrumentModel == "UNSPECIFIED")              {  instrumentModel = "unspecified";            }
             }else {
-                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are Ion_Torrent_PGM or unspecified."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are Ion_Torrent_PGM or unspecified.\n");  abort = true;
             }
         }else if (platform == "PACBIO_SMRT") { //instrument model options are PacBio_RS-unspecified
             if ((instrumentModel == "PACBIO_RS")  || (instrumentModel == "UNSPECIFIED")) { }
@@ -1337,7 +1337,7 @@ bool SRACommand::checkCasesInstrumentModels(string& instrumentModel){
                 if (instrumentModel == "PACBIO_RS")          {  instrumentModel = "PacBio_RS";        }
                 if (instrumentModel == "UNSPECIFIED")        {  instrumentModel = "unspecified";      }
             }else {
-                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are PacBio_RS or unspecified."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: " + original + " is not a valid instrument option for the " + platform + " platform.  Valid instrument options are PacBio_RS or unspecified.\n");  abort = true;
             }
         }
         return isOkay;
@@ -1372,7 +1372,7 @@ bool SRACommand::checkCasesLibStrategy(string& libStrategy){
             if (libStrategy == "MRE-SEQ")                   {  libStrategy = "MRE-Seq";                 }
             if (libStrategy == "MEDIP-SEQ")                 {  libStrategy = "MeDIP-Seq";               }
             }else {
-            m->mothurOut("[ERROR]: " + original + " is not a valid libstrategy option.  Valid libstrategy options are AMPLICON,WGA,WGS,WGX,RNA-Seq,miRNA-Seq,WCS,CLONE,POOLCLONE,CLONEEND,FINISHING,ChIP-Seq,MNase-Seq,DNase-Hypersensitivity,Bisulfite-Seq,Tn-Seq,EST,FL-cDNA,CTS,MRE-Seq,MeDIP-Seq,MBD-Seq or OTHER."); m->mothurOutEndLine(); abort = true;
+            m->mothurOut("[ERROR]: " + original + " is not a valid libstrategy option.  Valid libstrategy options are AMPLICON,WGA,WGS,WGX,RNA-Seq,miRNA-Seq,WCS,CLONE,POOLCLONE,CLONEEND,FINISHING,ChIP-Seq,MNase-Seq,DNase-Hypersensitivity,Bisulfite-Seq,Tn-Seq,EST,FL-cDNA,CTS,MRE-Seq,MeDIP-Seq,MBD-Seq or OTHER.\n");  abort = true;
         }
         
         return isOkay;
@@ -1399,7 +1399,7 @@ bool SRACommand::checkCasesLibSource(string& libSource){
         if (isOkay) {
             
         }else {
-            m->mothurOut("[ERROR]: " + original + " is not a valid libsource option.  Valid libsource options are METAGENOMIC,GENOMIC,TRANSCRIPTOMIC,METATRANSCRIPTOMIC,SYNTHETIC,VIRAL_RNA or OTHER."); m->mothurOutEndLine(); abort = true;
+            m->mothurOut("[ERROR]: " + original + " is not a valid libsource option.  Valid libsource options are METAGENOMIC,GENOMIC,TRANSCRIPTOMIC,METATRANSCRIPTOMIC,SYNTHETIC,VIRAL_RNA or OTHER.\n");  abort = true;
         }
         
         return isOkay;
@@ -1439,7 +1439,7 @@ bool SRACommand::checkCasesLibSelection(string& libSelection){
             if (libSelection == "UNSPECIFIED")                                  {  libSelection = "unspecified";                                }
             
         }else {
-            m->mothurOut("[ERROR]: " + original + " is not a valid libselection option.  Valid libselection options are PCR,RANDOM,RANDOM_PCR,RT-PCR,HMPR,MF,CF-S,CF-H,CF-T,CF-M,MDA,MSLL,cDNA,ChIP,MNase,DNAse,Hybrid_Selection,Reduced_Representation,Restriction_Digest,5-methylcytidine_antibody,MBD2_protein_methyl-CpG_binding_domain,CAGE,RACE,size_fractionation,Padlock_probes_capture_method,other or unspecified."); m->mothurOutEndLine(); abort = true;
+            m->mothurOut("[ERROR]: " + original + " is not a valid libselection option.  Valid libselection options are PCR,RANDOM,RANDOM_PCR,RT-PCR,HMPR,MF,CF-S,CF-H,CF-T,CF-M,MDA,MSLL,cDNA,ChIP,MNase,DNAse,Hybrid_Selection,Reduced_Representation,Restriction_Digest,5-methylcytidine_antibody,MBD2_protein_methyl-CpG_binding_domain,CAGE,RACE,size_fractionation,Padlock_probes_capture_method,other or unspecified.\n");  abort = true;
         }
         
         return isOkay;
@@ -1466,7 +1466,7 @@ bool SRACommand::checkCasesDataType(string& dataType){
         if (isOkay) {
             
         }else {
-            m->mothurOut("[ERROR]: " + original + " is not a valid datatype option.  Valid datatype options are METAGENOME,GENOME_SEQUENCING,METAGENOMIC_ASSEMBLY,ASSEMBLY,TRANSCRIPTOME,PROTEOMIC,MAP,CLONE_ENDS,TARGETED_LOCI,RANDOM_SURVEY,EXOME,VARIATION,EPIGENOMICS,PHENOTYPE,GENOTYPE,OTHER."); m->mothurOutEndLine(); abort = true;
+            m->mothurOut("[ERROR]: " + original + " is not a valid datatype option.  Valid datatype options are METAGENOME,GENOME_SEQUENCING,METAGENOMIC_ASSEMBLY,ASSEMBLY,TRANSCRIPTOME,PROTEOMIC,MAP,CLONE_ENDS,TARGETED_LOCI,RANDOM_SURVEY,EXOME,VARIATION,EPIGENOMICS,PHENOTYPE,GENOTYPE,OTHER.\n");  abort = true;
         }
         
         return isOkay;

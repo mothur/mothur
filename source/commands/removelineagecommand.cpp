@@ -160,9 +160,9 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
             
             if ((constaxonomy == "") && (taxfile == "")) {
                 taxfile = current->getTaxonomyFile();
-                if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+                if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter.\n");  }
                 else {
-                    m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+                    m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required.\n");  abort = true; }
 			}
 
 			
@@ -172,11 +172,11 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
             else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
 			string usedDups = "true";
@@ -188,7 +188,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			dups = util.isTrue(temp);
 			
 			taxons = validParameter.valid(parameters, "taxon");
-			if (taxons == "not found") { taxons = "";  m->mothurOut("No taxons given, please correct."); m->mothurOutEndLine();  abort = true;  }
+			if (taxons == "not found") { taxons = "";  m->mothurOut("No taxons given, please correct.\n");   abort = true;  }
 			else { 
 				//rip off quotes
 				if (taxons[0] == '\'') {  taxons = taxons.substr(1); }
@@ -197,7 +197,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			util.splitAtChar(taxons, listOfTaxons, '-');
             if (m->getDebug()) { string taxonString = util.getStringFromVector(listOfTaxons, ", "); m->mothurOut("[DEBUG]: " + taxonString + "\n."); }
 			
-			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile.\n");  abort = true; }
             
             if ((constaxonomy != "") && ((fastafile != "") || (namefile != "") || (groupfile != "") || (alignfile != "") || (taxfile != "") || (countfile != ""))) {
                 m->mothurOut("[ERROR]: can only use constaxonomy file with a list or shared file, aborting.\n");  abort = true;
@@ -213,11 +213,11 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");
-                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
             }
 
 		
-			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
+			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option.\n");   abort = true; }			
 			
 			if (countfile == "") {
                 if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){

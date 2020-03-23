@@ -238,16 +238,16 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			
             if (picrustOtuFile != "") {
                 picrust=true;
-                if (contaxonomyfile == "") {  m->mothurOut("[ERROR]: the constaxonomy parameter is required with the picrust parameter, aborting."); m->mothurOutEndLine(); abort = true;  }
-                if (referenceTax == "") {  m->mothurOut("[ERROR]: the reftaxonomy parameter is required with the picrust parameter, aborting."); m->mothurOutEndLine(); abort = true;  }
+                if (contaxonomyfile == "") {  m->mothurOut("[ERROR]: the constaxonomy parameter is required with the picrust parameter, aborting.\n");  abort = true;  }
+                if (referenceTax == "") {  m->mothurOut("[ERROR]: the reftaxonomy parameter is required with the picrust parameter, aborting.\n");  abort = true;  }
             }else { picrust=false; }
             
-            if ((contaxonomyfile != "") && (labels.size() > 1)) { m->mothurOut("[ERROR]: the contaxonomy parameter cannot be used with multiple labels."); m->mothurOutEndLine(); abort = true; }
+            if ((contaxonomyfile != "") && (labels.size() > 1)) { m->mothurOut("[ERROR]: the contaxonomy parameter cannot be used with multiple labels.\n");  abort = true; }
             
 			format = validParameter.valid(parameters, "matrixtype");				if (format == "not found") { format = "sparse"; }
 			
 			if ((format != "sparse") && (format != "dense")) {
-				m->mothurOut(format + " is not a valid option for the matrixtype parameter. Options are sparse and dense."); m->mothurOutEndLine(); abort = true; 
+				m->mothurOut(format + " is not a valid option for the matrixtype parameter. Options are sparse and dense.\n");  abort = true; 
 			}
 		}
         

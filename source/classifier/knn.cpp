@@ -70,12 +70,12 @@ string Knn::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 		
 			//is this sequence in the taxonomy file
 			if (it == taxonomy.end()) { //error not in file
-				m->mothurOut("Error: sequence " + names[closest[i]] + " is not in the taxonomy file.  It will be eliminated as a match to sequence " + seq->getName() + "."); m->mothurOutEndLine();
+				m->mothurOut("Error: sequence " + names[closest[i]] + " is not in the taxonomy file.  It will be eliminated as a match to sequence " + seq->getName() + ".\n"); 
 			}else{   closestNames.push_back(it->first);	}
 		}
 		
 		if (closestNames.size() == 0) {
-			m->mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. "); m->mothurOutEndLine();
+			m->mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. \n"); 
 			tax = "unknown;";
 		}else{
 			tax = findCommonTaxonomy(closestNames);

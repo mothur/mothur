@@ -239,10 +239,10 @@ int GetOtusCommand::readClassifyOtu(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["constaxonomy"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " otus from your constaxonomy file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " otus from your constaxonomy file.\n"); 
 		
 		return 0;
 		
@@ -294,10 +294,10 @@ int GetOtusCommand::readOtuAssociation(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["otucorr"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " lines from your otu.corr file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " lines from your otu.corr file.\n"); 
 		
 		return 0;
 		
@@ -349,10 +349,10 @@ int GetOtusCommand::readCorrAxes(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["corraxes"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " lines from your corr.axes file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " lines from your corr.axes file.\n"); 
 		
 		return 0;
 		
@@ -456,10 +456,10 @@ int GetOtusCommand::readList(){
         }
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " OTUs from your list file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " OTUs from your list file.\n"); 
         
         return 0;
     }

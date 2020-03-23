@@ -133,10 +133,10 @@ int MantelCommand::execute(){
 		//make sure matrix2 and matrix1 are in the same order
 		if (names1 == names2) { //then everything is in same order and same size
 		}else if (names1.size() != names2.size()) { //wrong size no need to order, abort
-			m->mothurOut("[ERROR]: distance matrices are not the same size, aborting."); m->mothurOutEndLine();
+			m->mothurOut("[ERROR]: distance matrices are not the same size, aborting.\n"); 
 			m->setControl_pressed(true);
 		}else { //sizes are the same, but either the names are different or they are in different order
-			m->mothurOut("[WARNING]: Names do not match between distance files. Comparing based on order in files."); m->mothurOutEndLine();
+			m->mothurOut("[WARNING]: Names do not match between distance files. Comparing based on order in files.\n"); 
 		}	
 		
 		if (m->getControl_pressed()) { return 0; }
