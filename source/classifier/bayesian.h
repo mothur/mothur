@@ -37,7 +37,6 @@ private:
 	string bootstrapResults(vector<int>, int, int, string&);
 	int getMostProbableTaxonomy(vector<int>);
 	void readProbFile(ifstream&, ifstream&, string, string);
-	bool checkReleaseDate(ifstream&, ifstream&, ifstream&, ifstream&, string);
 	bool isReversed(vector<int>&);
 	vector<int> createWordIndexArr(Sequence*);
 	int generateWordPairDiffArr();

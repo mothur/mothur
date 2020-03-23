@@ -11,19 +11,24 @@
 
 #include "mothur.h"
 #include "classify.h"
+#include "optidata.hpp"
 
 /**************************************************************************************************/
 
 class OptiClassifier : public Classify {
     
 public:
-    OptiClassifier() {}
+    OptiClassifier(string reffasta, string reftax, string mothurVersion);
     ~OptiClassifier() {}
     
-    string getTaxonomy(Sequence*, string&, bool&);
+    string getTaxonomy(Sequence*, string&, bool&) { return "not done yet"; }
     
 private:
+    OptiData* matrix;
     
+        
+    vector< vector<string> > binReferences();
+
     
 };
 

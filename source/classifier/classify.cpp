@@ -201,6 +201,48 @@ double Classify::getLogExpSum(vector<double> probabilities, int& maxIndex){
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+bool Classify::checkReleaseDate(vector<ifstream*>& files, string version) {
+    try {
+        Utils util;
+        bool good = true;
+        
+        vector<string> versionVector;
+        util.splitAtChar(version, versionVector, '.');
+        
+        for (int i = 0; i < files.size(); i++) {
+            string line = util.getline(*files[i]);
+            
+            if (line[0] != '#') { good = false; break; } //shortcut files from before we added this check
+            else {
+                line = line.substr(1);
+                
+                vector<string> linesVector; util.splitAtChar(line, linesVector, '.');
+                
+                if (versionVector.size() != linesVector.size()) { good = false; break; }
+                else {
+                    for (int j = 0; j < versionVector.size(); j++) {
+                        int num1, num2;
+                        convert(versionVector[j], num1);
+                        convert(linesVector[j], num2);
+                        
+                        //if mothurs version is newer than this files version, then we want to remake it
+                        if (num1 > num2) {  good = false; break;  }
+                    }
+                }
+                if (!good) { break; }
+            }
+        }
+        
+        if (!good) {  for (int i = 0; i < files.size(); i++) { files[i]->close(); }  }
+        else { for (int i = 0; i < files.size(); i++) { files[i]->seekg(0); }  }
+        
+        return good;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Classify", "checkReleaseDate");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 

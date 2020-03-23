@@ -19,37 +19,38 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		threadID = tid;
 		flip = f;
         shortcuts = sh;
-		string baseName = tempFile;
-		string baseTName = tfile;
+        string baseName = tempFile;
+        string baseTName = tfile;
         Utils util;
-
-		/************calculate the probablity that each word will be in a specific taxonomy*************/
-		string tfileroot = util.getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
-		string tempfileroot = util.getRootName(util.getSimpleName(baseName));
-		string phyloTreeName = tfileroot + "tree.train";
-		string phyloTreeSumName = tfileroot + "tree.sum";
-		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
-		string probFileName2 = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.numNonZero";
-		
-		ofstream out;
-		ofstream out2;
-		
-		ifstream phyloTreeTest(phyloTreeName.c_str());
-		ifstream probFileTest2(probFileName2.c_str());
-		ifstream probFileTest(probFileName.c_str());
-		ifstream probFileTest3(phyloTreeSumName.c_str());
+        
+        /************calculate the probablity that each word will be in a specific taxonomy*************/
+        string tfileroot = util.getFullPathName(baseTName.substr(0,baseTName.find_last_of(".")+1));
+        string tempfileroot = util.getRootName(util.getSimpleName(baseName));
+        string phyloTreeName = tfileroot + "tree.train";
+        string phyloTreeSumName = tfileroot + "tree.sum";
+        string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
+        string probFileName2 = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.numNonZero";
+        
+        ofstream out;
+        ofstream out2;
+        
+        vector<ifstream*> files;
+        ifstream* phyloTreeTest = new ifstream(phyloTreeName.c_str()); files.push_back(phyloTreeTest);
+		ifstream* probFileTest2 = new ifstream(probFileName2.c_str()); files.push_back(probFileTest2);
+		ifstream* probFileTest = new ifstream(probFileName.c_str());   files.push_back(probFileTest);
+		ifstream* probFileTest3 = new ifstream(phyloTreeSumName.c_str()); files.push_back(probFileTest3);
 		
 		long start = time(NULL);
 		
 		//if they are there make sure they were created after this release date
 		bool FilesGood = false;
-		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){ FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3, version); }
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){ FilesGood = checkReleaseDate(files, version); }
 
 		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){
 			
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
-			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
+			phyloTree = new PhyloTree(*phyloTreeTest, phyloTreeName);
             maxLevel = phyloTree->getMaxLevel();
 			
 			m->mothurOut("DONE.\n"); 
@@ -58,7 +59,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 			genusTotals = phyloTree->getGenusTotals();
 			
             m->mothurOut("Reading template probabilities...     "); cout.flush();
-            readProbFile(probFileTest, probFileTest2, probFileName, probFileName2);
+            readProbFile(*probFileTest, *probFileTest2, probFileName, probFileName2);
 			
         }else{
 		
@@ -86,8 +87,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
                 for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
 			
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-                ofstream out;
-				ofstream out2;
+                ofstream out; ofstream out2;
 
                 if (shortcuts) { 
                     util.openOutputFile(probFileName, out); 
@@ -145,10 +145,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
                     }
                     
 				}
-                if (shortcuts) {
-                    out.close();
-                    out2.close();
-                }
+                if (shortcuts) { out.close(); out2.close();  }
 				
 				//read in new phylotree with less info. - its faster
 				ifstream phyloTreeTest(phyloTreeName.c_str());
@@ -162,6 +159,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         if (m->getDebug()) { m->mothurOut("[DEBUG]: about to generateWordPairDiffArr\n"); }
 		generateWordPairDiffArr();
         if (m->getDebug()) { m->mothurOut("[DEBUG]: done generateWordPairDiffArr\n"); }
+        
+        for (int i = 0; i < files.size(); i++) { delete files[i]; }
 			
 		m->mothurOut("DONE.\n");
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities.\n"); 
@@ -456,59 +455,6 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "readProbFile");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file3, ifstream& file4, string version) {
-	try {
-		
-		bool good = true;
-		
-		vector<string> lines;
-        Utils util;
-		lines.push_back(util.getline(file1));  
-		lines.push_back(util.getline(file2)); 
-		lines.push_back(util.getline(file3)); 
-		lines.push_back(util.getline(file4)); 
-
-		//before we added this check
-		if ((lines[0][0] != '#') || (lines[1][0] != '#') || (lines[2][0] != '#') || (lines[3][0] != '#')) {  good = false;  }
-		else {
-			//rip off #
-			for (int i = 0; i < lines.size(); i++) { lines[i] = lines[i].substr(1);  }
-
-			vector<string> versionVector;
-			util.splitAtChar(version, versionVector, '.');
-			
-			//check each files version
-			for (int i = 0; i < lines.size(); i++) { 
-				vector<string> linesVector;
-				util.splitAtChar(lines[i], linesVector, '.');
-			
-				if (versionVector.size() != linesVector.size()) { good = false; break; }
-				else {
-					for (int j = 0; j < versionVector.size(); j++) {
-						int num1, num2;
-						convert(versionVector[j], num1);
-						convert(linesVector[j], num2);
-						
-						//if mothurs version is newer than this files version, then we want to remake it
-						if (num1 > num2) {  good = false; break;  }
-					}
-				}
-				
-				if (!good) { break; }
-			}
-		}
-		
-		if (!good) {  file1.close(); file2.close(); file3.close(); file4.close();  }
-		else { file1.seekg(0);  file2.seekg(0);  file3.seekg(0);  file4.seekg(0);  }
-		
-		return good;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Bayesian", "checkReleaseDate");
 		exit(1);
 	}
 }
