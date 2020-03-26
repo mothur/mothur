@@ -22,11 +22,12 @@ public:
 	
 	void generateDB();
 	void addSequence(Sequence);
-	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;
+ 	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;
 	vector<int> findClosestMegaBlast(Sequence*, int, int);
 	
 private:
 	
+    CurrentFile* current;
 	string scrubName(string) const;
 	
 	string dbFileName;

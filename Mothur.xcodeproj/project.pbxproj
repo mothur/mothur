@@ -411,6 +411,8 @@
 		4889EA221E8962D50054E0BB /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
 		488C1DE6241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */; };
 		488C1DE7241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */; };
+		488C1DEA242D102B00BDCCB4 /* optidb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE8242D102B00BDCCB4 /* optidb.cpp */; };
+		488C1DEB242D102B00BDCCB4 /* optidb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 488C1DE8242D102B00BDCCB4 /* optidb.cpp */; };
 		48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D441D5243E500F60EDB /* mergecountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D411D5243E500F60EDB /* mergecountcommand.cpp */; };
 		48910D461D58CAD700F60EDB /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
@@ -1003,6 +1005,8 @@
 		4889EA211E8962D50054E0BB /* summary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = summary.hpp; path = source/summary.hpp; sourceTree = SOURCE_ROOT; };
 		488C1DE4241AD20D00BDCCB4 /* opticlassifier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = opticlassifier.cpp; path = source/classifier/opticlassifier.cpp; sourceTree = SOURCE_ROOT; };
 		488C1DE5241AD20D00BDCCB4 /* opticlassifier.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = opticlassifier.hpp; path = source/classifier/opticlassifier.hpp; sourceTree = SOURCE_ROOT; };
+		488C1DE8242D102B00BDCCB4 /* optidb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = optidb.cpp; path = source/datastructures/optidb.cpp; sourceTree = SOURCE_ROOT; };
+		488C1DE9242D102B00BDCCB4 /* optidb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = optidb.hpp; path = source/datastructures/optidb.hpp; sourceTree = SOURCE_ROOT; };
 		48910D411D5243E500F60EDB /* mergecountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergecountcommand.cpp; path = source/commands/mergecountcommand.cpp; sourceTree = SOURCE_ROOT; };
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = SOURCE_ROOT; };
@@ -2775,6 +2779,8 @@
 				48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */,
 				48FB99C720A48EF700FF9F6E /* optidata.cpp */,
 				48FB99C820A48EF700FF9F6E /* optidata.hpp */,
+				488C1DE8242D102B00BDCCB4 /* optidb.cpp */,
+				488C1DE9242D102B00BDCCB4 /* optidb.hpp */,
 				48910D491D58CBA300F60EDB /* optimatrix.cpp */,
 				48910D4A1D58CBA300F60EDB /* optimatrix.h */,
 				48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */,
@@ -3096,6 +3102,7 @@
 				48E544461E9C2B1000FF6AB8 /* sensitivity.cpp in Sources */,
 				481FB5861AC1B6FF0076CFF3 /* chimerarealigner.cpp in Sources */,
 				481FB5A81AC1B7300076CFF3 /* collectcommand.cpp in Sources */,
+				488C1DEB242D102B00BDCCB4 /* optidb.cpp in Sources */,
 				481FB5961AC1B71B0076CFF3 /* chimeraccodecommand.cpp in Sources */,
 				48B44EEF1FB5006500789C45 /* currentfile.cpp in Sources */,
 				4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */,
@@ -3498,6 +3505,7 @@
 				48FB99CF20A4F3FB00FF9F6E /* optifitcluster.cpp in Sources */,
 				A7E9B89C12D37EC400DA6239 /* chimerarealigner.cpp in Sources */,
 				A7E9B89E12D37EC400DA6239 /* chimeraslayer.cpp in Sources */,
+				488C1DEA242D102B00BDCCB4 /* optidb.cpp in Sources */,
 				A7E9B89F12D37EC400DA6239 /* chimeraslayercommand.cpp in Sources */,
 				A7E9B8A012D37EC400DA6239 /* chopseqscommand.cpp in Sources */,
 				A7E9B8A112D37EC400DA6239 /* classify.cpp in Sources */,

@@ -17,6 +17,7 @@
 BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b, int tid) : Database(), 
 gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 	try {
+        current = CurrentFile::getInstance();
 		count = 0;
 		path = b;
 		threadID = tid;
@@ -65,6 +66,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 
 BlastDB::BlastDB(string b, int tid) : Database() {
 	try {
+        current = CurrentFile::getInstance();
 		count = 0;
 		path = b;
 		threadID = tid;
