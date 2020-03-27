@@ -12,6 +12,7 @@
 #include "sequence.hpp"
 #include "database.hpp"
 #include "calculator.h"
+#include "optimatrix.h"
 
 class OptiDB : public Database {
 
@@ -22,8 +23,11 @@ public:
     
     void addSequence(Sequence); //add otu with single seq
     void addSequences(vector<Sequence>); //add otu with multiple seqs
-    
     void generateDB();
+    
+    OptiData* findClosestSequences(Sequence*, int n); //seq, numColumnsToUse -> returns matrix containing references "close" to sequence
+    
+    
     
 private:
     

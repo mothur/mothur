@@ -18,33 +18,7 @@
 #include "currentfile.h"
 #include "utils.hpp"
 
-/**************************************************************************************************/
-struct classifierOTU {
-    vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU
-    
-    /*
-     otuData.size = num columns in seq's alignment
-     otuData[i].size() = numSeqs in otu
-     
-     seq1 > atgcaag
-     seq2 > gacctga
-     seq3 > cctgacg
-     
-     otuData[0] > {a,g,c}
-     otuData[1] > {t,a,c}
-     otuData[2] > {g,c,t}
-     
-     otuData[i] > {charInAllCols} if all chars in otuData[i] are identical. ie, ignore column
-     otuData[i] > {a} all seqs contain 'a' in column i of alignment
-     */
-    
-    vector<int> bootstrapColumns; // initialize to all columns
-    
-    classifierOTU() {}
-    classifierOTU(vector<vector<char> > otu) : otuData(otu) {
-        for (int i = 0; i < otu.size(); i++) { bootstrapColumns.push_back(i); }
-    }
-};
+
 /**************************************************************************************************/
 struct seqMatch {  //used to select top n matches
 		int seq;

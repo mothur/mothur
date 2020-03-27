@@ -7,9 +7,12 @@
 //
 
 #include "optidb.hpp"
+#include "onegapdist.h"
 
 /**************************************************************************************************/
-OptiDB::OptiDB(double c) : Database(), cutoff(c), aligned(true), alignedLength(0) {}
+OptiDB::OptiDB(double c) : Database(), cutoff(c), aligned(true), alignedLength(0) {
+    calc = new oneGapDist(cutoff);
+}
 /**************************************************************************************************/
 //adds otu with seq as only reference included
 void OptiDB::addSequence(Sequence seq)  {
@@ -75,8 +78,10 @@ void OptiDB::addSequences(vector<Sequence> seqs)  {
         
         if (!aligned) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); }
         
-        classifierOTU thisOtu(otuData);
+        classifierOTU thisOtu(otuData, seqs.size());
         reference.push_back(thisOtu);
+        
+        numSeqs++; //this is the number of otus
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "addSequences");
@@ -87,12 +92,12 @@ void OptiDB::addSequences(vector<Sequence> seqs)  {
 void OptiDB::generateDB()  {
     try {
         
-        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "generateDB");
         exit(1);
     }
 }
+
 /**************************************************************************************************/
 
