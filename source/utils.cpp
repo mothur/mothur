@@ -2022,11 +2022,12 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
             system("CLS");
         #endif
         
+	    string lastChar = "";
         #ifdef MOTHUR_FILES
             defaultPath = MOTHUR_FILES;
         
             //add / to name if needed
-            string lastChar = defaultPath.substr(defaultPath.length()-1);
+            lastChar = defaultPath.substr(defaultPath.length()-1);
             if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
         
             defaultPath = getFullPathName(defaultPath);
