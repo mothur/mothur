@@ -28,7 +28,8 @@ OptionParser::OptionParser(string option) {
                 //if value is wrapped in '' preserve spaces
                 if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
                 else {
-                    value = util.splitWhiteSpace(value).front();
+                    //value = util.splitWhiteSpace(value).front();
+                    value = util.trimWhiteSpace(value);
                 }
 				parameters[key] = value;
 			}
@@ -41,7 +42,8 @@ OptionParser::OptionParser(string option) {
             //if value is wrapped in '' preserve spaces
             if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
             else {
-                option = util.splitWhiteSpace(option).front();
+                //option = util.splitWhiteSpace(option).front();
+                option = util.trimWhiteSpace(option);
             }
 			parameters[key] = option;
 		}

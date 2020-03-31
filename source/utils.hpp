@@ -257,6 +257,7 @@ public:
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);
+    string trimWhiteSpace(string input);
     
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename

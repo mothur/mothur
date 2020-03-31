@@ -64,7 +64,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			m->mothurOut("and " + cParams.at(numParams-1) + ".\n");
 			return false;
 		}
-		
+        
 		if(parameterRanges.count(parameter) != 1)
 			return true;
 	
@@ -245,6 +245,7 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
                 vector<string> files; util.splitAtDash(it->second, files);
                 
                 for (int i = 0; i < files.size(); i++) {
+                    files[i] = util.removeQuotes(files[i]);
                     string filename = files[i];
                     if (util.checkLocations(filename, current->getLocations())) { vFiles.push_back(filename); container[parameter] = filename; openedAtLeastOne = true; }
                     else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
@@ -291,6 +292,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
         if(it != container.end()){ //no parameter given
             if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
             else {
+                it->second = util.removeQuotes(it->second);
                 string filename = it->second;
                 if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
                 else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
