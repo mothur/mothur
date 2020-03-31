@@ -3781,24 +3781,14 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
         ifstream in;
         openInputFile(accnosfile, in, noerror);
         string name;
-
-        string rest = "";
-        char buffer[4096];
-
+        
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            in.read(buffer, 4096);
-            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
-
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
+            string line = trimWhiteSpace(getline(in));
+            checkName(line); names.push_back(line);
         }
         in.close();
-
-        if (rest != "") {
-            vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
-        }
 
         return 0;
     }

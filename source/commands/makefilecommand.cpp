@@ -381,7 +381,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         
 #else
         //use ls command
-        findCommand = "find \"\" "  + inputDir.substr(0, inputDir.length()-1) + "\\*." + typeFile + " > " + tempFile;
+        findCommand = "dir /B \""  + inputDir.substr(0, inputDir.length()-1) + "\\*.\"" + typeFile + " > " + tempFile + "\"";
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
 
@@ -398,7 +398,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         string junk, filename;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
-            in >> junk; util.gobble(in);
+           
             in >> filename; util.gobble(in);
             
             //ignore hidden files
