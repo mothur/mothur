@@ -1255,7 +1255,8 @@ bool Utils::appendSFFFiles(string temp, string filename) {
         else {
             //get full path name
             string completeFileName = getFullPathName(temp);
-            input.open(completeFileName.c_str(), ios::binary);
+            openInputFileBinary(completeFileName, input);
+            //input.open(completeFileName.c_str(), ios::binary);
             if(!input) { return false; }
             else {
                 char buffer[4096];
@@ -2187,7 +2188,8 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
         vector<double> positions;
         ifstream inFASTA;
         string completeFileName = getFullPathName(filename);
-        inFASTA.open(completeFileName.c_str(), ios::binary);
+        //inFASTA.open(completeFileName.c_str(), ios::binary);
+        openInputFileBinary(completeFileName, inFASTA);
         int nameLine = 2;
         if (delim == '@') { nameLine = 4; }
         else if (delim == '>') { nameLine = 2; }
@@ -2247,8 +2249,9 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num) {
         ifstream inFASTA;
         //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
-        inFASTA.open(completeFileName.c_str(), ios::binary);
-
+        //inFASTA.open(completeFileName.c_str(), ios::binary);
+        openInputFileBinary(completeFileName, inFASTA);
+        
         string input;
         double count = 0;
         while(!inFASTA.eof()){
