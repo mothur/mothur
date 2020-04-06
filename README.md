@@ -18,3 +18,5 @@ References...
 * [SILVA](http://www.mothur.org/wiki/Silva_reference_files)
 * [greengenes](http://www.mothur.org/wiki/Greengenes-formatted_databases)
 * [RDP](http://www.mothur.org/wiki/RDP_reference_files)
+
+See the [citation file](CITATION.md) for how to cite mothur.

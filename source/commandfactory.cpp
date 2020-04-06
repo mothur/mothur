@@ -347,6 +347,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
+            outputOption = util.trimWhiteSpace(outputOption);
             outputOption = util.removeQuotes(outputOption);
             if(util.mkDir(outputOption)){
                 current->setOutputDir(outputOption);
@@ -364,6 +365,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
+            intputOption = util.trimWhiteSpace(intputOption);
             intputOption = util.removeQuotes(intputOption);
             if(util.dirCheck(intputOption)){
                 current->setInputDir(intputOption); 
@@ -418,7 +420,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
             checkForRedirects(optionString);
             
             //user has opted to redirect output from dir where input files are located to some other place
-            if (current->getOutputDir() != "") {
+           /* if (current->getOutputDir() != "") {
                 if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
                 else { optionString += "outputdir=" + current->getOutputDir(); }
             }
@@ -427,7 +429,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
             if (current->getInputDir() != "") {
                 if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
                 else { optionString += "inputdir=" + current->getInputDir(); }
-            }
+            }*/
         }
         
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}

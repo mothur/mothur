@@ -2026,7 +2026,7 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
         string lastChar = "";
         #ifdef MOTHUR_FILES
             defaultPath = MOTHUR_FILES;
-        
+            defaultPath = removeQuotes(defaultPath);
             //add / to name if needed
             lastChar = defaultPath.substr(defaultPath.length()-1);
             if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
@@ -2038,7 +2038,7 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
         
         #ifdef MOTHUR_TOOLS
             tools = MOTHUR_TOOLS;
-        
+            tools = removeQuotes(tools);
             //add / to name if needed
             lastChar = tools.substr(tools.length()-1);
             if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
@@ -2846,6 +2846,33 @@ vector<string> Utils::splitWhiteSpace(string& rest, char buffer[], int size){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitWhiteSpace");
+        exit(1);
+    }
+}
+/***********************************************************************/
+string Utils::trimWhiteSpace(string input){
+    try {
+       
+        int start, end; start = 0; end = input.length();
+        
+        //no spaces
+        if (input.find_first_of(' ') == string::npos) { return input; }
+        
+        for (int i = 0; i < input.length(); i++) {
+            if (input[i] != ' ') { start = i; break; }
+        }
+        
+        end = start;
+        for (int i = input.length()-1; i > start; i--) {
+            if (input[i] != ' ') { end = i; break; }
+        }
+        
+        string trimmed = input.substr(start, end-start+1);
+        
+        return trimmed;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "trimWhiteSpace");
         exit(1);
     }
 }
@@ -3757,24 +3784,14 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
         ifstream in;
         openInputFile(accnosfile, in, noerror);
         string name;
-
-        string rest = "";
-        char buffer[4096];
-
+        
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            in.read(buffer, 4096);
-            vector<string> pieces = splitWhiteSpace(rest, buffer, in.gcount());
-
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
+            string line = trimWhiteSpace(getline(in));
+            checkName(line); names.push_back(line);
         }
         in.close();
-
-        if (rest != "") {
-            vector<string> pieces = splitWhiteSpace(rest);
-            for (int i = 0; i < pieces.size(); i++) {  checkName(pieces[i]); names.push_back(pieces[i]);  }
-        }
 
         return 0;
     }
