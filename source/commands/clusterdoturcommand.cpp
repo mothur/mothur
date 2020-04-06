@@ -135,7 +135,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 				else if (method == "nearest") { tag = "nn"; }
 				else if (method == "average") { tag = "an"; }
 				else if (method == "weighted") { tag = "wn"; }
-			}else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted."); m->mothurOutEndLine(); abort = true; }
+			}else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted.\n");  abort = true; }
 		}
 	}
 	catch(exception& e) {
@@ -251,7 +251,7 @@ int ClusterDoturCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
 
 		return 0;
 	}

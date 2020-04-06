@@ -142,8 +142,8 @@ LefseCommand::LefseCommand(string option)  {
 			else if (designfile == "not found") {
 				//if there is a current shared file, use it
 				designfile = current->getDesignFile();
-				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -213,7 +213,7 @@ LefseCommand::LefseCommand(string option)  {
             
             multiClassStrat = validParameter.valid(parameters, "multiclass");
             if (multiClassStrat == "not found"){	multiClassStrat = "onevall";		}
-			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall."); m->mothurOutEndLine(); abort=true; }
+			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall.\n");  abort=true; }
 		}
 		
 	}

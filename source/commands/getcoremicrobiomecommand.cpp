@@ -130,7 +130,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "fraction"; }
 						
-			if ((output != "fraction") && (output != "count")) { m->mothurOut(output + " is not a valid output form. Options are fraction and count. I will use fraction."); m->mothurOutEndLine(); output = "fraction"; }
+			if ((output != "fraction") && (output != "count")) { m->mothurOut(output + " is not a valid output form. Options are fraction and count. I will use fraction.\n");  output = "fraction"; }
             
             string temp = validParameter.valid(parameters, "abundance");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, abund);

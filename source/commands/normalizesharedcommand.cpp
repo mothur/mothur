@@ -102,12 +102,12 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file.\n");  
 						abort = true;
 					}
 				}
@@ -137,14 +137,14 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			}
 			
 			method = validParameter.valid(parameters, "method");				if (method == "not found") { method = "totalgroup"; }
-			if ((method != "totalgroup") && (method != "zscore")) {  m->mothurOut(method + " is not a valid scaling option for the normalize.shared command. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!"); m->mothurOutEndLine(); abort = true; }
+			if ((method != "totalgroup") && (method != "zscore")) {  m->mothurOut(method + " is not a valid scaling option for the normalize.shared command. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!\n");  abort = true; }
 		
 			string temp = validParameter.valid(parameters, "norm");
 			if (temp == "not found") {  
 				norm = 0;  //once you have read, set norm to smallest group number
 			}else { 
 				util.mothurConvert(temp, norm);
-				if (norm < 0) { m->mothurOut("norm must be positive."); m->mothurOutEndLine(); abort=true; }
+				if (norm < 0) { m->mothurOut("norm must be positive.\n");  abort=true; }
 			}
 			
 			temp = validParameter.valid(parameters, "makerelabund");	if (temp == "") { temp = "f"; }
@@ -310,7 +310,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp, bool& pr
 				}
 			}
 						
-		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+		}else{ m->mothurOut(method + " is not a valid scaling option.\n");  m->setControl_pressed(true); return 0; }
 				
 		thisLookUp->eliminateZeroOTUS();
         thisLookUp->print(out, printHeaders);
@@ -383,7 +383,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp, boo
                 }
 			}			
 			
-		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+		}else{ m->mothurOut(method + " is not a valid scaling option.\n");  m->setControl_pressed(true); return 0; }
 		
 		
         thisLookUp->eliminateZeroOTUS();

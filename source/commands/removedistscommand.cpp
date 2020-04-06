@@ -83,9 +83,9 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  
 					abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
@@ -104,12 +104,12 @@ RemoveDistsCommand::RemoveDistsCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a phylip or column file.\n");  
 						abort = true;
 					}
 				}
@@ -143,7 +143,7 @@ int RemoveDistsCommand::execute(){
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
-			m->mothurOut("Output File names: "); m->mothurOutEndLine();
+			m->mothurOut("Output File names: \n"); 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			
@@ -192,7 +192,7 @@ int RemoveDistsCommand::readPhylip(){
         string numTest;
         in >> numTest >> name;
         
-        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
         else { convert(numTest, nseqs); }
         
         //not one we want to remove
@@ -300,9 +300,9 @@ int RemoveDistsCommand::readPhylip(){
         inPhylip.close();
 		out.close();
 		
-		if (keptCount == 0) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+		if (keptCount == 0) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file.\n");   }
         else if (count != names.size()) {
-            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file.\n"); 
             //rewrite with new number
             util.renameFile(outputFileName, outputFileName+".temp");
             ofstream out2;
@@ -322,7 +322,7 @@ int RemoveDistsCommand::readPhylip(){
             util.mothurRemove(outputFileName+".temp");
         }
 		
-		m->mothurOut("Removed " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(count) + " groups or sequences from your phylip file.\n"); 
 		
 		return 0;
 		
@@ -374,12 +374,12 @@ int RemoveDistsCommand::readColumn(){
 		in.close();
 		out.close();
         
-        if (!wrote) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        if (!wrote) {  m->mothurOut("Your file contains ONLY distances related to groups or sequences listed in the accnos file.\n");   }
         else if (removeNames.size() != names.size()) {
-            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(removeNames.size()) + " of them in the column file."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(removeNames.size()) + " of them in the column file.\n"); 
         }
 		
-		m->mothurOut("Removed " + toString(removeNames.size()) + " groups or sequences from your column file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removeNames.size()) + " groups or sequences from your column file.\n"); 
         
 		return 0;
 		

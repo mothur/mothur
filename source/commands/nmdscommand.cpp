@@ -95,8 +95,8 @@ NMDSCommand::NMDSCommand(string option)  {
 			else if (phylipfile == "not found") { 				
 				//if there is a current phylip file, use it
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required.\n");  abort = true; }
 			}else { current->setPhylipFile(phylipfile); }	
 			
 			axesfile = validParameter.validFile(parameters, "axes");
@@ -124,7 +124,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			temp = validParameter.valid(parameters, "epsilon");	if (temp == "not found") {	temp = "0.000000000001";	}
 			util.mothurConvert(temp, epsilon); 
 			
-			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
+			if (mindim < 1) { m->mothurOut("mindim must be at least 1.\n");  abort = true; }
 			if (maxdim < mindim) { maxdim = mindim; }
 		}
 		
@@ -484,9 +484,9 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		}
 		
 		if (maxdim > count) { 
-			m->mothurOut("You requested maxdim = " + toString(maxdim) + ", but your file only includes " + toString(count) + ". Using " + toString(count) + "."); m->mothurOutEndLine(); 
+			m->mothurOut("You requested maxdim = " + toString(maxdim) + ", but your file only includes " + toString(count) + ". Using " + toString(count) + ".\n");  
 			maxdim = count; 
-			if (maxdim < mindim) { m->mothurOut("Also adjusting mindim to " + toString(maxdim-1) + "."); m->mothurOutEndLine(); }
+			if (maxdim < mindim) { m->mothurOut("Also adjusting mindim to " + toString(maxdim-1) + ".\n");  }
 		}
 		
 		vector< vector<double> > axes;  axes.resize(maxdim);
@@ -503,7 +503,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			in >> group; util.gobble(in);
 			
 			bool ignore = false;
-			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring."); m->mothurOutEndLine(); }
+			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring.\n");  }
 			
 			vector<double> thisGroupsAxes;
 			for (int i = 0; i < count; i++) {
@@ -521,7 +521,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		in.close();
 				
 		//sanity check
-		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
+		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting.\n");  m->setControl_pressed(true); return axes; }
 		
 		//put axes info in same order as distance file, just in case
 		for (int i = 0; i < names.size(); i++) {
@@ -534,7 +534,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 					axes[j][i] = thisGroupsAxes[j];
 				}
 				
-			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
+			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting.\n");  m->setControl_pressed(true); return axes; }
 		}
 		
 		return axes;

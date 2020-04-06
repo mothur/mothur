@@ -87,16 +87,16 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
 			ValidParameters validParameter;
             errorFileName = validParameter.validFile(parameters, "error");
 			if (errorFileName == "not open") { errorFileName = ""; abort = true; }
-			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required.\n");   abort = true; }
 			
 			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not open") { flowFileName = ""; abort = true; }
-			else if (flowFileName == "not found") { flowFileName = ""; m->mothurOut("[ERROR]: flow parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (flowFileName == "not found") { flowFileName = ""; m->mothurOut("[ERROR]: flow parameter is required.\n");   abort = true; }
 			else {   current->setFlowFile(flowFileName);	}
 			
 			refFastaFileName = validParameter.validFile(parameters, "reference");
 			if (refFastaFileName == "not open") { abort = true; }
-			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required.\n");   abort = true; }
                       
             //if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){

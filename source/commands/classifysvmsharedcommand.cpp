@@ -442,7 +442,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         if ( stdthreshold > 0.0 ) {
             FeatureVector removedFeatureVector = applyStdThreshold(stdthreshold, labeledObservationVector, featureVector);
             if (removedFeatureVector.size() > 0) {
-                m->mothurOut(toString(removedFeatureVector.size()) + " OTUs were below the stdthreshold of " + toString(stdthreshold) + " and were removed"); m->mothurOutEndLine();
+                m->mothurOut(toString(removedFeatureVector.size()) + " OTUs were below the stdthreshold of " + toString(stdthreshold) + " and were removed\n"); 
                 if ( outputFilter.debug() ) {
                     m->mothurOut("the following OTUs were below the standard deviation threshold of " + toString(stdthreshold) ); m->mothurOutEndLine();
                     for (FeatureVector::iterator i = removedFeatureVector.begin(); i != removedFeatureVector.end(); i++) {
@@ -454,11 +454,11 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
         // apply [0,1] standardization
         if ( transformName == "zeroone") {
-            m->mothurOut("transforming data to lie within range [0,1]"); m->mothurOutEndLine();
+            m->mothurOut("transforming data to lie within range [0,1]\n"); 
             transformZeroOne(labeledObservationVector);
         }
         else {
-            m->mothurOut("transforming data to have zero mean and unit variance"); m->mothurOutEndLine();
+            m->mothurOut("transforming data to have zero mean and unit variance\n"); 
             transformZeroMeanUnitVariance(labeledObservationVector);
         }
 
@@ -484,8 +484,8 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
             int n = 0;
             int rfeRoundCount = rankedFeatureList.front().getRank();
-            m->mothurOut("ordered features:" ); m->mothurOutEndLine();
-            m->mothurOut("index\tOTU\trank"); m->mothurOutEndLine();
+            m->mothurOut("ordered features:\n" ); 
+            m->mothurOut("index\tOTU\trank\n"); 
             outputFile << setw(5)  << "index"
                        << setw(12) << "OTU"
                        << setw(5)  << "rank"

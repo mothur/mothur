@@ -111,8 +111,8 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  				//if there is a current fasta file, use it
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); } 	
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -136,11 +136,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -161,11 +161,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             temp = validParameter.valid(parameters, "keepn");	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
             keepN = util.isTrue(temp);
             
-            if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true."); m->mothurOutEndLine(); abort = true;  }
+            if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true.\n");  abort = true;  }
 		
 			keep = validParameter.valid(parameters, "keep");		if (keep == "not found") { keep = "front"; } 
 				
-			if (numbases == 0)  { m->mothurOut("You must provide the number of bases you want to keep for the chops.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (numbases == 0)  { m->mothurOut("You must provide the number of bases you want to keep for the chops.seqs command.\n");  abort = true;  }
 		}
 
 	}
@@ -221,8 +221,8 @@ int ChopSeqsCommand::execute(){
                     if (groupfile != "") {  inputString += ", group=" + groupfile;  }
                 }
                 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n"); 
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n"); 
                 current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
@@ -232,7 +232,7 @@ int ChopSeqsCommand::execute(){
                 
                 delete removeCommand;
                 current->setMothurCalling(false);
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n"); 
                 
                 if (groupfile != "") {
                     thisOutputDir = outputDir;

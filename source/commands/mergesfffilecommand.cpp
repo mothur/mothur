@@ -96,9 +96,9 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 					bool ignore = false;
 					if (filenames[i] == "current") {
 						filenames[i] = current->getSFFFile();
-						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current."); m->mothurOutEndLine(); }
+						if (filenames[i] != "") {  m->mothurOut("Using " + filenames[i] + " as input file for the sff parameter where you had given current.\n");  }
 						else {
-							m->mothurOut("You have no current sfffile, ignoring current."); m->mothurOutEndLine(); ignore=true;
+							m->mothurOut("You have no current sfffile, ignoring current.\n");  ignore=true;
 							//erase from file list
 							filenames.erase(filenames.begin()+i);
 							i--;
@@ -128,15 +128,15 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 			else if (file == "not found") { file = "";  }
             
             if ((file == "") && (filenames.size() == 0)) {
-                m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: no valid files.\n");  abort = true;
             }
             
             if ((file != "") && (filenames.size() != 0)) { //both are given
-                m->mothurOut("[ERROR]: cannot use file option and sff option at the same time, choose one."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: cannot use file option and sff option at the same time, choose one.\n");  abort = true;
             }
             
             outputFile = validParameter.valid(parameters, "output");
-			if (outputFile == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
+			if (outputFile == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
 			if (outputDir != "") { outputFile = outputDir + util.getSimpleName(outputFile);  }
             
             string temp = validParameter.valid(parameters, "keytrim");				if (temp == "not found") { temp = "F"; }
@@ -221,8 +221,8 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 		int count = 0;
 		
 		//check magic number and version
-		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file"); m->mothurOutEndLine(); return count; }
-		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001."); m->mothurOutEndLine(); return count; }
+		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file\n");  return count; }
+		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001.\n");  return count; }
 		
         //save for adjustHeader sanity check
         commonHeaders.push_back(header);
@@ -335,7 +335,7 @@ int MergeSfffilesCommand::readCommonHeader(ifstream& in, CommonHeader& header){
             in.seekg(spot);
             
         }else{
-            m->mothurOut("Error reading sff common header."); m->mothurOutEndLine();
+            m->mothurOut("Error reading sff common header.\n"); 
         }
         
 		return 0;
@@ -651,7 +651,7 @@ bool MergeSfffilesCommand::readSeqData(ifstream& in, seqRead& read, int numFlowR
             in2.close();
             
 		}else{
-			m->mothurOut("Error reading."); m->mothurOutEndLine();
+			m->mothurOut("Error reading.\n"); 
 		}
         
         if (in.eof()) {  return true; }

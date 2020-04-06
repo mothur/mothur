@@ -131,38 +131,38 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			//error checking on files			
 			if ((sharedfile == "") && ((phylipfile == "") && (columnfile == "")))	{ 
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					//is there are current file available for either of these?
 					//give priority to column, then phylip
 					columnfile = current->getColumnFile(); 
-					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 					else { 
 						phylipfile = current->getPhylipFile(); 
-						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 						else { 
-							m->mothurOut("No valid current files. You must provide a shared or phylip or column file."); m->mothurOutEndLine(); 
+							m->mothurOut("No valid current files. You must provide a shared or phylip or column file.\n");  
 							abort = true;
 						}
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters.\n");  abort = true; }
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
                         countfile = current->getCountFile(); 
-						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a name or count file if you are going to use the column format."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a name or count file if you are going to use the column format.\n");  
                             abort = true; 
                         }	
 					}	

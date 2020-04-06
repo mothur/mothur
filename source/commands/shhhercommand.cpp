@@ -584,7 +584,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 		string numFlowTest;
         flowFile >> numFlowTest;
         
-        if (!util.isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?"); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numFlowTest)) { m->mothurOut("[ERROR]: expected a number and got " + numFlowTest + ", quitting. Did you use the flow parameter instead of the file parameter?\n");  exit(1); }
         else { convert(numFlowTest, numFlowCells); }
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: numFlowCells = " + toString(numFlowCells) + ".\n"); }

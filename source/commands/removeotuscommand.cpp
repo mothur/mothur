@@ -94,9 +94,9 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  
 					abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
@@ -126,11 +126,11 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
             //if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	 outputDir = ""; 	}
             
-            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list."); m->mothurOutEndLine(); abort = true; }
+            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list.\n");  abort = true; }
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");			
-                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
             }
 		}
 		
@@ -237,10 +237,10 @@ int RemoveOtusCommand::readClassifyOtu(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["constaxonomy"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " otus from your constaxonomy file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " otus from your constaxonomy file.\n"); 
 		
 		return 0;
 		
@@ -290,10 +290,10 @@ int RemoveOtusCommand::readOtuAssociation(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["otucorr"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " lines from your otu.corr file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " lines from your otu.corr file.\n"); 
 		
 		return 0;
 		
@@ -343,10 +343,10 @@ int RemoveOtusCommand::readCorrAxes(){
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["corraxes"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " lines from your corr.axes file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " lines from your corr.axes file.\n"); 
 		
 		return 0;
 		
@@ -448,10 +448,10 @@ int RemoveOtusCommand::readList(){
         }
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file contains only OTUs from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file contains only OTUs from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " OTUs from your list file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " OTUs from your list file.\n"); 
         
         return 0;
     }
@@ -585,10 +585,10 @@ SharedRAbundVectors* RemoveOtusCommand::getShared(){
         for (it = userLabels.begin(); it != userLabels.end(); it++) {
             m->mothurOut("Your file does not include the label " + *it);
             if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                m->mothurOut(". I will use " + lastLabel + ".\n"); 
                 needToRun = true;
             }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
             }
         }
         

@@ -105,8 +105,8 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			else if (designfile == "not found") {  				
 				//if there is a current shared file, use it
 				designfile = current->getDesignFile(); 
-				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current designfile and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }	
 			
 			sharedfile = validParameter.validFile(parameters, "shared");
@@ -146,35 +146,35 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
             
             method = validParameter.valid(parameters, "method");		if(method == "not found"){	method = "sum"; }
             
-            if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum."); m->mothurOutEndLine(); method = "sum"; }
+            if ((method != "sum") && (method != "average") && (method != "median")) { m->mothurOut(method + " is not a valid method. Options are sum, average and median. I will use sum.\n");  method = "sum"; }
             
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 			
 			if ((sharedfile == "") && (groupfile == "") && (countfile == "")) {
 				//give priority to group, then shared
 				groupfile = current->getGroupFile(); 
-				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
 				else { 
 					sharedfile = current->getSharedFile(); 
-					if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+					if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 					else { 
                         countfile = current->getCountFile();
-                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
-                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required."); m->mothurOutEndLine(); abort = true;
+                            m->mothurOut("You have no current groupfile, countfile or sharedfile and one is required.\n");  abort = true;
                         }
 					}
 				}
 			}
             
-            if ((countfile == "") && (fastafile != "")) { m->mothurOut("[ERROR]: You may only use the fasta file with the count file, quitting."); m->mothurOutEndLine(); abort=true; }
-            else if ((countfile != "") && (method == "average")) { m->mothurOut("You may not use the average method with the count file. I will use the sum method."); m->mothurOutEndLine(); method = "sum"; }
+            if ((countfile == "") && (fastafile != "")) { m->mothurOut("[ERROR]: You may only use the fasta file with the count file, quitting.\n");  abort=true; }
+            else if ((countfile != "") && (method == "average")) { m->mothurOut("You may not use the average method with the count file. I will use the sum method.\n");  method = "sum"; }
             else if ((countfile != "") && (method == "median") && (fastafile == "")) {
                 fastafile = current->getFastaFile();
-                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
                 else {
                     m->mothurOut("[ERROR]: Fasta file is required with the median method and a count file so that sequences removed from your count table can also be removed from your fasta file to avoid downstream file mismatches, quitting.\n"); abort=true;
                 }
@@ -278,7 +278,7 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out,
             for (int i = 0; i < data.size(); i++) {
                 
                 string grouping = designMap->get(data[i]->getGroup());  //what set to your belong to
-                if (grouping == "not found") { m->mothurOut("[ERROR]: " + data[i]->getGroup() + " is not in your design file. Ignoring!"); m->mothurOutEndLine(); grouping = "NOTFOUND"; }
+                if (grouping == "not found") { m->mothurOut("[ERROR]: " + data[i]->getGroup() + " is not in your design file. Ignoring!\n");  grouping = "NOTFOUND"; }
                 else {
                     //Add this OTUs values to sets abunds
                     itAbunds = otusGroupAbunds.find(grouping);
@@ -397,7 +397,7 @@ int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 			if (util.inUsersGroups(thisGroup, Groups)) {
 				string thisGrouping = designMap->get(thisGroup);
 				
-				if (thisGrouping == "not found") { m->mothurOut("[ERROR]: " + namesOfSeqs[i] + " is from group " + thisGroup + " which is not in your design file, please correct."); m->mothurOutEndLine();  error = true; }
+				if (thisGrouping == "not found") { m->mothurOut("[ERROR]: " + namesOfSeqs[i] + " is from group " + thisGroup + " which is not in your design file, please correct.\n");   error = true; }
 				else {
 					out << namesOfSeqs[i] << '\t' << thisGrouping << endl;
 				}
@@ -512,8 +512,8 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             //run remove.seqs
             string inputString = "accnos=" + accnosFile + ", fasta=" + fastafile;
             
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
+            m->mothurOut("Running command: remove.seqs(" + inputString + ")\n"); 
             current->setMothurCalling(true);
             
             Command* removeCommand = new RemoveSeqsCommand(inputString);
@@ -523,7 +523,7 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             
             delete removeCommand;
             current->setMothurCalling(false);
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
             
             util.mothurRemove(accnosFile);
         }

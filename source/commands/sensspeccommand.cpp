@@ -96,8 +96,8 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			listFile = validParameter.validFile(parameters, "list");
 			if (listFile == "not found") {
 				listFile = current->getListFile();
-				if (listFile != "") { m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listFile != "") { m->mothurOut("Using " + listFile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listFile == "not open") { abort = true; }
 			else { current->setListFile(listFile); }

@@ -83,7 +83,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			ValidParameters validParameter;
 			mapfile = validParameter.validFile(parameters, "map");
 			if (mapfile == "not open") { abort = true; }
-			else if (mapfile == "not found") {  mapfile = "";  m->mothurOut("You must provide an map file."); m->mothurOutEndLine(); abort = true; }	
+			else if (mapfile == "not found") {  mapfile = "";  m->mothurOut("You must provide an map file.\n");  abort = true; }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
@@ -180,7 +180,7 @@ int AlignCheckCommand::execute(){
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(seq.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + seq.getName() + " is not in your namefile, please correct.\n");  m->setControl_pressed(true); }
 					else { num = it->second; }
 				}
 				
@@ -224,17 +224,16 @@ int AlignCheckCommand::execute(){
 		
 		if (m->getControl_pressed()) {  util.mothurRemove(outfile); return 0; }
 		
-		m->mothurOutEndLine();
-		m->mothurOut("\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal"); m->mothurOutEndLine();
-		m->mothurOut("Minimum:\t" + toString(pound[0]) + "\t" + toString(dash[0]) + "\t" + toString(plus[0]) + "\t" + toString(equal[0]) + "\t" + toString(loop[0]) + "\t" + toString(tilde[0]) + "\t" + toString(total[0])); m->mothurOutEndLine();
-		m->mothurOut("2.5%-tile:\t" + toString(pound[ptile0_25]) + "\t" + toString(dash[ptile0_25]) + "\t" + toString(plus[ptile0_25]) + "\t" + toString(equal[ptile0_25]) + "\t"+ toString(loop[ptile0_25]) + "\t"+ toString(tilde[ptile0_25]) + "\t"+ toString(total[ptile0_25])); m->mothurOutEndLine();
-		m->mothurOut("25%-tile:\t" + toString(pound[ptile25]) + "\t" + toString(dash[ptile25]) + "\t" + toString(plus[ptile25]) + "\t" + toString(equal[ptile25]) + "\t" + toString(loop[ptile25]) + "\t" + toString(tilde[ptile25]) + "\t" + toString(total[ptile25])); m->mothurOutEndLine();
-		m->mothurOut("Median: \t" + toString(pound[ptile50]) + "\t" + toString(dash[ptile50]) + "\t" + toString(plus[ptile50]) + "\t" + toString(equal[ptile50]) + "\t" + toString(loop[ptile50]) + "\t" + toString(tilde[ptile50]) + "\t" + toString(total[ptile50])); m->mothurOutEndLine();
-		m->mothurOut("75%-tile:\t" + toString(pound[ptile75]) + "\t" + toString(dash[ptile75]) + "\t" + toString(plus[ptile75]) + "\t" + toString(equal[ptile75]) + "\t" + toString(loop[ptile75]) + "\t" + toString(tilde[ptile75]) + "\t" + toString(total[ptile75])); m->mothurOutEndLine();
-		m->mothurOut("97.5%-tile:\t" + toString(pound[ptile97_5]) + "\t" + toString(dash[ptile97_5]) + "\t" + toString(plus[ptile97_5]) + "\t" + toString(equal[ptile97_5]) + "\t" + toString(loop[ptile97_5]) + "\t" + toString(tilde[ptile97_5]) + "\t" + toString(total[ptile97_5])); m->mothurOutEndLine();
-		m->mothurOut("Maximum:\t" + toString(pound[ptile100]) + "\t" + toString(dash[ptile100]) + "\t" + toString(plus[ptile100]) + "\t" + toString(equal[ptile100]) + "\t" + toString(loop[ptile100]) + "\t" + toString(tilde[ptile100]) + "\t" + toString(total[ptile100])); m->mothurOutEndLine();
-		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(count)); m->mothurOutEndLine(); }
-		else { m->mothurOut("# of unique seqs:\t" + toString(count)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
+		m->mothurOut("\n\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal\n");
+		m->mothurOut("Minimum:\t" + toString(pound[0]) + "\t" + toString(dash[0]) + "\t" + toString(plus[0]) + "\t" + toString(equal[0]) + "\t" + toString(loop[0]) + "\t" + toString(tilde[0]) + "\t" + toString(total[0])+ "\n");
+		m->mothurOut("2.5%-tile:\t" + toString(pound[ptile0_25]) + "\t" + toString(dash[ptile0_25]) + "\t" + toString(plus[ptile0_25]) + "\t" + toString(equal[ptile0_25]) + "\t"+ toString(loop[ptile0_25]) + "\t"+ toString(tilde[ptile0_25]) + "\t"+ toString(total[ptile0_25])+ "\n");
+		m->mothurOut("25%-tile:\t" + toString(pound[ptile25]) + "\t" + toString(dash[ptile25]) + "\t" + toString(plus[ptile25]) + "\t" + toString(equal[ptile25]) + "\t" + toString(loop[ptile25]) + "\t" + toString(tilde[ptile25]) + "\t" + toString(total[ptile25])+ "\n");
+		m->mothurOut("Median: \t" + toString(pound[ptile50]) + "\t" + toString(dash[ptile50]) + "\t" + toString(plus[ptile50]) + "\t" + toString(equal[ptile50]) + "\t" + toString(loop[ptile50]) + "\t" + toString(tilde[ptile50]) + "\t" + toString(total[ptile50])+ "\n");
+		m->mothurOut("75%-tile:\t" + toString(pound[ptile75]) + "\t" + toString(dash[ptile75]) + "\t" + toString(plus[ptile75]) + "\t" + toString(equal[ptile75]) + "\t" + toString(loop[ptile75]) + "\t" + toString(tilde[ptile75]) + "\t" + toString(total[ptile75])+ "\n");
+		m->mothurOut("97.5%-tile:\t" + toString(pound[ptile97_5]) + "\t" + toString(dash[ptile97_5]) + "\t" + toString(plus[ptile97_5]) + "\t" + toString(equal[ptile97_5]) + "\t" + toString(loop[ptile97_5]) + "\t" + toString(tilde[ptile97_5]) + "\t" + toString(total[ptile97_5])+ "\n");
+		m->mothurOut("Maximum:\t" + toString(pound[ptile100]) + "\t" + toString(dash[ptile100]) + "\t" + toString(plus[ptile100]) + "\t" + toString(equal[ptile100]) + "\t" + toString(loop[ptile100]) + "\t" + toString(tilde[ptile100]) + "\t" + toString(total[ptile100])+ "\n");
+		if ((namefile == "") && (countfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(count)+ "\n"); }
+		else { m->mothurOut("# of unique seqs:\t" + toString(count)+ "\n"); m->mothurOut("total # of seqs:\t" + toString(size)+ "\n"); }
 		
 		
 		m->mothurOut("\nOutput File Names: \n"); 
@@ -273,7 +272,7 @@ void AlignCheckCommand::readMap(){
 		for(int i=0;i<seqLength;i++){
 			if(structMap[i] != 0){
 				if(structMap[structMap[i]] != i){
-					m->mothurOut("Your map file contains an error:  line " + toString(i) + " does not match line " + toString(structMap[i]) + "."); m->mothurOutEndLine();
+					m->mothurOut("Your map file contains an error:  line " + toString(i) + " does not match line " + toString(structMap[i]) + ".\n"); 
 				}
 			}
 		}
@@ -295,7 +294,7 @@ statData AlignCheckCommand::getStats(string sequence){
 		
 		int length = sequence.length();
 		
-		if (length != seqLength) { m->mothurOut("your sequences are " + toString(length) + " long, but your map file only contains " + toString(seqLength) + " entries. please correct."); m->mothurOutEndLine(); haderror = 1; return data;  }
+		if (length != seqLength) { m->mothurOut("your sequences are " + toString(length) + " long, but your map file only contains " + toString(seqLength) + " entries. please correct.\n");  haderror = 1; return data;  }
 		
 		for(int i=1;i<length;i++){
 			if(structMap[i] != 0){

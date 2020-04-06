@@ -119,9 +119,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile();
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  
 					abort = true;
 				}  
 			}else { current->setAccnosFile(accnosfile); }	
@@ -182,14 +182,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
             else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 			
-			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, count, taxonomy, quality, alignreport, contigsreport, fastq or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, count, taxonomy, quality, alignreport, contigsreport, fastq or list.\n");  abort = true; }
 			
             if (countfile == "") {
                 if ((fastafile != "") && (namefile == "")) {
@@ -746,10 +746,10 @@ void RemoveSeqsCommand::readGroup(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   }
 		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " sequences from your group file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your group file.\n"); 
 
 		return;
 	}
@@ -804,10 +804,10 @@ void RemoveSeqsCommand::readTax(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");   }
 		outputTypes["taxonomy"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " sequences from your taxonomy file."); m->mothurOutEndLine();
+		m->mothurOut("Removed " + toString(removedCount) + " sequences from your taxonomy file.\n"); 
 		
 		return;
 	}

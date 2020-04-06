@@ -167,7 +167,7 @@ int SortSeqsCommand::execute(){
         
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut("Output File Names: \n"); 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			

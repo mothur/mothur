@@ -212,7 +212,7 @@ int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstre
 					float averageOtu = totalOtu / (float) thisLookUp->size();
 					
 					relabund = abund / (float) averageOtu;
-				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+				}else{ m->mothurOut(scale + " is not a valid scaling option.\n");  m->setControl_pressed(true); return 0; }
 				
 				out  << '\t' << relabund;
 			}

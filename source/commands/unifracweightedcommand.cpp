@@ -111,8 +111,8 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it
 				treefile = current->getTreeFile(); 
-				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }								
 			}else { current->setTreeFile(treefile); }	
 			
 			//check for required parameters
@@ -132,11 +132,11 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
@@ -159,7 +159,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			else{
                 if (temp=="phylip") { temp = "lt"; }
 				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
-				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
+				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt.\n");  phylip = true; outputForm = "lt"; }
 			}
 			
 			temp = validParameter.valid(parameters, "random");				if (temp == "not found") { temp = "F"; }
@@ -569,7 +569,7 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
             //so if you have 1000 random trees the index returned is 100 
             //then there are 900 trees with a score greater then you. 
             //giving you a signifigance of 0.900
-            int index = findIndex(usersScores[f], f, rScores);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand"); m->mothurOutEndLine(); exit(1); } //error code
+            int index = findIndex(usersScores[f], f, rScores);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand\n");  exit(1); } //error code
             
             //the signifigance is the number of trees with the users score or higher 
             WScoreSig.push_back((iters-index)/(float)iters);

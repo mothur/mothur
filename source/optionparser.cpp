@@ -49,8 +49,8 @@ OptionParser::OptionParser(string option, vector<string> parametersAllowedByThis
                 option = util.splitWhiteSpace(option).front();
             }
             
-			if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, value)) {} //ignore invalid parameters
-            else { parameters[key] = value; }
+			if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, option)) {} //ignore invalid parameters
+            else { parameters[key] = option; }
 		}
 	}
 	catch(exception& e) {
@@ -177,7 +177,7 @@ map<string, string> OptionParser::getParameters() {
                 }
                 
                 if (it->second == "") { //no file was saved for that type, warn and remove from parameters
-                    m->mothurOut("[WARNING]: no file was saved for " + it->first + " parameter."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: no file was saved for " + it->first + " parameter.\n"); 
                     parameters.erase(it++);
                 }else {
                     m->mothurOut("Using " + it->second + " as input file for the " + it->first + " parameter.\n");

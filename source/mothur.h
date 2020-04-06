@@ -156,6 +156,41 @@ using namespace std;
 typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
+const vector<int> nullIntVector; //used to pass blank ints
+
+/**************************************************************************************************/
+struct classifierOTU {
+    vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU
+    int numSeqs;
+    
+    /*
+     otuData.size = num columns in seq's alignment
+     otuData[i].size() = numSeqs in otu
+     
+     seq1 > atgcaag
+     seq2 > gacctga
+     seq3 > cctgacg
+     
+     otuData[0] > {a,g,c}
+     otuData[1] > {t,a,c}
+     otuData[2] > {g,c,t}
+     
+     otuData[i] > {charInAllCols} if all chars in otuData[i] are identical. ie, ignore column
+     otuData[i] > {a} all seqs contain 'a' in column i of alignment
+     */
+    
+    classifierOTU(string aligned) {
+        for (int i = 0; i < aligned.length(); i++) {
+            vector<char> thisSpot;
+            thisSpot.push_back(aligned[i]);
+            
+            otuData.push_back(thisSpot);
+        }
+        numSeqs = 1;
+    }
+    classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
+};
+
 
 //******************************************************
 struct mcmcSample {

@@ -38,7 +38,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, quitting.\n");  exit(1); }
 		else { convert(numTest, numSeqs); }
 		
 		while((d=in.get()) != EOF){

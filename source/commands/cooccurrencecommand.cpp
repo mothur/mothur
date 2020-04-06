@@ -188,7 +188,7 @@ int CooccurrenceCommand::getCooccurrence(SharedRAbundVectors*& thisLookUp, ofstr
         int numOTUS = thisLookUp->getNumBins();
         
         if(numOTUS < 2) {
-            m->mothurOut("Not enough OTUs for co-occurrence analysis, skipping"); m->mothurOutEndLine();
+            m->mothurOut("Not enough OTUs for co-occurrence analysis, skipping\n"); 
             return 0;
         }
         

@@ -286,13 +286,13 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                     inPhylip >> numTest >> name;
                     inPhylip.close();
                     
-                    if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
+                    if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting.\n");  return "not found"; }
                 }
                 
                 //check for blank file
                 if (ableToOpen) {
                     if (util.isBlank(container[parameter])) {
-                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found";
+                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found";
                     }
                 }
             }

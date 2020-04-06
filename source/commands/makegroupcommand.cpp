@@ -107,10 +107,10 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			else{ filename = output; }
 			
 			groups = validParameter.valid(parameters, "groups");			
-			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
+			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command.\n");  abort = true;  }
 			else { util.splitAtDash(groups, groupsNames);	}
 
-			if (groupsNames.size() != fastaFileNames.size()) { m->mothurOut("You do not have the same number of valid fastfile files as groups.  This could be because we could not open a fastafile."); m->mothurOutEndLine(); abort = true;  }
+			if (groupsNames.size() != fastaFileNames.size()) { m->mothurOut("You do not have the same number of valid fastfile files as groups.  This could be because we could not open a fastafile.\n");  abort = true;  }
 		}
 	}
 	catch(exception& e) {

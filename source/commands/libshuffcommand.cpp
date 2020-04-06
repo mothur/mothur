@@ -104,9 +104,9 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { 
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 				else { 
-					m->mothurOut("You must provide a phylip file."); m->mothurOutEndLine(); 
+					m->mothurOut("You must provide a phylip file.\n");  
 					abort = true;
 				} 
 			}else { current->setPhylipFile(phylipfile); }	
@@ -116,9 +116,9 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { 
 				groupfile = current->getGroupFile(); 
-				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+				if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
 				else { 
-					m->mothurOut("You must provide a group file."); m->mothurOutEndLine(); 
+					m->mothurOut("You must provide a group file.\n");  
 					abort = true;
 				} 
 			}else { current->setGroupFile(groupfile); }	
@@ -200,7 +200,7 @@ int LibShuffCommand::execute(){
 			}
 			outGroups.close();
 			
-			m->mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead."); m->mothurOutEndLine();
+			m->mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead.\n"); 
 			
 			//read new groupfile
 			delete groupMap; 
@@ -215,7 +215,7 @@ int LibShuffCommand::execute(){
 			
 		setGroups();								//set the groups to be analyzed and sorts them
 		
-		if (numGroups < 2) { m->mothurOut("[ERROR]: libshuff requires at least 2 groups, you only have " + toString(numGroups) + ", aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+		if (numGroups < 2) { m->mothurOut("[ERROR]: libshuff requires at least 2 groups, you only have " + toString(numGroups) + ", aborting.\n");  m->setControl_pressed(true); }
 		
 		if (m->getControl_pressed()) { delete groupMap; delete matrix; return 0; }
 		
@@ -403,7 +403,7 @@ int LibShuffCommand::printSummaryFile() {
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
 		cout << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
-		m->mothurOutJustToLog("Comparison\tdCXYScore\tSignificance"); m->mothurOutEndLine();
+		m->mothurOutJustToLog("Comparison\tdCXYScore\tSignificance\n"); 
 		outSum << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
 	
 		int precision = (int)log10(iters);
@@ -460,7 +460,7 @@ void LibShuffCommand::setGroups() {
 				//check that groups are valid
 				for (int i = 0; i < myGroups.size(); i++) {
 					if (groupMap->isValidGroup(myGroups[i]) != true) {
-						m->mothurOut(myGroups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+						m->mothurOut(myGroups[i] + " is not a valid group, and will be disregarded.\n"); 
 						// erase the invalid group from globaldata->Groups
 						myGroups.erase(myGroups.begin()+i);
 					}
@@ -470,7 +470,7 @@ void LibShuffCommand::setGroups() {
 				if ((myGroups.size() == 0) || (myGroups.size() == 1)) { 
 					numGroups = groupMap->getNumGroups();
 					for (int i=0; i < numGroups; i++) {  myGroups.push_back((groupMap->getNamesOfGroups())[i]); }
-					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
+					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile.\n"); 
 				} else { numGroups = myGroups.size(); }
 			} else { //users wants all groups
 				numGroups = groupMap->getNumGroups();

@@ -151,27 +151,27 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                 }
             }
             
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
-            if ((countfile != "") && (groupfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or group."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (groupfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
             if ((countfile == "") && (groupfile == "")) {
                 if (namefile == "") { //check for count then group
                     countfile = current->getCountFile(); 
-					if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+					if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
 					else { 
 						groupfile = current->getGroupFile(); 
-                        if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                        if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a count or group file."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a count or group file.\n");  
                             abort = true; 
                         }	
 					}	
                 }else { //check for group
                     groupfile = current->getGroupFile(); 
-                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
                     else { 
-                        m->mothurOut("You need to provide a count or group file."); m->mothurOutEndLine(); 
+                        m->mothurOut("You need to provide a count or group file.\n");  
                         abort = true; 
                     }	
                 }

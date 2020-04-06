@@ -135,8 +135,8 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         string line = util.getline(in); util.gobble(in);
         vector<string> pieces = util.splitWhiteSpace(line);
         name = "";  if (pieces.size() != 0) { name = pieces[0]; }
-        if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
-        else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
+        if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read.\n");  ignore=true;  }
+        else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read.\n");  ignore=true; }
         else { name = name.substr(1); }
         if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = util.getStringFromVector(pieces, " "); }
         
@@ -193,8 +193,8 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
             string line = util.getline(in); util.gobble(in);
             vector<string> pieces = util.splitWhiteSpace(line);
             name = "";  if (pieces.size() != 0) { name = pieces[0];  }
-            if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read."); m->mothurOutEndLine(); ignore=true;  }
-            else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read."); m->mothurOutEndLine(); ignore=true; }
+            if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read.\n");  ignore=true;  }
+            else if (name[0] != '@') { m->mothurOut("[WARNING]: reading " + name + " expected a name with @ as a leading character, ignoring read.\n");  ignore=true; }
             else { name = name.substr(1); }
             if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = util.getStringFromVector(pieces, " "); }
             

@@ -27,7 +27,7 @@ PhyloSummary::PhyloSummary(string refTfile, CountTable* c, bool r, int p){
 		ifstream FileTest(taxFileNameTest.c_str());
 		
 		if (!FileTest) { 
-			m->mothurOut("Error: can't find " + taxFileNameTest + "."); m->mothurOutEndLine(); exit(1);
+			m->mothurOut("Error: can't find " + taxFileNameTest + ".\n");  exit(1);
 		}else{
 			readTreeStruct(FileTest);
 		}
@@ -82,7 +82,7 @@ PhyloSummary::PhyloSummary(string refTfile, GroupMap* g, bool r, int p){
 		ifstream FileTest(taxFileNameTest.c_str());
 		
 		if (!FileTest) { 
-			m->mothurOut("Error: can't find " + taxFileNameTest + "."); m->mothurOutEndLine(); exit(1);
+			m->mothurOut("Error: can't find " + taxFileNameTest + ".\n");  exit(1);
 		}else{
 			readTreeStruct(FileTest);
 		}
@@ -194,7 +194,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					//find out the sequences group
 					string group = groupmap->getGroup(seqName);
 					
-					if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+					if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total.\n");   }
 					
 					//do you have a count for this group?
 					map<string, int>::iterator itGroup = tree[childPointer->second].groupCount.find(group);
@@ -247,7 +247,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 						//find out the sequences group
 						string group = groupmap->getGroup(seqName);
 						
-						if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+						if (group == "not found") {  m->mothurOut("[WARNING]: " + seqName + " is not in your groupfile, and will be included in the overall total, but not any group total.\n");   }
 						
 						//do you have a count for this group?
 						map<string, int>::iterator itGroup = tree[index].groupCount.find(group);
@@ -285,7 +285,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					currentNode = index;
 					
 				}else{ //otherwise, error
-					m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + " for " + seqName + ". This may cause totals of daughter levels not to add up in summary file."); m->mothurOutEndLine();
+					m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + " for " + seqName + ". This may cause totals of daughter levels not to add up in summary file.\n"); 
 					break;
 				}
 			}
@@ -358,7 +358,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 					currentNode = index;
 					
 				}else{ //otherwise, error
-					m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + ". This may cause totals of daughter levels not to add up in summary file."); m->mothurOutEndLine();
+					m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + ". This may cause totals of daughter levels not to add up in summary file.\n"); 
 					break;
 				}
 			}

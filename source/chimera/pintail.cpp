@@ -75,7 +75,7 @@ int Pintail::doPrep(string version) {
 			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
 			probabilityProfile = decalc->calcFreq(templateSeqs, templateFileName, version);
 			if (m->getControl_pressed()) {  return 0;  }
-			m->mothurOut("Done."); m->mothurOutEndLine();
+			m->mothurOut("Done.\n"); 
 		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
 		m->mothurOutEndLine();
 		
@@ -208,7 +208,7 @@ int Pintail::doPrep(string version) {
 			//free memory
 			quantilesMembers.clear();
 			
-			m->mothurOut("Done."); m->mothurOutEndLine();
+			m->mothurOut("Done.\n"); 
 		}
 		
 		if (reRead) {
@@ -244,7 +244,7 @@ Sequence Pintail::print(ostream& out, ostream& outAcc) {
 		
 		out << querySeq->getName() << '\t' << "div: " << deviation << "\tstDev: " << DE << "\tchimera flag: " << chimera << endl;
 		if (chimera == "Yes") {
-			m->mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); m->mothurOutEndLine();
+			m->mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera+ "\n");
 			outAcc << querySeq->getName() << endl;
 		}
 		out << "Observed";

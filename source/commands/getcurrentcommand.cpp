@@ -180,7 +180,7 @@ int GetCurrentCommand::execute(){
             variables["[filename]"] = util.getFullPathName(outputDir);
             string filename = getOutputFileName("summary", variables);
             
-			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
+			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
 			current->printCurrentFiles(filename);
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
@@ -207,7 +207,7 @@ int GetCurrentCommand::execute(){
         
         if (current->hasCurrentFiles()) {
             m->mothurOutEndLine();
-            m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+            m->mothurOut("Output File Names: \n"); 
             for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
             m->mothurOutEndLine();
         }

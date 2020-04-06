@@ -169,7 +169,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 				abort=true;
 			}
 
-            if ((!fasta) && (!qual) && (file == "") && (fastaQFile == "") && (oligosfile == "")) { m->mothurOut("[ERROR]: no outputs selected. Aborting."); m->mothurOutEndLine(); abort=true; }
+            if ((!fasta) && (!qual) && (file == "") && (fastaQFile == "") && (oligosfile == "")) { m->mothurOut("[ERROR]: no outputs selected. Aborting.\n");  abort=true; }
             temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "F"; }
 			reorient = util.isTrue(temp);
 

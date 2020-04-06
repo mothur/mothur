@@ -127,7 +127,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
             if (countfile != "") { hasCount = true; }
             
 			//make sure there is at least one valid file left
-            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
             if (!hasName && !hasCount) { 
                 //if there is a current name file, use it, else look for current count file
@@ -688,7 +688,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 			Sequence temp(in); util.gobble(in);
 			
 			it = nameMap.find(temp.getName());
-			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
+			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct.\n");  }
 			else {
                 temp.setAligned(util.removeNs(temp.getUnaligned()));
 				sequences.push_back(seqData(temp.getName(), temp.getUnaligned(), it->second));

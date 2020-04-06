@@ -136,7 +136,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to phylip, then fasta
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") {  inputFile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				if (phylipfile != "") {  inputFile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 				else { 
 					fastafile = current->getFastaFile(); 
 					if (fastafile != "") { inputFile = fastafile;  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
@@ -304,8 +304,7 @@ int ClearcutCommand::execute() {
 				if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; current->setTreeFile(currentTree); }
 			}
 			
-			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut("\nOutput File Names:\n");
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 		}

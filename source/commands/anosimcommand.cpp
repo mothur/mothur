@@ -149,7 +149,7 @@ int AnosimCommand::execute(){
 			string group = designMap->get(sampleNames[i]);
 			
 			if (group == "not found") {
-				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);
+				m->mothurOut("[ERROR]: " + sampleNames[i] + " is not in your design file, please correct.\n");  m->setControl_pressed(true);
 			}else { origGroupSampleMap[group].push_back(i); }
 		}
 		int numGroups = origGroupSampleMap.size();

@@ -68,7 +68,7 @@ Sequence::Sequence(istringstream& fastaString){
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
 			
-			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences.\n");  }
 		}
 		
 	}
@@ -114,7 +114,7 @@ Sequence::Sequence(ifstream& fastaFile){
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
 			
-			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences.\n");  }
 			
 		}
 
@@ -161,7 +161,7 @@ Sequence::Sequence(boost::iostreams::filtering_istream& fastaFile){
             //setUnaligned removes any gap characters for us
             setUnaligned(sequence);
             
-            if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+            if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences.\n");  }
             
         }
         
@@ -215,7 +215,7 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
 			
-			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences."); m->mothurOutEndLine(); }
+			if ((numAmbig / (float) numBases) > 0.25) { m->mothurOut("[WARNING]: We found more than 25% of the bases in sequence " + name + " to be ambiguous. Mothur is not setup to process protein sequences.\n");  }
 		}
         
 	}
@@ -237,7 +237,7 @@ string Sequence::getSequenceName(ifstream& fastaFile) {
             
             util.checkName(name);
             
-        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  } }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name.\n");  m->setControl_pressed(true);  } }
         
 		return name;
 	}
@@ -260,7 +260,7 @@ string Sequence::getSequenceName(boost::iostreams::filtering_istream& fastaFile)
             
             util.checkName(name);
             
-        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name.\n");  m->setControl_pressed(true);  }  }
         
         return name;
     }
@@ -283,7 +283,7 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
             
             util.checkName(name);
             
-        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }  }
+        }else{ if (!fastaFile.eof()) { m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name.\n");  m->setControl_pressed(true);  }  }
         
 		return name;
 	}

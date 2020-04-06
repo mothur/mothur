@@ -50,6 +50,7 @@ protected:
 	int readTaxonomy(string);
 	vector<string> parseTax(string);
     double getLogExpSum(vector<double>, int&);
+    bool checkReleaseDate(vector<ifstream*>&, string);
     virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float, string);
 
 	

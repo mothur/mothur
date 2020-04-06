@@ -97,8 +97,8 @@ SparccCommand::SparccCommand(string option)  {
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -109,7 +109,7 @@ SparccCommand::SparccCommand(string option)  {
 			normalizeMethod = validParameter.valid(parameters, "method");
 			if (normalizeMethod == "not found") { normalizeMethod = "dirichlet"; }
 			if ((normalizeMethod == "dirichlet") || (normalizeMethod == "relabund")) { }
-			else { m->mothurOut(normalizeMethod + " is not a valid method.  Valid methods are dirichlet and relabund."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut(normalizeMethod + " is not a valid method.  Valid methods are dirichlet and relabund.\n");  abort = true; }
 
 
             string temp = validParameter.valid(parameters, "samplings");	if (temp == "not found"){	temp = "20";	}

@@ -83,9 +83,9 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			listFile = validParameter.validFile(parameters, "list");
 			if (listFile == "not found") { 
 				listFile = current->getListFile(); 
-				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter.\n");  }
 				else { 
-					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
+					m->mothurOut("No valid current list file. You must provide a list file.\n");  
 					abort = true;
 				}
 			}else if (listFile == "not open") { abort = true; }	
@@ -100,15 +100,15 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
+			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command.\n");  abort = true; }
 			else { 
 				util.splitAtDash(label, mylabels);
-				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
+				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels.\n");  abort = true; }
 			}	
 			
 			output = validParameter.valid(parameters, "output");			if (output == "not found") { output = "name"; }
 			
-			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name."); m->mothurOutEndLine(); output = "name"; }
+			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name.\n");  output = "name"; }
 		}
 		
 	}
@@ -144,7 +144,7 @@ int OtuHierarchyCommand::execute(){
                 list1Label = tempLabel;
 			}
 		}else{
-			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs."); m->mothurOutEndLine(); return 0;
+			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs.\n");  return 0;
 		}
 		
 		//map sequences to bin number in the "little" otu
@@ -293,10 +293,10 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it);
 			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".\n"); 
 				needToRun = true;
 			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
 			}
 		}
 		

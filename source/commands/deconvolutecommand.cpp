@@ -89,8 +89,8 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {
 				fastafile = current->getFastaFile();
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -108,7 +108,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
             format = validParameter.valid(parameters, "format");
             if(format == "not found"){
@@ -200,7 +200,7 @@ int DeconvoluteCommand::execute() {
 				//sanity checks
 				itname = nameInFastaFile.find(seq.getName());
 				if (itname == nameInFastaFile.end()) { nameInFastaFile.insert(seq.getName());  }
-				else { m->mothurOut("[ERROR]: You already have a sequence named " + seq.getName() + " in your fasta file, sequence names must be unique, please correct."); m->mothurOutEndLine(); }
+				else { m->mothurOut("[ERROR]: You already have a sequence named " + seq.getName() + " in your fasta file, sequence names must be unique, please correct.\n");  }
 
 				itStrings = sequenceStrings.find(seq.getAligned());
 				
@@ -212,7 +212,7 @@ int DeconvoluteCommand::execute() {
 						itNames = nameMap.find(seq.getName());
 						
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
-							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
+							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct.\n"); 
 						}else {
                             if (format == "name") { sequenceStrings[seq.getAligned()] = itNames->second;  nameFileOrder.push_back(seq.getAligned());
                             }else {  newCt.push_back(seq.getName(), util.getNumNames(itNames->second)); sequenceStrings[seq.getAligned()] = seq.getName();	nameFileOrder.push_back(seq.getAligned()); }
@@ -236,7 +236,7 @@ int DeconvoluteCommand::execute() {
 						itNames = nameMap.find(seq.getName());
 						
 						if (itNames == nameMap.end()) { //namefile and fastafile do not match
-							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct."); m->mothurOutEndLine();
+							m->mothurOut("[ERROR]: " + seq.getName() + " is in your fasta file, and not in your namefile, please correct.\n"); 
 						}else {
                             if (format == "name") { sequenceStrings[seq.getAligned()] += "," + itNames->second;  }
                             else {  int currentReps = newCt.getNumSeqs(itStrings->second);  newCt.setNumSeqs(itStrings->second, currentReps+(util.getNumNames(itNames->second)));  }
@@ -300,7 +300,7 @@ int DeconvoluteCommand::execute() {
                     if (countfile != "") {  ct.printSeq(outNames, itStrings->second);  }
                     else if (format == "count")  {  newCt.printSeq(outNames, itStrings->second);  }
                 }
-			}else{ m->mothurOut("[ERROR]: mismatch in namefile print."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+			}else{ m->mothurOut("[ERROR]: mismatch in namefile print.\n");  m->setControl_pressed(true); }
 		}
 		outNames.close();
 		

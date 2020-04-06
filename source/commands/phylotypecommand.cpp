@@ -96,9 +96,9 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyFileName == "not found") { 
 				taxonomyFileName = current->getTaxonomyFile(); 
-				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter.\n");  }
 				else { 
-					m->mothurOut("No valid current files. taxonomy is a required parameter."); m->mothurOutEndLine(); 
+					m->mothurOut("No valid current files. taxonomy is a required parameter.\n");  
 					abort = true; 
 				}
 			}else if (taxonomyFileName == "not open") { taxonomyFileName = ""; abort = true; }	
@@ -120,7 +120,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				outputDir += util.hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
 			}
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			string temp = validParameter.valid(parameters, "cutoff");
 			if (temp == "not found") { temp = "-1"; }
@@ -172,7 +172,7 @@ int PhylotypeCommand::execute(){
 		for (int i = 0; i < leaves.size(); i++)		{	currentNodes[leaves[i]] = leaves[i];	}
 		
 		bool done = false;
-		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree"); m->mothurOutEndLine();	done = true;	}
+		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree\n"); 	done = true;	}
 		
 		if (m->getControl_pressed()) { delete tree; return 0; }
 		
@@ -242,7 +242,7 @@ int PhylotypeCommand::execute(){
                                 map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
                                 
                                 if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
-                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct.\n");  m->setControl_pressed(true);  }
                                 
                             }else{   name += names[i] + ",";	}
                         }

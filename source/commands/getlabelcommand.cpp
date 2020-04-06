@@ -82,15 +82,15 @@ GetlabelCommand::GetlabelCommand(string option)  {
 				//if there is a current shared file, use it
 				
 				listfile = current->getListFile(); 
-				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 				else { 
 					rabundfile = current->getRabundFile(); 
-					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+					if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 					else { 
 						sabundfile = current->getSabundFile(); 
-						if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+						if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 						else { 
-							m->mothurOut("No valid current files. You must provide a list, sabund or rabund file."); m->mothurOutEndLine(); 
+							m->mothurOut("No valid current files. You must provide a list, sabund or rabund file.\n");  
 							abort = true;
 						}
 					}
