@@ -720,7 +720,7 @@ int driverPcr(pcrData* params){
                     else {
                         string alignedString = currSeq.getAligned();
                         //cout << currSeq.getName() << '\t' << alignedString[params->start] << '\t' << alignedString[params->end] << endl;
-                        if ((alignedString[params->start] == '.') || (alignedString[params->end] == '.')) {
+                        if ((currSeq.getStartPos() > params->start) || (currSeq.getEndPos() < params->end)) {
                             goodSeq = false;
                             if (params->m->getDebug()) {
                                 params->m->mothurOut("[DEBUG]: " + currSeq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
