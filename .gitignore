@@ -24,3 +24,5 @@ uchime
 
 *.stderr
 *.pat
+
+tools/
