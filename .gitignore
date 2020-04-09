@@ -17,6 +17,7 @@ nbproject/
 mothur
 Mothur.1
 DerivedData/
+mothur.entitlements
 
 *.stdout
 
