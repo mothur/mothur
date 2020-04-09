@@ -53,7 +53,14 @@ vector<string> SffMultipleCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
-		
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        
+        abort = false; calledHelp = false;  append=false; makeGroup=false;
+
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -116,77 +123,19 @@ string SffMultipleCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SffMultipleCommand::SffMultipleCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["name"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SffMultipleCommand", "SffMultipleCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 SffMultipleCommand::SffMultipleCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;  append=false; makeGroup=false;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-            map<string,string>::iterator it;
-            
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
+ 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["name"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("lookup");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["lookup"] = inputDir + it->second;		}
-				}
-			}
-            
 			filename = validParameter.validFile(parameters, "file");
             if (filename == "not open") { filename = ""; abort = true; }
             else if (filename == "not found") { filename = "";  }
@@ -321,7 +270,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 				in2.close();
 				lookupFileName = tryPath;
 				
-				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + "."); m->mothurOutEndLine(); abort=true;  }
+				if (!ableToOpen) {  m->mothurOut("Unable to open " + lookupFileName + ".\n");  abort=true;  }
 			}else						{	lookupFileName = temp;	}
 		}
 	}

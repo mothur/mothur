@@ -20,7 +20,6 @@ class SortSeqsCommand : public Command {
 public:
 	
     SortSeqsCommand(string);	
-    SortSeqsCommand();
     ~SortSeqsCommand(){}
 	
     vector<string> setParameters();

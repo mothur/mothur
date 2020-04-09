@@ -14,14 +14,13 @@
 #include "sharedrabundvectors.hpp"
 #include "listvector.hpp"
 #include "removeseqscommand.h"
-#include "removeotulabelscommand.h"
+#include "removeotuscommand.h"
 
 class RemoveLineageCommand : public Command {
 	
 	public:
 	
 		RemoveLineageCommand(string);
-		RemoveLineageCommand();
 		~RemoveLineageCommand(){};
 	
 		vector<string> setParameters();

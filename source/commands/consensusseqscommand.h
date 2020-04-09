@@ -18,7 +18,6 @@
 class ConsensusSeqsCommand : public Command {
 public:
 	ConsensusSeqsCommand(string);
-	ConsensusSeqsCommand();
 	~ConsensusSeqsCommand(){}
 	
 	vector<string> setParameters();

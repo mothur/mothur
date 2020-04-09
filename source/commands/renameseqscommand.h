@@ -20,7 +20,6 @@ class RenameSeqsCommand : public Command {
     
 public:
 	RenameSeqsCommand(string);
-	RenameSeqsCommand();
 	~RenameSeqsCommand() {}
 	
 	vector<string> setParameters();

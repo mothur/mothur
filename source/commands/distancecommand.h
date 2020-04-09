@@ -61,8 +61,7 @@ struct distanceData {
 class DistanceCommand : public Command {
 
 public:
-	DistanceCommand(string);
-	DistanceCommand();
+    DistanceCommand(string);
 	~DistanceCommand() {}
 	
 	vector<string> setParameters();

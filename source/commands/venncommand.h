@@ -19,7 +19,6 @@ class VennCommand : public Command {
 
 public:
 	VennCommand(string);
-	VennCommand();
 	~VennCommand() {}
 	
 	vector<string> setParameters();

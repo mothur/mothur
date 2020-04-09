@@ -26,6 +26,14 @@ vector<string> GetSharedOTUCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
+        abort = false; calledHelp = false;
+        userGroups = ""; unique = true; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["sharedseqs"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -79,101 +87,18 @@ string GetSharedOTUCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetSharedOTUCommand::GetSharedOTUCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-		outputTypes["sharedseqs"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSharedOTUCommand", "GetSharedOTUCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
-	
-		abort = false; calledHelp = false;   userGroups = "";
-		unique = true;
-		allLines = true;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			outputTypes["sharedseqs"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-			}
-
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -209,35 +134,35 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
                 //is there are current file available for either of these?
 				//give priority to shared, then list
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else {
 					listfile = current->getListFile();
-					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else {
-						m->mothurOut("No valid current files. You must provide a shared or list file."); m->mothurOutEndLine();
+						m->mothurOut("No valid current files. You must provide a shared or list file.\n"); 
 						abort = true;
 					}
 				}
             }else if ((sharedfile != "") && (listfile != "")) {
-                m->mothurOut("You may enter ONLY ONE of the following: shared or list."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("You may enter ONLY ONE of the following: shared or list.\n");  abort = true;
             }
 			
             if (listfile != "") {
                 if ((groupfile == "") && (countfile == "")) {
                     groupfile = current->getGroupFile();
-                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter."); m->mothurOutEndLine(); }
+                    if (groupfile != "") {  m->mothurOut("Using " + groupfile + " as input file for the group parameter.\n");  }
                     else {
                         countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
-                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format."); m->mothurOutEndLine();
+                            m->mothurOut("You need to provide a groupfile or countfile if you are going to use the list format.\n"); 
                             abort = true;
                         }
                     }
                 }
 			}
 
-			if ((sharedfile != "") && (fastafile != "")) { m->mothurOut("You cannot use the fasta file with the shared file."); m->mothurOutEndLine(); abort = true; }
+			if ((sharedfile != "") && (fastafile != "")) { m->mothurOut("You cannot use the fasta file with the shared file.\n");  abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -424,7 +349,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + binLabels[i]));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
-				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
+				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct.\n");  exit(1);  }
 				
                 if (groupfile != "") {
                     //is this seq in one of hte groups we care about

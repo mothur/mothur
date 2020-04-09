@@ -23,7 +23,6 @@ class RemoveGroupsCommand : public Command {
 public:
 	
 	RemoveGroupsCommand(string);	
-	RemoveGroupsCommand();
 	~RemoveGroupsCommand(){}
 	
 	vector<string> setParameters();

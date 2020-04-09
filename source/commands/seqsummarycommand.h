@@ -19,7 +19,6 @@
 class SeqSummaryCommand : public Command {
 public:
 	SeqSummaryCommand(string);
-	SeqSummaryCommand();
 	~SeqSummaryCommand(){}
 	
 	vector<string> setParameters();

@@ -35,7 +35,6 @@ class ValidParameters {
 		map<string, string>::iterator it;
 		map<string, vector<string> > parameterRanges;
 		MothurOut* m;
-		string commandName;
         CurrentFile* current;
         vector<string> locations;
 

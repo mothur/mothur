@@ -15,7 +15,6 @@
 class GetgroupCommand : public Command {
 public:
 	GetgroupCommand(string);
-	GetgroupCommand();
 	~GetgroupCommand() {}
 	
 	vector<string> setParameters();

@@ -31,6 +31,15 @@ vector<string> UnifracWeightedCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["weighted"] = tempOutNames;
+        outputTypes["wsummary"] = tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        outputTypes["tree"] = tempOutNames;
+        
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -85,99 +94,25 @@ string UnifracWeightedCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-UnifracWeightedCommand::UnifracWeightedCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["weighted"] = tempOutNames;
-		outputTypes["wsummary"] = tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-        outputTypes["tree"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
-		exit(1);
-	}
-}
 /***********************************************************/
 UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-			
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters=parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["weighted"] = tempOutNames;
-			outputTypes["wsummary"] = tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			outputTypes["column"] = tempOutNames;
-            outputTypes["tree"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("tree");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree");
 			if (treefile == "not open") { treefile = ""; abort = true; }
 			else if (treefile == "not found") { 				//if there is a current design file, use it
 				treefile = current->getTreeFile(); 
-				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+				if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+				else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }								
 			}else { current->setTreeFile(treefile); }	
 			
 			//check for required parameters
@@ -197,11 +132,11 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
@@ -224,7 +159,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			else{
                 if (temp=="phylip") { temp = "lt"; }
 				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
-				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
+				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt.\n");  phylip = true; outputForm = "lt"; }
 			}
 			
 			temp = validParameter.valid(parameters, "random");				if (temp == "not found") { temp = "F"; }
@@ -634,7 +569,7 @@ int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vecto
             //so if you have 1000 random trees the index returned is 100 
             //then there are 900 trees with a score greater then you. 
             //giving you a signifigance of 0.900
-            int index = findIndex(usersScores[f], f, rScores);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand"); m->mothurOutEndLine(); exit(1); } //error code
+            int index = findIndex(usersScores[f], f, rScores);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand\n");  exit(1); } //error code
             
             //the signifigance is the number of trees with the users score or higher 
             WScoreSig.push_back((iters-index)/(float)iters);

@@ -24,7 +24,6 @@ class SharedCommand : public Command {
 	
 public:
 	SharedCommand(string);	
-	SharedCommand();
 	~SharedCommand();
 	
 	vector<string> setParameters();

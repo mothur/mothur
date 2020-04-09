@@ -22,7 +22,6 @@ class CooccurrenceCommand : public Command {
 public:
 	
 	CooccurrenceCommand(string);	
-	CooccurrenceCommand();
 	~CooccurrenceCommand(){}
 	
 	vector<string> setParameters();

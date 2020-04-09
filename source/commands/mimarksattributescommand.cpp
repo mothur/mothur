@@ -17,6 +17,8 @@ vector<string> MimarksAttributesCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -55,62 +57,21 @@ string MimarksAttributesCommand::getHelpString(){
     }
 }
 //**********************************************************************************************************************
-MimarksAttributesCommand::MimarksAttributesCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["source"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MimarksAttributesCommand", "MimarksAttributesCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        
-        //allow user to run help
+
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string,string>::iterator it;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("xml");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["xml"] = inputDir + it->second;		}
-                }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["source"] = tempOutNames;
-            
-            //check for required parameters
             xmlFile = validParameter.validFile(parameters, "xml");
             if (xmlFile == "not open") { abort = true; }
-            else if (xmlFile == "not found") {  xmlFile = ""; abort=true; m->mothurOut("You must provide an xml file. It is required."); m->mothurOutEndLine();  }
+            else if (xmlFile == "not found") {  xmlFile = ""; abort=true; m->mothurOut("You must provide an xml file. It is required.\n");  }
             
             selectedPackage = validParameter.valid(parameters, "package");
             if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey."; }
@@ -119,7 +80,6 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(xmlFile);		}
             
         }
-        
     }
     catch(exception& e) {
         m->errorOut(e, "MimarksAttributesCommand", "MimarksAttributesCommand");
@@ -340,7 +300,7 @@ int MimarksAttributesCommand::execute(){
         out.close();
         
         m->mothurOutEndLine();
-        m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+        m->mothurOut("Output File Names: \n"); 
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
         m->mothurOutEndLine();
         

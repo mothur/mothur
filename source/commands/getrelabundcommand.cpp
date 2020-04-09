@@ -20,6 +20,11 @@ vector<string> GetRelAbundCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false; allLines = true;
+     
+        vector<string> tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -65,68 +70,25 @@ string GetRelAbundCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetRelAbundCommand::GetRelAbundCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["relabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "GetRelAbundCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetRelAbundCommand::GetRelAbundCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["relabund"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-			}
-		
-			//get shared file
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
 			
@@ -153,10 +115,9 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "totalgroup"; }
 			
 			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
-				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu."); m->mothurOutEndLine(); abort = true; 
+				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu.\n"); abort = true;
 			}
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetRelAbundCommand", "GetRelAbundCommand");
@@ -251,7 +212,7 @@ int GetRelAbundCommand::getRelAbundance(SharedRAbundVectors*& thisLookUp, ofstre
 					float averageOtu = totalOtu / (float) thisLookUp->size();
 					
 					relabund = abund / (float) averageOtu;
-				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true); return 0; }
+				}else{ m->mothurOut(scale + " is not a valid scaling option.\n");  m->setControl_pressed(true); return 0; }
 				
 				out  << '\t' << relabund;
 			}

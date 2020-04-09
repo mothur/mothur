@@ -27,6 +27,11 @@ vector<string> MetaStatsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;   allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["metastats"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -79,80 +84,17 @@ string MetaStatsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MetaStatsCommand::MetaStatsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["metastats"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MetaStatsCommand", "MetaStatsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 MetaStatsCommand::MetaStatsCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-		
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			map<string,string>::iterator it;
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["metastats"] = tempOutNames;
-			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("design");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["design"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-                it = parameters.find("clr");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["clr"] = inputDir + it->second;        }
-                }
-			}
-			
-			//check for required parameters
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
             else if (sharedfile == "not found") { sharedfile = "";  }
@@ -185,8 +127,8 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			else if (designfile == "not found") {  				
 				//if there is a current design file, use it
 				designfile = current->getDesignFile(); 
-				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current designfile and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current designfile and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 

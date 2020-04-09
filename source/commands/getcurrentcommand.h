@@ -17,7 +17,6 @@ class GetCurrentCommand : public Command {
 
 	public:
 		GetCurrentCommand(string);
-		GetCurrentCommand();
 		~GetCurrentCommand() {}
 	
 		vector<string> setParameters();

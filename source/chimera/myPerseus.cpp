@@ -285,7 +285,7 @@ int Perseus::toInt(char b){
 		else if(b == 'C')	{	return 1;	}
 		else if(b == 'T')	{	return 2;	}
 		else if(b == 'G')	{	return 3;	}
-		else { m->mothurOut("[ERROR]: " + toString(b) + " is not ATGC."); m->mothurOutEndLine(); return -1; }
+		else { m->mothurOut("[ERROR]: " + toString(b) + " is not ATGC.\n");  return -1; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Perseus", "toInt");

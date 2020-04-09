@@ -17,7 +17,6 @@ class RemoveSeqsCommand : public Command {
 	public:
 	
 		RemoveSeqsCommand(string);	
-		RemoveSeqsCommand();
 		~RemoveSeqsCommand(){}
 	
 		vector<string> setParameters();

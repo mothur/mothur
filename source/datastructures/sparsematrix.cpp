@@ -108,7 +108,7 @@ void SparseMatrix::print(ListVector* list){
 	try {
 		int index = 0;
 	
-		m->mothurOutEndLine(); m->mothurOut("Index\tRow\tColumn\tDistance"); m->mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOut("Index\tRow\tColumn\tDistance\n"); 
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
 			m->mothurOut(toString(index) + "\t" + toString(list->get(currentCell->row))  + "\t" + toString(list->get(currentCell->column)) + "\t" + toString(currentCell->dist)); m->mothurOutEndLine();

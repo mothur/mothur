@@ -20,7 +20,6 @@ class LibShuffCommand : public Command {
 	
 public:
 	LibShuffCommand(string);
-	LibShuffCommand();	
 	~LibShuffCommand(){};
 	
 	vector<string> setParameters();

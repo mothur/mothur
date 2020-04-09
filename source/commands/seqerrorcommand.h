@@ -45,7 +45,6 @@ struct Compare {
 class SeqErrorCommand : public Command {
 public:
 	SeqErrorCommand(string);
-	SeqErrorCommand();
 	~SeqErrorCommand(){}
 	
 	vector<string> setParameters();

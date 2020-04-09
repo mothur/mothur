@@ -26,7 +26,6 @@ class MGClusterCommand : public Command {
 
 public:
 	MGClusterCommand(string);
-	MGClusterCommand();
 	~MGClusterCommand(){}
 	
 	vector<string> setParameters();

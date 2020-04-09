@@ -22,6 +22,13 @@ vector<string> SRAInfoCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
+        outputTypes["sra"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {    myArray.push_back(parameters[i].name);        }
         return myArray;
@@ -69,65 +76,18 @@ string SRAInfoCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-SRAInfoCommand::SRAInfoCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["fastq"] = tempOutNames;
-        outputTypes["file"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "SRAInfoCommand", "SRAInfoCommand");
-        exit(1);
-    }
-}
 //***************************************************************************************************************
-
 SRAInfoCommand::SRAInfoCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        
-        //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string,string>::iterator it;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){    inputDir = "";        }
-            else {
-                string path;
-                it = parameters.find("accnos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["accnos"] = inputDir + it->second;        }
-                }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["fastq"] = tempOutNames;
-            outputTypes["file"] = tempOutNames;
-            outputTypes["sra"] = tempOutNames;
-            
-            //check for required parameters
             accnosfile = validParameter.validFile(parameters, "accnos");
             if (accnosfile == "not open") { accnosfile = ""; abort = true; }
             else if (accnosfile == "not found") { m->mothurOut("[ERROR]: The accnos parameter is required.\n");  abort = true; }

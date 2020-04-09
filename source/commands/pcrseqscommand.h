@@ -22,7 +22,6 @@
 class PcrSeqsCommand : public Command {
 public:
 	PcrSeqsCommand(string);
-	PcrSeqsCommand();
 	~PcrSeqsCommand(){}
 	
 	vector<string> setParameters();

@@ -19,7 +19,6 @@ class GetListCountCommand : public Command {
 	
 public:
 	GetListCountCommand(string);
-	GetListCountCommand();	
 	~GetListCountCommand(){}
 	
 	vector<string> setParameters();
@@ -37,9 +36,6 @@ public:
 	
 	
 private:
-	ListVector* list;
-	InputData* input;
-	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string label, listfile, outputDir, sort;

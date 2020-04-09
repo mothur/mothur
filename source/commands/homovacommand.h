@@ -19,7 +19,6 @@ class HomovaCommand : public Command {
 	
 public:
 	HomovaCommand(string);
-	HomovaCommand();
 	~HomovaCommand(){}
 	
 	vector<string> setParameters();

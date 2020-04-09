@@ -30,6 +30,16 @@ vector<string> GetMetaCommunityCommand::setParameters(){
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pmethod("method", "Multiple", "dmm-kmeans-pam", "dmm", "", "", "","",false,false,true); parameters.push_back(pmethod);
         
+        abort = false; calledHelp = false; allLines=true;
+        
+        vector<string> tempOutNames;
+        outputTypes["fit"] = tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
+        outputTypes["matrix"] = tempOutNames;
+        outputTypes["design"] = tempOutNames;
+        outputTypes["parameters"] = tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -83,68 +93,18 @@ string GetMetaCommunityCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetMetaCommunityCommand::GetMetaCommunityCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["fit"] = tempOutNames;
-        outputTypes["relabund"] = tempOutNames;
-        outputTypes["matrix"] = tempOutNames;
-        outputTypes["design"] = tempOutNames;
-        outputTypes["parameters"] = tempOutNames;
-        outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetMetaCommunityCommand", "GetMetaCommunityCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-        allLines=true;
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["fit"] = tempOutNames;
-            outputTypes["relabund"] = tempOutNames;
-            outputTypes["matrix"] = tempOutNames;
-            outputTypes["design"] = tempOutNames;
-            outputTypes["parameters"] = tempOutNames;
-			outputTypes["summary"] = tempOutNames;
-            
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                string path;
-                it = parameters.find("shared");
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-                       
-            //get shared file, it is required
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
@@ -892,7 +852,7 @@ int GetMetaCommunityCommand::driver(SharedRAbundVectors*& thisLookup, vector< ve
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "MatrixOutputCommand", "driver");
+		m->errorOut(e, "GetMetaCommunityCommand", "driver");
 		exit(1);
 	}
 }

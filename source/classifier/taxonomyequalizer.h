@@ -38,8 +38,6 @@ private:
 	map<string, int> seqLevels;  //maps name to level of taxonomy
 	
 	int getHighestLevel(ifstream&);  //scans taxonomy file to find taxonomy with highest level
-	void extendTaxonomy(string, string&, int);  //name, taxonomy, desired level
-	void truncateTaxonomy(string, string&, int);  //name, taxonomy, desired level
 	MothurOut* m;
     Utils util;
 	

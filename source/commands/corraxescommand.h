@@ -19,7 +19,6 @@
 class CorrAxesCommand : public Command {
 public:
 	CorrAxesCommand(string);
-	CorrAxesCommand();
 	~CorrAxesCommand(){}
 	
 	vector<string> setParameters();

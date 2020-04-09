@@ -28,6 +28,16 @@ vector<string> SharedCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["map"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        
+        abort = false; calledHelp = false; pickedGroups=false;
+        allLines = true;
+
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -73,92 +83,17 @@ string SharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SharedCommand::SharedCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		
-		vector<string> tempOutNames;
-		outputTypes["shared"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-        outputTypes["map"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SharedCommand", "SharedCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 SharedCommand::SharedCommand(string option)  {
 	try {
-        abort = false; calledHelp = false; pickedGroups=false;
-		allLines = true;
-
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 
 		else {
-
-			 vector<string> myArray = setParameters();
-
-			 OptionParser parser(option);
+			 OptionParser parser(option, setParameters());
 			 map<string, string> parameters = parser.getParameters();
 
 			 ValidParameters validParameter;
-			 map<string, string>::iterator it;
-
-			 //check to make sure all parameters are valid for command
-			 for (it = parameters.begin(); it != parameters.end(); it++) {
-				 if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			 }
-
-			 //if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			 if (inputDir == "not found"){	inputDir = "";		}
-			 else {
-				 string path;
-				 it = parameters.find("list");
-				 //user has given a template file
-				 if(it != parameters.end()){
-					 path = util.hasPath(it->second);
-					 //if the user has not given a path then, add inputdir. else leave path alone.
-					 if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				 }
-
-				 it = parameters.find("group");
-				 //user has given a template file
-				 if(it != parameters.end()){
-					 path = util.hasPath(it->second);
-					 //if the user has not given a path then, add inputdir. else leave path alone.
-					 if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				 }
-
-				 it = parameters.find("count");
-				 //user has given a template file
-				 if(it != parameters.end()){
-					 path = util.hasPath(it->second);
-					 //if the user has not given a path then, add inputdir. else leave path alone.
-					 if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				 }
-
-                 it = parameters.find("biom");
-				 //user has given a template file
-				 if(it != parameters.end()){
-					 path = util.hasPath(it->second);
-					 //if the user has not given a path then, add inputdir. else leave path alone.
-					 if (path == "") {	parameters["biom"] = inputDir + it->second;		}
-				 }
-			 }
-
-             vector<string> tempOutNames;
-             outputTypes["shared"] = tempOutNames;
-             outputTypes["group"] = tempOutNames;
-             outputTypes["map"] = tempOutNames;
-             outputTypes["list"] = tempOutNames;
-
-			 //if the user changes the output directory command factory will send this info to us in the output parameter
 			 outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 
 			 //check for required parameters
@@ -1062,7 +997,7 @@ void SharedCommand::printSharedData(SharedRAbundVectors*& thislookup, ofstream& 
 
 					Groups.push_back((myIt->second)->getGroup());
 				}else{
-					m->mothurOut("Can't find shared info for " + order[i] + ", skipping."); m->mothurOutEndLine();
+					m->mothurOut("Can't find shared info for " + order[i] + ", skipping.\n"); 
 				}
 			}
 
@@ -1100,15 +1035,15 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
 				if (num == 0) {
                     error = 1;
                     if (groupfile != "") {
-                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct."); m->mothurOutEndLine();	}
-                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct."); m->mothurOutEndLine();	}
+                        m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct.\n"); 	}
+                    else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct.\n"); 	}
                 }else { groupNamesSeqs.erase(listNames[j]); }
 			}
 		}
 
 		for (set<string>::iterator itGroupSet = groupNamesSeqs.begin(); itGroupSet != groupNamesSeqs.end(); itGroupSet++) {
 			error = 1;
-			m->mothurOut("[ERROR]: " + (*itGroupSet) + " is in your groupfile and not your listfile. Please correct."); m->mothurOutEndLine();
+			m->mothurOut("[ERROR]: " + (*itGroupSet) + " is in your groupfile and not your listfile. Please correct.\n"); 
 		}
 
 		return error;

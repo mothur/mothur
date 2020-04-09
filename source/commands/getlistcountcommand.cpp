@@ -19,6 +19,11 @@ vector<string> GetListCountCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["otu"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -65,69 +70,26 @@ string GetListCountCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetListCountCommand::GetListCountCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["otu"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetListCountCommand", "GetListCountCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["otu"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-			}
-
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found")  { 				
 				listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n"); }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
 			else { current->setListFile(listfile); }
@@ -136,7 +98,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			sort = validParameter.valid(parameters, "sort");	  if (sort == "not found") { sort = "otu"; }
-			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu."); m->mothurOutEndLine(); sort = "otu"; }
+			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu.\n");  sort = "otu"; }
 			
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
@@ -156,81 +118,25 @@ GetListCountCommand::GetListCountCommand(string option)  {
 int GetListCountCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		input = new InputData(listfile, "list", nullVector);
-		list = input->getListVector();
-		string lastLabel = list->getLabel();
-
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-		
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){
-			
-				process(list);
-				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-							
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list;
-				list = input->getListVector(lastLabel);
-				
-				process(list);
-				
-				if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-
-													
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
-			}
-			
-			lastLabel = list->getLabel();			
-			
-			delete list;
-			list = input->getListVector();
-		}
-		
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (list != NULL) {		delete list;	}
-			list = input->getListVector(lastLabel);
-				
-			process(list);	
-			
-			if (m->getControl_pressed()) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} return 0;  }
-			
-			delete list;  
-		}
-		
-		delete input;
-		
+        
+        InputData input(listfile, "list", nullVector);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+               
+        while (list != NULL) {
+                   
+            if (m->getControl_pressed()) { delete list; break; }
+                   
+            process(list); delete list;
+                  
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+		if (m->getControl_pressed()) { return 0; }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		

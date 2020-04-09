@@ -31,7 +31,16 @@ vector<string> MGClusterCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
 		
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
+        outputTypes["steps"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -88,86 +97,19 @@ string MGClusterCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//*******************************************************************************************************************
-MGClusterCommand::MGClusterCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-		outputTypes["sabund"] = tempOutNames;
-        outputTypes["steps"] = tempOutNames;
-        outputTypes["sensspec"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MGClusterCommand", "MGClusterCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 MGClusterCommand::MGClusterCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			outputTypes["sabund"] = tempOutNames;
-            outputTypes["steps"] = tempOutNames;
-            outputTypes["sensspec"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("blast");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["blast"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
-			
-			//check for required parameters
 			blastfile = validParameter.validFile(parameters, "blast");
 			if (blastfile == "not open") { blastfile = ""; abort = true; }	
 			else if (blastfile == "not found") { blastfile = ""; }
@@ -188,9 +130,9 @@ MGClusterCommand::MGClusterCommand(string option) {
 			else if (countfile == "not found") { countfile = ""; }
             else { current->setCountFile(countfile); }
             
-            if (countfile != "" && namefile != "") { m->mothurOut("[ERROR]: Cannot have both a name file and count file. Please use one or the other."); m->mothurOutEndLine(); abort = true; }
+            if (countfile != "" && namefile != "") { m->mothurOut("[ERROR]: Cannot have both a name file and count file. Please use one or the other.\n");  abort = true; }
 			
-			if ((blastfile == "")) { m->mothurOut("When executing a mgcluster command you must provide a blastfile."); m->mothurOutEndLine(); abort = true; }
+			if ((blastfile == "")) { m->mothurOut("When executing a mgcluster command you must provide a blastfile.\n");  abort = true; }
 			
 			//check for optional parameter and set defaults
 			string temp;
@@ -208,17 +150,17 @@ MGClusterCommand::MGClusterCommand(string option) {
 			if (method == "not found") { method = "opti"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "opti")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average or opti."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average or opti.\n");  abort = true; }
             
             metric = validParameter.valid(parameters, "metric");		if (metric == "not found") { metric = "mcc"; }
             
             if ((metric == "mcc") || (metric == "sens") || (metric == "spec") || (metric == "tptn") || (metric == "tp") || (metric == "tn") || (metric == "fp") || (metric == "fn") || (metric == "f1score") || (metric == "accuracy") || (metric == "ppv") || (metric == "npv") || (metric == "fdr") || (metric == "fpfn") ){ }
-            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr.\n");  abort = true; }
             
             initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
-            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu.\n");  abort = true; }
             
             temp = validParameter.valid(parameters, "delta");		if (temp == "not found")  { temp = "0.0001"; }
             util.mothurConvert(temp, stableMetric);
@@ -698,7 +640,7 @@ int MGClusterCommand::runMothurCluster(){
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();
+        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster.\n"); 
         
         return 0;
 

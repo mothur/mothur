@@ -43,7 +43,6 @@ class GetOTURepCommand : public Command {
 
 public:
 	GetOTURepCommand(string);
-	GetOTURepCommand();
 	~GetOTURepCommand(){}
 	
 	vector<string> setParameters();

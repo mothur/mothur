@@ -19,7 +19,7 @@
 class SummaryQualCommand : public Command {
 public:
 	SummaryQualCommand(string);
-	SummaryQualCommand();
+	
 	~SummaryQualCommand(){}
 	
 	vector<string> setParameters();

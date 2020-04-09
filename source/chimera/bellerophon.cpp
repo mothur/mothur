@@ -26,7 +26,7 @@ Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc
 		//read in sequences
 		seqs = readSeqs(fastafile);
 		numSeqs = seqs.size();
-		if (numSeqs == 0) { m->mothurOut("Error in reading you sequences."); m->mothurOutEndLine(); exit(1); }
+		if (numSeqs == 0) { m->mothurOut("Error in reading you sequences.\n");  exit(1); }
 	
 		//do soft filter
 		if (filterSeqs)  {
@@ -40,14 +40,14 @@ Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc
 		string seq0 = seqs[0]->getAligned();
 		if (window == 0) { window = seq0.length() / 4;  }
 		else if (window > (seq0.length() / 2)) {  
-			m->mothurOut("Your sequence length is = " + toString(seq0.length()) + ". You have selected a window size greater than the length of half your aligned sequence. I will run it with a window size of " + toString((seq0.length() / 2))); m->mothurOutEndLine();
+			m->mothurOut("Your sequence length is = " + toString(seq0.length()) + ". You have selected a window size greater than the length of half your aligned sequence. I will run it with a window size of " + toString((seq0.length() / 2)) + "\n");
 			window = (seq0.length() / 2);
 		}
 		
 		if (increment > (seqs[0]->getAlignLength() - (2*window))) { 
 			if (increment != 10) {
 			
-				m->mothurOut("You have selected a increment that is too large. I will use the default."); m->mothurOutEndLine();
+				m->mothurOut("You have selected a increment that is too large. I will use the default.\n"); 
 				increment = 10;
 				if (increment > (seqs[0]->getAlignLength() - (2*window))) {  increment = 0;  }
 				
@@ -95,29 +95,28 @@ int Bellerophon::print(ostream& out, ostream& outAcc, string s) {
 			if (best[i].score > 1.0) { 
 				above1++; 
 				outAcc << best[i].name << endl;
-				m->mothurOut(best[i].name + " is a suspected chimera at breakpoint " + toString(best[i].midpoint)); m->mothurOutEndLine();
-				m->mothurOut("It's score is " + toString(best[i].score) + " with suspected left parent " + best[i].leftParent + " and right parent " + best[i].rightParent); m->mothurOutEndLine();
+				m->mothurOut(best[i].name + " is a suspected chimera at breakpoint " + toString(best[i].midpoint) + "\n");
+				m->mothurOut("It's score is " + toString(best[i].score) + " with suspected left parent " + best[i].leftParent + " and right parent " + best[i].rightParent + "\n");
 			}
 		}
 		
 		//output results to screen
-		m->mothurOutEndLine();
-		m->mothurOut("Sequence with preference score above 1.0: " + toString(above1)); m->mothurOutEndLine();
+		m->mothurOut("\nSequence with preference score above 1.0: " + toString(above1) + "\n");
 		int spot;
 		spot = best.size()-1;
-		m->mothurOut("Minimum:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("Minimum:\t" + toString(best[spot].score) + "\n");
 		spot = best.size() * 0.975;
-		m->mothurOut("2.5%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("2.5%-tile:\t" + toString(best[spot].score) + "\n");
 		spot = best.size() * 0.75;
-		m->mothurOut("25%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("25%-tile:\t" + toString(best[spot].score) + "\n");
 		spot = best.size() * 0.50;
-		m->mothurOut("Median: \t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("Median: \t" + toString(best[spot].score) + "\n");
 		spot = best.size() * 0.25;
-		m->mothurOut("75%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("75%-tile:\t" + toString(best[spot].score) + "\n");
 		spot = best.size() * 0.025;
-		m->mothurOut("97.5%-tile:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("97.5%-tile:\t" + toString(best[spot].score) + "\n");
 		spot = 0;
-		m->mothurOut("Maximum:\t" + toString(best[spot].score)); m->mothurOutEndLine();
+		m->mothurOut("Maximum:\t" + toString(best[spot].score) + "\n");
 		
 		return numSeqs;
 

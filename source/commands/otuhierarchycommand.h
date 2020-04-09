@@ -18,7 +18,6 @@ class OtuHierarchyCommand : public Command {
 
 public:
 	OtuHierarchyCommand(string);
-	OtuHierarchyCommand();
 	~OtuHierarchyCommand(){}
 	
 	vector<string> setParameters();

@@ -47,6 +47,15 @@ vector<string> TrimSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        abort = false; calledHelp = false;  comboStarts = 0;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -123,112 +132,24 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-
-TrimSeqsCommand::TrimSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
-
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;   
-		comboStarts = 0;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("qfile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-				
-			}
-
-			
-			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta");
 			if (fastaFile == "not found") { 				
 				fastaFile = current->getFastaFile(); 
-				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else if (fastaFile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastaFile); }
 			
@@ -295,7 +216,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (nameFile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			temp = validParameter.valid(parameters, "qthreshold");	if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, qThreshold);
@@ -340,15 +261,15 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			processors = current->setProcessors(temp);
 			
 			if(allFiles && (oligoFile == "")){
-				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request."); m->mothurOutEndLine();
+				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request.\n"); 
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
-				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); m->mothurOutEndLine();
+				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored.\n"); 
 				qAverage=0;
 				qThreshold=0;
 			}
 			if(!flip && oligoFile=="" && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP && qFileName == ""){		
-				m->mothurOut("You didn't set any options... quiting command."); m->mothurOutEndLine();
+				m->mothurOut("You didn't set any options... quiting command.\n"); 
 				abort = true;
 			}
 			
@@ -1211,7 +1132,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             
             if (firstSeqNames.size() != 0) { 
                 for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
-                    m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file."); m->mothurOutEndLine();
+                    m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file.\n"); 
                 }
                 qFileName = "";
                 return processors;
@@ -1254,7 +1175,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
                 qfileFilePos = util.setFilePosFasta(qfilename, numQualSeqs); 
                 
                 if (numFastaSeqs != numQualSeqs) {
-                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file."); m->mothurOutEndLine(); m->setControl_pressed(true); 
+                    m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your fasta file, but " + toString(numQualSeqs) + " sequences in your quality file.\n");  m->setControl_pressed(true); 
                 }
             }
         

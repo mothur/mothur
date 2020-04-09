@@ -18,7 +18,6 @@
 class GetSAbundCommand : public Command {
 public:
 	GetSAbundCommand(string);
-	GetSAbundCommand();
 	~GetSAbundCommand() {}
 	
 	vector<string> setParameters();

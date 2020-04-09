@@ -22,7 +22,6 @@
 class ChimeraSlayerCommand : public Command {
 public:
 	ChimeraSlayerCommand(string);
-	ChimeraSlayerCommand();
 	~ChimeraSlayerCommand() {}
 	
 	vector<string> setParameters();

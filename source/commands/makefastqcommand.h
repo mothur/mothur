@@ -18,7 +18,6 @@ class MakeFastQCommand : public Command {
 public:
 	
 	MakeFastQCommand(string);	
-	MakeFastQCommand();
 	~MakeFastQCommand(){}
 	
 	vector<string> setParameters();

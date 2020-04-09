@@ -28,6 +28,11 @@ vector<string> ListSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -70,126 +75,19 @@ string ListSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ListSeqsCommand::ListSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 ListSeqsCommand::ListSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("alignreport");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("contigsreport");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["contigsreport"] = inputDir + it->second;        }
-                }
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fastq");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
-				}
-			}
-
 			//check for required parameters
 			fastafiles = validParameter.validFiles(parameters, "fasta");
             if (fastafiles.size() != 0) {

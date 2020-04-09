@@ -23,6 +23,13 @@ vector<string> ClusterDoturCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -67,84 +74,19 @@ string ClusterDoturCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClusterDoturCommand::ClusterDoturCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-		outputTypes["sabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterDoturCommand", "ClusterCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterDoturCommand::ClusterDoturCommand(string option)  {
 	try{
-		
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			map<string,string>::iterator it;
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-					abort = true;
-				}
-			}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			outputTypes["sabund"] = tempOutNames;
-		
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -152,14 +94,12 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { 
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n"); }
 				else { 
-					m->mothurOut("You need to provide a phylip file with the cluster.classic command."); m->mothurOutEndLine(); 
-					abort = true; 
+					m->mothurOut("You need to provide a phylip file with the cluster.classic command.\n");abort = true;
 				}	
 			}else { current->setPhylipFile(phylipfile); }	
 
-		
 			//check for optional parameter and set defaults
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; namefile = ""; }	
@@ -171,7 +111,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.classic command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.classic command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			string temp;
 			temp = validParameter.valid(parameters, "precision");
@@ -195,7 +135,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 				else if (method == "nearest") { tag = "nn"; }
 				else if (method == "average") { tag = "an"; }
 				else if (method == "weighted") { tag = "wn"; }
-			}else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted."); m->mothurOutEndLine(); abort = true; }
+			}else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted.\n");  abort = true; }
 		}
 	}
 	catch(exception& e) {
@@ -311,7 +251,7 @@ int ClusterDoturCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
 
 		return 0;
 	}

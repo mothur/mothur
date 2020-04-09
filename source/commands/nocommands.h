@@ -18,7 +18,6 @@ class NoCommand : public Command {
 
 public:
 	NoCommand(string);
-	NoCommand() {}
 	~NoCommand(){}
 	
 	vector<string> setParameters()      { return outputNames;       } //dummy, doesn't really do anything	

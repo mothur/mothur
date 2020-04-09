@@ -3,7 +3,7 @@
 
 
 //
-//  removeotulabelscommand.h
+//  removeotuscommand.h
 //  Mothur
 //
 //  Created by Sarah Westcott on 5/21/12.
@@ -17,11 +17,10 @@
 
 /**************************************************************************************************/
 
-class RemoveOtuLabelsCommand : public Command {
+class RemoveOtusCommand : public Command {
 public:
-    RemoveOtuLabelsCommand(string);
-    RemoveOtuLabelsCommand();
-    ~RemoveOtuLabelsCommand(){}
+    RemoveOtusCommand(string);
+    ~RemoveOtusCommand(){}
     
     vector<string> setParameters();
     string getCommandName()			{ return "remove.otus";          }

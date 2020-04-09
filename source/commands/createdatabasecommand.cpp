@@ -24,6 +24,11 @@ vector<string> CreateDatabaseCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["database"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -73,118 +78,18 @@ string CreateDatabaseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CreateDatabaseCommand::CreateDatabaseCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["database"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CreateDatabaseCommand", "CreateDatabaseCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
 CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
-        
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
-		}else if(option == "citation") { citation(); abort = true; calledHelp = true;} 
+		}else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  } 
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-            
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["database"] = tempOutNames;
-            
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("repname");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["repname"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("repfasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["repfasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("relabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-                }
-			}
-            
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -207,13 +112,13 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to list, then shared, then relabund
 				listfile = current->getListFile(); 
-				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 				else { 
 					sharedfile = current->getSharedFile(); 
-					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+					if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 					else { 
                         relabundfile = current->getRelAbundFile();
-                        if (relabundfile != "") {  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+                        if (relabundfile != "") {  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
                         else {
                             m->mothurOut("[ERROR]: No valid current files. You must provide a shared, list or relabund file before you can use the create.database command.\n");  abort = true;
                         }
@@ -228,7 +133,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			
 			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
-               contaxonomyfile = "";  m->mothurOut("The constaxonomy parameter is required, aborting."); m->mothurOutEndLine(); abort = true;
+               contaxonomyfile = "";  m->mothurOut("The constaxonomy parameter is required, aborting.\n");  abort = true;
 			}
 			else if (contaxonomyfile == "not open") { contaxonomyfile = ""; abort = true; }
 
@@ -240,7 +145,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			if (repnamesfile == "not found") {  repnamesfile = "";  			}
 			else if (repnamesfile == "not open") { repnamesfile = ""; abort = true; }
             
-            if ((repnamesfile != "") && (repfastafile == "")) { m->mothurOut("[ERROR]: You must provide a repfasta file if you are using a repnames file."); m->mothurOutEndLine();
+            if ((repnamesfile != "") && (repfastafile == "")) { m->mothurOut("[ERROR]: You must provide a repfasta file if you are using a repnames file.\n");
                 abort = true; }
             
             countfile = validParameter.validFile(parameters, "count");

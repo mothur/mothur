@@ -54,6 +54,15 @@ vector<string> ClusterCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
+        outputTypes["steps"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -109,103 +118,20 @@ string ClusterCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClusterCommand::ClusterCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-        outputTypes["sensspec"] = tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-		outputTypes["sabund"] = tempOutNames;
-        outputTypes["steps"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterCommand", "ClusterCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterCommand::ClusterCommand(string option)  {
 	try{
-        abort = false; calledHelp = false;
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-					abort = true;
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-            outputTypes["sensspec"] = tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			outputTypes["sabund"] = tempOutNames;
-            outputTypes["steps"] = tempOutNames;
-		
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-			}
 			
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
@@ -263,38 +189,38 @@ ClusterCommand::ClusterCommand(string option)  {
             }
             
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti") || (method == "unique")) { }
-            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc, unique and opti."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc, unique and opti.\n");  abort = true; }
             
             if (method != "unique") {
                 if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) {
                     //is there are current file available for either of these?
                     //give priority to column, then phylip
                     columnfile = current->getColumnFile();
-                    if (columnfile != "") {  distfile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+                    if (columnfile != "") {  distfile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
                     else {
                         phylipfile = current->getPhylipFile();
-                        if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+                        if (phylipfile != "") { distfile = phylipfile;  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
                         else {
                             fastafile = current->getFastaFile();
-                            if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                            if (fastafile != "") {  distfile = fastafile; format = "fasta"; m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
                             else {
-                                m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command, unless using the unique method."); m->mothurOutEndLine();
+                                m->mothurOut("No valid current files. You must provide a phylip, column or fasta file before you can use the cluster command, unless using the unique method.\n"); 
                                 abort = true;
                             }
                         }
                     }
                 }
-                else if (((phylipfile != "") && (columnfile != "")) || ((phylipfile != "") && (fastafile != "")) || ((fastafile != "") && (columnfile != "")))  { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip, column or fasta."); m->mothurOutEndLine(); abort = true; }
+                else if (((phylipfile != "") && (columnfile != "")) || ((phylipfile != "") && (fastafile != "")) || ((fastafile != "") && (columnfile != "")))  { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip, column or fasta.\n");  abort = true; }
                 
                 if (columnfile != "") {
                     if ((namefile == "") && (countfile == "")){
                         namefile = current->getNameFile();
-                        if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                        if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
                         else {
                             countfile = current->getCountFile();
-                            if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                            if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                             else { 
-                                m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                                m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format.\n");  
                                 abort = true; 
                             }	
                         }	
@@ -308,12 +234,12 @@ ClusterCommand::ClusterCommand(string option)  {
             }else {
                 if ((countfile == "") && (namefile == "")) {
                     countfile = current->getCountFile();
-                    if (countfile != "") { distfile = countfile;  format = "count"; m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                    if (countfile != "") { distfile = countfile;  format = "count"; m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                     else {
                         namefile = current->getNameFile();
-                        if (namefile != "") {  distfile = namefile; format = "name"; m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                        if (namefile != "") {  distfile = namefile; format = "name"; m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
                         else {
-                            m->mothurOut("No valid current files. You must provide a count or name file before you can use the cluster command with the unique method."); m->mothurOutEndLine();
+                            m->mothurOut("No valid current files. You must provide a count or name file before you can use the cluster command with the unique method.\n"); 
                             abort = true;
                         }
                     }
@@ -322,7 +248,7 @@ ClusterCommand::ClusterCommand(string option)  {
                 else if(countfile != "")    { format = "count"; }
                 else if(namefile != "")     { format = "name";  }
             }
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -343,12 +269,12 @@ ClusterCommand::ClusterCommand(string option)  {
             metricName = validParameter.valid(parameters, "metric");		if (metricName == "not found") { metricName = "mcc"; }
             
             if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
-            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr.\n");  abort = true; }
             
             initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
-            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu.\n");  abort = true; }
 
             temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
             util.mothurConvert(temp, maxIters);
@@ -777,7 +703,7 @@ int ClusterCommand::runMothurCluster(){
         
         if (!util.isEqual(saveCutoff, cutoff)) {
             saveCutoff = util.ceilDist(saveCutoff, precision);
-            m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
+            m->mothurOut("changed cutoff to " + toString(cutoff)+"\n");
         }
 
         return 0;
@@ -795,7 +721,7 @@ void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph)
         
 		if (util.isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
-		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
+		     + "\tclusters. Updates: " + toString(loops)+"\n");
 		}
 		print_start = true;
 		loops = 0;
@@ -854,7 +780,7 @@ int ClusterCommand::runOptiCluster(){
     try {
         if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
         
-        m->mothurOut("\nClustering " + distfile); m->mothurOutEndLine();
+        m->mothurOut("\nClustering " + distfile+"\n");
         
         ClusterMetric* metric = NULL;
         if (metricName == "mcc")             { metric = new MCC();              }
@@ -1000,7 +926,7 @@ int ClusterCommand::runUniqueCluster(){
         if (countfile != "") {  distfile = countfile;   }
         else if (namefile != "") {  distfile = namefile;  }
         
-        m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
+        m->mothurOut("\nClustering " + distfile+"\n"); 
         
         ListVector list; list.setLabel(toString(cutoff));
         

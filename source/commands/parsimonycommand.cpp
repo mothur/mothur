@@ -24,6 +24,12 @@ vector<string> ParsimonyCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["parsimony"] = tempOutNames;
+        outputTypes["psummary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,87 +75,18 @@ string ParsimonyCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ParsimonyCommand::ParsimonyCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["parsimony"] = tempOutNames;
-		outputTypes["psummary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ParsimonyCommand", "ParsimonyCommand");
-		exit(1);
-	}
-}
 /***********************************************************/
 ParsimonyCommand::ParsimonyCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		Groups.clear();
-			
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["parsimony"] = tempOutNames;
-			outputTypes["psummary"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("tree");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
 			randomtree = validParameter.valid(parameters, "random");		if (randomtree == "not found") { randomtree = ""; }
@@ -161,8 +98,8 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				if (treefile == "not open") { treefile = ""; abort = true; }
 				else if (treefile == "not found") { 				//if there is a current design file, use it
 					treefile = current->getTreeFile(); 
-					if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
-					else { 	m->mothurOut("You have no current tree file and the tree parameter is required."); m->mothurOutEndLine(); abort = true; }								
+					if (treefile != "") { m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
+					else { 	m->mothurOut("You have no current tree file and the tree parameter is required.\n");  abort = true; }								
 				}else { current->setTreeFile(treefile); }	
 				
 				//check for required parameters
@@ -182,11 +119,11 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
                 else { current->setCountFile(countfile); }
                 
                 if ((namefile != "") && (countfile != "")) {
-                    m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                    m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
                 }
                 
                 if ((groupfile != "") && (countfile != "")) {
-                    m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                    m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
                 }
 
 			}
@@ -269,7 +206,7 @@ int ParsimonyCommand::execute() {
         //check that groups are valid
         for (int i = 0; i < Groups.size(); i++) {
             if (!util.inUsersGroups(Groups[i], tGroups)) {
-                m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
+                m->mothurOut(Groups[i] + " is not a valid group, and will be disregarded.\n"); 
                 // erase the invalid group from userGroups
                 Groups.erase(Groups.begin()+i);
                 i--;

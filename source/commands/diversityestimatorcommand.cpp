@@ -47,6 +47,26 @@ vector<string> EstimatorSingleCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["erarefact"] = tempOutNames;
+        outputTypes["igrarefact"] = tempOutNames;
+        outputTypes["igabund"] = tempOutNames;
+        outputTypes["lnabund"] = tempOutNames;
+        outputTypes["lnrarefact"] = tempOutNames;
+        outputTypes["lnshift"] = tempOutNames;
+        outputTypes["lsabund"] = tempOutNames;
+        outputTypes["lsrarefact"] = tempOutNames;
+        outputTypes["siabund"] = tempOutNames;
+        outputTypes["sirarefact"] = tempOutNames;
+        outputTypes["sishift"] = tempOutNames;
+        outputTypes["ig"] = tempOutNames;
+        outputTypes["ln"] = tempOutNames;
+        outputTypes["ls"] = tempOutNames;
+        outputTypes["si"] = tempOutNames;
+        outputTypes["sample"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -120,124 +140,20 @@ string EstimatorSingleCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-EstimatorSingleCommand::EstimatorSingleCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["erarefact"] = tempOutNames;
-        outputTypes["igrarefact"] = tempOutNames;
-        outputTypes["igabund"] = tempOutNames;
-        outputTypes["lnabund"] = tempOutNames;
-        outputTypes["lnrarefact"] = tempOutNames;
-        outputTypes["lnshift"] = tempOutNames;
-        outputTypes["lsabund"] = tempOutNames;
-        outputTypes["lsrarefact"] = tempOutNames;
-        outputTypes["siabund"] = tempOutNames;
-        outputTypes["sirarefact"] = tempOutNames;
-        outputTypes["sishift"] = tempOutNames;
-        outputTypes["ig"] = tempOutNames;
-        outputTypes["ln"] = tempOutNames;
-        outputTypes["ls"] = tempOutNames;
-        outputTypes["si"] = tempOutNames;
-        outputTypes["sample"] = tempOutNames;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "EstimatorSingleCommand", "EstimatorSingleCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
         allLines = true;
         
         //allow user to run help
         if(option == "help") { help(); calledHelp = true; abort = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
-            map<string,string>::iterator it;
-            
+             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["erarefact"] = tempOutNames;
-            outputTypes["igabund"] = tempOutNames;
-            outputTypes["lnabund"] = tempOutNames;
-            outputTypes["siabund"] = tempOutNames;
-            outputTypes["ig"] = tempOutNames;
-            outputTypes["ln"] = tempOutNames;
-            outputTypes["ls"] = tempOutNames;
-            outputTypes["si"] = tempOutNames;
-            outputTypes["igrarefact"] = tempOutNames;
-            outputTypes["lnrarefact"] = tempOutNames;
-            outputTypes["lnshift"] = tempOutNames;
-            outputTypes["lsabund"] = tempOutNames;
-            outputTypes["lsrarefact"] = tempOutNames;
-            outputTypes["sirarefact"] = tempOutNames;
-            outputTypes["sishift"] = tempOutNames;
-            outputTypes["sample"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("shared");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("rabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("sabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("list");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["list"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("sample");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["sample"] = inputDir + it->second;		}
-                }
-            }
-            
-            //check for required parameters
             listfile = validParameter.validFile(parameters, "list");
             if (listfile == "not open") { listfile = ""; abort = true; }
             else if (listfile == "not found") { listfile = ""; }
@@ -457,8 +373,12 @@ int EstimatorSingleCommand::processSharedFile() {
     try {
         vector<string> Groups;
         InputData input(inputfile, format, Groups);
-        SharedRAbundVectors* shared = input.getSharedRAbundVectors();
-        string lastLabel = shared->getLabel();
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = shared->getNamesGroups();
         
         if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
@@ -514,64 +434,14 @@ int EstimatorSingleCommand::processSharedFile() {
             *out[0] << "label\tgroup\tnum\t" << calc << "\n";
         }
         
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        while((shared != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while (shared != NULL) {
             
             if (m->getControl_pressed()) { delete shared; break; }
             
-            if(allLines == 1 || labels.count(shared->getLabel()) == 1){
-                
-                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
-                
-                processShared(shared, out, fileNameRoot);
-            }
-            //you have a label the user want that is smaller than this label and the last label has not already been processed
-            if ((util.anyLabelsToProcess(shared->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = shared->getLabel();
-                
-                delete shared;
-                shared = (input.getSharedRAbundVectors(lastLabel));
-                
-                m->mothurOut(shared->getLabel() + "\n"); processedLabels.insert(shared->getLabel()); userLabels.erase(shared->getLabel());
-                
-                processShared(shared, out, fileNameRoot);
-                
-                //restore real lastlabel to save below
-                shared->setLabel(saveLabel);
-            }
-            
-            lastLabel = shared->getLabel();
-            
-            delete shared;
-            shared = input.getSharedRAbundVectors();
-        }
-        
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
-        }
-        
-        //run last label if you need to
-        if (needToRun)  {
-            if (shared != NULL) {	delete shared;	}
-            shared = input.getSharedRAbundVectors(lastLabel);
-            
-            m->mothurOut(shared->getLabel() + "\n");
-            
             processShared(shared, out, fileNameRoot); delete shared;
+            
+            shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
         out[0]->close(); delete out[0];
         if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
         
@@ -586,8 +456,11 @@ int EstimatorSingleCommand::processSharedFile() {
 int EstimatorSingleCommand::processSingleSample() {
     try {
         InputData input(inputfile, format, nullVector);
-        SAbundVector* sabund = input.getSAbundVector();
-        string lastLabel = sabund->getLabel();
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (outputDir == "") { outputDir += util.hasPath(inputfile); }
         string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
@@ -643,63 +516,15 @@ int EstimatorSingleCommand::processSingleSample() {
             *out[0] << "label\tnum\t" << calc << "\n";
         }
          
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
+        while (sabund != NULL) {
+                   
             if (m->getControl_pressed()) { delete sabund; break; }
-            
-            if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
-                
-                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                
-                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
-            }
-            //you have a label the user want that is smaller than this label and the last label has not already been processed
-            if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = sabund->getLabel();
-                
-                delete sabund;
-                sabund = (input.getSAbundVector(lastLabel));
-                
-                m->mothurOut(sabund->getLabel() + "\n"); processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
-                
-                processSingle(sabund, sabund->getLabel(), out, fileNameRoot);
-                
-                //restore real lastlabel to save below
-                sabund->setLabel(saveLabel);
-            }
-            
-            lastLabel = sabund->getLabel();
-            
-            delete sabund;
-            sabund = input.getSAbundVector();
-        }
-        
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        {  m->mothurOut(". Please refer to " + lastLabel + ".\n");              }
-        }
-        
-        //run last label if you need to
-        if (needToRun)  {
-            if (sabund != NULL) {	delete sabund;	}
-            sabund = input.getSAbundVector(lastLabel);
-            
-            m->mothurOut(sabund->getLabel() + "\n");
-            
+                   
             processSingle(sabund, sabund->getLabel(), out, fileNameRoot); delete sabund;
+                  
+            sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         }
-
+        
         out[0]->close(); delete out[0];
         if (util.inUsersGroups(calc, samplingCalcs)) { out[1]->close(); out[2]->close(); delete out[1]; delete out[2]; }
         

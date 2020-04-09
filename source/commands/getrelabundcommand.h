@@ -17,7 +17,6 @@ class GetRelAbundCommand : public Command {
 
 public:
 	GetRelAbundCommand(string);
-	GetRelAbundCommand();
 	~GetRelAbundCommand(){}
 	
 	vector<string> setParameters();

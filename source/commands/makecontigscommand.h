@@ -43,7 +43,6 @@ struct pairFastqRead {
 class MakeContigsCommand : public Command {
 public:
     MakeContigsCommand(string);
-    MakeContigsCommand();
     ~MakeContigsCommand(){}
 
     vector<string> setParameters();

@@ -1,195 +1,110 @@
 //
-//  removeotulabels.cpp
+//  getotulabelscommand.cpp
 //  Mothur
 //
 //  Created by Sarah Westcott on 5/21/12.
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 
-#include "removeotulabelscommand.h"
+#include "getotuscommand.h"
 
 //**********************************************************************************************************************
-vector<string> RemoveOtuLabelsCommand::setParameters(){	
+vector<string> GetOtusCommand::setParameters(){	
 	try {
-        CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(paccnos);
-        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none","constaxonomy",false,false); parameters.push_back(pconstaxonomy);
-		CommandParameter potucorr("otucorr", "InputTypes", "", "", "none", "FNGLT", "none","otucorr",false,false); parameters.push_back(potucorr);
-        CommandParameter pcorraxes("corraxes", "InputTypes", "", "", "none", "FNGLT", "none","corraxes",false,false); parameters.push_back(pcorraxes);
+        CommandParameter paccnos("accnos", "InputTypes", "", "", "none", "none", "none","",false,true, true); parameters.push_back(paccnos);
+        CommandParameter pconstaxonomy("constaxonomy", "InputTypes", "", "", "none", "FNGLT", "none","constaxonomy",false,false, true); parameters.push_back(pconstaxonomy);
         CommandParameter plist("list", "InputTypes", "", "", "none", "FNGLT", "none","list",false,false, true); parameters.push_back(plist);
         CommandParameter pshared("shared", "InputTypes", "", "", "none", "FNGLT", "none","shared",false,false, true); parameters.push_back(pshared);
+		CommandParameter potucorr("otucorr", "InputTypes", "", "", "none", "FNGLT", "none","otucorr",false,false, true); parameters.push_back(potucorr);
+        CommandParameter pcorraxes("corraxes", "InputTypes", "", "", "none", "FNGLT", "none","corraxes",false,false, true); parameters.push_back(pcorraxes);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["otucorr"] = tempOutNames;
+        outputTypes["corraxes"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "setParameters");
+		m->errorOut(e, "GetOtusCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string RemoveOtuLabelsCommand::getHelpString(){	
+string GetOtusCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The remove.otus command can be used to remove specific otus with the output from classify.otu, otu.association, or corr.axes. It can also be used to select a set of otus from a shared or list file.\n";
-		helpString += "The remove.otus parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
-		helpString += "The constaxonomy parameter is input the results of the classify.otu command.\n";
-        helpString += "The otucorr parameter is input the results of the otu.association command.\n";
-        helpString += "The corraxes parameter is input the results of the corr.axes command.\n";
+		helpString += "The get.otus command can be used to select specific otus with the output from classify.otu, otu.association, or corr.axes commands.  It can also be used to select a set of otus from a shared or list file.\n";
+		helpString += "The get.otus parameters are: constaxonomy, otucorr, corraxes, shared, list, label and accnos.\n";
+		helpString += "The constaxonomy parameter is used to input the results of the classify.otu command.\n";
+        helpString += "The otucorr parameter is used to input the results of the otu.association command.\n";
+        helpString += "The corraxes parameter is used to input the results of the corr.axes command.\n";
         helpString += "The label parameter is used to analyze specific labels in your input. \n";
-		helpString += "The remove.otus commmand should be in the following format: \n";
-		helpString += "remove.otus(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
+		helpString += "The get.otus commmand should be in the following format: \n";
+		helpString += "get.otus(accnos=yourListOfOTULabels, corraxes=yourCorrAxesFile)\n";
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getHelpString");
+		m->errorOut(e, "GetOtusCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string RemoveOtuLabelsCommand::getOutputPattern(string type) {
+string GetOtusCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "constaxonomy")         {   pattern = "[filename],pick,[extension]";                }
-        else if (type == "otucorr")         {   pattern = "[filename],pick,[extension]";                }
-        else if (type == "corraxes")        {   pattern = "[filename],pick,[extension]";                }
-        else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";     }
-        else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";     }
+        if (type == "constaxonomy")         {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "otucorr")         {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "corraxes")        {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
+        else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "RemoveOtuLabelsCommand", "getOutputPattern");
+        m->errorOut(e, "GetOtusCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(){	
+GetOtusCommand::GetOtusCommand(string option)  {
 	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["constaxonomy"] = tempOutNames; 
-        outputTypes["otucorr"] = tempOutNames;
-        outputTypes["corraxes"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "RemoveOtuLabelsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-        
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-                //edit file types below to include only the types you added as parameters
-                
-				string path;
-                it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("accnos");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("corraxes");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["corraxes"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("otucorr");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["otucorr"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames; 
-            outputTypes["otucorr"] = tempOutNames;
-            outputTypes["corraxes"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-
-            
- 			//check for parameters
             accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
-					abort = true;
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
 			
 			constaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (constaxonomyfile == "not open") { constaxonomyfile = ""; abort = true; }
 			else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
+            else { current->setConsTaxonomyFile(constaxonomyfile); }
             
             corraxesfile = validParameter.validFile(parameters, "corraxes");
 			if (corraxesfile == "not open") { corraxesfile = ""; abort = true; }
@@ -212,36 +127,34 @@ RemoveOtuLabelsCommand::RemoveOtuLabelsCommand(string option)  {
             //if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	 outputDir = ""; 	}
             
-            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list."); m->mothurOutEndLine(); abort = true; }
+            if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list.\n"); abort = true; }
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");			
-                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+                if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n"); label=""; }
             }
 		}
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "RemoveOtuLabelsCommand");
+		m->errorOut(e, "GetOtusCommand", "GetOtusCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int RemoveOtuLabelsCommand::execute(){
+int GetOtusCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         //get labels you want to keep
-		otulabels = util.readAccnos(accnosfile);
+		labels = util.readAccnos(accnosfile);
         //simplfy labels
         set<string> newLabels;
-        for (set<string>::iterator it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
-        otulabels = newLabels;
+        for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
+        labels = newLabels;
         
-        if (m->getDebug()) { m->mothurOut("[DEBUG]: numlabels = " + toString(otulabels.size()) + "\n"); }
-		
 		if (m->getControl_pressed()) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
@@ -277,19 +190,20 @@ int RemoveOtuLabelsCommand::execute(){
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "GetOtuLabelsCommand", "execute");
+		m->errorOut(e, "GetOtusCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readClassifyOtu(){
+int GetOtusCommand::readClassifyOtu(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
-		map<string, string> variables; 
+        map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
         variables["[extension]"] = util.getExtension(constaxonomyfile);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
+		
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		
@@ -297,10 +211,10 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
 		util.openInputFile(constaxonomyfile, in);
 		
 		bool wroteSomething = false;
-		int removedCount = 0;
+		int selectedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -313,31 +227,33 @@ int RemoveOtuLabelsCommand::readClassifyOtu(){
             in >> otu >> size; util.gobble(in);
             tax = util.getline(in); util.gobble(in);
             
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
+            if (m->getDebug()) { m->mothurOut("Otu=" + otu + ", size=" + toString(size) + ", tax=" + tax + "\n"); }
             
-            if (otulabels.count(util.getSimpleLabel(otu)) == 0) {
+            if (labels.count(util.getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
+				selectedCount++;
+                
                 out << otu << '\t' << size << '\t' << tax << endl;
-            }else {  removedCount++;  }
+            }
         }
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["constaxonomy"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " otus from your constaxonomy file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " otus from your constaxonomy file.\n"); 
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readClassifyOtu");
+		m->errorOut(e, "GetOtusCommand", "readClassifyOtu");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readOtuAssociation(){
+int GetOtusCommand::readOtuAssociation(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(otucorrfile);  }
@@ -345,6 +261,7 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(otucorrfile));
         variables["[extension]"] = util.getExtension(otucorrfile);
 		string outputFileName = getOutputFileName("otucorr", variables);
+
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		
@@ -352,10 +269,10 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
 		util.openInputFile(otucorrfile, in);
 		
 		bool wroteSomething = false;
-		int removedCount = 0;
+		int selectedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -367,30 +284,31 @@ int RemoveOtuLabelsCommand::readOtuAssociation(){
             in >> otu1 >> otu2;
             string line = util.getline(in); util.gobble(in);
             
-            if ((otulabels.count(util.getSimpleLabel(otu1)) == 0) && (otulabels.count(util.getSimpleLabel(otu2)) == 0)){
+            if ((labels.count(util.getSimpleLabel(otu1)) != 0) && (labels.count(util.getSimpleLabel(otu2)) != 0)){
 				wroteSomething = true;
+				selectedCount++;
                 
                 out << otu1 << '\t' << otu2 << '\t' << line << endl;
-            }else { removedCount++; }
+            }
         }
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["otucorr"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " lines from your otu.corr file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " lines from your otu.corr file.\n"); 
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readOtuAssociation");
+		m->errorOut(e, "GetOtusCommand", "readOtuAssociation");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readCorrAxes(){
+int GetOtusCommand::readCorrAxes(){
 	try {
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(corraxesfile);  }
@@ -398,6 +316,7 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(corraxesfile));
         variables["[extension]"] = util.getExtension(corraxesfile);
 		string outputFileName = getOutputFileName("corraxes", variables);
+
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		
@@ -406,10 +325,10 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
 		util.openInputFile(corraxesfile, in);
 		
 		bool wroteSomething = false;
-		int removedCount = 0;
+		int selectedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -420,53 +339,54 @@ int RemoveOtuLabelsCommand::readCorrAxes(){
             in >> otu;
             string line = util.getline(in); util.gobble(in);
             
-            if (otulabels.count(util.getSimpleLabel(otu)) == 0) {
+            if (labels.count(util.getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
+				selectedCount++;
                 
                 out << otu << '\t' << line << endl;
-            }else { removedCount++; }
+            }
         }
         in.close();
         out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file only contains labels from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any labels from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["corraxes"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " lines from your corr.axes file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " lines from your corr.axes file.\n"); 
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readCorrAxes");
+		m->errorOut(e, "GetOtusCommand", "readCorrAxes");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readShared(){
+int GetOtusCommand::readShared(){
 	try {
         
         SharedRAbundVectors* lookup = getShared();
         
         if (m->getControl_pressed()) { delete lookup; return 0; }
-        
+          
         vector<string> newLabels;
-
+        
         bool wroteSomething = false;
-        int numRemoved = 0;
+        int numSelected = 0;
         vector<int> binsToRemove;
         for (int i = 0; i < lookup->getNumBins(); i++) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
             //is this otu on the list
-            if (otulabels.count(util.getSimpleLabel(lookup->getOTUNames()[i])) == 0) {
-                wroteSomething = true;
-            }else { numRemoved++; binsToRemove.push_back(i); }
+            if (labels.count(util.getSimpleLabel(lookup->getOTUNames()[i])) != 0) {
+                numSelected++; wroteSomething = true;
+            }else { binsToRemove.push_back(i);   }
         }
         
-        lookup->removeOTUs(binsToRemove, true);
-
+        lookup->removeOTUs(binsToRemove);
+        
         string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables; 
@@ -477,22 +397,23 @@ int RemoveOtuLabelsCommand::readShared(){
         outputTypes["shared"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         ofstream out; util.openOutputFile(outputFileName, out);  bool printHeaders = true;
         lookup->print(out, printHeaders);
-        out.close();
+		out.close();
         
         delete lookup;
         
-        if (wroteSomething == false) { m->mothurOut("Your file contains only OTUs from the .accnos file.\n");  }
-		m->mothurOut("Removed " + toString(numRemoved) + " OTUs from your shared file.\n");
+        if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file.\n");  }
+
+		m->mothurOut("Selected " + toString(numSelected) + " OTUs from your shared file.\n"); 
         
         return 0;
     }
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "readShared");
+		m->errorOut(e, "GetOtusCommand", "readShared");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::readList(){
+int GetOtusCommand::readList(){
 	try {
         getListVector();
         
@@ -500,7 +421,7 @@ int RemoveOtuLabelsCommand::readList(){
         
         ListVector newList;
         newList.setLabel(list->getLabel());
-        int removedCount = 0;
+        int selectedCount = 0;
         bool wroteSomething = false;
         
         vector<string> binLabels = list->getLabels();
@@ -509,10 +430,11 @@ int RemoveOtuLabelsCommand::readList(){
             
             if (m->getControl_pressed()) { delete list; return 0;}
             
-            if (otulabels.count(util.getSimpleLabel(binLabels[i])) == 0) {
+            if (labels.count(util.getSimpleLabel(binLabels[i])) != 0) {
+				selectedCount++;
                 newList.push_back(list->get(i));
                 newLabels.push_back(binLabels[i]);
-            }else { removedCount++; }
+            }
         }
         
         string thisOutputDir = outputDir;
@@ -534,20 +456,20 @@ int RemoveOtuLabelsCommand::readList(){
         }
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file contains only OTUs from the .accnos file."); m->mothurOutEndLine();  }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any OTUs from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
-		m->mothurOut("Removed " + toString(removedCount) + " OTUs from your list file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(selectedCount) + " OTUs from your list file.\n"); 
         
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "RemoveOtuLabelsCommand", "readList");
-        exit(1);
+            m->errorOut(e, "GetOtusCommand", "readList");
+            exit(1);
+        }
     }
-}
 //**********************************************************************************************************************
-int RemoveOtuLabelsCommand::getListVector(){
+int GetOtusCommand::getListVector(){
 	try {
 		InputData input(listfile, "list", nullVector);
 		list = input.getListVector();
@@ -612,86 +534,76 @@ int RemoveOtuLabelsCommand::getListVector(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getListVector");	
+		m->errorOut(e, "GetOtusCommand", "getListVector");	
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-SharedRAbundVectors* RemoveOtuLabelsCommand::getShared(){
+SharedRAbundVectors* GetOtusCommand::getShared(){
 	try {
-		InputData input(sharedfile, "sharedfile",nullVector);
+		InputData input(sharedfile, "sharedfile", nullVector);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
 		string lastLabel = lookup->getLabel();
-        
+		
 		if (label == "") { label = lastLabel;  return lookup; }
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> labels; labels.insert(label);
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && (userLabels.size() != 0)) {
-            if (m->getControl_pressed()) {   delete lookup; return NULL;  }
-            
-            if(labels.count(lookup->getLabel()) == 1){
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-                break;
-            }
-            
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> labels; labels.insert(label);
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup != NULL) && (userLabels.size() != 0)) {
+			if (m->getControl_pressed()) {   delete lookup; return NULL;  }
+			
+			if(labels.count(lookup->getLabel()) == 1){
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+				break;
+			}
+			
+			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup->getLabel();
+				
                 delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-                break;
-            }
-            
-            lastLabel = lookup->getLabel();
-            
-            //get next line to process
-            //prevent memory leak
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				
+				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+				
+				//restore real lastlabel to save below
+				lookup->setLabels(saveLabel);
+				break;
+			}
+			
+			lastLabel = lookup->getLabel();
+			
+			//get next line to process
+			//prevent memory leak
             delete lookup;
-            lookup = input.getSharedRAbundVectors();
-        }
-        
-        
-        if (m->getControl_pressed()) {  return 0;  }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundVectors(lastLabel);
-        }	
+			lookup = input.getSharedRAbundVectors();
+		}
+		
+		
+		if (m->getControl_pressed()) {  return 0;  }
+		
+		//output error messages about any remaining user labels
+		bool needToRun = false;
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
+			m->mothurOut("Your file does not include the label " + *it); 
+            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
+			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
+		}
+		
+		//run last label if you need to
+		if (needToRun )  {
+			delete lookup;
+			lookup = input.getSharedRAbundVectors(lastLabel);
+		}	
 		
 		return lookup;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "RemoveOtuLabelsCommand", "getShared");	
+		m->errorOut(e, "GetOtusCommand", "getShared");	
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-
-
-

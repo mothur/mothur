@@ -339,7 +339,7 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 		//for each sequence
 		for(int i = start; i < end; i++){
 		
-			m->mothurOut("Processing sequence " + toString(i)); m->mothurOutEndLine();
+			m->mothurOut("Processing sequence " + toString(i)+ "\n");
 			Sequence* query = new Sequence(seqs[i]->getName(), seqs[i]->getAligned());
 			
 			//compare to every other sequence in template

@@ -34,7 +34,14 @@ vector<string> AlignCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["alignreport"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
 
+        abort = false; calledHelp = false;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -119,74 +126,19 @@ string AlignCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-AlignCommand::AlignCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["alignreport"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignCommand", "AlignCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 AlignCommand::AlignCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
+			OptionParser parser(option, setParameters());
+			map<string, string> parameters = parser.getParameters();
 			
-			OptionParser parser(option);
-			map<string, string> parameters = parser.getParameters(); 
-			
-			ValidParameters validParameter("align.seqs");
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["alignreport"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
+            ValidParameters validParameter;
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-
-				//user has given a template file
-                it = parameters.find("reference");
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-			}
 
             templateFileName = validParameter.validFile(parameters, "reference");
             if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
@@ -200,7 +152,6 @@ AlignCommand::AlignCommand(string option)  {
             }
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
-
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

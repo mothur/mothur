@@ -57,6 +57,17 @@ vector<string> ClusterSplitCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -154,124 +165,22 @@ string ClusterSplitCommand::getCommonQuestions(){
     }
 }
 //**********************************************************************************************************************
-ClusterSplitCommand::ClusterSplitCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-		outputTypes["sabund"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-        outputTypes["name"] = tempOutNames;
-        outputTypes["file"] = tempOutNames;
-        outputTypes["sensspec"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterSplitCommand::ClusterSplitCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
 		format = "";
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("cluster.split");
-		
-			//check to make sure all parameters are valid for command
-			map<string,string>::iterator it;
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-					abort = true;
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			outputTypes["sabund"] = tempOutNames;
-			outputTypes["column"] = tempOutNames;
-            outputTypes["file"] = tempOutNames;
-            outputTypes["sensspec"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			ValidParameters validParameter;
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-				//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-			}
 			
 			//check for required parameters
 			file = validParameter.validFile(parameters, "file");
@@ -316,33 +225,33 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip, then fasta
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {  format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {  format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 					else { 
 						fastafile = current->getFastaFile(); 
-						if (fastafile != "") {   m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+						if (fastafile != "") {   m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
 						else { 
-							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a file, phylip or a column or fastafile."); m->mothurOutEndLine();
+							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a file, phylip or a column or fastafile.\n"); 
 							abort = true; 
 						}
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "") && (file != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: file, fasta, phylip or column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "") && (file != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: file, fasta, phylip or column.\n");  abort = true; }
             
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			if (columnfile != "") {
 				if ((namefile == "") && (countfile == "")) { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format.\n");  
                             abort = true; 
                         }	
 					}	
@@ -352,21 +261,21 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (fastafile != "") {
 				if (taxFile == "") { 
 					taxFile = current->getTaxonomyFile(); 
-					if (taxFile != "") {  m->mothurOut("Using " + taxFile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+					if (taxFile != "") {  m->mothurOut("Using " + taxFile + " as input file for the taxonomy parameter.\n");  }
 					else { 
-						m->mothurOut("You need to provide a taxonomy file if you are if you are using a fasta file to generate the split."); m->mothurOutEndLine(); 
+						m->mothurOut("You need to provide a taxonomy file if you are if you are using a fasta file to generate the split.\n");  
 						abort = true; 
 					}	
 				}
 				
 				if ((namefile == "") && (countfile == "")) { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the fasta file to generate the split."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the fasta file to generate the split.\n");  
                             abort = true; 
                         }	
 					}	
@@ -416,12 +325,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             metricName = validParameter.valid(parameters, "metric");		if (metricName == "not found") { metricName = "mcc"; }
             
             if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
-            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr.\n");  abort = true; }
             
             initialize = validParameter.valid(parameters, "initialize");		if (initialize == "not found") { initialize = "singleton"; }
             
             if ((initialize == "singleton") || (initialize == "oneotu")){ }
-            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid initialization.  Valid initializations are singleton and oneotu.\n");  abort = true; }
 
 			method = validParameter.valid(parameters, "method");		if (method == "not found") { method = "opti";  }
             
@@ -452,7 +361,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             }
 			
             if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted") || (method == "agc") || (method == "dgc") || (method == "opti")) { }
-            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti."); m->mothurOutEndLine(); abort = true; }
+            else { m->mothurOut("[ERROR]: Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, weighted, agc, dgc and opti.\n");  abort = true; }
             
             if ((method == "agc") || (method == "dgc")) {
                 if (fastafile == "") { m->mothurOut("[ERROR]: You must provide a fasta file when using the agc or dgc clustering methods, aborting\n."); abort = true;}
@@ -466,9 +375,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             util.mothurConvert(temp, cutoff);
             
 			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
-			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta.\n");  abort = true; }
 			
-			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("[ERROR]: You need to provide a taxonomy file if you are going to use the classify splitmethod."); m->mothurOutEndLine(); abort = true;  }
+			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("[ERROR]: You need to provide a taxonomy file if you are going to use the classify splitmethod.\n");  abort = true;  }
 
 			temp = validParameter.valid(parameters, "showabund");
 			if (temp == "not found") { temp = "T"; }
@@ -529,7 +438,7 @@ int ClusterSplitCommand::execute(){
                 }
                 
                 m->mothurOutEndLine();
-                m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+                m->mothurOut("Output File Names: \n"); 
                 for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
                 m->mothurOutEndLine();
                 
@@ -570,12 +479,12 @@ int ClusterSplitCommand::execute(){
                     delete listToMakeNameFile;
                     delete convert;
                     
-                    m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file."); m->mothurOutEndLine();
+                    m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file.\n"); 
                 }
                 if (m->getControl_pressed()) { return 0; }
                 
                 estart = time(NULL);
-                m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
+                m->mothurOut("Splitting the file...\n"); 
                 current->setMothurCalling(true);
             
                 //split matrix into non-overlapping groups
@@ -590,7 +499,7 @@ int ClusterSplitCommand::execute(){
                         split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "distance");
                     }
                 }
-                else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
+                else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta.\n");  return 0;		}
                 split->split();
                 if (fastafile != "") {  current->setFastaFile(fastafile);  }
 
@@ -608,7 +517,7 @@ int ClusterSplitCommand::execute(){
 				
                 if (m->getControl_pressed()) { return 0; }
                 
-                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
+                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file.\n"); 
                 estart = time(NULL);
 
                 if (!runCluster) {
@@ -1696,7 +1605,7 @@ int ClusterSplitCommand::runSensSpec() {
         outputTypes["sensspec"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
         m->mothurOut("/******************************************/\n"); 
-        m->mothurOut("Done.\n\n"); m->mothurOutEndLine();
+        m->mothurOut("Done.\n\n\n"); 
         
         ifstream in;
         util.openInputFile(outputFileName, in);

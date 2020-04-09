@@ -16,7 +16,6 @@ class RemoveDistsCommand : public Command {
 public:
 	
 	RemoveDistsCommand(string);	
-	RemoveDistsCommand();
 	~RemoveDistsCommand(){}
 	
 	vector<string> setParameters();

@@ -44,6 +44,14 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter pmaxlen("maxlen", "Number", "", "10000", "", "", "","",false,false); parameters.push_back(pmaxlen);
 		CommandParameter pucl("ucl", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pucl);
 		CommandParameter pqueryfract("queryfract", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pqueryfract);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["alns"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -116,93 +124,21 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraUchimeCommand::ChimeraUchimeCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-		outputTypes["alns"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraUchimeCommand", "ChimeraUchimeCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false; hasCount=false;
+		hasCount=false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("chimera.uchime");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			outputTypes["alns"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("group");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("uchime");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["uchime"] = inputDir + it->second;        }
-                }
-            }
-            
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();
@@ -240,15 +176,11 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
             
-            it = parameters.find("reference");
+            map<string, string>::iterator it = parameters.find("reference");
             //user has given a template file
             if(it != parameters.end()){
                 if (it->second == "self") {  templatefile = "self";  }
                 else {
-                    string path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-                    
                     templatefile = validParameter.validFile(parameters, "reference");
                     if (templatefile == "not open") { abort = true; }
                     else if (templatefile == "not found") { //check for saved reference sequences
@@ -262,7 +194,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			processors = current->setProcessors(temp);
 			
 			abskew = validParameter.valid(parameters, "abskew");	if (abskew == "not found"){	useAbskew = false;  abskew = "1.9";	}else{  useAbskew = true;  }
-			if (useAbskew && templatefile != "self") { m->mothurOut("The abskew parameter is only valid with template=self, ignoring."); m->mothurOutEndLine(); useAbskew = false; }
+			if (useAbskew && templatefile != "self") { m->mothurOut("The abskew parameter is only valid with template=self, ignoring.\n");  useAbskew = false; }
 			
 			temp = validParameter.valid(parameters, "chimealns");			if (temp == "not found") { temp = "f"; }
 			chimealns = util.isTrue(temp); 
@@ -285,7 +217,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
 			ucl = util.isTrue(temp);
 			
 			queryfract = validParameter.valid(parameters, "queryfract");			if (queryfract == "not found")		{ useQueryfract = false; queryfract = "0.5";		}	else{ useQueryfract = true;		}
-			if (!ucl && useQueryfract) { m->mothurOut("queryfact may only be used when ucl=t, ignoring."); m->mothurOutEndLine(); useQueryfract = false; }
+			if (!ucl && useQueryfract) { m->mothurOut("queryfact may only be used when ucl=t, ignoring.\n");  useQueryfract = false; }
 			
 			temp = validParameter.valid(parameters, "skipgaps");					if (temp == "not found") { temp = "t"; }
 			skipgaps = util.isTrue(temp); 
@@ -1115,8 +1047,8 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
 							else { out3 << line[i]; }
 						}
 						
-						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
-						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + "."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+						if (spot == (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + ".\n");  m->setControl_pressed(true); }
+						else if ((spot+2) > (line.length() - 1)) { m->mothurOut("[ERROR]: could not line sequence name in line " + line + ".\n");  m->setControl_pressed(true); }
 						else {
 							out << line[spot] << line[spot+1];
 							

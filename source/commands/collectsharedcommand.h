@@ -23,7 +23,6 @@ class CollectSharedCommand : public Command {
 	
 public:
 	CollectSharedCommand(string);	
-	CollectSharedCommand();	
 	~CollectSharedCommand();
 	
 	vector<string> setParameters();

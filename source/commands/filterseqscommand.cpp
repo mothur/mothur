@@ -23,6 +23,12 @@ vector<string> FilterSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["filter"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -73,82 +79,31 @@ string FilterSeqsCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-FilterSeqsCommand::FilterSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["filter"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
-		exit(1);
-	}
-}
 /**************************************************************************************/
 FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;  recalced = false;
-		filterFileName = "";
+		recalced = false; filterFileName = "";
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("filter.seqs");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["filter"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("hard");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["hard"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
+			ValidParameters validParameter;
 			fasta = validParameter.valid(parameters, "fasta");
 			if (fasta == "not found") { 				
 				fasta = current->getFastaFile(); 
 				if (fasta != "") { 
                     fastafileNames.push_back(fasta);  
-                    m->mothurOut("Using " + fasta + " as input file for the fasta parameter."); m->mothurOutEndLine();
+                    m->mothurOut("Using " + fasta + " as input file for the fasta parameter.\n");
                     string simpleName = util.getSimpleName(fasta);
                     filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
                 }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}
 			else { 
 				util.splitAtChar(fasta, fastafileNames, '|');
@@ -159,9 +114,9 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 					bool ignore = false;
 					if (fastafileNames[i] == "current") { 
 						fastafileNames[i] = current->getFastaFile(); 
-						if (fastafileNames[i] != "") {  m->mothurOut("Using " + fastafileNames[i] + " as input file for the fasta parameter where you had given current."); m->mothurOutEndLine(); }
+						if (fastafileNames[i] != "") {  m->mothurOut("Using " + fastafileNames[i] + " as input file for the fasta parameter where you had given current.\n");  }
 						else { 	
-							m->mothurOut("You have no current fastafile, ignoring current."); m->mothurOutEndLine(); ignore=true; 
+							m->mothurOut("You have no current fastafile, ignoring current.\n"); ignore=true;
 							//erase from file list
 							fastafileNames.erase(fastafileNames.begin()+i);
 							i--;
@@ -179,7 +134,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
                 }
 				
 				//make sure there is at least one valid file left
-				if (fastafileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
+				if (fastafileNames.size() == 0) { m->mothurOut("no valid files.\n");  abort = true; }
 			}
 			
 			if (!abort) {
@@ -191,7 +146,6 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			}
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			
 			string temp;
 			hard = validParameter.validFile(parameters, "hard");				if (hard == "not found") { hard = ""; }
 			else if (hard == "not open") { hard = ""; abort = true; }	

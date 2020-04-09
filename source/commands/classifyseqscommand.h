@@ -36,7 +36,6 @@ class ClassifySeqsCommand : public Command {
 	
 public:
 	ClassifySeqsCommand(string);
-	ClassifySeqsCommand();
 	~ClassifySeqsCommand();
 	
 	vector<string> setParameters();

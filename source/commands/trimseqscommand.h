@@ -24,7 +24,6 @@
 class TrimSeqsCommand : public Command {
 public:
 	TrimSeqsCommand(string);
-	TrimSeqsCommand();
 	~TrimSeqsCommand(){}
 	
 	vector<string> setParameters();

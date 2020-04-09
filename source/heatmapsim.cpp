@@ -18,22 +18,25 @@
 #include "sharedthetan.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
+#include "sharedrabundvectors.hpp"
 
 //**********************************************************************************************************************
 HeatMapSim::HeatMapSim(string dir, string i, int f) : outputDir(dir), inputfile(i), fontSize(f) {
 		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
-vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs, vector<string> groups) {
+vector<string> HeatMapSim::getPic(SharedRAbundVectors*& allLookup, vector<Calculator*> calcs, vector<string> groups) {
 	try {
 		EstOutput data;
 		vector<double> sims;
 		vector<string> outputNames;
+        
+        vector<SharedRAbundVector*> lookup = allLookup->getSharedRAbundVectors();
 				
 		//make file for each calculator selected
 		for (int k = 0; k < calcs.size(); k++) {
 		
-			if (m->getControl_pressed()) { return outputNames; }
+			if (m->getControl_pressed()) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return outputNames; }
 		
 			string filenamesvg = outputDir + util.getRootName(util.getSimpleName(inputfile)) + lookup[0]->getLabel() + "." + calcs[k]->getName() + ".heatmap.sim.svg";
 			util.openOutputFile(filenamesvg, outsvg);
@@ -62,7 +65,7 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 			for(int i = 0; i < (lookup.size()-1); i++){
 				for(int j = (i+1); j < lookup.size(); j++){
 						
-						if (m->getControl_pressed()) { outsvg.close(); return outputNames; }
+						if (m->getControl_pressed()) { outsvg.close(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return outputNames; }
 						
 						vector<SharedRAbundVector*> subset;
 						subset.push_back(lookup[i]);  subset.push_back(lookup[j]); 
@@ -104,6 +107,8 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 
 		}
 		
+        for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+        
 		return outputNames;
 	}
 	catch(exception& e) {

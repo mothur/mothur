@@ -45,6 +45,8 @@ vector<string> RenameFileCommand::setParameters(){
         CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -73,20 +75,6 @@ string RenameFileCommand::getHelpString(){
         exit(1);
     }
 }
-
-
-//**********************************************************************************************************************
-RenameFileCommand::RenameFileCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "RenameFileCommand", "RenameFileCommand");
-        exit(1);
-    }
-}
 //**********************************************************************************************************************
 string RenameFileCommand::getOutputPattern(string type) {
     try {
@@ -102,237 +90,15 @@ string RenameFileCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 RenameFileCommand::RenameFileCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        
-        //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            //valid paramters for this command
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            map<string,string>::iterator it;
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("phylip");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("column");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["column"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("list");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["list"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("rabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("sabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("group");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("design");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["design"] = inputDir + it->second;		}
-                }
-                
-                
-                it = parameters.find("tree");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["tree"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("shared");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("input");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["input"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("relabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("qfile");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("sff");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["sff"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("oligos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("accnos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("taxonomy");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("flow");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["flow"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("biom");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["biom"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("summary");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["summary"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("file");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["file"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("constaxonomy");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-                }
-            }
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
             
             int numFiles = 0;
@@ -467,7 +233,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
             
             outputfile = validParameter.valid(parameters, "new");
             if (outputfile == "not found") {
-                if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name"); m->mothurOutEndLine();  abort=true; }
+                if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name\n");   abort=true; }
                 outputfile = "";
             }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  } }
             
@@ -619,7 +385,7 @@ int RenameFileCommand::execute(){
             renameOrCopy(inputfile, newName);
         }
         
-        m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
+        m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
         if (current->hasCurrentFiles()) {  current->printCurrentFiles(""); }
         
         return 0;	
@@ -691,15 +457,15 @@ string RenameFileCommand::renameOrCopy(string oldName, string newName){
             #endif
             
             string inputString = command + oldName + " " + newName;
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-            m->mothurOut("Running command: system(" + inputString + ")"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
+            m->mothurOut("Running command: system(" + inputString + ")\n"); 
             current->setMothurCalling(true);
             
             Command* systemCommand = new SystemCommand(inputString);
             systemCommand->execute();
             delete systemCommand;
             current->setMothurCalling(false);
-            m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+            m->mothurOut("/******************************************/\n"); 
         }
         
         return newName;

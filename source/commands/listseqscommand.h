@@ -17,7 +17,6 @@ class ListSeqsCommand : public Command {
 	public:
 	
 		ListSeqsCommand(string);
-		ListSeqsCommand();	
 		~ListSeqsCommand(){}
 	
 		vector<string> setParameters();

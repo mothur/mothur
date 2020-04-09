@@ -18,7 +18,6 @@ class FilterSeqsCommand : public Command {
 
 public:
 	FilterSeqsCommand(string);
-	FilterSeqsCommand();
 	~FilterSeqsCommand() {};
 	
 	vector<string> setParameters();

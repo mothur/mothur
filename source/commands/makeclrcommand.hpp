@@ -16,7 +16,6 @@ class MakeCLRCommand : public Command {
 
 public:
     MakeCLRCommand(string);
-    MakeCLRCommand();
     ~MakeCLRCommand() {}
     
     vector<string> setParameters();

@@ -19,7 +19,6 @@ class HelpCommand : public Command {
 	
 public:
 	HelpCommand(string);
-	HelpCommand() {}
 	~HelpCommand(){}
 	
 	vector<string> setParameters()	{ return outputNames;	} //dummy, doesn't really do anything	

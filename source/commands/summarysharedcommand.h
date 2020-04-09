@@ -62,7 +62,6 @@ class SummarySharedCommand : public Command {
 
 public:
 	SummarySharedCommand(string);
-	SummarySharedCommand();
 	~SummarySharedCommand() {}
 	
 	vector<string> setParameters();

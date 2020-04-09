@@ -24,6 +24,11 @@ vector<string> SummaryTaxCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -71,87 +76,19 @@ string SummaryTaxCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-SummaryTaxCommand::SummaryTaxCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryTaxCommand", "SummaryTaxCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
-
 SummaryTaxCommand::SummaryTaxCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+            OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["summary"] = tempOutNames;
-			
-			//check for required parameters
 			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") { 				
@@ -176,11 +113,11 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -197,7 +134,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
 
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
-            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n");  output = "detail"; }
 			
             temp = validParameter.valid(parameters, "threshold");			if (temp == "not found") { temp = "0"; }
             util.mothurConvert(temp, threshold);
@@ -266,7 +203,7 @@ int SummaryTaxCommand::execute(){
                 itNames = nameMap.find(name);
                 
                 if (itNames == nameMap.end()) {
-                    m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
+                    m->mothurOut(name + " is not in your name file please correct.\n");  exit(1);
                 }else{
                     for (int i = 0; i < itNames->second.size(); i++) {
                         taxaSum->addSeqToTree(itNames->second[i], newTax);  //add it as many times as there are identical seqs
@@ -301,7 +238,7 @@ int SummaryTaxCommand::execute(){
 		if (m->getControl_pressed()) {  util.mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n");  m->mothurOutEndLine();
 		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();

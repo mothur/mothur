@@ -19,7 +19,6 @@
 class EstimatorSingleCommand : public Command {
 public:
     EstimatorSingleCommand(string);
-    EstimatorSingleCommand();
     ~EstimatorSingleCommand(){}
     
     vector<string> setParameters();

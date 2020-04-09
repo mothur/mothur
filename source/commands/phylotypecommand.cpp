@@ -26,6 +26,13 @@ vector<string> PhylotypeCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["sabund"] = tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -73,86 +80,25 @@ string PhylotypeCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-PhylotypeCommand::PhylotypeCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["sabund"] = tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhylotypeCommand", "PhylotypeCommand");
-		exit(1);
-	}
-}
 /**********************************************************************************************************************/
 PhylotypeCommand::PhylotypeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["sabund"] = tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyFileName == "not found") { 
 				taxonomyFileName = current->getTaxonomyFile(); 
-				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+				if (taxonomyFileName != "") {  m->mothurOut("Using " + taxonomyFileName + " as input file for the taxonomy parameter.\n");  }
 				else { 
-					m->mothurOut("No valid current files. taxonomy is a required parameter."); m->mothurOutEndLine(); 
+					m->mothurOut("No valid current files. taxonomy is a required parameter.\n");  
 					abort = true; 
 				}
 			}else if (taxonomyFileName == "not open") { taxonomyFileName = ""; abort = true; }	
@@ -174,7 +120,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				outputDir += util.hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
 			}
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			string temp = validParameter.valid(parameters, "cutoff");
 			if (temp == "not found") { temp = "-1"; }
@@ -226,7 +172,7 @@ int PhylotypeCommand::execute(){
 		for (int i = 0; i < leaves.size(); i++)		{	currentNodes[leaves[i]] = leaves[i];	}
 		
 		bool done = false;
-		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree"); m->mothurOutEndLine();	done = true;	}
+		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree\n"); 	done = true;	}
 		
 		if (m->getControl_pressed()) { delete tree; return 0; }
 		
@@ -296,7 +242,7 @@ int PhylotypeCommand::execute(){
                                 map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
                                 
                                 if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
-                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+                                else { m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct.\n");  m->setControl_pressed(true);  }
                                 
                             }else{   name += names[i] + ",";	}
                         }

@@ -21,6 +21,12 @@ vector<string> PCACommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["pca"] = tempOutNames;
+        outputTypes["loadings"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -65,73 +71,18 @@ string PCACommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
-PCACommand::PCACommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["pca"] = tempOutNames;
-		outputTypes["loadings"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "PCACommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 PCACommand::PCACommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-	
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["pca"] = tempOutNames;
-			outputTypes["loadings"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
@@ -148,12 +99,12 @@ PCACommand::PCACommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputFile = sharedfile; mode = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputFile = sharedfile; mode = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") { inputFile = relabundfile; mode = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") { inputFile = relabundfile; mode = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a relabund or shared file."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a relabund or shared file.\n");  
 						abort = true;
 					}
 				}
@@ -169,7 +120,7 @@ PCACommand::PCACommand(string option)  {
 			metric = util.isTrue(temp); 
 			
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); } }
+			if (label == "not found") { label = ""; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  } }
 			else { util.splitAtDash(label, labels); }
 			
 			groups = validParameter.valid(parameters, "groups");			
@@ -203,7 +154,7 @@ int PCACommand::execute(){
 			input = new InputData(inputFile, "sharedfile", Groups);
 		}else if (mode == "relabund")	{ 
 			input = new InputData(inputFile, "relabund", Groups);
-		}else {  m->mothurOut("[ERROR]: filetype not recognized."); m->mothurOutEndLine();  return 0; }
+		}else {  m->mothurOut("[ERROR]: filetype not recognized.\n");   return 0; }
 		
 		SharedRAbundFloatVectors* lookupFloat = input->getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat->getLabel();

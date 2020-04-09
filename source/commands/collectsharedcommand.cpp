@@ -65,6 +65,51 @@ vector<string> CollectSharedCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+ 
+        vector<string> tempOutNames;
+        outputTypes["sharedchao"] = tempOutNames;
+        outputTypes["sharedsobs"] = tempOutNames;
+        outputTypes["sharedace"] = tempOutNames;
+        outputTypes["jabund"] = tempOutNames;
+        outputTypes["sorabund"] = tempOutNames;
+        outputTypes["jclass"] = tempOutNames;
+        outputTypes["sorclass"] = tempOutNames;
+        outputTypes["jest"] = tempOutNames;
+        outputTypes["sorest"] = tempOutNames;
+        outputTypes["thetayc"] = tempOutNames;
+        outputTypes["thetan"] = tempOutNames;
+        outputTypes["kstest"] = tempOutNames;
+        outputTypes["whittaker"] = tempOutNames;
+        outputTypes["sharednseqs"] = tempOutNames;
+        outputTypes["ochiai"] = tempOutNames;
+        outputTypes["anderberg"] = tempOutNames;
+        outputTypes["kulczynski"] = tempOutNames;
+        outputTypes["kulczynskicody"] = tempOutNames;
+        outputTypes["lennon"] = tempOutNames;
+        outputTypes["morisitahorn"] = tempOutNames;
+        outputTypes["braycurtis"] = tempOutNames;
+        outputTypes["odum"] = tempOutNames;
+        outputTypes["canberra"] = tempOutNames;
+        outputTypes["structeuclidean"] = tempOutNames;
+        outputTypes["structchord"] = tempOutNames;
+        outputTypes["hellinger"] = tempOutNames;
+        outputTypes["manhattan"] = tempOutNames;
+        outputTypes["structpearson"] = tempOutNames;
+        outputTypes["soergel"] = tempOutNames;
+        outputTypes["spearman"] = tempOutNames;
+        outputTypes["structkulczynski"] = tempOutNames;
+        outputTypes["structchi2"] = tempOutNames;
+        outputTypes["speciesprofile"] = tempOutNames;
+        outputTypes["hamming"] = tempOutNames;
+        outputTypes["gower"] = tempOutNames;
+        outputTypes["memchi2"] = tempOutNames;
+        outputTypes["memchord"] = tempOutNames;
+        outputTypes["memeuclidean"] = tempOutNames;
+        outputTypes["mempearson"] = tempOutNames;
+        outputTypes["jsd"] = tempOutNames;
+        outputTypes["rjsd"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -155,152 +200,28 @@ string CollectSharedCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-CollectSharedCommand::CollectSharedCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["sharedchao"] = tempOutNames;
-		outputTypes["sharedsobs"] = tempOutNames;
-		outputTypes["sharedace"] = tempOutNames;
-		outputTypes["jabund"] = tempOutNames;
-		outputTypes["sorabund"] = tempOutNames;
-		outputTypes["jclass"] = tempOutNames;
-		outputTypes["sorclass"] = tempOutNames;
-		outputTypes["jest"] = tempOutNames;
-		outputTypes["sorest"] = tempOutNames;
-		outputTypes["thetayc"] = tempOutNames;
-		outputTypes["thetan"] = tempOutNames;
-		outputTypes["kstest"] = tempOutNames;
-		outputTypes["whittaker"] = tempOutNames;
-		outputTypes["sharednseqs"] = tempOutNames;
-		outputTypes["ochiai"] = tempOutNames;
-		outputTypes["anderberg"] = tempOutNames;
-		outputTypes["kulczynski"] = tempOutNames;
-		outputTypes["kulczynskicody"] = tempOutNames;
-		outputTypes["lennon"] = tempOutNames;
-		outputTypes["morisitahorn"] = tempOutNames;
-		outputTypes["braycurtis"] = tempOutNames;
-		outputTypes["odum"] = tempOutNames;
-		outputTypes["canberra"] = tempOutNames;
-		outputTypes["structeuclidean"] = tempOutNames;
-		outputTypes["structchord"] = tempOutNames;
-		outputTypes["hellinger"] = tempOutNames;
-		outputTypes["manhattan"] = tempOutNames;
-		outputTypes["structpearson"] = tempOutNames;
-		outputTypes["soergel"] = tempOutNames;
-		outputTypes["spearman"] = tempOutNames;
-		outputTypes["structkulczynski"] = tempOutNames;
-		outputTypes["structchi2"] = tempOutNames;
-		outputTypes["speciesprofile"] = tempOutNames;
-		outputTypes["hamming"] = tempOutNames;
-		outputTypes["gower"] = tempOutNames;
-		outputTypes["memchi2"] = tempOutNames;
-		outputTypes["memchord"] = tempOutNames;
-		outputTypes["memeuclidean"] = tempOutNames;
-		outputTypes["mempearson"] = tempOutNames;
-        outputTypes["jsd"] = tempOutNames;
-        outputTypes["rjsd"] = tempOutNames;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters=parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-	
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["sharedchao"] = tempOutNames;
-			outputTypes["sharedsobs"] = tempOutNames;
-			outputTypes["sharedace"] = tempOutNames;
-			outputTypes["jabund"] = tempOutNames;
-			outputTypes["sorabund"] = tempOutNames;
-			outputTypes["jclass"] = tempOutNames;
-			outputTypes["sorclass"] = tempOutNames;
-			outputTypes["jest"] = tempOutNames;
-			outputTypes["sorest"] = tempOutNames;
-			outputTypes["thetayc"] = tempOutNames;
-			outputTypes["thetan"] = tempOutNames;
-			outputTypes["kstest"] = tempOutNames;
-			outputTypes["whittaker"] = tempOutNames;
-			outputTypes["sharednseqs"] = tempOutNames;
-			outputTypes["ochiai"] = tempOutNames;
-			outputTypes["anderberg"] = tempOutNames;
-			outputTypes["kulczynski"] = tempOutNames;
-			outputTypes["kulczynskicody"] = tempOutNames;
-			outputTypes["lennon"] = tempOutNames;
-			outputTypes["morisitahorn"] = tempOutNames;
-			outputTypes["braycurtis"] = tempOutNames;
-			outputTypes["odum"] = tempOutNames;
-			outputTypes["canberra"] = tempOutNames;
-			outputTypes["structeuclidean"] = tempOutNames;
-			outputTypes["structchord"] = tempOutNames;
-			outputTypes["hellinger"] = tempOutNames;
-			outputTypes["manhattan"] = tempOutNames;
-			outputTypes["structpearson"] = tempOutNames;
-			outputTypes["soergel"] = tempOutNames;
-			outputTypes["spearman"] = tempOutNames;
-			outputTypes["structkulczynski"] = tempOutNames;
-			outputTypes["speciesprofile"] = tempOutNames;
-			outputTypes["structchi2"] = tempOutNames;
-			outputTypes["hamming"] = tempOutNames;
-			outputTypes["gower"] = tempOutNames;
-			outputTypes["memchi2"] = tempOutNames;
-			outputTypes["memchord"] = tempOutNames;
-			outputTypes["memeuclidean"] = tempOutNames;
-			outputTypes["mempearson"] = tempOutNames;
-            outputTypes["jsd"] = tempOutNames;
-            outputTypes["rjsd"] = tempOutNames;
-			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-			}
-			
-			//get shared file
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }	
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
 			
@@ -500,103 +421,34 @@ int CollectSharedCommand::execute(){
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
-		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
-	
-		InputData input(sharedfile, "sharedfile", Groups);
-		SharedOrderVector* order = input.getSharedOrderVector();
-		string lastLabel = order->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-        Groups = order->getGroups();
+		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}
         
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					delete order; return 0;
-			}
-
-			if(allLines == 1 || labels.count(order->getLabel()) == 1){
-			
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				//create collectors curve
-                util.mothurRandomShuffle(*order);
-				Collect cCurve(order, cDisplays);
-				cCurve.getSharedCurve(freq);
-			
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
-			}
-			
-			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = order->getLabel();
-				
-				delete order;
-				order = input.getSharedOrderVector(lastLabel);
-                util.mothurRandomShuffle(*order);
-				
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				//create collectors curve
-                Collect cCurve(order, cDisplays);
-                cCurve.getSharedCurve(freq);
-				
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
-				
-				//restore real lastlabel to save below
-				order->setLabel(saveLabel);
-			}
-			
-			
-			lastLabel = order->getLabel();			
-			
-			//get next line to process
-			delete order;
-			order = input.getSharedOrderVector();
-		}
-		
-		if (m->getControl_pressed()) { 
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}   outputTypes.clear();
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					return 0;
-		}
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (order != NULL) {  delete order;  }
-			order = input.getSharedOrderVector(lastLabel);
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedOrderVector* order = util.getNextSharedOrder(input, allLines, userLabels, processedLabels, lastLabel);
+        
+        while (order != NULL) {
+            
+            if (m->getControl_pressed()) { delete order; break; }
+            
             util.mothurRandomShuffle(*order);
-			
-			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
             Collect cCurve(order, cDisplays);
             cCurve.getSharedCurve(freq);
-			
-			if (m->getControl_pressed()) { 
-				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}  outputTypes.clear();
-				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				delete order; 	return 0;
-			}
-
-			delete order;
-		}
-		
-		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
+            delete order;
+            
+            order = util.getNextSharedOrder(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+        
+         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); }  return 0; } 
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		
 		return 0;
 	}
 	catch(exception& e) {

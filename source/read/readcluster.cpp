@@ -84,7 +84,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
 		else { convert(numTest, nseqs); }
 		
 		rowToName[0] = name;
@@ -96,7 +96,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		}
 		else{
 			list = new ListVector(nameMap->getListVector());
-			if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+			if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 		}
         
 		char d;
@@ -142,7 +142,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					
 				}
 				else{
-					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 					
 					for(int j=0;j<i;j++){
 						
@@ -180,7 +180,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 					}
 				}
 				else{
-					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct\n");  }
 					
 					for(int j=0;j<nseqs;j++){
 						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
@@ -265,7 +265,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		string numTest;
 		in >> numTest >> name;
 		
-		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+		if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
 		else { convert(numTest, nseqs); }
 		
 		rowToName[0] = name;

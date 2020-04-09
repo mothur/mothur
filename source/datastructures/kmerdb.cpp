@@ -39,6 +39,9 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(), kmerSize(kSize) {
 		
 		maxKmer = power4s[kmerSize];
 		kmerLocations.resize(maxKmer+1);
+        
+        CurrentFile* current; current = CurrentFile::getInstance();
+        version = current->getVersion();
 		
 	}
 	catch(exception& e) {
@@ -48,7 +51,10 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(), kmerSize(kSize) {
 
 }
 /**************************************************************************************************/
-KmerDB::KmerDB() : Database() {}
+KmerDB::KmerDB() : Database() {
+    CurrentFile* current; current = CurrentFile::getInstance();
+    version = current->getVersion();
+}
 /**************************************************************************************************/
 
 KmerDB::~KmerDB(){}
@@ -133,7 +139,7 @@ void KmerDB::generateDB(){
 		util.openOutputFile(kmerDBName, kmerFile);					//	to a file
 		
 		//output version
-		kmerFile << "#" << current->getVersion() << endl;
+		kmerFile << "#" << version << endl;
 		
 		for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
 			kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with

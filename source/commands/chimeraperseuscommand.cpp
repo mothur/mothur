@@ -28,6 +28,13 @@ vector<string> ChimeraPerseusCommand::setParameters(){
 		CommandParameter pcutoff("cutoff", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pcutoff);
 		CommandParameter palpha("alpha", "Number", "", "-5.54", "", "", "","",false,false); parameters.push_back(palpha);
 		CommandParameter pbeta("beta", "Number", "", "0.33", "", "", "","",false,false); parameters.push_back(pbeta);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -81,86 +88,22 @@ string ChimeraPerseusCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraPerseusCommand::ChimeraPerseusCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPerseusCommand", "ChimeraPerseusCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 	try {
-		abort = false; calledHelp = false; 
         hasCount = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			
-			ValidParameters validParameter("chimera.perseus");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("group");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["group"] = inputDir + it->second;		}
-                }
-            }
-			
+
 			//check for required parameters
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();
@@ -184,7 +127,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
             if (countfile != "") { hasCount = true; }
             
 			//make sure there is at least one valid file left
-            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if (hasName && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
             if (!hasName && !hasCount) { 
                 //if there is a current name file, use it, else look for current count file
@@ -745,7 +688,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 			Sequence temp(in); util.gobble(in);
 			
 			it = nameMap.find(temp.getName());
-			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct."); m->mothurOutEndLine(); }
+			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct.\n");  }
 			else {
                 temp.setAligned(util.removeNs(temp.getUnaligned()));
 				sequences.push_back(seqData(temp.getName(), temp.getUnaligned(), it->second));

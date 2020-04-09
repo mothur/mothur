@@ -2,7 +2,7 @@
 #define Mothur_getotulabelscommand_h
 
 //
-//  getotulabelscommand.h
+//  getotuscommand.h
 //  Mothur
 //
 //  Created by Sarah Westcott on 5/21/12.
@@ -17,11 +17,10 @@
 
 /**************************************************************************************************/
 
-class GetOtuLabelsCommand : public Command {
+class GetOtusCommand : public Command {
 public:
-    GetOtuLabelsCommand(string);
-    GetOtuLabelsCommand();
-    ~GetOtuLabelsCommand(){}
+    GetOtusCommand(string);
+    ~GetOtusCommand(){}
     
     vector<string> setParameters();
     string getCommandName()			{ return "get.otus";          }

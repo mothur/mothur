@@ -21,6 +21,11 @@ vector<string> MakeLookupCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["lookup"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,88 +74,29 @@ string MakeLookupCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeLookupCommand::MakeLookupCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["lookup"] = tempOutNames; 
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MakeLookupCommand", "MakeLookupCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeLookupCommand::MakeLookupCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["lookup"] = tempOutNames; 
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                string path;
-				it = parameters.find("flow");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("error");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["error"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("reference");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-                
-            }
-                        
-			//check for parameters
             errorFileName = validParameter.validFile(parameters, "error");
 			if (errorFileName == "not open") { errorFileName = ""; abort = true; }
-			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (errorFileName == "not found") { errorFileName = ""; m->mothurOut("[ERROR]: error parameter is required.\n");   abort = true; }
 			
 			flowFileName = validParameter.validFile(parameters, "flow");
 			if (flowFileName == "not open") { flowFileName = ""; abort = true; }
-			else if (flowFileName == "not found") { flowFileName = ""; m->mothurOut("[ERROR]: flow parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (flowFileName == "not found") { flowFileName = ""; m->mothurOut("[ERROR]: flow parameter is required.\n");   abort = true; }
 			else {   current->setFlowFile(flowFileName);	}
 			
 			refFastaFileName = validParameter.validFile(parameters, "reference");
 			if (refFastaFileName == "not open") { abort = true; }
-			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required."); m->mothurOutEndLine();  abort = true; }
+			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required.\n");   abort = true; }
                       
             //if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){

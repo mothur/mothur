@@ -20,6 +20,11 @@ vector<string> SummaryQualCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -62,84 +67,24 @@ string SummaryQualCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-SummaryQualCommand::SummaryQualCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryQualCommand", "SummaryQualCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
-
 SummaryQualCommand::SummaryQualCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("qfile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["summary"] = tempOutNames;
-			
-			//check for required parameters
 			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { qualfile = ""; abort = true; }
 			else if (qualfile == "not found") { 				
 				qualfile = current->getQualFile(); 
-				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current quality file and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (qualfile != "") { m->mothurOut("Using " + qualfile + " as input file for the qfile parameter.\n");  }
+				else { 	m->mothurOut("You have no current quality file and the qfile parameter is required.\n");  abort = true; }
 			}else { current->setQualFile(qualfile); }	
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -152,7 +97,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	

@@ -56,6 +56,11 @@ vector<string> SummaryCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        
+        abort = false; calledHelp = false;  allLines = true;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -105,86 +110,17 @@ string SummaryCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SummaryCommand::SummaryCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SummaryCommand", "SummaryCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 SummaryCommand::SummaryCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
-		//allow user to run help
 		if(option == "help") {  help();  abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["summary"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("rabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("sabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
@@ -306,14 +242,12 @@ int SummaryCommand::execute(){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		int numLines = 0;
-		int numCols = 0;
+		int numLines = 0; int numCols = 0;
 		map<string, string> groupIndex;
         
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			numLines = 0;
-			numCols = 0;
+			numLines = 0; numCols = 0;
 			
             map<string, string> variables; 
             variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
@@ -321,80 +255,14 @@ int SummaryCommand::execute(){
             variables["[tag]"] = "ave-std";
             string fileNameAve = getOutputFileName("summary",variables);
             
-			if (inputFileNames.size() > 1) {
-				m->mothurOut("\nProcessing group " + groups[p] + "\n\n");
-                groupIndex[fileNameRoot] = groups[p];
-			}
+			if (inputFileNames.size() > 1) { m->mothurOut("\nProcessing group " + groups[p] + "\n\n"); groupIndex[fileNameRoot] = groups[p]; }
 			
-			sumCalculators.clear();
-			
-			ValidCalculators validCalculator;
-			
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("summary", Estimators[i]) ) { 
-					if(Estimators[i] == "sobs"){
-						sumCalculators.push_back(new Sobs());
-					}else if(Estimators[i] == "chao"){
-						sumCalculators.push_back(new Chao1());
-					}else if(Estimators[i] == "coverage"){
-						sumCalculators.push_back(new Coverage());
-					}else if(Estimators[i] == "geometric"){
-						sumCalculators.push_back(new Geom());
-					}else if(Estimators[i] == "logseries"){
-						sumCalculators.push_back(new LogSD());
-					}else if(Estimators[i] == "qstat"){
-						sumCalculators.push_back(new QStat());
-					}else if(Estimators[i] == "bergerparker"){
-						sumCalculators.push_back(new BergerParker());
-					}else if(Estimators[i] == "bstick"){
-						sumCalculators.push_back(new BStick());
-					}else if(Estimators[i] == "ace"){
-						if(abund < 5)
-							abund = 10;
-						sumCalculators.push_back(new Ace(abund));
-					}else if(Estimators[i] == "jack"){
-						sumCalculators.push_back(new Jackknife());
-					}else if(Estimators[i] == "shannon"){
-						sumCalculators.push_back(new Shannon());
-					}else if(Estimators[i] == "shannoneven"){
-						sumCalculators.push_back(new ShannonEven());
-                    }else if(Estimators[i] == "shannonrange"){
-						sumCalculators.push_back(new RangeShannon(alpha));
-					}else if(Estimators[i] == "npshannon"){
-						sumCalculators.push_back(new NPShannon());
-					}else if(Estimators[i] == "heip"){
-						sumCalculators.push_back(new Heip());
-					}else if(Estimators[i] == "smithwilson"){
-						sumCalculators.push_back(new SmithWilson());
-					}else if(Estimators[i] == "simpson"){
-						sumCalculators.push_back(new Simpson());
-					}else if(Estimators[i] == "simpsoneven"){
-						sumCalculators.push_back(new SimpsonEven());
-					}else if(Estimators[i] == "invsimpson"){
-						sumCalculators.push_back(new InvSimpson());
-					}else if(Estimators[i] == "bootstrap"){
-						sumCalculators.push_back(new Bootstrap());
-					}else if (Estimators[i] == "nseqs") { 
-						sumCalculators.push_back(new NSeqs());
-					}else if (Estimators[i] == "goodscoverage") { 
-						sumCalculators.push_back(new GoodsCoverage());
-					}else if (Estimators[i] == "efron") { 
-						sumCalculators.push_back(new Efron(size));
-					}else if (Estimators[i] == "boneh") { 
-						sumCalculators.push_back(new Boneh(size));
-					}else if (Estimators[i] == "solow") { 
-						sumCalculators.push_back(new Solow(size));
-					}else if (Estimators[i] == "shen") { 
-						sumCalculators.push_back(new Shen(size, abund));
-					}
-				}
-			}
+            fillEstimators();
 			
 			//if the users entered no valid calculators don't execute command
 			if (sumCalculators.size() == 0) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 			
-			ofstream outputFileHandle;
-            ofstream outAve;
+			ofstream outputFileHandle; ofstream outAve;
             if (subsample) {
                 util.openOutputFile(fileNameAve, outAve);
                 outputNames.push_back(fileNameAve); outputTypes["summary"].push_back(fileNameAve);
@@ -409,101 +277,41 @@ int SummaryCommand::execute(){
                 outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
             }
 		
-			InputData input(inputFileNames[p], format, nullVector);
-			sabund = input.getSAbundVector();
-			string lastLabel = sabund->getLabel();
-		
-			for(int i=0;i<sumCalculators.size();i++){
-				if(sumCalculators[i]->getCols() == 1){
-					
+            for(int i=0;i<sumCalculators.size();i++){
+                if(sumCalculators[i]->getCols() == 1){
+                    
                     if (subsample) { outAve << '\t' << sumCalculators[i]->getName();  }
                     else { outputFileHandle << '\t' << sumCalculators[i]->getName();  }
-					numCols++;
-				}
-				else{
+                    numCols++;
+                }
+                else{
                     if (subsample) { outAve << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";  }
                     else { outputFileHandle << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci"; }
-					numCols += 3;
-				}
-			}
-			
+                    numCols += 3;
+                }
+            }
+            
             if (subsample) {  outAve << endl; }
             else {  outputFileHandle << endl; }
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
-			
+            
+			InputData input(inputFileNames[p], format, nullVector);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+            SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+            
 			if (m->getControl_pressed()) {  if (!subsample) { outputFileHandle.close(); } else { outAve.close(); } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
-			
-			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-                if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
-				
-				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
-					
-					m->mothurOut(sabund->getLabel()+"\n");
-					processedLabels.insert(sabund->getLabel());
-					userLabels.erase(sabund->getLabel());
-					
-                    process(sabund, outputFileHandle, outAve);
-                    
-                    if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }   for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;   return 0;  }
-					numLines++;
-				}
-				
-				if ((util.anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = sabund->getLabel();
-					
-					delete sabund;
-					sabund = input.getSAbundVector(lastLabel);
-					
-					m->mothurOut(sabund->getLabel()+"\n");
-					processedLabels.insert(sabund->getLabel());
-					userLabels.erase(sabund->getLabel());
-					
-                    process(sabund, outputFileHandle, outAve);
-                    
-                    if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
-					numLines++;
-					
-					//restore real lastlabel to save below
-					sabund->setLabel(saveLabel);
-				}		
-				
-				lastLabel = sabund->getLabel();			
-				
-				delete sabund;
-				sabund = input.getSAbundVector();
-			}
-			
-			if (m->getControl_pressed()) {  if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }   for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  return 0;  }
-
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + ".\n");
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + ".\n");
-				}
-			}
-			
-			//run last label if you need to
-			if (needToRun )  {
-				if (sabund != NULL) {	delete sabund;	}
-				sabund = input.getSAbundVector(lastLabel);
-				
-				m->mothurOut(sabund->getLabel()+"\n");
-                process(sabund, outputFileHandle, outAve);
-                
-                if (m->getControl_pressed()) { if (!subsample) { outputFileHandle.close(); } else { outAve.close(); }  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;  return 0;  }
-				numLines++;
-				delete sabund;
-			}
+            
+            while (sabund != NULL) {
+                       
+                if (m->getControl_pressed()) { delete sabund; break; }
+                       
+                process(sabund, outputFileHandle, outAve); delete sabund;
+                      
+                sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
+                numLines++;
+            }
 			
             if (subsample) { outAve.close(); }
             else { outputFileHandle.close(); }
@@ -531,6 +339,78 @@ int SummaryCommand::execute(){
 		m->errorOut(e, "SummaryCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void SummaryCommand::fillEstimators() {
+    try {
+        sumCalculators.clear();
+        
+        ValidCalculators validCalculator;
+        
+        for (int i=0; i<Estimators.size(); i++) {
+            if (validCalculator.isValidCalculator("summary", Estimators[i]) ) {
+                if(Estimators[i] == "sobs"){
+                    sumCalculators.push_back(new Sobs());
+                }else if(Estimators[i] == "chao"){
+                    sumCalculators.push_back(new Chao1());
+                }else if(Estimators[i] == "coverage"){
+                    sumCalculators.push_back(new Coverage());
+                }else if(Estimators[i] == "geometric"){
+                    sumCalculators.push_back(new Geom());
+                }else if(Estimators[i] == "logseries"){
+                    sumCalculators.push_back(new LogSD());
+                }else if(Estimators[i] == "qstat"){
+                    sumCalculators.push_back(new QStat());
+                }else if(Estimators[i] == "bergerparker"){
+                    sumCalculators.push_back(new BergerParker());
+                }else if(Estimators[i] == "bstick"){
+                    sumCalculators.push_back(new BStick());
+                }else if(Estimators[i] == "ace"){
+                    if(abund < 5)
+                        abund = 10;
+                    sumCalculators.push_back(new Ace(abund));
+                }else if(Estimators[i] == "jack"){
+                    sumCalculators.push_back(new Jackknife());
+                }else if(Estimators[i] == "shannon"){
+                    sumCalculators.push_back(new Shannon());
+                }else if(Estimators[i] == "shannoneven"){
+                    sumCalculators.push_back(new ShannonEven());
+                }else if(Estimators[i] == "shannonrange"){
+                    sumCalculators.push_back(new RangeShannon(alpha));
+                }else if(Estimators[i] == "npshannon"){
+                    sumCalculators.push_back(new NPShannon());
+                }else if(Estimators[i] == "heip"){
+                    sumCalculators.push_back(new Heip());
+                }else if(Estimators[i] == "smithwilson"){
+                    sumCalculators.push_back(new SmithWilson());
+                }else if(Estimators[i] == "simpson"){
+                    sumCalculators.push_back(new Simpson());
+                }else if(Estimators[i] == "simpsoneven"){
+                    sumCalculators.push_back(new SimpsonEven());
+                }else if(Estimators[i] == "invsimpson"){
+                    sumCalculators.push_back(new InvSimpson());
+                }else if(Estimators[i] == "bootstrap"){
+                    sumCalculators.push_back(new Bootstrap());
+                }else if (Estimators[i] == "nseqs") {
+                    sumCalculators.push_back(new NSeqs());
+                }else if (Estimators[i] == "goodscoverage") {
+                    sumCalculators.push_back(new GoodsCoverage());
+                }else if (Estimators[i] == "efron") {
+                    sumCalculators.push_back(new Efron(size));
+                }else if (Estimators[i] == "boneh") {
+                    sumCalculators.push_back(new Boneh(size));
+                }else if (Estimators[i] == "solow") {
+                    sumCalculators.push_back(new Solow(size));
+                }else if (Estimators[i] == "shen") {
+                    sumCalculators.push_back(new Shen(size, abund));
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SummaryCommand", "fillEstimators");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int SummaryCommand::process(SAbundVector*& sabund, ofstream& outputFileHandle, ofstream& outAve) {

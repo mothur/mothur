@@ -17,7 +17,6 @@ class MergeSfffilesCommand : public Command {
 	
 public:
 	MergeSfffilesCommand(string);
-	MergeSfffilesCommand();
 	~MergeSfffilesCommand(){}
 	
 	vector<string> setParameters();

@@ -32,6 +32,12 @@ vector<string> ClassifyOtuCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+       
+        vector<string> tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["taxsummary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -91,98 +97,20 @@ string ClassifyOtuCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifyOtuCommand::ClassifyOtuCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["constaxonomy"] = tempOutNames;
-		outputTypes["taxsummary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "ClassifyOtuCommand");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
 		allLines = true;
-		labels.clear();
 				
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
-		}else if(option == "citation") { citation(); abort = true; calledHelp = true;} 
+		}else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  } 
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["constaxonomy"] = tempOutNames;
-			outputTypes["taxsummary"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -190,8 +118,8 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			if (listfile == "not found") {				
 				//if there is a current list file, use it
 				listfile = current->getListFile(); 
-				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") {  m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current listfile and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
 			else { current->setListFile(listfile); }
@@ -199,8 +127,8 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			taxfile = validParameter.validFile(parameters, "taxonomy");
 			if (taxfile == "not found") {  //if there is a current list file, use it
 				taxfile = current->getTaxonomyFile(); 
-				if (taxfile != "") {  m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (taxfile != "") {  m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter.\n");  }
+				else { 	m->mothurOut("You have no current taxonomy file and the taxonomy parameter is required.\n");  abort = true; }
 			}
 			else if (taxfile == "not open") { abort = true; }
 			else { current->setTaxonomyFile(taxfile); }
@@ -221,11 +149,11 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			
@@ -241,7 +169,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			basis = validParameter.valid(parameters, "basis");
 			if (basis == "not found") { basis = "otu"; }	
 			
-			if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
+			if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu.\n");  }
 			
 			string temp = validParameter.valid(parameters, "cutoff");			if (temp == "not found") { temp = "51"; }
 			util.mothurConvert(temp, cutoff);
@@ -262,7 +190,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
             util.mothurConvert(temp, printlevel);
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
-            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail."); m->mothurOutEndLine(); output = "detail"; }
+            if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n");  output = "detail"; }
 			
             if ((groupfile == "") && (countfile == "")) { if (persample) { m->mothurOut("persample is only valid with a group file, or count file with group information. Setting persample=f.\n"); persample = false; } 
             }
@@ -273,7 +201,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
                 }
             }
 			
-			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
+			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100.\n");  abort = true;  }
 			
             if (countfile == "") {
                 if (namefile == ""){
@@ -312,81 +240,22 @@ int ClassifyOtuCommand::execute(){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		input = new InputData(listfile, "list", nullVector);
-		list = input->getListVector();
-		string lastLabel = list->getLabel();
-
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0; }
-	
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (allLines == 1 || labels.count(list->getLabel()) == 1){
-                    string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
-                
-					m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
-					process(list);
-					if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } delete input; delete list; return 0; }
-										
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = list->getLabel();
-					
-					delete list;
-					list = input->getListVector(lastLabel);
-                
-                    string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
-					m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
-					process(list);
-				
-					
-					if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
-										
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-					
-					//restore real lastlabel to save below
-					list->setLabel(saveLabel);
-			}
-			
-			lastLabel = list->getLabel();
-	
-			delete list;
-			list = input->getListVector();
-		}
-		
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + (*it)); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			if (list != NULL) {	delete list;	}
-			list = input->getListVector(lastLabel);
-            string output = toString(list->size());  if (basis == "sequence") { output = toString(list->getNumSeqs()); }
-			m->mothurOut(list->getLabel() + "\t" + toString(output)); m->mothurOutEndLine();
-			
-			process(list);
-			delete list;
-			
-			if (m->getControl_pressed()) { outputTypes.clear();  if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } delete input; delete list; return 0; }
-		}
-		
-		delete input;  
+        InputData input(listfile, "list", nullVector);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+               
+        while (list != NULL) {
+                   
+            if (m->getControl_pressed()) { delete list; break; }
+                   
+            process(list); delete list;
+                  
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
         if (groupMap != NULL) { delete groupMap; }
         if (ct != NULL) { delete ct; }
 				
@@ -426,7 +295,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
                 it = taxMap.find(names[i]);
                 
                 if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-                    m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus.\n"); 
                 }else{
                     if (countfile != "") {
                         int numDups = ct->getGroupCount(names[i], group);
@@ -448,7 +317,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
                     it2 = nameMap.find(names[i]);
                     
                     if (it2 == nameMap.end()) { //this name is not in name file, skip it
-                        m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                        m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus.\n"); 
                     }else{
                         
                         //is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
@@ -456,8 +325,8 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
                         
                         if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
                             
-                            if (names[i] != it2->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
-                            else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+                            if (names[i] != it2->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus.\n");  }
+                            else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus.\n");  }
                         }else{
                             
                             //add seq to tree
@@ -472,7 +341,7 @@ vector<string> ClassifyOtuCommand::findConsensusTaxonomy(vector<string> names, i
                     it = taxMap.find(names[i]);
                     
                     if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-                        m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
+                        m->mothurOut("[WARNING]: " + names[i] + " is not in your taxonomy file.  I will not include it in the consensus.\n"); 
                     }else{
                         if (countfile != "") {
                             int numDups = ct->getNumSeqs(names[i]); 
@@ -649,7 +518,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
                             //find out the sequences group
                             string group = groupMap->getGroup(names[k]);
                             
-                            if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+                            if (group == "not found") {  m->mothurOut("[WARNING]: " + names[k] + " is not in your groupfile, and will be included in the overall total, but not any group total.\n");   }
                             else {
                                 containsGroup[group] = true;
                             }

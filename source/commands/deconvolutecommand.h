@@ -21,7 +21,6 @@ class DeconvoluteCommand : public Command {
 
 public:
 	DeconvoluteCommand(string);
-	DeconvoluteCommand();
 	~DeconvoluteCommand() {}
 	
 	vector<string> setParameters();

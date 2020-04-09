@@ -22,6 +22,11 @@ vector<string> GetRAbundCommand::setParameters(){
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["rabund"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -66,88 +71,19 @@ string GetRAbundCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-GetRAbundCommand::GetRAbundCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["rabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRAbundCommand", "GetRAbundCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["rabund"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-                }
-				
-				it = parameters.find("sabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
-			
-			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
@@ -190,7 +126,7 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				listfile = current->getListFile(); 
-				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");}
 				else {
                     sharedfile = current->getSharedFile();
                     if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
@@ -207,8 +143,6 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}			
 		}
-			
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetRAbundCommand", "GetRAbundCommand");
@@ -230,93 +164,31 @@ int GetRAbundCommand::execute(){
         if (countfile != "") {
             processList(out);
         }else {
-            InputData input(inputfile, format, Groups);
-            RAbundVector* rabund = input.getRAbundVector();
-            string lastLabel = rabund->getLabel();
-            
-            //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+            InputData input(inputfile, format, nullVector);
             set<string> processedLabels;
             set<string> userLabels = labels;
+            string lastLabel = "";
             
-            if (m->getControl_pressed()) {  outputTypes.clear();  out.close(); util.mothurRemove(filename); delete rabund;  return 0; }
+            RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
             
-            while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-                
-                if(allLines == 1 || labels.count(rabund->getLabel()) == 1){
-					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					
-					if (m->getControl_pressed()) {   outputTypes.clear(); out.close(); util.mothurRemove(filename);   delete rabund;  return 0;  }
-					
-					if(sorted)	{   rabund->print(out);				}
-					else		{	rabund->nonSortedPrint(out);	}
-                    
-					processedLabels.insert(rabund->getLabel());
-					userLabels.erase(rabund->getLabel());
-                }
-                
-                if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = rabund->getLabel();
-					
-					delete rabund;
-					rabund = input.getRAbundVector(lastLabel);
-					
-					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					
-					if (m->getControl_pressed()) {   outputTypes.clear(); out.close(); util.mothurRemove(filename);  delete rabund;  return 0;  }
-					
-					if(sorted)	{   rabund->print(out);				}
-					else		{	rabund->nonSortedPrint(out);	}
-                    
-					processedLabels.insert(rabund->getLabel());
-					userLabels.erase(rabund->getLabel());
-					
-					//restore real lastlabel to save below
-					rabund->setLabel(saveLabel);
-                }
-                
-                lastLabel = rabund->getLabel();
-                
+            while (rabund != NULL) {
+                       
+                if (m->getControl_pressed()) { delete rabund; break; }
+                       
+                if(sorted)      {   rabund->print(out);                 }
+                else            {   rabund->nonSortedPrint(out);        }
                 delete rabund;
-                rabund = input.getRAbundVector();
+                      
+                rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
             }
-            
-            //output error messages about any remaining user labels
-            set<string>::iterator it;
-            bool needToRun = false;
-            for (it = userLabels.begin(); it != userLabels.end(); it++) {
-                m->mothurOut("Your file does not include the label " + *it);
-                if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                    needToRun = true;
-                }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-                }
-            }
-            
-            //run last label if you need to
-            if (needToRun )  {
-                if (rabund != NULL) {	delete rabund;	}
-                rabund = input.getRAbundVector(lastLabel);
-                
-                m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-                
-                if (m->getControl_pressed()) {  outputTypes.clear(); out.close(); util.mothurRemove(filename);   delete rabund;  return 0; }
-                
-                if(sorted)	{   rabund->print(out);				}
-                else		{	rabund->nonSortedPrint(out);	}
-                
-                delete rabund;
-            }
-		}
+        }
+        out.close();
         
-        if (m->getControl_pressed()) {  outputTypes.clear();  out.close(); util.mothurRemove(filename);  return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear();  util.mothurRemove(filename);  return 0; }
         
-		m->mothurOut("\nOutput File Names: \n"); 
-		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["rabund"].push_back(filename);
-		m->mothurOutEndLine();
+		m->mothurOut("\nOutput File Names:\n"+filename+"\n\n");
+        outputNames.push_back(filename); outputTypes["rabund"].push_back(filename);
 		
-		out.close(); 
-				
 		//set rabund file as new current rabundfile
 		string currentName = "";
 		itTypes = outputTypes.find("rabund");
@@ -326,7 +198,6 @@ int GetRAbundCommand::execute(){
 		
 		return 0;		
 	}
-
 	catch(exception& e) {
 		m->errorOut(e, "GetRAbundCommand", "execute");
 		exit(1);
@@ -339,95 +210,29 @@ int GetRAbundCommand::processList(ofstream& out){
         ct.readTable(countfile, false, false);
         
         InputData input(inputfile, format, nullVector);
-        ListVector* list = input.getListVector();
-        string lastLabel = list->getLabel();
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         
         if (m->getControl_pressed()) {  delete list;  return 0; }
         
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
-            if(allLines == 1 || labels.count(list->getLabel()) == 1){
-                m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-                
-                if (m->getControl_pressed()) {   delete list;  return 0;  }
-                
-                RAbundVector* rabund = new RAbundVector();
-                createRabund(ct, list, rabund);
-                
-                if(sorted)	{   rabund->print(out);				}
-                else		{	rabund->nonSortedPrint(out);	}
-                
-                delete rabund;
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-            }
-            
-            if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = list->getLabel();
-                
-                delete list;
-                list = input.getListVector(lastLabel);
-                
-                m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-                
-                if (m->getControl_pressed()) {    delete list;  return 0;  }
-                
-                RAbundVector* rabund = new RAbundVector();
-                createRabund(ct, list, rabund);
-                
-                if(sorted)	{   rabund->print(out);				}
-                else		{	rabund->nonSortedPrint(out);	}
-                
-                delete rabund;
-                processedLabels.insert(list->getLabel());
-                userLabels.erase(list->getLabel());
-                
-                //restore real lastlabel to save below
-                list->setLabel(saveLabel);
-            }
-            
-            lastLabel = list->getLabel();
-            
-            delete list;
-            list = input.getListVector();
-        }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            if (list != NULL) {	delete list;	}
-            list = input.getListVector(lastLabel);
-            
-            m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-            
-            if (m->getControl_pressed()) {   delete list;  return 0; }
-            
+        while (list != NULL) {
+                   
+            if (m->getControl_pressed()) { delete list; break; }
+                   
             RAbundVector* rabund = new RAbundVector();
             createRabund(ct, list, rabund);
             
-            if(sorted)	{   rabund->print(out);				}
-            else		{	rabund->nonSortedPrint(out);	}
+            if(sorted)  {   rabund->print(out);              }
+            else        {    rabund->nonSortedPrint(out);    }
             
-            delete rabund;
-            delete list;
+            delete rabund; delete list;
+                  
+            list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
-
+        
         return 0;
     }
 	catch(exception& e) {
@@ -459,9 +264,7 @@ int GetRAbundCommand::createRabund(CountTable& ct, ListVector*& list, RAbundVect
 		m->errorOut(e, "GetRAbundCommand", "createRabund");
 		exit(1);
 	}
-    
 }
-
 //**********************************************************************************************************************
 
 

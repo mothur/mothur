@@ -19,6 +19,11 @@ vector<string> OtuHierarchyCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["otuheirarchy"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -64,65 +69,23 @@ string OtuHierarchyCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-OtuHierarchyCommand::OtuHierarchyCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["otuheirarchy"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "OtuHierarchyCommand", "OtuHierarchyCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+				OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["otuheirarchy"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-			}
-
 			listFile = validParameter.validFile(parameters, "list");
 			if (listFile == "not found") { 
 				listFile = current->getListFile(); 
-				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+				if (listFile != "") {  m->mothurOut("Using " + listFile + " as input file for the list parameter.\n");  }
 				else { 
-					m->mothurOut("No valid current list file. You must provide a list file."); m->mothurOutEndLine(); 
+					m->mothurOut("No valid current list file. You must provide a list file.\n");  
 					abort = true;
 				}
 			}else if (listFile == "not open") { abort = true; }	
@@ -137,15 +100,15 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
+			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command.\n");  abort = true; }
 			else { 
 				util.splitAtDash(label, mylabels);
-				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
+				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels.\n");  abort = true; }
 			}	
 			
 			output = validParameter.valid(parameters, "output");			if (output == "not found") { output = "name"; }
 			
-			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name."); m->mothurOutEndLine(); output = "name"; }
+			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name.\n");  output = "name"; }
 		}
 		
 	}
@@ -181,7 +144,7 @@ int OtuHierarchyCommand::execute(){
                 list1Label = tempLabel;
 			}
 		}else{
-			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs."); m->mothurOutEndLine(); return 0;
+			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs.\n");  return 0;
 		}
 		
 		//map sequences to bin number in the "little" otu
@@ -330,10 +293,10 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it);
 			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".\n"); 
 				needToRun = true;
 			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
 			}
 		}
 		

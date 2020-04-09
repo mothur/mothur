@@ -16,6 +16,11 @@ vector<string> GetCurrentCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -43,19 +48,6 @@ string GetCurrentCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-GetCurrentCommand::GetCurrentCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-        outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCurrentCommand", "GetCurrentCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 string GetCurrentCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
@@ -73,27 +65,16 @@ string GetCurrentCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 GetCurrentCommand::GetCurrentCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-            
 			clearTypes = validParameter.valid(parameters, "clear");
 			if (clearTypes == "not found") { clearTypes = ""; }
 			else { util.splitAtDash(clearTypes, types);	}
@@ -199,7 +180,7 @@ int GetCurrentCommand::execute(){
             variables["[filename]"] = util.getFullPathName(outputDir);
             string filename = getOutputFileName("summary", variables);
             
-			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:"); m->mothurOutEndLine();
+			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
 			current->printCurrentFiles(filename);
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
@@ -226,7 +207,7 @@ int GetCurrentCommand::execute(){
         
         if (current->hasCurrentFiles()) {
             m->mothurOutEndLine();
-            m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+            m->mothurOut("Output File Names: \n"); 
             for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
             m->mothurOutEndLine();
         }

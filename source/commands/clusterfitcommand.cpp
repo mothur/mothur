@@ -58,6 +58,13 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["sensspec"] = tempOutNames;
+        outputTypes["steps"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
@@ -119,144 +126,22 @@ string ClusterFitCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClusterFitCommand::ClusterFitCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["list"] = tempOutNames;
-        outputTypes["sensspec"] = tempOutNames;
-        outputTypes["steps"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "ClusterFitCommand", "ClusterFitCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterFitCommand::ClusterFitCommand(string option)  {
     try{
-        abort = false; calledHelp = false;
-        
         //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
-            map<string,string>::iterator it;
             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-                    abort = true;
-                }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["list"] = tempOutNames;
-            outputTypes["sensspec"] = tempOutNames;
-            outputTypes["steps"] = tempOutNames;
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
             
-            inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                
-                it = parameters.find("refcolumn");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["refcolumn"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("column");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["column"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["name"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("count");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["count"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("fasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("reflist");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["reflist"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("refname");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["refname"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("refcount");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["refcount"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("reffasta");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["reffasta"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("accnos");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-                }
-            }
-            
-            selfReference = true;
-            refdistfile = "";
-            distfile = "";
+            selfReference = true; refdistfile = ""; distfile = "";
             
             //check for required parameters
             reffastafile = validParameter.validFile(parameters, "reffasta");

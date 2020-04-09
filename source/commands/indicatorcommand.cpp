@@ -26,6 +26,12 @@ vector<string> IndicatorCommand::setParameters(){
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pprocessors);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["tree"] = tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -75,84 +81,18 @@ string IndicatorCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-IndicatorCommand::IndicatorCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "IndicatorCommand", "IndicatorCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 IndicatorCommand::IndicatorCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["tree"] = tempOutNames;
-			outputTypes["summary"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("tree");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("design");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["design"] = inputDir + it->second;		}
-				}
-			}
-			
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 
 			//check for required parameters
@@ -181,7 +121,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			else { util.splitAtDash(groups, Groups); if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	}
 			
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }	
 			
 			string temp = validParameter.valid(parameters, "iters");		if (temp == "not found") { temp = "1000"; }
 			util.mothurConvert(temp, iters); 
@@ -193,12 +133,12 @@ IndicatorCommand::IndicatorCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") {  inputFileName = relabundfile; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") {  inputFileName = relabundfile; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a shared or relabund.\n");  
 						abort = true;
 					}
 				}
@@ -207,17 +147,17 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			
 			if ((designfile == "") && (treefile == "")) { 
 				treefile = current->getTreeFile(); 
-				if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter."); m->mothurOutEndLine(); }
+				if (treefile != "") {  m->mothurOut("Using " + treefile + " as input file for the tree parameter.\n");  }
 				else { 
 					designfile = current->getDesignFile(); 
-					if (designfile != "") {  m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
+					if (designfile != "") {  m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
 					else { 
-						m->mothurOut("[ERROR]: You must provide either a tree or design file."); m->mothurOutEndLine(); abort = true; 
+						m->mothurOut("[ERROR]: You must provide either a tree or design file.\n");  abort = true; 
 					}
 				}
 			}
 			
-			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
+			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file.\n");  abort = true;  }
 			
 			
 		}
@@ -502,11 +442,11 @@ int IndicatorCommand::GetIndicatorSpecies(){
         if (sharedfile != "") {
             lookup = getShared();
             if (m->getControl_pressed()) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
-            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file."); m->mothurOutEndLine(); return 0; }
+            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
         }else {
             lookupFloat = getSharedFloat();
             if (m->getControl_pressed()) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
-            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
         }
 
         
@@ -593,7 +533,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 				subset.clear();
 			}
 			
-			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+			if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings.\n");  }
 			
 			indicatorValues = getValues(groupings, groupingNames, indicatorGroups, randomGroupingsMap, m);
 			
@@ -644,11 +584,11 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
         if (sharedfile != "") {
             lookup = getShared();
             if (m->getControl_pressed()) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
-            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file."); m->mothurOutEndLine(); return 0; }
+            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
         }else {
             lookupFloat = getSharedFloat();
             if (m->getControl_pressed()) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
-            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
         }
         
 		string thisOutputDir = outputDir;
@@ -815,7 +755,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 					}
 				}
 				
-				if (groupsAlreadyAdded.size() != data.size()) { m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+				if (groupsAlreadyAdded.size() != data.size()) { m->mothurOut("[ERROR]: could not make proper groupings.\n");  }
 				
                 map<sharedIndexes, sharedIndexes> placeHolder; //don't need randomization for initial calc
 				indicatorValues = getValues(groupings, groupingNames, indicatorGroups, placeHolder, m);

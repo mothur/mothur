@@ -19,7 +19,6 @@ class PCOACommand : public Command {
 	
 public:
 	PCOACommand(string);	
-	PCOACommand();
 	~PCOACommand(){}
 	
 	vector<string> setParameters();

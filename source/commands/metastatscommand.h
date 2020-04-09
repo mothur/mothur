@@ -24,7 +24,6 @@ class MetaStatsCommand : public Command {
 
 public:
 	MetaStatsCommand(string);
-	MetaStatsCommand();
 	~MetaStatsCommand() {}
 	
 	vector<string> setParameters();

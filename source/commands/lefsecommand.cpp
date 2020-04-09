@@ -46,6 +46,11 @@ vector<string> LefseCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -103,69 +108,18 @@ string LefseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-LefseCommand::LefseCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "LefseCommand", "LefseCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 LefseCommand::LefseCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-        allLines = true;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-            
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-                string path;
-				it = parameters.find("design");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["design"] = inputDir + it->second;		}
-				}
-				
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-                    
-            //check for required parameters
             sharedfile = validParameter.validFile(parameters, "shared");
             if (sharedfile == "not open") { abort = true; }
             else if (sharedfile == "not found") { sharedfile = "";  }
@@ -188,8 +142,8 @@ LefseCommand::LefseCommand(string option)  {
 			else if (designfile == "not found") {
 				//if there is a current shared file, use it
 				designfile = current->getDesignFile();
-				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter
@@ -259,7 +213,7 @@ LefseCommand::LefseCommand(string option)  {
             
             multiClassStrat = validParameter.valid(parameters, "multiclass");
             if (multiClassStrat == "not found"){	multiClassStrat = "onevall";		}
-			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall."); m->mothurOutEndLine(); abort=true; }
+			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall.\n");  abort=true; }
 		}
 		
 	}

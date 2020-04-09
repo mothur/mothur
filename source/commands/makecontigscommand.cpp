@@ -116,6 +116,16 @@ vector<string> MakeContigsCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
+        abort = false; calledHelp = false;
+        createFileGroup = false; createOligosGroup = false; gz = false;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["report"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -186,139 +196,18 @@ string MakeContigsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeContigsCommand::MakeContigsCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["qfile"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-        outputTypes["report"] = tempOutNames;
-    }
-	catch(exception& e) {
-		m->errorOut(e, "MakeContigsCommand", "MakeContigsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeContigsCommand::MakeContigsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-        createFileGroup = false; createOligosGroup = false; gz = false;
 
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 
 		else {
-			vector<string> myArray = setParameters();
-
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 
-			ValidParameters validParameter("pairwise.seqs");
-			map<string, string>::iterator it;
-
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["qfile"] = tempOutNames;
-            outputTypes["report"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-                it = parameters.find("ffastq");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["ffastq"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("rfastq");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rfastq"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("ffasta");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["ffasta"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("rfasta");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rfasta"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("fqfile");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fqfile"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("rqfile");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rqfile"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("file");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["file"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("oligos");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("findex");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["findex"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("rindex");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rindex"] = inputDir + it->second;		}
-				}
-            }
-
+			ValidParameters validParameter;
             ffastqfile = validParameter.validFile(parameters, "ffastq");
 			if (ffastqfile == "not open") {  abort = true; }
 			else if (ffastqfile == "not found") { ffastqfile = ""; }
@@ -451,7 +340,7 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             makeQualFile = util.isTrue(temp);
 
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman."); m->mothurOutEndLine(); align = "needleman"; }
+			if ((align != "needleman") && (align != "gotoh") && (align != "kmer")) { m->mothurOut(align + " is not a valid alignment method. Options are kmer, needleman or gotoh. I will use needleman.\n");  align = "needleman"; }
 
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
 
@@ -2460,9 +2349,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         if ((firstSeqNames.size() != 0)){
             for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                 if (delim == '>') {
-                    m->mothurOut(it->first + " is in your forward fasta file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                    m->mothurOut(it->first + " is in your forward fasta file and not in your reverse file, please remove it using the remove.seqs command before proceeding.\n"); 
                 }else {
-                    m->mothurOut(it->first + " is in your forward fastq file and not in your reverse file, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                    m->mothurOut(it->first + " is in your forward fastq file and not in your reverse file, please remove it using the remove.seqs command before proceeding.\n"); 
                 }
             }
             m->setControl_pressed(true);
@@ -2532,9 +2421,9 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 if ((firstSeqNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
-                            m->mothurOut(it->first + " is in your forward fasta file and reverse fasta file, but not your forward qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                            m->mothurOut(it->first + " is in your forward fasta file and reverse fasta file, but not your forward qfile, please remove it using the remove.seqs command before proceeding.\n"); 
                         }else {
-                            m->mothurOut(it->first + " is in your forward fastq file and reverse fastq file, but not your forward index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                            m->mothurOut(it->first + " is in your forward fastq file and reverse fastq file, but not your forward index, please remove it using the remove.seqs command before proceeding.\n"); 
                         }
                     }
                     m->setControl_pressed(true);
@@ -2591,12 +2480,12 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 if ((firstSeqNames.size() != 0)){
                     for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
                         if (delim == '>') {
-                            m->mothurOut(it->first + " is in your forward fasta file, reverse fasta file, and forward qfile but not your reverse qfile, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                            m->mothurOut(it->first + " is in your forward fasta file, reverse fasta file, and forward qfile but not your reverse qfile, please remove it using the remove.seqs command before proceeding.\n"); 
                         }else {
                             if (qual[0] != "NONE") {
-                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, and forward index but not your reverse index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, and forward index but not your reverse index, please remove it using the remove.seqs command before proceeding.\n"); 
                             }else {
-                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, but not your reverse index, please remove it using the remove.seqs command before proceeding."); m->mothurOutEndLine();
+                                m->mothurOut(it->first + " is in your forward fastq file, reverse fastq file, but not your reverse index, please remove it using the remove.seqs command before proceeding.\n"); 
                             }
                         }
                     }
@@ -2667,11 +2556,11 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                         m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fasta file, " + toString(numRFastaSeqs) + " sequences in your reverse fasta file, " + toString(numFQualSeqs) + " sequences in your forward qual file, " + toString(numRQualSeqs) + " sequences in your reverse qual file. Please use the list.seqs and get.seqs commands to make the files match before proceeding.\n");  m->setControl_pressed(true); return processors;
                     }else {
                         if (qual[0] != "NONE") {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding.\n");  m->setControl_pressed(true); return processors;
                         }else if (qual[1] != "NONE") {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numFQualSeqs) + " sequences in your forward index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file and " + toString(numFQualSeqs) + " sequences in your forward index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding.\n");  m->setControl_pressed(true); return processors;
                         }else {
-                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file, " + toString(numFQualSeqs) + " sequences in your forward index file, " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding."); m->mothurOutEndLine(); m->setControl_pressed(true); return processors;
+                            m->mothurOut("[ERROR]: You have " + toString(numFastaSeqs) + " sequences in your forward fastq file, " + toString(numRFastaSeqs) + " sequences in your reverse fastq file, " + toString(numFQualSeqs) + " sequences in your forward index file, " + toString(numRQualSeqs) + " sequences in your reverse index file. Please use the list.seqs and get.seqs commands to make the files match before proceeding.\n");  m->setControl_pressed(true); return processors;
                         }
                     }
                 }

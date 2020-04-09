@@ -7,9 +7,7 @@
 //
 
 #include "optimatrix.h"
-
 #include "counttable.h"
-
 
 /***********************************************************************/
 OptiMatrix::OptiMatrix(vector< set<long long> > close, vector<string> name, vector<string> single, double c) : OptiData(c) {

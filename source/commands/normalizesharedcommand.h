@@ -18,7 +18,6 @@ class NormalizeSharedCommand : public Command {
 
 public:
 	NormalizeSharedCommand(string);
-	NormalizeSharedCommand();
 	~NormalizeSharedCommand() {}
 	
 	vector<string> setParameters();

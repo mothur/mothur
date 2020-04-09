@@ -24,6 +24,11 @@ vector<string> CorrAxesCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["corraxes"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -70,89 +75,22 @@ string CorrAxesCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-CorrAxesCommand::CorrAxesCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["corraxes"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "CorrAxesCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["corraxes"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("axes");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["axes"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("metadata");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
-				}
-			}
-			
-			
-			//check for required parameters
 			axesfile = validParameter.validFile(parameters, "axes");
 			if (axesfile == "not open") { abort = true; }
-			else if (axesfile == "not found") { axesfile = ""; m->mothurOut("axes is a required parameter for the corr.axes command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (axesfile == "not found") { axesfile = ""; m->mothurOut("axes is a required parameter for the corr.axes command.\n");  abort = true;  }	
 			
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
@@ -180,27 +118,27 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);	}
 			
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }	
 			
 			if ((relabundfile == "") && (sharedfile == "") && (metadatafile == "")) { 
 				//is there are current file available for any of these?
 				//give priority to shared, then relabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputFileName = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") { inputFileName = relabundfile;  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") { inputFileName = relabundfile;  m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("You must provide either a shared, relabund, or metadata file."); m->mothurOutEndLine(); abort = true; 
+						m->mothurOut("You must provide either a shared, relabund, or metadata file.\n");  abort = true; 
 					}
 				}
 			}	
 			
 			if (metadatafile != "") {
-				if ((relabundfile != "") || (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
+				if ((relabundfile != "") || (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file.\n");  abort = true;  }
 			}else {
-				if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
+				if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file.\n");  abort = true;  }
 			}
 			string temp;
 			temp = validParameter.valid(parameters, "numaxes");		if (temp == "not found"){	temp = "3";				}
@@ -208,7 +146,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			
 			method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "pearson";		}
 			
-			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall."); m->mothurOutEndLine(); abort = true; }
+			if ((method != "pearson") && (method != "spearman") && (method != "kendall")) { m->mothurOut(method + " is not a valid method. Valid methods are pearson, spearman, and kendall.\n");  abort = true; }
 			
 		}
 	}
@@ -233,7 +171,7 @@ int CorrAxesCommand::execute(){
 			delete input;
 			
             if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
 			
 		}else if (relabundfile != "") { 
 			InputData* input = new InputData(relabundfile, "relabund", Groups);
@@ -241,13 +179,13 @@ int CorrAxesCommand::execute(){
 			delete input;
 			
 			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
 			
 		}else if (metadatafile != "") { 
 			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
 			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading metadata file."); m->mothurOutEndLine(); return 0; }
-		}else {	m->mothurOut("[ERROR]: no file given."); m->mothurOutEndLine(); return 0; }
+			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading metadata file.\n");  return 0; }
+		}else {	m->mothurOut("[ERROR]: no file given.\n");  return 0; }
 		
 		if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
 		
@@ -269,7 +207,7 @@ int CorrAxesCommand::execute(){
 			map<string, vector<float> >::iterator it;
 			for (int i = 0; i < lookupGroups.size(); i++) {
 				it = axes.find(lookupGroups[i]);
-				if (it == axes.end()) { m->mothurOut(lookupGroups[i] + " is in your shared of relabund file but not in your axes file, please correct."); m->mothurOutEndLine(); }
+				if (it == axes.end()) { m->mothurOut(lookupGroups[i] + " is in your shared of relabund file but not in your axes file, please correct.\n");  }
 			}
 			m->setControl_pressed(true);
 		}
@@ -298,7 +236,7 @@ int CorrAxesCommand::execute(){
 		if (method == "pearson")		{  calcPearson(axes, out);	}
 		else if (method == "spearman")	{  calcSpearman(axes, out); }
 		else if (method == "kendall")	{  calcKendall(axes, out);	}
-		else { m->mothurOut("[ERROR]: Invalid method."); m->mothurOutEndLine(); }
+		else { m->mothurOut("[ERROR]: Invalid method.\n");  }
 		
 		out.close();
 		delete lookupFloat;
@@ -812,7 +750,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 			}else { done = true; }
 		}
 		
-		if (numaxes > count) { m->mothurOut("You requested " + toString(numaxes) + " axes, but your file only includes " + toString(count) + ". Using " + toString(count) + "."); m->mothurOutEndLine(); numaxes = count; }
+		if (numaxes > count) { m->mothurOut("You requested " + toString(numaxes) + " axes, but your file only includes " + toString(count) + ". Using " + toString(count) + ".\n");  numaxes = count; }
 		
 		while (!in.eof()) {
 			

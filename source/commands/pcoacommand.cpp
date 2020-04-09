@@ -20,6 +20,12 @@ vector<string> PCOACommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["pcoa"] = tempOutNames;
+        outputTypes["loadings"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -62,71 +68,25 @@ string PCOACommand::getOutputPattern(string type) {
     }
 }
 
-
 //**********************************************************************************************************************
-PCOACommand::PCOACommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["pcoa"] = tempOutNames;
-		outputTypes["loadings"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "PCOACommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 PCOACommand::PCOACommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["pcoa"] = tempOutNames;
-			outputTypes["loadings"] = tempOutNames;
-			
-			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { 			
 				//if there is a current phylip file, use it
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required.\n");  abort = true; }
 			}else { current->setPhylipFile(phylipfile); }	
 			
 			filename = phylipfile;  

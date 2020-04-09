@@ -31,6 +31,19 @@ vector<string> GetLineageCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["alignreport"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -89,142 +102,18 @@ string GetLineageCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetLineageCommand::GetLineageCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["taxonomy"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["alignreport"] = tempOutNames;
-		outputTypes["list"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-        outputTypes["constaxonomy"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetLineageCommand", "GetLineageCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-				
-		//allow user to run help
-		if(option == "help") { help(); abort = true; calledHelp = true; }
+        if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["taxonomy"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["alignreport"] = tempOutNames;
-			outputTypes["list"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("alignreport");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-			}
-
 			
 			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta");
@@ -268,9 +157,9 @@ GetLineageCommand::GetLineageCommand(string option)  {
     
             if ((constaxonomy == "") && (taxfile == "")) {
                 taxfile = current->getTaxonomyFile();
-                if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter."); m->mothurOutEndLine(); }
+                if (taxfile != "") { m->mothurOut("Using " + taxfile + " as input file for the taxonomy parameter.\n");  }
                 else {
-                    m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required."); m->mothurOutEndLine(); abort = true; }
+                    m->mothurOut("You have no current taxonomy file and did not provide a constaxonomy file. The taxonomy or constaxonomy parameter is required.\n");  abort = true; }
 			}
             
 			string usedDups = "true";
@@ -287,15 +176,15 @@ GetLineageCommand::GetLineageCommand(string option)  {
             else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 			
 			taxons = validParameter.valid(parameters, "taxon");
-			if (taxons == "not found") { taxons = "";  m->mothurOut("No taxons given, please correct."); m->mothurOutEndLine();  abort = true;  }
+			if (taxons == "not found") { taxons = "";  m->mothurOut("No taxons given, please correct.\n");   abort = true;  }
 			else { 
 				//rip off quotes
 				if (taxons[0] == '\'') {  taxons = taxons.substr(1); }
@@ -303,7 +192,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			}
 			util.splitAtChar(taxons, listOfTaxons, '-');
 			
-			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (constaxonomy == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (countfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, taxonomy, constaxonomy, shared or listfile.\n");  abort = true; }
             
             if ((constaxonomy != "") && ((fastafile != "") || (namefile != "") || (groupfile != "") || (alignfile != "") || (taxfile != "") || (countfile != ""))) {
                 m->mothurOut("[ERROR]: can only use constaxonomy file with a list or shared file, aborting.\n");  abort = true;
@@ -319,7 +208,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
             
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");
-                if (label == "not found") { label = ""; m->mothurOut("[WARNING]: You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); }
+                if (label == "not found") { label = ""; m->mothurOut("[WARNING]: You did not provide a label, I will use the first label in your inputfile.\n");  }
             }
             
             if (countfile == "") {
@@ -510,7 +399,7 @@ int GetLineageCommand::runGetOTUs(string accnosFileName){
             m->mothurOut("Running command: get.otus(" + inputString + ")\n");
             current->setMothurCalling(true);
             
-            Command* getCommand = new GetOtuLabelsCommand(inputString);
+            Command* getCommand = new GetOtusCommand(inputString);
             getCommand->execute();
             
             map<string, vector<string> > filenames = getCommand->getOutputFiles();

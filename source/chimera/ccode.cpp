@@ -121,7 +121,7 @@ Sequence Ccode::print(ostream& out, ostream& outAcc) {
 		out << endl;	
 			
 		if (results) {
-			m->mothurOut(querySeq->getName() + " was found have at least one chimeric window."); m->mothurOutEndLine();
+			m->mothurOut(querySeq->getName() + " was found have at least one chimeric window.\n"); 
 			outAcc << querySeq->getName() << endl;
 		}
 
@@ -323,7 +323,7 @@ void Ccode::trimSequences(Sequence* query) {
 
 		
 		//check to make sure that is not whole seq
-		if ((rearPos - frontPos - 1) <= 0) {  m->mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine(); exit(1);  }
+		if ((rearPos - frontPos - 1) <= 0) {  m->mothurOut("Error, when I trim your sequences, the entire sequence is trimmed.\n");  exit(1);  }
 		
 		map<int, int> tempTrim;
 		tempTrim[frontPos] = rearPos;
@@ -362,9 +362,9 @@ vector<int> Ccode::findWindows() {
 			windowSizes = length / 10;
 		}else if (windowSizes == 0) { windowSizes = length / 10;  }
 		else if (windowSizes > (length * 0.20)) {
-			m->mothurOut("You have selected a window that is larger than 20% of your sequence length.  This is not recommended, but I will continue anyway."); m->mothurOutEndLine();
+			m->mothurOut("You have selected a window that is larger than 20% of your sequence length.  This is not recommended, but I will continue anyway.\n"); 
 		}else if (windowSizes < (length * 0.05)) {
-			m->mothurOut("You have selected a window that is smaller than 5% of your sequence length.  This is not recommended, but I will continue anyway."); m->mothurOutEndLine();
+			m->mothurOut("You have selected a window that is smaller than 5% of your sequence length.  This is not recommended, but I will continue anyway.\n"); 
 		}
 		
 		//save starting points of each window
@@ -503,7 +503,7 @@ void Ccode::removeBadReferenceSeqs(vector<SeqDist>& seqs) {
 			seqs = goodSeqs;
 			
 		}else { //warn, but dont remove any
-			m->mothurOut(querySeq->getName() + " does not have an adaquate number of reference sequences that are within 20% and 0.5% similarity.  I will continue, but please check."); m->mothurOutEndLine();  
+			m->mothurOut(querySeq->getName() + " does not have an adaquate number of reference sequences that are within 20% and 0.5% similarity.  I will continue, but please check.\n");   
 		}
 
 	}
@@ -861,7 +861,7 @@ float Ccode::getT(int numseq) {
         else if (numseq > 2) tvalue = 2.353;
         else if (numseq > 1) tvalue = 2.920;
 		else if (numseq <= 1) {
-			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); m->mothurOutEndLine();
+			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n\n"); 
 		}
 		
 		return tvalue;
@@ -913,7 +913,7 @@ float Ccode::getF(int numseq) {
         else if (numseq > 1) fvalue = 18.5;
         else if (numseq > 0) fvalue = 161;
 		else if (numseq <= 0) {
-			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); m->mothurOutEndLine();
+			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n\n"); 
         }
 		
 		return fvalue;

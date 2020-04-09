@@ -23,6 +23,11 @@ vector<string> MakeLefseCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["lefse"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -69,83 +74,18 @@ string MakeLefseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeLefseCommand::MakeLefseCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["lefse"] = tempOutNames; 
-			}
-	catch(exception& e) {
-		m->errorOut(e, "MakeLefseCommand", "MakeLefseCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeLefseCommand::MakeLefseCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-            outputTypes["lefse"] = tempOutNames;
-            
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("design");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["design"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-            }
-                    
-			//check for parameters
 			designfile = validParameter.validFile(parameters, "design");
 			if (designfile == "not open") { abort = true; }
 			else if (designfile == "not found") { designfile = ""; }
@@ -166,7 +106,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 			else if (constaxonomyfile == "not found") {  constaxonomyfile = "";  }
 			
 			label = validParameter.valid(parameters, "label");
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
             
             string groups = validParameter.valid(parameters, "groups");
 			if (groups == "not found") { groups = "";  }
@@ -177,18 +117,18 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else {
 					relabundfile = current->getRelAbundFile();
-					if (relabundfile != "") {   m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") {   m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else {
-						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine();
+						m->mothurOut("No valid current files. You must provide a shared or relabund.\n"); 
 						abort = true;
 					}
 				}
 			}
 			
-			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
+			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file.\n");  abort = true;  }
 			
             //if the user changes the output directory command factory will send this info to us in the output parameter
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
@@ -197,7 +137,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
             scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "totalgroup"; }
 			
 			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
-				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu."); m->mothurOutEndLine(); abort = true;
+				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu.\n");  abort = true;
 			}
         }
 		
@@ -382,10 +322,10 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             for (it = userLabels.begin(); it != userLabels.end(); it++) {
                 m->mothurOut("Your file does not include the label " + *it);
                 if (processedLabels.count(lastLabel) != 1) {
-                    m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". I will use " + lastLabel + ".\n"); 
                     needToRun = true;
                 }else {
-                    m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+                    m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
                 }
             }
             
@@ -430,7 +370,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
 					float averageOtu = totalOtu / (float) data.size();
 					
 					relabund = abund / (float) averageOtu;
-				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+				}else{ m->mothurOut(scale + " is not a valid scaling option.\n");  m->setControl_pressed(true);  }
 				
 				rel->push_back(relabund);
 			}
@@ -506,10 +446,10 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {
 			m->mothurOut("Your file does not include the label " + *it);
 			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".\n"); 
 				needToRun = true;
 			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
 			}
 		}
 		

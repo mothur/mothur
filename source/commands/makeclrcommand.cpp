@@ -19,6 +19,11 @@ vector<string> MakeCLRCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["clr"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {    myArray.push_back(parameters[i].name);        }
         return myArray;
@@ -64,60 +69,19 @@ string MakeCLRCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeCLRCommand::MakeCLRCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["clr"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MakeCLRCommand", "MakeCLRCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 
 MakeCLRCommand::MakeCLRCommand(string option) {
     try {
-        abort = false; calledHelp = false; allLines = true;
-        
-        //allow user to run help
+
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters = parser.getParameters();
-            map<string,string>::iterator it;
             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            //initialize outputTypes
-            vector<string> tempOutNames;
-            outputTypes["clr"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){    inputDir = "";        }
-            else {
-                string path;
-                it = parameters.find("shared");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["shared"] = inputDir + it->second;        }
-                }
-            }
-            
             sharedfile = validParameter.validFile(parameters, "shared");
             if (sharedfile == "not open") { sharedfile = ""; abort = true; }
             else if (sharedfile == "not found") {
@@ -168,6 +132,7 @@ int MakeCLRCommand::execute(){
         string lastLabel = "";
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
         map<string, string> variables;
         variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));

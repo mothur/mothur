@@ -52,6 +52,13 @@ vector<string> GetOTURepCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -110,114 +117,18 @@ string GetOTURepCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetOTURepCommand::GetOTURepCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
-		abort = false; calledHelp = false;   
-		allLines = true;
-				
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true; calledHelp = true;
 		}else if(option == "citation") { citation(); abort = true; calledHelp = true;
-		} else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+		} else if(option == "category") {  abort = true; calledHelp = true;  }
+        else {
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
@@ -229,8 +140,8 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") { 			
 				listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current list file and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current list file and the list parameter is required.\n");  abort = true; }
 			}
 			else if (listfile == "not open") { abort = true; }	
 			else { current->setListFile(listfile); }
@@ -267,33 +178,33 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			
             method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "distance";	}
 			if ((method != "distance") && (method != "abundance")) {
-				m->mothurOut(method + " is not a valid option for the method parameter. The only options are: distance and abundance, aborting."); m->mothurOutEndLine(); abort = true;
+				m->mothurOut(method + " is not a valid option for the method parameter. The only options are: distance and abundance, aborting.\n");  abort = true;
 			}
             
             if (method == "distance") {
                 if ((phylipfile == "") && (columnfile == "")) { //is there are current file available for either of these?
                     //give priority to column, then phylip
                     columnfile = current->getColumnFile();
-                    if (columnfile != "") {  distFile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+                    if (columnfile != "") {  distFile = columnfile; format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
                     else {
                         phylipfile = current->getPhylipFile();
-                        if (phylipfile != "") {  distFile = phylipfile; format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+                        if (phylipfile != "") {  distFile = phylipfile; format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
                         else {
-                            m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the get.oturep command."); m->mothurOutEndLine();
+                            m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the get.oturep command.\n"); 
                             abort = true;
                         }
                     }
-                }else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+                }else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column.\n");  abort = true; }
                 
                 if (columnfile != "") {
                     if ((namefile == "") && (countfile == "")) {
                         namefile = current->getNameFile();
-                        if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+                        if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
                         else {
                             countfile = current->getCountFile();
-                            if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                            if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                             else {
-                                m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format."); m->mothurOutEndLine();
+                                m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format.\n"); 
                                 abort = true; 
                             }	
                         }	
@@ -302,28 +213,28 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
             }else if (method == "abundance") {
                 if ((namefile == "") && (countfile == "")) {
 					namefile = current->getNameFile();
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else {
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the abundance method."); m->mothurOutEndLine();
+                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the abundance method.\n"); 
                             abort = true;
                         }
 					}
 				}
                 if ((phylipfile != "") || (columnfile != "")) {
-                    m->mothurOut("[WARNING]: A phylip or column file is not needed to use the abundance method, ignoring."); m->mothurOutEndLine();
+                    m->mothurOut("[WARNING]: A phylip or column file is not needed to use the abundance method, ignoring.\n"); 
                     phylipfile = ""; columnfile = "";
                 }
             }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
             cutoffSet = false;
@@ -340,12 +251,12 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			sorted = validParameter.valid(parameters, "sorted");		if (sorted == "not found"){	sorted = "";	}
 			if (sorted == "none") { sorted=""; }
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
-				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); m->mothurOutEndLine();
+				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort.\n"); 
 				sorted = "";
 			}
             
 			if ((sorted == "group") && ((groupfile == "")&& !hasGroups)) {
-				m->mothurOut("You must provide a groupfile or have a count file with group info to sort by group. I will not sort."); m->mothurOutEndLine();
+				m->mothurOut("You must provide a groupfile or have a count file with group info to sort by group. I will not sort.\n"); 
 				sorted = "";
 			}
 			
@@ -845,7 +756,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				for (int j=0; j<namesInBin.size(); j++) {
                     if (groupfile != "") {
                         string thisgroup = groupMap->getGroup(namesInBin[j]);
-                        if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); m->setControl_pressed(true); }
+                        if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct.\n");  m->setControl_pressed(true); }
                         
                         //add this name to correct group
                         if (util.inUsersGroups(thisgroup, Groups)) { NamesInGroup[thisgroup].push_back(namesInBin[j]);  }

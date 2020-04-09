@@ -18,6 +18,12 @@ vector<string> GetDistsCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -59,89 +65,28 @@ string GetDistsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetDistsCommand::GetDistsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetDistsCommand", "GetDistsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetDistsCommand::GetDistsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["column"] = tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-                it = parameters.find("accnos");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-				}
-            }
-			
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  
 					abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
@@ -160,18 +105,16 @@ GetDistsCommand::GetDistsCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {  m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n"); }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file."); m->mothurOutEndLine(); 
-						abort = true;
+						m->mothurOut("No valid current files. You must provide a phylip or column file.\n");  abort = true;
 					}
 				}
 			}
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetDistsCommand", "GetDistsCommand");
@@ -199,7 +142,7 @@ int GetDistsCommand::execute(){
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
-			m->mothurOut("Output File names: "); m->mothurOutEndLine();
+			m->mothurOut("Output File names: \n"); 
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 			
@@ -248,7 +191,7 @@ int GetDistsCommand::readPhylip(){
         string numTest;
         in >> numTest >> name;
         
-        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting."); m->mothurOutEndLine(); exit(1); }
+        if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ", quitting.\n");  exit(1); }
         else { convert(numTest, nseqs); }
         
         if (names.count(name) != 0) { rows.insert(row); }
@@ -354,9 +297,9 @@ int GetDistsCommand::readPhylip(){
         inPhylip.close();
 		out.close();
 		
-		if (count == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+		if (count == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file.\n");   }
         else if (count != names.size()) {
-            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(count) + " of them in the phylip file.\n"); 
             //rewrite with new number
             util.renameFile(outputFileName, outputFileName+".temp");
             ofstream out2;
@@ -376,7 +319,7 @@ int GetDistsCommand::readPhylip(){
             util.mothurRemove(outputFileName+".temp");
         }
 		
-		m->mothurOut("Selected " + toString(count) + " groups or sequences from your phylip file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(count) + " groups or sequences from your phylip file.\n"); 
 		
 		return 0;
 		
@@ -422,12 +365,12 @@ int GetDistsCommand::readColumn(){
 		in.close();
 		out.close();
         
-        if (foundNames.size() == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file."); m->mothurOutEndLine();  }
+        if (foundNames.size() == 0) {  m->mothurOut("Your file does NOT contain distances related to groups or sequences listed in the accnos file.\n");   }
         else if (foundNames.size() != names.size()) {
-            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(foundNames.size()) + " of them in the column file."); m->mothurOutEndLine();
+            m->mothurOut("[WARNING]: Your accnos file contains " + toString(names.size()) + " groups or sequences, but I only found " + toString(foundNames.size()) + " of them in the column file.\n"); 
         }
 		
-		m->mothurOut("Selected " + toString(foundNames.size()) + " groups or sequences from your column file."); m->mothurOutEndLine();
+		m->mothurOut("Selected " + toString(foundNames.size()) + " groups or sequences from your column file.\n"); 
         
 		return 0;
 		

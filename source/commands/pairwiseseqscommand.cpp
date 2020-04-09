@@ -30,6 +30,12 @@ vector<string> PairwiseSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -86,84 +92,19 @@ string PairwiseSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-PairwiseSeqsCommand::PairwiseSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["phylip"] = tempOutNames;
-		outputTypes["column"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PairwiseSeqsCommand", "PairwiseSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-	
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters(); 
 			
-			ValidParameters validParameter("pairwise.seqs");
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["phylip"] = tempOutNames;
-			outputTypes["column"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			ValidParameters validParameter;
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			
-			if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                map<string, string>::iterator it2;
-                string path;
-                it2 = parameters.find("fasta");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
-                }
-                
-                it2 = parameters.find("oldfasta");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
-                }
-                
-                it2 = parameters.find("column");
-                //user has given a template file
-                if(it2 != parameters.end()){
-                    path = util.hasPath(it2->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["column"] = inputDir + it2->second;		}
-                }
-            }
-
-            
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not found") {
 				fastaFileName = current->getFastaFile();
@@ -229,7 +170,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output=="phylip") { output = "lt"; }
-			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
+			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column.\n");  output = "column"; }
 			
 			calc = validParameter.valid(parameters, "calc");			
 			if (calc == "not found") { calc = "onegap";  }

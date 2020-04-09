@@ -28,6 +28,21 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["errorsummary"] = tempOutNames;
+        outputTypes["errorseq"] = tempOutNames;
+        outputTypes["errorquality"] = tempOutNames;
+        outputTypes["errorqualforward"] = tempOutNames;
+        outputTypes["errorqualreverse"] = tempOutNames;
+        outputTypes["errorforward"] = tempOutNames;
+        outputTypes["errorreverse"] = tempOutNames;
+        outputTypes["errorcount"] = tempOutNames;
+        outputTypes["errormatrix"] = tempOutNames;
+        outputTypes["errorchimera"] = tempOutNames;
+        outputTypes["errorref-query"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -90,139 +105,30 @@ string SeqErrorCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-
-SeqErrorCommand::SeqErrorCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["errorsummary"] = tempOutNames;
-		outputTypes["errorseq"] = tempOutNames;
-		outputTypes["errorquality"] = tempOutNames;
-		outputTypes["errorqualforward"] = tempOutNames;
-		outputTypes["errorqualreverse"] = tempOutNames;
-		outputTypes["errorforward"] = tempOutNames;
-		outputTypes["errorreverse"] = tempOutNames;
-		outputTypes["errorcount"] = tempOutNames;
-		outputTypes["errormatrix"] = tempOutNames;
-        outputTypes["errorchimera"] = tempOutNames;
-        outputTypes["errorref-query"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqErrorCommand", "SeqErrorCommand");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
 
 SeqErrorCommand::SeqErrorCommand(string option)  {
 	try {
-		
-		abort = false; calledHelp = false;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			string temp;
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["errorsummary"] = tempOutNames;
-			outputTypes["errorseq"] = tempOutNames;
-			outputTypes["errorquality"] = tempOutNames;
-			outputTypes["errorqualforward"] = tempOutNames;
-			outputTypes["errorqualreverse"] = tempOutNames;
-			outputTypes["errorforward"] = tempOutNames;
-			outputTypes["errorreverse"] = tempOutNames;
-			outputTypes["errorcount"] = tempOutNames;
-			outputTypes["errormatrix"] = tempOutNames;
-            outputTypes["errorchimera"] = tempOutNames;
-            outputTypes["errorref-query"] = tempOutNames;
-
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("reference");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a names file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a names file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-
-				it = parameters.find("qfile");
-				//user has given a quality score file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("report");
-				//user has given a alignment report file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["report"] = inputDir + it->second;		}
-				}
-				
-			}
-			//check for required parameters
 			queryFileName = validParameter.validFile(parameters, "fasta");
 			if (queryFileName == "not found") { 
 				queryFileName = current->getFastaFile(); 
-				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (queryFileName != "") { m->mothurOut("Using " + queryFileName + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fasta file and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (queryFileName == "not open") { queryFileName = ""; abort = true; }	
 			else { current->setFastaFile(queryFileName); }
 			
 			referenceFileName = validParameter.validFile(parameters, "reference");
-			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
+			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command.\n");  abort = true; }
 			else if (referenceFileName == "not open") { abort = true; }	
 			
 			//check for optional parameters
@@ -250,11 +156,11 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if (outputDir == "not found"){ //if user entered a file with a path then preserve it
 				outputDir = util.hasPath(queryFileName); }
 			
-            if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			temp = validParameter.valid(parameters, "threshold");	if (temp == "not found") { temp = "1.00"; }
+			string temp = validParameter.valid(parameters, "threshold");	if (temp == "not found") { temp = "1.00"; }
 			util.mothurConvert(temp, threshold);
 			
 			temp = validParameter.valid(parameters, "ignorechimeras");	if (temp == "not found") { temp = "T"; }

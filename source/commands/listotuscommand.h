@@ -17,21 +17,20 @@
 
 /**************************************************************************************************/
 
-class ListOtuLabelsCommand : public Command {
+class ListOtusCommand : public Command {
 public:
-    ListOtuLabelsCommand(string);
-    ListOtuLabelsCommand();
-    ~ListOtuLabelsCommand(){}
+    ListOtusCommand(string);
+    ~ListOtusCommand(){}
     
     vector<string> setParameters();
-    string getCommandName()			{ return "list.otulabels";          }
+    string getCommandName()			{ return "list.otus";          }
     string getCommandCategory()		{ return "OTU-Based Approaches";	} 
     //commmand category choices: Sequence Processing, OTU-Based Approaches, Hypothesis Testing, Phylotype Analysis, General, Clustering and Hidden
     
 	string getHelpString();	
     string getOutputPattern(string);	
     string getCitation() { return "http://www.mothur.org/wiki/List.otulabels"; }
-    string getDescription()		{ return "lists otu labels from shared or relabund file. Can be used by get.otulabels with output from classify.otu, otu.association, or corr.axes to select specific otus."; }
+    string getDescription()		{ return "lists otu labels from shared or relabund file. Can be used by get.otus with output from classify.otu, otu.association, or corr.axes to select specific otus."; }
     
     int execute(); 
     void help() { m->mothurOut(getHelpString()); }	
@@ -43,9 +42,7 @@ private:
     vector<string> Groups;
     set<string> labels;
     
-    int createList(SharedRAbundFloatVectors*&);
-    int createList(SharedRAbundVectors*&);
-    int createList(ListVector*&);
+    int printList(vector<string> currentLabels, string distance);
     int createList(string);
 
 };

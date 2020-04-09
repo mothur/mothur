@@ -67,7 +67,7 @@ QualityScores::QualityScores(ifstream& qFile){
                 qScoreStringStream >> temp;  util.gobble(qScoreStringStream);
 
                   //check temp to make sure its a number
-                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
 
                 qScores.push_back(score);
@@ -116,7 +116,7 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
                 qScoreStringStream >> temp;  util.gobble(qScoreStringStream);
 
                 //check temp to make sure its a number
-                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
 
                 
@@ -166,7 +166,7 @@ int QualityScores::read(ifstream& qFile){
                 
 
                 //check temp to make sure its a number
-                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0."); m->mothurOutEndLine(); temp = "0"; }
+                if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
 
                 qScores.push_back(score);
@@ -197,7 +197,7 @@ string QualityScores::getSequenceName(ifstream& qFile) {
 
             util.checkName(name);
 
-        }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name.\n");  m->setControl_pressed(true);  }
 
 		return name;
 	}
@@ -220,7 +220,7 @@ string QualityScores::getSequenceName(boost::iostreams::filtering_istream& qFile
 
             util.checkName(name);
 
-        }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); m->setControl_pressed(true);  }
+        }else{ m->mothurOut("Error in reading your qfile, at position " + toString(qFile.tellg()) + ". Blank name.\n");  m->setControl_pressed(true);  }
 
         return name;
     }

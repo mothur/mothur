@@ -18,7 +18,6 @@ class MakeBiomCommand : public Command {
 	
 public:
 	MakeBiomCommand(string);
-	MakeBiomCommand();	
 	~MakeBiomCommand(){}
 	
 	vector<string> setParameters();

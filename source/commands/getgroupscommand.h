@@ -23,7 +23,6 @@ class GetGroupsCommand : public Command {
 public:
 	
 	GetGroupsCommand(string);	
-	GetGroupsCommand();
 	~GetGroupsCommand(){}
 	
 	vector<string> setParameters();

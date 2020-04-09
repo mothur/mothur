@@ -26,6 +26,12 @@ vector<string> ChimeraPintailCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -77,88 +83,20 @@ string ChimeraPintailCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraPintailCommand::ChimeraPintailCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraPintailCommand", "ChimeraPintailCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			
-			ValidParameters validParameter("chimera.pintail");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-        
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("reference");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("conservation");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["conservation"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("quantile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["quantile"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-			}
 
-			
 			//check for required parameters
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();

@@ -22,6 +22,13 @@ vector<string> ChimeraCcodeCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["chimera"] = tempOutNames;
+        outputTypes["mapinfo"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -73,72 +80,19 @@ string ChimeraCcodeCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ChimeraCcodeCommand::ChimeraCcodeCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["chimera"] = tempOutNames;
-		outputTypes["mapinfo"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraCcodeCommand", "ChimeraCcodeCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter("chimera.ccode");
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-			outputTypes["chimera"] = tempOutNames;
-			outputTypes["mapinfo"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-            
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("reference");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fasta");
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-                }
-			}
-
+            ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
                 fastafile = current->getFastaFile();
@@ -154,12 +108,6 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			maskfile = validParameter.valid(parameters, "mask");
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
-				if (inputDir != "") {
-					string path = util.hasPath(maskfile);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	maskfile = inputDir + maskfile;		}
-				}
-
 				ifstream in;
 				bool ableToOpen = util.openInputFile(maskfile, in);
 				if (!ableToOpen) { abort = true; }
@@ -275,7 +223,7 @@ int ChimeraCcodeCommand::driver(string outputFName, string filename, string accn
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
-					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
+					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping.\n"); 
 				}else{
 					//find chimeras
 					chimera->getChimeras(candidateSeq);

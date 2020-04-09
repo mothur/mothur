@@ -34,6 +34,21 @@ vector<string> GetSeqsCommand::setParameters(){
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter paccnos2("accnos2", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(paccnos2);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+        outputTypes["taxonomy"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["alignreport"] = tempOutNames;
+        outputTypes["contigsreport"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["accnosreport"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -60,30 +75,6 @@ string GetSeqsCommand::getHelpString(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "getHelpString");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-GetSeqsCommand::GetSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["fastq"] = tempOutNames;
-		outputTypes["taxonomy"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["alignreport"] = tempOutNames;
-        outputTypes["contigsreport"] = tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-		outputTypes["accnosreport"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
 		exit(1);
 	}
 }
@@ -115,155 +106,26 @@ string GetSeqsCommand::getOutputPattern(string type) {
 //**********************************************************************************************************************
 GetSeqsCommand::GetSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-            outputTypes["fastq"] = tempOutNames;
-			outputTypes["taxonomy"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["alignreport"] = tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-			outputTypes["accnosreport"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            outputTypes["contigsreport"] = tempOutNames;
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("alignreport");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
-				}
-                
-				it = parameters.find("contigsreport");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {    parameters["contigsreport"] = inputDir + it->second;        }
-                }
-                
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("accnos");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("accnos2");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["accnos2"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("taxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("qfile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("fastq");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
-				}
-			}
-
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  
 				accnosfile = current->getAccnosFile(); 
-				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter."); m->mothurOutEndLine(); }
+				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required."); m->mothurOutEndLine(); 
-					abort = true;
+					m->mothurOut("You have no valid accnos file and accnos is required.\n");  abort = true;
 				} 
 			}else { current->setAccnosFile(accnosfile); }	
 			
@@ -321,11 +183,11 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
             
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			

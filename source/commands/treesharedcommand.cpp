@@ -7,12 +7,12 @@
  *
  */
 
-#include "treegroupscommand.h"
+#include "treesharedcommand.h"
 #include "subsample.h"
 #include "consensus.h"
 
 //**********************************************************************************************************************
-vector<string> TreeGroupCommand::setParameters(){	
+vector<string> TreeSharedCommand::setParameters(){	
 	try {
 		CommandParameter pshared("shared", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","tree",false,false,true); parameters.push_back(pshared);
 		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnShared", "PhylipColumnShared", "none","tree",false,false); parameters.push_back(pphylip);
@@ -32,18 +32,23 @@ vector<string> TreeGroupCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["tree"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "setParameters");
+		m->errorOut(e, "TreeSharedCommand", "setParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string TreeGroupCommand::getHelpString(){	
+string TreeSharedCommand::getHelpString(){	
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
@@ -68,12 +73,12 @@ string TreeGroupCommand::getHelpString(){
 		return helpString;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "getHelpString");
+		m->errorOut(e, "TreeSharedCommand", "getHelpString");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-string TreeGroupCommand::getOutputPattern(string type) {
+string TreeSharedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
@@ -83,92 +88,22 @@ string TreeGroupCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "TreeGroupCommand", "getOutputPattern");
+        m->errorOut(e, "TreeSharedCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-TreeGroupCommand::TreeGroupCommand(){	
+TreeSharedCommand::TreeSharedCommand(string option)  {
 	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		//initialize outputTypes
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
-TreeGroupCommand::TreeGroupCommand(string option)  {
-	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["tree"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
@@ -295,38 +230,49 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
+		m->errorOut(e, "TreeSharedCommand", "TreeSharedCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-TreeGroupCommand::~TreeGroupCommand(){}
+TreeSharedCommand::~TreeSharedCommand(){}
 
 //**********************************************************************************************************************
 
-int TreeGroupCommand::execute(){
+int TreeSharedCommand::execute(){
 	try {
-	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (format == "sharedfile") {
 			InputData input(sharedfile, "sharedfile", Groups);
-			SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-			lastLabel = lookup->getLabel();
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+			SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
 			
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");   return 0; }
+            if (subsample) {
+                if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
+                    subsampleSize = lookup->getNumSeqsSmallestGroup();
+                }else {
+                    lookup->removeGroups(subsampleSize);
+                    Groups = lookup->getNamesGroups();
+                    Treenames = Groups;
+                }
+                
+                if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true); return 0; }
+            }
+            numGroups = lookup->size();
+            
+            if (numGroups < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");   return 0; }
 			
 			//create treemap class from groupmap for tree class to use
 			CountTable ct;
-            set<string> nameMap;
-            map<string, string> groupMap;
-            set<string> gps;
+            set<string> nameMap; map<string, string> groupMap; set<string> gps;
             for (int i = 0; i < Groups.size(); i++) {
-                nameMap.insert(Groups[i]);
-                gps.insert(Groups[i]);
-                groupMap[Groups[i]] = Groups[i];
+                nameMap.insert(Groups[i]); gps.insert(Groups[i]); groupMap[Groups[i]] = Groups[i];
             }
             ct.createTable(nameMap, groupMap, gps);
 			
@@ -334,9 +280,15 @@ int TreeGroupCommand::execute(){
 			Treenames = lookup->getNamesGroups();
             
 			if (m->getControl_pressed()) { return 0; }
-			
-			//create tree file
-			makeSimsShared(input, lookup, ct);
+            
+            while (lookup != NULL) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                createProcesses(lookup, ct); delete lookup;
+                
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            }
 			
 			if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0; }
 		}else{
@@ -385,8 +337,7 @@ int TreeGroupCommand::execute(){
 			if (m->getControl_pressed()) { return 0; }
 			
 			vector< vector<double> > matrix = makeSimsDist(dMatrix, list->getNumBins());
-            delete readMatrix;
-            delete dMatrix;
+            delete readMatrix; delete dMatrix;
 			
 			if (m->getControl_pressed()) { return 0; }
 
@@ -418,12 +369,12 @@ int TreeGroupCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "execute");
+		m->errorOut(e, "TreeSharedCommand", "execute");
 		exit(1);
 	}
 }
 /***********************************************************/
-void TreeGroupCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
+void TreeSharedCommand::printSims(ostream& out, vector< vector<double> >& simMatrix, vector<string> groupNames) {
     try {
         
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
@@ -439,12 +390,12 @@ void TreeGroupCommand::printSims(ostream& out, vector< vector<double> >& simMatr
         
     }
     catch(exception& e) {
-        m->errorOut(e, "TreeGroupCommand", "printSims");
+        m->errorOut(e, "TreeSharedCommand", "printSims");
         exit(1);
     }
 }
 /***********************************************************/
-vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* matrix, int numGroups) {
+vector< vector<double> > TreeSharedCommand::makeSimsDist(SparseDistanceMatrix* matrix, int numGroups) {
 	try {
 		//initialize simMatrix
 		vector< vector<double> > simMatrix;
@@ -473,7 +424,7 @@ vector< vector<double> > TreeGroupCommand::makeSimsDist(SparseDistanceMatrix* ma
 		return simMatrix;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "makeSimsDist");
+		m->errorOut(e, "TreeSharedCommand", "makeSimsDist");
 		exit(1);
 	}
 }
@@ -515,93 +466,9 @@ int driverTreeShared(vector<SharedRAbundVector*>& thisLookup, vector< vector<seq
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MatrixOutputCommand", "driverTreeShared");
+        m->errorOut(e, "TreeSharedCommand", "driverTreeShared");
         exit(1);
     }
-}
-
-/***********************************************************/
-int TreeGroupCommand::makeSimsShared(InputData& input, SharedRAbundVectors*& lookup, CountTable& ct) {
-	try {
-        
-        if (subsample) { 
-            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup->getNumSeqsSmallestGroup();
-            }else {
-                lookup->removeGroups(subsampleSize);
-                Groups = lookup->getNamesGroups();
-                Treenames = Groups;
-            }
-            
-            if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command.\n");  m->setControl_pressed(true); return 0; }
-        }
-        numGroups = lookup->size();
-        
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            if (m->getControl_pressed()) { delete lookup;  return 1; }
-		
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-				m->mothurOut(lookup->getLabel()+"\n");
-				createProcesses(lookup, ct);
-				
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-			
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-			
-				delete lookup;
-				lookup = input.getSharedRAbundVectors(lastLabel);
-
-				m->mothurOut(lookup->getLabel()+"\n");
-				createProcesses(lookup, ct);
-					
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-
-			lastLabel = lookup->getLabel();
-			
-			//get next line to process
-			delete lookup;
-			lookup = input.getSharedRAbundVectors();
-		}
-		
-		if (m->getControl_pressed()) {  return 1; }
-
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + ".\n");
-				needToRun = true;
-			}else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			delete lookup;
-			lookup = input.getSharedRAbundVectors(lastLabel);
-
-			m->mothurOut(lookup->getLabel()+"\n");
-			createProcesses(lookup, ct);
-			delete lookup;
-		}
-
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "TreeGroupCommand", "makeSimsShared");
-		exit(1);
-	}
 }
 /**************************************************************************************************/
 struct treeSharedData {
@@ -782,12 +649,12 @@ int process(treeSharedData* params) {
         return 0;
     }
     catch(exception& e) {
-        params->m->errorOut(e, "TreeGroupCommand", "process");
+        params->m->errorOut(e, "TreeSharedCommand", "process");
         exit(1);
     }
 }
 /***********************************************************/
-int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTable& ct){
+int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTable& ct){
     try {
         
         vector<string> groupNames = thisLookup->getNamesGroups();
@@ -971,7 +838,7 @@ int TreeGroupCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTab
         
     }
     catch(exception& e) {
-        m->errorOut(e, "TreeGroupCommand", "createProcesses");
+        m->errorOut(e, "TreeSharedCommand", "createProcesses");
         exit(1);
     }
 }

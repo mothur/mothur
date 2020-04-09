@@ -17,7 +17,6 @@
 class MakeLookupCommand : public Command {
 public:
     MakeLookupCommand(string);
-    MakeLookupCommand();
     ~MakeLookupCommand(){}
     
     vector<string> setParameters();

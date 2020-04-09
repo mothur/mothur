@@ -24,7 +24,6 @@ class GetSharedOTUCommand : public Command {
 	public:
 	
 		GetSharedOTUCommand(string);	
-		GetSharedOTUCommand();	
 		~GetSharedOTUCommand() {}
 	
 		vector<string> setParameters();

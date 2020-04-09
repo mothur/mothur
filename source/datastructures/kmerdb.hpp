@@ -40,6 +40,7 @@ public:
 	
 private:
 	
+    string version;
 	int kmerSize;
 	int maxKmer, count;
 	string kmerDBName;

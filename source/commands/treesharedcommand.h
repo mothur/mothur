@@ -2,7 +2,7 @@
 #define TREEGROUPCOMMAND_H
 
 /*
- *  treegroupscommand.h
+ *  treesharedcommand.h
  *  Mothur
  *
  *  Created by Sarah Westcott on 4/8/09.
@@ -70,12 +70,12 @@
 	
 /**************************************************************************************************************/
 
-class TreeGroupCommand : public Command {
+class TreeSharedCommand : public Command {
 	
 public:
-	TreeGroupCommand(string);	
-	TreeGroupCommand();
-	~TreeGroupCommand();
+	TreeSharedCommand(string);
+	TreeSharedCommand();
+	~TreeSharedCommand();
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "tree.shared";				}
@@ -105,7 +105,6 @@ private:
 	
     int createProcesses(SharedRAbundVectors*& thisLookup, CountTable&);
     void printSims(ostream&, vector< vector<double> >&, vector<string>);
-    int makeSimsShared(InputData&, SharedRAbundVectors*&, CountTable& );
     vector< vector<double> > makeSimsDist(SparseDistanceMatrix*, int);
 };
 

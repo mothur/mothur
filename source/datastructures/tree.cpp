@@ -964,7 +964,7 @@ try {
                     outputString += ":" + toString(tree[node].getBranchLength());
                 }
                 
-                m->mothurOut("[ERROR]: " + tree[node].getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); 
+                m->mothurOut("[ERROR]: " + tree[node].getName() + " is not in your namefile, please correct.\n");  
             }
                 
             out << outputString;

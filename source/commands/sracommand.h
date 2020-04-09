@@ -19,7 +19,6 @@
 class SRACommand : public Command {
 public:
     SRACommand(string);
-    SRACommand();
     ~SRACommand(){}
     
     vector<string> setParameters();

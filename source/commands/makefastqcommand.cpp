@@ -22,6 +22,12 @@ vector<string> MakeFastQCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
+       
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -64,84 +70,32 @@ string MakeFastQCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeFastQCommand::MakeFastQCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fastq"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeFastQCommand", "MakeFastQCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 MakeFastQCommand::MakeFastQCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fastq"] = tempOutNames;
-			
-						
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("qfile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-			}
-			
-			
-			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; fastafile = ""; }
 			else if (fastafile == "not found") {  		
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") {  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); }	
 			
 			qualfile = validParameter.validFile(parameters, "qfile");
 			if (qualfile == "not open") { abort = true; qualfile = ""; }
 			else if (qualfile == "not found") {  			
 				qualfile = current->getQualFile(); 
-				if (qualfile != "") {  m->mothurOut("Using " + qualfile + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (qualfile != "") {  m->mothurOut("Using " + qualfile + " as input file for the qfile parameter.\n");  }
+				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required.\n");  abort = true; }
 			}else { current->setQualFile(qualfile); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -153,10 +107,7 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
                 m->mothurOut(format + " is not a valid format. Your format choices are sanger, solexa, illumina1.8+ and illumina, aborting." ); m->mothurOutEndLine();
                 abort=true;
             }
-
-
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeFastQCommand", "MakeFastQCommand");

@@ -30,7 +30,6 @@ class AlignCommand : public Command {
     
 public:
 	AlignCommand(string);	
-	AlignCommand();
 	~AlignCommand();
 	
 	vector<string> setParameters();

@@ -22,6 +22,13 @@ vector<string> ShhhSeqsCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter psigma("sigma", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(psigma);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["map"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -72,89 +79,24 @@ string ShhhSeqsCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-
-ShhhSeqsCommand::ShhhSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-		outputTypes["map"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ShhhSeqsCommand", "ShhhSeqsCommand");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
-				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["map"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}
 			else if (fastafile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastafile); }
@@ -167,8 +109,8 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { 			
 				namefile = current->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current namefile and the name parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
+				else { 	m->mothurOut("You have no current namefile and the name parameter is required.\n");  abort = true; }
 			}
 			else if (namefile == "not open") { namefile =  ""; abort = true; }	
 			else {  current->setNameFile(namefile); }
@@ -665,12 +607,12 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
 //**********************************************************************************************************************
 int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 	try {
-		m->mothurOutEndLine(); m->mothurOut("Deconvoluting results:"); m->mothurOutEndLine(); m->mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOut("Deconvoluting results:\n");  m->mothurOutEndLine();
 		
 		//use unique.seqs to create new name and fastafile
 		string inputString = "fasta=" + fastaFile + ", name=" + nameFile;
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
-		m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+		m->mothurOut("/******************************************/\n");  
+		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");  
 		current->setMothurCalling(true);
         
 		Command* uniqueCommand = new DeconvoluteCommand(inputString);
@@ -680,7 +622,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		
 		delete uniqueCommand;
 		current->setMothurCalling(false);
-		m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+		m->mothurOut("/******************************************/\n");  
 		
 		string newnameFile = filenames["name"][0];
 		string newfastaFile = filenames["fasta"][0];

@@ -26,6 +26,11 @@ vector<string> HeatMapCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["svg"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -77,96 +82,20 @@ string HeatMapCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-HeatMapCommand::HeatMapCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["svg"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapCommand", "HeatMapCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 
 HeatMapCommand::HeatMapCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["svg"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("rabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("sabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
@@ -198,21 +127,21 @@ HeatMapCommand::HeatMapCommand(string option) {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
 						rabundfile = current->getRabundFile(); 
-						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 						else { 
 							sabundfile = current->getSabundFile(); 
-							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 							else { 
 								relabundfile = current->getRelAbundFile(); 
-								if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+								if (relabundfile != "") { inputfile = relabundfile; format = "relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 								else { 
-									m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file."); m->mothurOutEndLine(); 
+									m->mothurOut("No valid current files. You must provide a list, sabund, rabund, relabund or shared file.\n");  
 									abort = true;
 								}
 							}
@@ -220,7 +149,6 @@ HeatMapCommand::HeatMapCommand(string option) {
 					}
 				}
 			}
-			
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
@@ -233,7 +161,6 @@ HeatMapCommand::HeatMapCommand(string option) {
 				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
 				else { allLines = true;  }
 			}
-			
 			
 			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
@@ -257,7 +184,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 		 
 			scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "log10"; }
 			
-			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup"); m->mothurOutEndLine(); abort=true;  }
+			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup\n");  abort=true;  }
 		}
 
 	}
@@ -270,283 +197,57 @@ HeatMapCommand::HeatMapCommand(string option) {
 
 int HeatMapCommand::execute(){
 	try {
-	
-		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		string lastLabel;
-		input = new InputData(inputfile, format, Groups);
-		
-        vector<string> currentLabels;
-		if (format == "sharedfile") {
-			//you have groups
-			lookup = input->getSharedRAbundVectors();
-			lastLabel = lookup->getLabel();
-            currentLabels = lookup->getOTUNames();
-            Groups = lookup->getNamesGroups();
-		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
-			//you are using just a list file and have only one group
-			rabund = input->getRAbundVector();
-			lastLabel = rabund->getLabel();
-		}else if (format == "relabund") {
-			//you have groups
-			lookupFloat = input->getSharedRAbundFloatVectors();
-			lastLabel = lookupFloat->getLabel();
-            currentLabels = lookup->getOTUNames();
-            Groups = lookupFloat->getNamesGroups();
-		}
-		
-        heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir, inputfile, currentLabels);
+        if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-
-		if (format == "sharedfile") {	
+        InputData input(inputfile, format, Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        HeatMap heatmap(sorted, scale, numOTU, fontSize, outputDir, inputfile);
 		
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->getControl_pressed()) {
-                    delete lookup;
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					 
-					delete input; delete heatmap; return 0;
-				}
-		
-				if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-	
-					m->mothurOut(lookup->getLabel()+"\n"); 
-                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
-                    for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookup->getLabel();
-                    delete lookup;
-			
-					lookup = input->getSharedRAbundVectors(lastLabel);
-					m->mothurOut(lookup->getLabel()+"\n"); 
-					
-                    vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-					string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
-                    for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-					
-					//restore real lastlabel to save below
-					lookup->setLabels(saveLabel);
-				}
-				
-				lastLabel = lookup->getLabel();
-				//prevent memory leak
-				delete lookup;
-							
-				//get next line to process
-				lookup = input->getSharedRAbundVectors();
-			}
-			
-			
-			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				 
-				delete input; delete heatmap; return 0;
-			}
-
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-		
-			//run last label if you need to
-			if (needToRun )  {
-				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				
-				m->mothurOut(lookup->getLabel()+"\n"); 
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                string outputFileName = heatmap->getPic(data, lookup->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-
-				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-				delete lookup;
-			}
-		
-			//reset groups parameter
-			  
-			
-		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
-	
-			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->getControl_pressed()) {   
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					delete rabund;  delete input; delete heatmap; return 0;	
-				}
-
-				if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
-	
-					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					string outputFileName = heatmap->getPic(rabund);
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(rabund->getLabel());
-					userLabels.erase(rabund->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = rabund->getLabel();
-					
-					delete rabund;
-					rabund = input->getRAbundVector(lastLabel);
-					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					
-					string outputFileName = heatmap->getPic(rabund);
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(rabund->getLabel());
-					userLabels.erase(rabund->getLabel());
-					
-					//restore real lastlabel to save below
-					rabund->setLabel(saveLabel);
-				}		
-				
-								
-								
-				lastLabel = rabund->getLabel();			
-				delete rabund;
-				rabund = input->getRAbundVector();
-			}
-			
-			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				delete input; delete heatmap; return 0;
-			}
-
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-		
-			//run last label if you need to
-			if (needToRun )  {
-		
-				if (rabund != NULL) {	delete rabund;	}
-				rabund = input->getRAbundVector(lastLabel);
-				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					
-				string outputFileName = heatmap->getPic(rabund);
-				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-				delete rabund; 
-			}
-		
-		}else {
-		
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookupFloat != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				if (m->getControl_pressed()) {
-                    delete lookupFloat;
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-					 
-					delete input; delete heatmap; return 0;
-				}
-		
-				if(allLines == 1 || labels.count(lookupFloat->getLabel()) == 1){
-	
-					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-                    vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
-                    string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
-                    for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(lookupFloat->getLabel());
-					userLabels.erase(lookupFloat->getLabel());
-				}
-				
-				if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = lookupFloat->getLabel();
-				
-					delete lookupFloat;
-					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
-					m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
-					
-                    vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
-                    string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
-                    for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-					
-					processedLabels.insert(lookupFloat->getLabel());
-					userLabels.erase(lookupFloat->getLabel());
-					
-					//restore real lastlabel to save below
-					lookupFloat->setLabels(saveLabel);
-				}
-				
-				lastLabel = lookupFloat->getLabel();
-				//prevent memory leak
-				delete lookupFloat;
-							
-				//get next line to process
-				lookupFloat = input->getSharedRAbundFloatVectors();
-			}
-			
-			
-			if (m->getControl_pressed()) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear();
-				 
-				delete input; delete heatmap; return 0;
-			}
-
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-		
-			//run last label if you need to
-			if (needToRun )  {
-                delete lookupFloat;
-                lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookupFloat->getLabel()); m->mothurOutEndLine();
+		if (format == "sharedfile") {
+            SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
+        
+            while (lookup != NULL) {
                 
-                vector<SharedRAbundFloatVector*> data = lookupFloat->getSharedRAbundFloatVectors();
-                string outputFileName = heatmap->getPic(data, lookupFloat->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                string outputFileName = heatmap.getPic(lookup); delete lookup;
+                outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
+                
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            
+		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
+			RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+                   
+            while (rabund != NULL) {
+                       
+                if (m->getControl_pressed()) { delete rabund; break; }
+                       
+                string outputFileName = heatmap.getPic(rabund); delete rabund;
+                outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
+                      
+                rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            
+		}else if (format == "relabund") {
+            SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
+            
+            while (lookup != NULL) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                string outputFileName = heatmap.getPic(lookup); delete lookup;
+                outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
+                
+                lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+		}
 
-				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
-				delete lookupFloat;
-			}
-		
-        }
-		
-		delete input; 
-		delete heatmap;
-		
 		if (m->getControl_pressed()) {
 			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  util.mothurRemove(outputNames[i]);  } } outputTypes.clear(); return 0;
 		}
@@ -561,7 +262,6 @@ int HeatMapCommand::execute(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 
 

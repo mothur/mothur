@@ -36,6 +36,11 @@ vector<string> HeatMapSimCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false; allLines = true; format = "";
+        
+        vector<string> tempOutNames;
+        outputTypes["svg"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -89,96 +94,18 @@ string HeatMapSimCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-HeatMapSimCommand::HeatMapSimCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["svg"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "HeatMapSimCommand", "HeatMapSimCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 
 HeatMapSimCommand::HeatMapSimCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-			
-		//allow user to run help
 		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["svg"] = tempOutNames;
-			
-			format = "";
-				
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
-			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
@@ -204,38 +131,38 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name."); m->mothurOutEndLine(); abort = true; }
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
 			//error checking on files			
 			if ((sharedfile == "") && ((phylipfile == "") && (columnfile == "")))	{ 
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { format = "shared"; inputfile = sharedfile; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					//is there are current file available for either of these?
 					//give priority to column, then phylip
 					columnfile = current->getColumnFile(); 
-					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+					if (columnfile != "") {  format = "column"; inputfile = columnfile; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 					else { 
 						phylipfile = current->getPhylipFile(); 
-						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+						if (phylipfile != "") { format = "phylip";  inputfile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 						else { 
-							m->mothurOut("No valid current files. You must provide a shared or phylip or column file."); m->mothurOutEndLine(); 
+							m->mothurOut("No valid current files. You must provide a shared or phylip or column file.\n");  
 							abort = true;
 						}
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters.\n");  abort = true; }
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
                         countfile = current->getCountFile(); 
-						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+						if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else { 
-                            m->mothurOut("You need to provide a name or count file if you are going to use the column format."); m->mothurOutEndLine(); 
+                            m->mothurOut("You need to provide a name or count file if you are going to use the column format.\n");  
                             abort = true; 
                         }	
 					}	
@@ -328,9 +255,8 @@ int HeatMapSimCommand::execute(){
 		
 		heatmap = new HeatMapSim(outputDir, inputfile, fontsize);
 		
-		if (format == "shared") {
-			runCommandShared();
-		}else{	runCommandDist();	}
+		if (format == "shared") { runCommandShared();   }
+		else                    {	runCommandDist();	}
 		
 		delete heatmap;
 		
@@ -351,98 +277,29 @@ int HeatMapSimCommand::execute(){
 int HeatMapSimCommand::runCommandShared() {
 	try {
 		//if the users entered no valid calculators don't execute command
-		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
+		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators.\n");  return 0; }
 		
-		input = new InputData(sharedfile, "sharedfile", Groups);
-		SharedRAbundVectors* lookup = input->getSharedRAbundVectors();
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
-		string lastLabel = lookup->getLabel();
 			
-		if (lookup->size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
-				
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-        if (m->getControl_pressed()) {  delete input;  delete lookup;   return 0; }
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (m->getControl_pressed()) { delete input;  delete lookup;  return 0; }
-
-			if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-	
-				m->mothurOut(lookup->getLabel()+"\n"); 
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-				vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
-					
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-			}
-				
-			if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup->getLabel();
-			
-				delete lookup;
-				lookup = input->getSharedRAbundVectors(lastLabel);				
-
-				m->mothurOut(lookup->getLabel()+"\n"); 
-                vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-                vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-                for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
-					
-				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup->setLabels(saveLabel);
-			}
-				
-			//prevent memory leak
-			 
-			lastLabel = lookup->getLabel();
-
-			//get next line to process
-			delete lookup;
-			lookup = input->getSharedRAbundVectors();
-
-		}
-		
-			
-		if (m->getControl_pressed()) {  delete input;    return 0; }
-
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-		
-		if (m->getControl_pressed()) {  delete input;   return 0; }
-		
-		//run last label if you need to
-		if (needToRun )  {
-            delete lookup;
-            lookup = input->getSharedRAbundVectors(lastLabel);
+		if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command, quitting\n"); return 0;}
+        
+        while (lookup != NULL) {
             
-            m->mothurOut(lookup->getLabel()+"\n"); 
-            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-            vector<string> outfilenames = heatmap->getPic(data, heatCalculators, lookup->getNamesGroups());
-            for (int i = 0; i < data.size(); i++) {  delete data[i];  }
-			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
-			delete lookup;
-		}
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators, lookup->getNamesGroups()); delete lookup;
+            
+            for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
 		
-		if (m->getControl_pressed()) {  delete input;   return 0; }
-			
-		//reset groups parameter
-		  
-			
-		delete input;  
-	
 		return 0;
 	}
 	catch(exception& e) {

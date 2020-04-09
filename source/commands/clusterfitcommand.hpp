@@ -28,7 +28,6 @@ class ClusterFitCommand : public Command {
     
 public:
     ClusterFitCommand(string);
-    ClusterFitCommand();
     ~ClusterFitCommand();
     
     vector<string> setParameters();

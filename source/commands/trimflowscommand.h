@@ -22,7 +22,6 @@
 class TrimFlowsCommand : public Command {
 public:
 	TrimFlowsCommand(string);
-	TrimFlowsCommand();
 	~TrimFlowsCommand() {}
 	
 	vector<string> setParameters();

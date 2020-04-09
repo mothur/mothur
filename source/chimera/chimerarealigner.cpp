@@ -261,7 +261,7 @@ string ChimeraReAligner::getNewAlignment(string query){
 //			}
 //		}
 //		
-//		if(spot == -1) { m->mothurOut("Error: Could not find sequence."); m->mothurOutEndLine(); return NULL; }
+//		if(spot == -1) { m->mothurOut("Error: Could not find sequence.\n");  return NULL; }
 //		
 //		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
 //		

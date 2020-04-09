@@ -21,7 +21,6 @@ class ChimeraPintailCommand : public Command {
 public:
 
 	ChimeraPintailCommand(string);
-	ChimeraPintailCommand();
 	~ChimeraPintailCommand(){}
 	
 	vector<string> setParameters();

@@ -1255,7 +1255,8 @@ bool Utils::appendSFFFiles(string temp, string filename) {
         else {
             //get full path name
             string completeFileName = getFullPathName(temp);
-            input.open(completeFileName.c_str(), ios::binary);
+            openInputFileBinary(completeFileName, input);
+            //input.open(completeFileName.c_str(), ios::binary);
             if(!input) { return false; }
             else {
                 char buffer[4096];
@@ -2022,7 +2023,7 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
             system("CLS");
         #endif
         
-	    string lastChar = "";
+        string lastChar = "";
         #ifdef MOTHUR_FILES
             defaultPath = MOTHUR_FILES;
             defaultPath = removeQuotes(defaultPath);
@@ -2188,7 +2189,8 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
         vector<double> positions;
         ifstream inFASTA;
         string completeFileName = getFullPathName(filename);
-        inFASTA.open(completeFileName.c_str(), ios::binary);
+        //inFASTA.open(completeFileName.c_str(), ios::binary);
+        openInputFileBinary(completeFileName, inFASTA);
         int nameLine = 2;
         if (delim == '@') { nameLine = 4; }
         else if (delim == '>') { nameLine = 2; }
@@ -2248,8 +2250,9 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num) {
         ifstream inFASTA;
         //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
-        inFASTA.open(completeFileName.c_str(), ios::binary);
-
+        //inFASTA.open(completeFileName.c_str(), ios::binary);
+        openInputFileBinary(completeFileName, inFASTA);
+        
         string input;
         double count = 0;
         while(!inFASTA.eof()){
@@ -5265,7 +5268,303 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         return list;
         
     }catch(exception& e) {
-            m->errorOut(e, "Utils", "getNextShared");
+            m->errorOut(e, "Utils", "getNextList");
+            exit(1);
+    }
+}
+/***********************************************************************/
+RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        RAbundVector* rabund = input.getRAbundVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = rabund->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(rabund->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(rabund->getLabel()+"\n");
+                
+                processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+                
+                return rabund;
+            }
+            
+            if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = rabund->getLabel();
+                
+                delete rabund;
+                rabund = input.getRAbundVector(lastLabel);
+                m->mothurOut(rabund->getLabel()+"\n");
+                
+                processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return rabund;
+            }
+            
+            lastLabel = rabund->getLabel();
+            //prevent memory leak
+            delete rabund;
+            
+            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            
+            //get next line to process
+            rabund = input.getRAbundVector();
+        }
+        
+        if (m->getControl_pressed()) { delete rabund;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete rabund;
+            rabund = input.getRAbundVector(lastLabel);
+            m->mothurOut(rabund->getLabel()+"\n");
+            processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+            return rabund;
+        }
+        
+        return rabund;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextRAbund");
+            exit(1);
+    }
+}
+/***********************************************************************/
+SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        SAbundVector* sabund = input.getSAbundVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = sabund->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(sabund->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(sabund->getLabel()+"\n");
+                
+                processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                return sabund;
+            }
+            
+            if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = sabund->getLabel();
+                
+                delete sabund;
+                sabund = input.getSAbundVector(lastLabel);
+                m->mothurOut(sabund->getLabel()+"\n");
+                
+                processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return sabund;
+            }
+            
+            lastLabel = sabund->getLabel();
+            //prevent memory leak
+            delete sabund;
+            
+            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            
+            //get next line to process
+            sabund = input.getSAbundVector();
+        }
+        
+        if (m->getControl_pressed()) { delete sabund;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete sabund;
+            sabund = input.getSAbundVector(lastLabel);
+            m->mothurOut(sabund->getLabel()+"\n");
+            processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+            return sabund;
+        }
+        
+        return sabund;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextSAbund");
+            exit(1);
+    }
+}
+/***********************************************************************/
+OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        OrderVector* order = input.getOrderVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = order->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(order->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(order->getLabel()+"\n");
+                
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+                
+                return order;
+            }
+            
+            if ((anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = order->getLabel();
+                
+                delete order;
+                order = input.getOrderVector(lastLabel);
+                m->mothurOut(order->getLabel()+"\n");
+                
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return order;
+            }
+            
+            lastLabel = order->getLabel();
+            //prevent memory leak
+            delete order;
+            
+            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            
+            //get next line to process
+            order = input.getOrderVector();
+        }
+        
+        if (m->getControl_pressed()) { delete order;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete order;
+            order = input.getOrderVector(lastLabel);
+            m->mothurOut(order->getLabel()+"\n");
+            processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            return order;
+        }
+        
+        return order;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextOrder");
+            exit(1);
+    }
+}
+/***********************************************************************/
+SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+    try {
+        
+        SharedOrderVector* order = input.getSharedOrderVector();
+        
+        //as long as you are not at the end of the file or done wih the lines you want
+        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            
+            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            
+            if (lastLabel == "") {  lastLabel = order->getLabel();  }
+            
+            if(allLines == 1 || userLabels.count(order->getLabel()) == 1){ //process all lines or this is a line we want
+                
+                m->mothurOut(order->getLabel()+"\n");
+                
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+                
+                return order;
+            }
+            
+            if ((anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) { //use smart distancing to find previous small distance if user labels differ from the labels in file.
+                
+                string saveLabel = order->getLabel();
+                
+                delete order;
+                order = input.getSharedOrderVector(lastLabel);
+                m->mothurOut(order->getLabel()+"\n");
+                
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+                
+                lastLabel = saveLabel;
+                
+                return order;
+            }
+            
+            lastLabel = order->getLabel();
+            //prevent memory leak
+            delete order;
+            
+            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            
+            //get next line to process
+            order = input.getSharedOrderVector();
+        }
+        
+        if (m->getControl_pressed()) { delete order;  return NULL; }
+        
+        //output error messages about any remaining user labels
+        set<string>::iterator it;
+        bool needToRun = false;
+        for (it = userLabels.begin(); it != userLabels.end(); it++) {
+            m->mothurOut("Your file does not include the label " + *it);
+            if (processedLabels.count(lastLabel) != 1) { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true; }
+            else { m->mothurOut(". Please refer to " + lastLabel + ".\n");  }
+        }
+        
+        //run last label if you need to
+        if (needToRun )  {
+            delete order;
+            order = input.getSharedOrderVector(lastLabel);
+            m->mothurOut(order->getLabel()+"\n");
+            processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            return order;
+        }
+        
+        return order;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Utils", "getNextSharedOrder");
             exit(1);
     }
 }

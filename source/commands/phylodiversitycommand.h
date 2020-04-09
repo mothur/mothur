@@ -18,7 +18,6 @@ class PhyloDiversityCommand : public Command {
 	
 	public:
 		PhyloDiversityCommand(string);
-		PhyloDiversityCommand();
 		~PhyloDiversityCommand(){}
 	
 		vector<string> setParameters();

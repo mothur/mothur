@@ -57,11 +57,14 @@ vector<string> ClassifySvmSharedCommand::setParameters() {
         parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "", "", false, false);
         parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
 
         vector<string> myArray;
-        for (int i = 0; i < parameters.size(); i++) {
-            myArray.push_back(parameters[i].name);
-        }
+        for (int i = 0; i < parameters.size(); i++) { myArray.push_back(parameters[i].name); }
         return myArray;
     }
     catch (exception& e) {
@@ -108,131 +111,45 @@ string ClassifySvmSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-
-ClassifySvmSharedCommand::ClassifySvmSharedCommand() {
-    try {
-        abort = true;
-        calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["summary"] = tempOutNames;
-    }
-    catch (exception& e) {
-        m->errorOut(e, "ClassifySvmSharedCommand", "ClassifySvmSharedCommand");
-        exit(1);
-    }
-}
-
-//**********************************************************************************************************************
 ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
     try {
-        abort = false;
-        calledHelp = false;
         allLines = true;
 
         //allow user to run help
-        if (option == "help") {
-            help();
-            abort = true;
-            calledHelp = true;
-        }
-        else if (option == "citation") {
-            citation();
-            abort = true;
-            calledHelp = true;
-        }
+        if (option == "help") { help(); abort = true; calledHelp = true; }
+        else if (option == "citation") { citation(); abort = true; calledHelp = true; }
+        else if(option == "category") {  abort = true; calledHelp = true;  }
+        
         else {
-            //valid parameters for this command
-            vector<string> myArray = setParameters();
-
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string, string> parameters = parser.getParameters();
 
             ValidParameters validParameter;
-            map<string, string>::iterator it;
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {
-                    abort = true;
-                }
-            }
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames;
-
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found") {
-                inputDir = "";
-            }
-            else {
-                string path;
-                it = parameters.find("shared");
-                //user has given a shared file
-                if (it != parameters.end()) {
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {
-                        parameters["shared"] = inputDir + it->second;
-                    }
-                }
-
-                it = parameters.find("design");
-                //user has given a design file
-                if (it != parameters.end()) {
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {
-                        parameters["design"] = inputDir + it->second;
-                    }
-                }
-
-            }
-            //check for parameters
-            //get shared file, it is required
             sharedfile = validParameter.validFile(parameters, "shared");
-            if (sharedfile == "not open") {
-                sharedfile = "";
-                abort = true;
-            }
+            if (sharedfile == "not open") { sharedfile = ""; abort = true; }
             else if (sharedfile == "not found") {
                 //if there is a current shared file, use it
                 sharedfile = current->getSharedFile();
                 if (sharedfile != "") {
-                    m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.");
-                    m->mothurOutEndLine();
+                    m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");
                 }
-                else {
-                    m->mothurOut("You have no current sharedfile and the shared parameter is required.");
-                    m->mothurOutEndLine();
-                    abort = true;
-                }
+                else { m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
             }
-            else {
-                current->setSharedFile(sharedfile);
-            }
+            else { current->setSharedFile(sharedfile); }
 
             //get design file, it is required
             designfile = validParameter.validFile(parameters, "design");
-            if (designfile == "not open") {
-                sharedfile = "";
-                abort = true;
-            }
+            if (designfile == "not open") { designfile = ""; abort = true; }
             else if (designfile == "not found") {
                 //if there is a current shared file, use it
                 designfile = current->getDesignFile();
                 if (designfile != "") {
-                    m->mothurOut("Using " + designfile + " as input file for the design parameter.");
-                    m->mothurOutEndLine();
+                    m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");
                 }
                 else {
-                    m->mothurOut("You have no current designfile and the design parameter is required.");
-                    m->mothurOutEndLine();
-                    abort = true;
+                    m->mothurOut("You have no current designfile and the design parameter is required.\n"); abort = true;
                 }
-            }
-            else {
-                current->setDesignFile(designfile);
-            }
+            } else { current->setDesignFile(designfile); }
 
             //if the user changes the output directory command factory will send this info to us in the output parameter
             outputDir = validParameter.valid(parameters, "outputdir");
@@ -251,46 +168,26 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
             //Commonly used to process list, rabund, sabund, shared and relabund files.
             //Look at "smart distancing" examples below in the execute function.
             string label = validParameter.valid(parameters, "label");
-            if (label == "not found") {
-                label = "";
-            }
+            if (label == "not found") { label = ""; }
             else {
-                if (label != "all") {
-                    util.splitAtDash(label, labels);
-                    allLines = false;
-                }
-                else {
-                    allLines = true;
-                }
+                if (label != "all") { util.splitAtDash(label, labels); allLines = false; }
+                else { allLines = true; }
             }
 
             string modeOption = validParameter.valid(parameters, "mode");
-            if ( modeOption == "not found" || modeOption == "rfe" ) {
-                mode = "rfe";
-            }
-            else if ( modeOption == "classify" ) {
-                mode = "classify";
-            }
+            if ( modeOption == "not found" || modeOption == "rfe" ) { mode = "rfe"; }
+            else if ( modeOption == "classify" ) { mode = "classify"; }
             else {
-                m->mothurOut("the mode option " + modeOption + " is not recognized -- must be 'rfe' or 'classify'");
-                m->mothurOutEndLine();
-                abort = true;
+                m->mothurOut("the mode option " + modeOption + " is not recognized -- must be 'rfe' or 'classify'\n"); abort = true;
             }
 
             string ef = validParameter.valid(parameters, "evaluationfolds");
-            if ( ef == "not found") {
-                evaluationFoldCount = 3;
-            }
-            else {
-                util.mothurConvert(ef, evaluationFoldCount);
-            }
+            if ( ef == "not found") { evaluationFoldCount = 3; }
+            else { util.mothurConvert(ef, evaluationFoldCount); }
+            
             string tf = validParameter.valid(parameters, "trainingfolds");
-            if ( tf == "not found") {
-                trainingFoldCount = 5;
-            }
-            else {
-                util.mothurConvert(tf, trainingFoldCount);
-            }
+            if ( tf == "not found") { trainingFoldCount = 5; }
+            else { util.mothurConvert(tf, trainingFoldCount); }
 
             string smocOption = validParameter.valid(parameters, "smoc");
             smocList.clear();
@@ -385,23 +282,15 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 
             // get the normalization option
             string transformOption = validParameter.valid(parameters, "transform");
-            if ( transformOption == "not found" || transformOption == "unitmean") {
-                transformName = "unitmean";
-            }
-            else if ( transformOption == "zeroone" ) {
-                transformName = "zeroone";
-            }
+            if ( transformOption == "not found" || transformOption == "unitmean") { transformName = "unitmean"; }
+            else if ( transformOption == "zeroone" ) { transformName = "zeroone"; }
             else {
-                m->mothurOut("the transform option " + transformOption + " is not recognized -- must be 'unitmean' or 'zeroone'");
-                m->mothurOutEndLine();
-                abort = true;
+                m->mothurOut("the transform option " + transformOption + " is not recognized -- must be 'unitmean' or 'zeroone'\n"); abort = true;
             }
 
             // get the verbosity option
             string verbosityOption = validParameter.valid(parameters, "verbose");
-            if ( verbosityOption == "not found") {
-                verbosity = 0;
-            }
+            if ( verbosityOption == "not found") { verbosity = 0; }
             else {
                 util.mothurConvert(tf, verbosity);
                 if (verbosity < OutputFilter::QUIET || verbosity > OutputFilter::TRACE) {
@@ -411,9 +300,7 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
 
             // get the std threshold option
             string stdthresholdOption = validParameter.valid(parameters, "stdthreshold");
-            if ( stdthresholdOption == "not found" ) {
-                stdthreshold = -1.0;
-            }
+            if ( stdthresholdOption == "not found" ) { stdthreshold = -1.0; }
             else {
                 util.mothurConvert(stdthresholdOption, stdthreshold);
                 if ( stdthreshold <= 0.0 ) {
@@ -421,116 +308,53 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             }
         }
-
     }
     catch (exception& e) {
         m->errorOut(e, "ClassifySvmSharedCommand", "ClassifySvmSharedCommand");
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 int ClassifySvmSharedCommand::execute() {
-  try {
-
-    if (abort) { if (calledHelp) { return 0; }  return 2;   }
-
-    InputData input(sharedfile, "sharedfile", Groups);
-    SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-    vector<string> currentLabels = lookup->getOTUNames();
-      Groups = lookup->getNamesGroups();
-    //read design file
-    designMap.read(designfile);
-
-    string lastLabel = lookup->getLabel();
-    set<string> processedLabels;
-    set<string> userLabels = labels;
-
-      //as long as you are not at the end of the file or done wih the lines you want
-    while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-
-        if (m->getControl_pressed()) { delete lookup;  return 0; }
-
-      if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-
-        m->mothurOut(lookup->getLabel()+"\n"); 
-          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data, currentLabels);
-          for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-        processedLabels.insert(lookup->getLabel());
-        userLabels.erase(lookup->getLabel());
-      }
-
-      if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-        string saveLabel = lookup->getLabel();
-
-        delete lookup;
-        lookup = input.getSharedRAbundVectors(lastLabel);
-        m->mothurOut(lookup->getLabel()+"\n"); 
-          vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-          processSharedAndDesignData(data, currentLabels);
-          for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-        processedLabels.insert(lookup->getLabel());
-        userLabels.erase(lookup->getLabel());
-
-          //restore real lastlabel to save below
-        lookup->setLabels(saveLabel);
-      }
-
-      lastLabel = lookup->getLabel();
-        //prevent memory leak
-      delete lookup;
-
-      if (m->getControl_pressed()) { return 0; }
-
-        //get next line to process
-      lookup = input.getSharedRAbundVectors();
+    try {
+        
+        if (abort) { if (calledHelp) { return 0; }  return 2;   }
+        
+        InputData input(sharedfile, "sharedfile", Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        vector<string> currentLabels = lookup->getOTUNames();
+        
+        //read design file
+        designMap.read(designfile);
+        
+        while (lookup != NULL) {
+            
+            if (m->getControl_pressed()) { delete lookup; break; }
+            
+            vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
+            processSharedAndDesignData(data, currentLabels);
+            for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
+            delete lookup;
+            
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+        }
+        
+        m->mothurOutEndLine();
+        m->mothurOut("Output File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]+"\n");    } m->mothurOutEndLine();
+        
+        return 0;
+        
     }
-
-    if (m->getControl_pressed()) {  return 0; }
-
-      //output error messages about any remaining user labels
-    set<string>::iterator it;
-    bool needToRun = false;
-    for (it = userLabels.begin(); it != userLabels.end(); it++) {
-      m->mothurOut("Your file does not include the label " + *it);
-      if (processedLabels.count(lastLabel) != 1) {
-        m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-        needToRun = true;
-      }else {
-        m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-      }
+    catch(exception& e) {
+        m->errorOut(e, "ClassifySharedCommand", "execute");
+        exit(1);
     }
-
-      //run last label if you need to
-    if (needToRun )  {
-      delete lookup;
-      lookup = input.getSharedRAbundVectors(lastLabel);
-
-      m->mothurOut(lookup->getLabel()+"\n"); 
-
-        vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
-        processSharedAndDesignData(data, currentLabels);
-        for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();
-
-      delete lookup;
-
-    }
-
-      m->mothurOutEndLine();
-      m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-      for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
-      m->mothurOutEndLine();
-
-    return 0;
-
-  }
-  catch(exception& e) {
-    m->errorOut(e, "ClassifySharedCommand", "execute");
-    exit(1);
-  }
 }
 //**********************************************************************************************************************
 // This static function is intended to read all the necessary information from
@@ -618,7 +442,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
         if ( stdthreshold > 0.0 ) {
             FeatureVector removedFeatureVector = applyStdThreshold(stdthreshold, labeledObservationVector, featureVector);
             if (removedFeatureVector.size() > 0) {
-                m->mothurOut(toString(removedFeatureVector.size()) + " OTUs were below the stdthreshold of " + toString(stdthreshold) + " and were removed"); m->mothurOutEndLine();
+                m->mothurOut(toString(removedFeatureVector.size()) + " OTUs were below the stdthreshold of " + toString(stdthreshold) + " and were removed\n"); 
                 if ( outputFilter.debug() ) {
                     m->mothurOut("the following OTUs were below the standard deviation threshold of " + toString(stdthreshold) ); m->mothurOutEndLine();
                     for (FeatureVector::iterator i = removedFeatureVector.begin(); i != removedFeatureVector.end(); i++) {
@@ -630,11 +454,11 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
         // apply [0,1] standardization
         if ( transformName == "zeroone") {
-            m->mothurOut("transforming data to lie within range [0,1]"); m->mothurOutEndLine();
+            m->mothurOut("transforming data to lie within range [0,1]\n"); 
             transformZeroOne(labeledObservationVector);
         }
         else {
-            m->mothurOut("transforming data to have zero mean and unit variance"); m->mothurOutEndLine();
+            m->mothurOut("transforming data to have zero mean and unit variance\n"); 
             transformZeroMeanUnitVariance(labeledObservationVector);
         }
 
@@ -660,8 +484,8 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
 
             int n = 0;
             int rfeRoundCount = rankedFeatureList.front().getRank();
-            m->mothurOut("ordered features:" ); m->mothurOutEndLine();
-            m->mothurOut("index\tOTU\trank"); m->mothurOutEndLine();
+            m->mothurOut("ordered features:\n" ); 
+            m->mothurOut("index\tOTU\trank\n"); 
             outputFile << setw(5)  << "index"
                        << setw(12) << "OTU"
                        << setw(5)  << "rank"

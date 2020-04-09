@@ -19,7 +19,6 @@ class DeuniqueTreeCommand : public Command {
 	
 public:
 	DeuniqueTreeCommand(string);	
-	DeuniqueTreeCommand();
 	~DeuniqueTreeCommand() {}
 	
 	vector<string> setParameters();

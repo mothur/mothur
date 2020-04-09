@@ -18,11 +18,17 @@ vector<string> MergeOTUsCommand::setParameters(){
         CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","list",false,true,true); parameters.push_back(plist);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter ptaxlevel("taxlevel", "Number", "", "-1", "", "", "","",false,false,true); parameters.push_back(ptaxlevel);
-        
-        
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
+        outputTypes["constaxonomy"] = tempOutNames;
         
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -67,90 +73,17 @@ string MergeOTUsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeOTUsCommand::MergeOTUsCommand(){
-    try {
-        abort = true; calledHelp = true;
-        setParameters();
-        vector<string> tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-        outputTypes["relabund"] = tempOutNames;
-        outputTypes["constaxonomy"] = tempOutNames;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "MergeOTUsCommand", "MergeOTUsCommand");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-
 MergeOTUsCommand::MergeOTUsCommand(string option)  {
     try {
-        abort = false; calledHelp = false;
-        allLines = true;
-        
-        //allow user to run help
         if(option == "help") {  help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
         
         else {
-            vector<string> myArray = setParameters();
-            
-            OptionParser parser(option);
+            OptionParser parser(option, setParameters());
             map<string,string> parameters  = parser.getParameters();
-            map<string,string>::iterator it;
             
             ValidParameters validParameter;
-            
-            //check to make sure all parameters are valid for command
-            for (it = parameters.begin(); it != parameters.end(); it++) {
-                if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-            }
-            
-            vector<string> tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-            outputTypes["relabund"] = tempOutNames;
-            outputTypes["constaxonomy"] = tempOutNames;
-            
-            //if the user changes the input directory command factory will send this info to us in the output parameter
-            string inputDir = validParameter.valid(parameters, "inputdir");
-            if (inputDir == "not found"){	inputDir = "";		}
-            else {
-                string path;
-                it = parameters.find("shared");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("constaxonomy");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("relabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("list");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["list"] = inputDir + it->second;		}
-                }
-            }
-            
             sharedfile = validParameter.validFile(parameters, "shared");
             if (sharedfile == "not found") { sharedfile = ""; }
             else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
@@ -561,82 +494,28 @@ int MergeOTUsCommand::mergeRelabundOTUs(vector<TaxNode>& nodes){
         string outputFileName = getOutputFileName("relabund", variables);
         outputTypes["relabund"].push_back(outputFileName); outputNames.push_back(outputFileName);
         
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
+        ofstream out; util.openOutputFile(outputFileName, out);
         
         InputData input(relabundfile, "relabund", Groups);
-        SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
-        string lastLabel = lookup->getLabel();
-        Groups = lookup->getNamesGroups();
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
+        
+        SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        
         bool printHeaders = true;
-        
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while (lookup != NULL) {
             
-            if (m->getControl_pressed()) {  out.close(); delete lookup;  return 0; }
+            if (m->getControl_pressed()) { delete lookup; break; }
             
-            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                
-                m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-                process(lookup, out, printHeaders, nodes);
-                
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-            }
+            process(lookup, out, printHeaders, nodes); delete lookup;
             
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-                
-                process(lookup, out, printHeaders, nodes);
-                
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-            }
-            
-            lastLabel = lookup->getLabel();
-            //prevent memory leak
-            delete lookup;
-            
-            if (m->getControl_pressed()) {  out.close();  return 0; }
-            
-            //get next line to process
-            lookup = input.getSharedRAbundFloatVectors();
+            lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
-        if (m->getControl_pressed()) { out.close(); return 0; }
-        
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            
-            m->mothurOut(lookup->getLabel()+"\t"+numNodes+"\n");
-            process(lookup, out, printHeaders, nodes);
-            
-            delete lookup;
-        }
-        
         out.close();
         
         return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "MergeOTUsCommand", "mergeRelabundOTUs");

@@ -21,7 +21,6 @@
 class ChimeraCheckCommand : public Command {
 public:
 	ChimeraCheckCommand(string);
-	ChimeraCheckCommand();
 	~ChimeraCheckCommand(){}
 	
 	vector<string> setParameters();

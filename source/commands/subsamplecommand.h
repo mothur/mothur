@@ -24,7 +24,6 @@ class SubSampleCommand : public Command {
 
 public:
 	SubSampleCommand(string);
-	SubSampleCommand();
 	~SubSampleCommand() {}
 	
 	vector<string> setParameters();
@@ -52,8 +51,8 @@ private:
 	
 	int getSubSampleShared();
 	int getSubSampleList();
-	int getSubSampleRabund();
-	int getSubSampleSabund();
+	void getSubSampleRabund();
+	void getSubSampleSabund();
 	int getSubSampleFasta();
     int getSubSampleTree();
 	int processShared(SharedRAbundVectors*&);

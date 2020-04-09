@@ -258,7 +258,7 @@ int Oligos::readOligos(){
 					
 					//check for repeat barcodes
 					map<string, int>::iterator itPrime = primers.find(oligo);
-					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already, disregarding.\n");   }
                     else {
                         if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer " + oligo + ".\n"); }  }
                     
@@ -298,7 +298,7 @@ int Oligos::readOligos(){
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding.\n");   }
                     else { uniquePrimers.insert(tempPair);
 					
                         if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
@@ -358,7 +358,7 @@ int Oligos::readOligos(){
                     }else {
                         //check for repeat barcodes
                         map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already, disregarding."); m->mothurOutEndLine();  }
+                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already, disregarding.\n");   }
                         else {
                             barcodes[oligo]=indexBarcode; indexBarcode++;
                             barcodeNameVector.push_back(group);
@@ -369,7 +369,7 @@ int Oligos::readOligos(){
 				}else if(type == "SPACER"){
 					spacer.push_back(oligo);
 				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine(); }
+				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + ".\n");  }
 			}
 			util.gobble(inOligos);
 		}
@@ -392,7 +392,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardBarcode=NONE and forwardBarcode=barcodeString in same file. Mothur assumes all sequences have forward barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardBarcode=NONE and forwardBarcode=barcodeString in same file. Mothur assumes all sequences have forward barcodes or all do not, quitting.\n");   return 0;
                 }
             }
             
@@ -405,7 +405,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reverseBarcode=NONE and reverseBarcode=barcodeString in same file. Mothur assumes all sequences have reverse barcodes or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reverseBarcode=NONE and reverseBarcode=barcodeString in same file. Mothur assumes all sequences have reverse barcodes or all do not, quitting.\n");   return 0;
                 }
             }
             
@@ -418,7 +418,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardPrimer=NONE and forwardPrimer=primerString in same file. Mothur assumes all sequences have forward primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix forwardPrimer=NONE and forwardPrimer=primerString in same file. Mothur assumes all sequences have forward primers or all do not, quitting.\n");   return 0;
                 }
             }
             
@@ -431,7 +431,7 @@ int Oligos::readOligos(){
                     }
                 }
                 if (!allNONE) {
-                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reversePrimer=NONE and reversePrimer=primerString in same file. Mothur assumes all sequences have reverse primers or all do not, quitting."); m->mothurOutEndLine();  return 0;
+                    m->setControl_pressed(true);  m->mothurOut("[ERROR]: cannot mix reversePrimer=NONE and reversePrimer=primerString in same file. Mothur assumes all sequences have reverse primers or all do not, quitting.\n");   return 0;
                 }
             }
         }

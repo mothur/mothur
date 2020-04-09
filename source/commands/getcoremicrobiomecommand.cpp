@@ -23,6 +23,11 @@ vector<string> GetCoreMicroBiomeCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["coremicrobiome"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,69 +74,20 @@ string GetCoreMicroBiomeCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["coremicrobiome"] = tempOutNames; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetCoreMicroBiomeCommand", "GetCoreMicroBiomeCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   allLines = true;
+		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-				string path;
-				it = parameters.find("relabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-           
-            vector<string> tempOutNames;
-            outputTypes["coremicrobiome"] = tempOutNames; 
-
-			//check for parameters
             sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }
 			else if (sharedfile == "not found") { sharedfile = ""; }
@@ -146,13 +102,12 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to shared, then relabund
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") {  inputFileName = sharedfile; format="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					relabundfile = current->getRelAbundFile(); 
-					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+					if (relabundfile != "") {  inputFileName = relabundfile; format="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); 
-						abort = true;
+						m->mothurOut("No valid current files. You must provide a shared or relabund.\n");  abort = true;
 					}
 				}
 			}
@@ -175,7 +130,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
             
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "fraction"; }
 						
-			if ((output != "fraction") && (output != "count")) { m->mothurOut(output + " is not a valid output form. Options are fraction and count. I will use fraction."); m->mothurOutEndLine(); output = "fraction"; }
+			if ((output != "fraction") && (output != "count")) { m->mothurOut(output + " is not a valid output form. Options are fraction and count. I will use fraction.\n");  output = "fraction"; }
             
             string temp = validParameter.valid(parameters, "abundance");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, abund);
@@ -196,15 +151,11 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
                     factor = 100;
                     abund /= 100;
                 }
-            }else {
-                factor = 100;
-            }
+            }else { factor = 100; }
             
             temp = validParameter.valid(parameters, "samples");	if (temp == "not found"){	temp = "-1";	}
 			util.mothurConvert(temp, samples);
-
 		}
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetCoreMicroBiomeCommand", "GetCoreMicroBiomeCommand");
@@ -222,7 +173,6 @@ int GetCoreMicroBiomeCommand::execute(){
             string options = "shared=" + sharedfile;
             if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
-            //calc dists for fastafile
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: get.relabund(" + options + ")\n");
             Command* relabundCommand = new GetRelAbundCommand(options);
@@ -238,89 +188,26 @@ int GetCoreMicroBiomeCommand::execute(){
         }
         
         InputData input(inputFileName, format, Groups);
-        SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
-        Groups = lookup->getNamesGroups();
-        string lastLabel = lookup->getLabel();
-        
-        if (samples != -1) { 
-            if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
-        }
-
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
         set<string> processedLabels;
         set<string> userLabels = labels;
+        string lastLabel = "";
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-            
-            if (m->getControl_pressed()) { delete lookup;  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
-            
-            if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createTable(lookup);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-            }
-            
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundFloatVectors(lastLabel);
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                
-                createTable(lookup);
-                
-                processedLabels.insert(lookup->getLabel());
-                userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-            }
-            
-            lastLabel = lookup->getLabel();
-            //prevent memory leak
-            delete lookup;
-            
-            if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-            
-            //get next line to process
-            lookup = input.getSharedRAbundFloatVectors();				
+        SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
+        
+        if (samples != -1) {
+            if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
         }
-        
-        if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
-        
-        //output error messages about any remaining user labels
-        set<string>::iterator it;
-        bool needToRun = false;
-        for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-            m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1) {
-                m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-                needToRun = true;
-            }else {
-                m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-            }
+            
+        while (lookup != NULL) {
+                
+            if (m->getControl_pressed()) { delete lookup; break; }
+                
+            createTable(lookup); delete lookup;
+                
+            lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
         }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
- 
-            lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            
-            m->mothurOut(lookup->getLabel()+"\n"); 
-            
-            createTable(lookup);
-            
-            delete lookup;
 
-        }
-        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); }  return 0; }
         
         //output files created by command

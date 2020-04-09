@@ -22,7 +22,6 @@ class SensSpecCommand : public Command {
 
 public:
 	SensSpecCommand(string);
-	SensSpecCommand();
 	~SensSpecCommand(){}
 
 	vector<string> setParameters();
@@ -39,7 +38,7 @@ public:
 
 private:
 	vector< vector< int> > preProcessList(OptiMatrix& matrix, ListVector*);
-	int processListFile();
+	void processListFile();
 	void setUpOutput();
 	void outputStatistics(string, string, int);
 

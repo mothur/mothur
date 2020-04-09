@@ -19,6 +19,12 @@ vector<string> ReverseSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -60,90 +66,37 @@ string ReverseSeqsCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ReverseSeqsCommand::ReverseSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qfile"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReverseSeqsCommand", "ReverseSeqsCommand");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 
 ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qfile"] = tempOutNames;
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("qfile");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-				}
-			}
-
-			//check for required parameters
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not open") { abort = true; }
-			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (fastaFileName == "not found") { fastaFileName = "";}// m->mothurOut("fasta is a required parameter for the reverse.seqs command.\n");  abort = true;  }	
 			else { current->setFastaFile(fastaFileName); }
 			
 			qualFileName = validParameter.validFile(parameters, "qfile");
 			if (qualFileName == "not open") { abort = true; }
-			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (qualFileName == "not found") { qualFileName = ""; }//m->mothurOut("fasta is a required parameter for the reverse.seqs command.\n");  abort = true;  }	
 			else { current->setQualFile(qualFileName); }
 			
 			if((fastaFileName == "") && (qualFileName == "")){
 				fastaFileName = current->getFastaFile(); 
-				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+				if (fastaFileName != "") {  m->mothurOut("Using " + fastaFileName + " as input file for the fasta parameter.\n");  }
 				else { 
 					qualFileName = current->getQualFile(); 
-					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter."); m->mothurOutEndLine(); }
+					if (qualFileName != "") {  m->mothurOut("Using " + qualFileName + " as input file for the qfile parameter.\n");  }
 					else { 
-						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command."); m->mothurOutEndLine();
+						m->mothurOut("You have no current files for fasta or qfile, and fasta or qfile is a required parameter for the reverse.seqs command.\n"); 
 						abort = true;
 					}
 				}

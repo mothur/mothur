@@ -39,6 +39,15 @@ vector<string> NewCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        //set output file types
+        vector<string> tempOutNames;
+        outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
+        outputTypes["fileType2"] = tempOutNames;
+        outputTypes["FileType3"] = tempOutNames;
+        
+        //set abort and called Help
+        abort = false; calledHelp = false;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -83,106 +92,25 @@ string NewCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-NewCommand::NewCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["fileType1"] = tempOutNames; //filetypes should be things like: shared, fasta, accnos...
-		outputTypes["fileType2"] = tempOutNames;
-		outputTypes["FileType3"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NewCommand", "NewCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 NewCommand::NewCommand(string option)  {
 	try {
 ////////////////////////////////////////////////////////
 /////////////////// start leave alone block ////////////
 ////////////////////////////////////////////////////////
-		abort = false; calledHelp = false;   
+		  
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
 			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
 			
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-///////////////////////////////////////////////////////////////
-//////////////// stop leave alone block ///////////////////////
-///////////////////////////////////////////////////////////////
-                
-//edit file types below to include only the types you added as parameters
-                
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("column");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["column"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-								
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-///////////////////////////////////////////////////////////////////////////////
-/////////// example of getting filenames and checking dependancies ////////////
-// the validParameter class will make sure file exists, fill with correct    //
-// and name is current is given ///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-            
-            
             ///variables for examples below that you will most likely want to put in the header for 
             //use by the other class functions.
             string phylipfile, columnfile, namefile, fastafile, sharedfile, method, countfile;
@@ -220,24 +148,24 @@ NewCommand::NewCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to column, then phylip
 				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter."); m->mothurOutEndLine(); }
+				if (columnfile != "") {   m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
 				else { 
 					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+					if (phylipfile != "") {  m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a phylip or column file before you can use the cluster command.\n");  
 						abort = true;
 					}
 				}
 			}
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column.\n");  abort = true; }
 			
 			if (columnfile != "") {
 				if (namefile == "") { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 					else { 
-						m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); 
+						m->mothurOut("You need to provide a namefile if you are going to use the column format.\n");  
 						abort = true; 
 					}	
 				}
@@ -249,8 +177,8 @@ NewCommand::NewCommand(string option)  {
 			else if (sharedfile == "not found") { 
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -268,7 +196,7 @@ NewCommand::NewCommand(string option)  {
 			if (method == "not found") { method = "average"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted.\n");  abort = true; }
             
             //use more than one multiple type. do not check to make sure the entry is valid.
             string calc = validParameter.valid(parameters, "calc");			
@@ -329,101 +257,68 @@ int NewCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-        
-        // reading and processing a shared file code example
-        // Note: As long as you set groups and labels as shown in the constructor, you can use this code without modification other than adding your function call which is passed the lookup vector.
-        // The classes used below will handle the checking of groups to make sure they are valid and returning only the groups you selected.  The while loop implements mothur "smart distancing" so as long as you filled label as shown above in the constructor the code below will handle bad labels or labels not included in the sharedfile.
-         
-         //Reads sharefile, binLabels are stored in m->currentBinLabels, lookup will be filled with groups in m->getGroups() or all groups in file if m->getGroups is empty. If groups are selected, some bins maybe eliminated if they only contained seqs from groups not included. No need to worry about the details of this, SharedRAbundVector takes care of it.  Just make sure to use m->currentBinLabels if you are outputting OTU labels so that if otus are eliminated you still have the correct names.
-        
         /*
-         InputData input(sharedfile, "sharedfile");
-         vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
-         string lastLabel = lookup[0]->getLabel();
-         
-         //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+         InputData input(inputFileName, format, Groups);
          set<string> processedLabels;
          set<string> userLabels = labels;
+         string lastLabel = "";
          
-                  
-         //as long as you are not at the end of the file or done wih the lines you want
-         while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-         
-         if (m->getControl_pressed()) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  return 0; }
-         
-         if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-         
-         m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-         
-         ///////////////////////////////////////////////////////////////////////////////////
-         //// Call your function to process specific distance in sharedfile, ie lookup /////
-         ///////////////////////////////////////////////////////////////////////////////////
-         
-         processedLabels.insert(lookup[0]->getLabel());
-         userLabels.erase(lookup[0]->getLabel());
-         }
-         
-         if ((util.anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-         string saveLabel = lookup[0]->getLabel();
-         
-         for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
-         lookup = input.getSharedRAbundVectors(lastLabel);
-         m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-         
-         ///////////////////////////////////////////////////////////////////////////////////
-         //// Call your function to process specific distance in sharedfile, ie lookup /////
-         ///////////////////////////////////////////////////////////////////////////////////
+         if (format == "relabund") {
+             SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+         Groups = lookup->getNamesGroups();
+             
+             while (lookup != NULL) {
+                 
+                 if (m->getControl_pressed()) { delete lookup; break; }
+                 
+         //////// myfunction(lookup); - call your function to process relabund data ////////////////////
+                 
+                delete lookup;
+                 
+                 lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+             }
 
+         }else if (format == "sharedfile") {
          
-         processedLabels.insert(lookup[0]->getLabel());
-         userLabels.erase(lookup[0]->getLabel());
-         
-         //restore real lastlabel to save below
-         lookup[0]->setLabel(saveLabel);
+             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+         Groups = lookup->getNamesGroups();
+             
+             while (lookup != NULL) {
+                 
+                 if (m->getControl_pressed()) { delete lookup; break; }
+                 
+                 //////// myfunction(lookup); - call your function to process shared data ////////////////////
+                delete lookup;
+                 
+                 lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+             }
+             
+         }else if (format == "list") {
+             ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+                    
+             while (list != NULL) {
+                        
+                 if (m->getControl_pressed()) { delete list; break; }
+                        
+                 //////// myfunction(list); - call your function to process list data //////////////////// delete list;
+                       
+                 list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+             }
+             
+         }else if (format == "rabund") {
+             RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+                    
+             while (rabund != NULL) {
+                        
+                 if (m->getControl_pressed()) { delete rabund; break; }
+                        
+                 //////// myfunction(rabund); - call your function to process list data //////////////////// delete rabund;
+                       
+                 rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
+             }
+             
          }
-         
-         lastLabel = lookup[0]->getLabel();
-         //prevent memory leak
-         for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-         
-         if (m->getControl_pressed()) { return 0; }
-         
-         //get next line to process
-         lookup = input.getSharedRAbundVectors();				
-         }
-         
-         if (m->getControl_pressed()) {  return 0; }
-         
-         //output error messages about any remaining user labels
-         set<string>::iterator it;
-         bool needToRun = false;
-         for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-         m->mothurOut("Your file does not include the label " + *it); 
-         if (processedLabels.count(lastLabel) != 1) {
-         m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-         needToRun = true;
-         }else {
-         m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-         }
-         }
-         
-         //run last label if you need to
-         if (needToRun )  {
-         for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-         lookup = input.getSharedRAbundVectors(lastLabel);
-         
-         m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-         
-         ///////////////////////////////////////////////////////////////////////////////////
-         //// Call your function to process specific distance in sharedfile, ie lookup /////
-         ///////////////////////////////////////////////////////////////////////////////////
-
-         
-         for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-         }
-         */
-        
-        
+        */
         
         //if you make a new file or a type that mothur keeps track of the current version, you can update it with something like the following.
 		string currentFasta = "";

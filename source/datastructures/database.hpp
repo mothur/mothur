@@ -18,6 +18,7 @@
 #include "currentfile.h"
 #include "utils.hpp"
 
+
 /**************************************************************************************************/
 struct seqMatch {  //used to select top n matches
 		int seq;
@@ -46,11 +47,14 @@ inline bool compareSeqMatchesReverse (seqMatch member, seqMatch member2){ //sort
 class Database {
 
 public:
-    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance(); current = CurrentFile::getInstance(); }
+    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance();  }
+    
     virtual ~Database(){};
-	virtual void generateDB() = 0;
+    virtual void generateDB() = 0;
     virtual void readKmerDB(ifstream&){};
-	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
+    virtual void addSequence(Sequence) = 0;  //add sequence to search engine
+    virtual void addSequences(vector<Sequence> seqs) { for (int i = 0; i < seqs.size(); i++) { addSequence(seqs[i]); } }
+
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
     
     
@@ -64,10 +68,9 @@ public:
     virtual vector<int> findClosestMegaBlast(Sequence*, int, int){ vector<int> results; return results;}
 	
 protected:
-	MothurOut* m;
-    CurrentFile* current;
+    
+    MothurOut* m;
 	int numSeqs, longest;
-    //std::mutex mutex;
     Utils util;
 	
 	

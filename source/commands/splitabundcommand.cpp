@@ -9,7 +9,7 @@
 
 #include "splitabundcommand.h"
 #include "getseqscommand.h"
-#include "getotulabelscommand.h"
+#include "getotuscommand.h"
 
 //**********************************************************************************************************************
 vector<string> SplitAbundCommand::setParameters(){	
@@ -25,6 +25,16 @@ vector<string> SplitAbundCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        vector<string> tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        abort = false; calledHelp = false;    allLines = true;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -77,104 +87,18 @@ string SplitAbundCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-SplitAbundCommand::SplitAbundCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["list"] = tempOutNames;
-		outputTypes["name"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitAbundCommand", "SplitAbundCommand");
-		exit(1);
-	}
-}
+
 //**********************************************************************************************************************
 SplitAbundCommand::SplitAbundCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-			
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["list"] = tempOutNames;
-			outputTypes["name"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
-			outputTypes["fasta"] = tempOutNames;	
-            outputTypes["count"] = tempOutNames;
-												
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
-
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 
 			//check for required parameters
@@ -207,26 +131,26 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
             }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
 			//do you have all files needed
 			if ((listfile == "") && (namefile == "") && (countfile == "") && (fastafile == "")) {
 				namefile = current->getNameFile(); 
-				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter."); m->mothurOutEndLine(); }
+				if (namefile != "") { m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
 				else { 				
 					listfile = current->getListFile(); 
-					if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 	
                         countfile  = current->getCountFile(); 
-                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter."); m->mothurOutEndLine(); }
+                        if (countfile != "") { m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
                             fastafile = current->getFastaFile();
-                        if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+                        if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
                         else {     m->mothurOut("You have no current fastafile file, and a fasta, list, name or count file is required.\n"); abort = true; } }
                     }
 				}
@@ -399,7 +323,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
          m->mothurOut("/******************************************/\n");
          m->mothurOut("Running command: get.otus(" + inputString + ")\n");
          
-         Command* getOTUSCommand = new GetOtuLabelsCommand(inputString);
+         Command* getOTUSCommand = new GetOtusCommand(inputString);
          getOTUSCommand->execute();
          
          map<string, vector<string> > filenames = getOTUSCommand->getOutputFiles();
@@ -415,7 +339,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
          m->mothurOut("/******************************************/\n");
          m->mothurOut("Running command: get.otus(" + inputString + ")\n");
          
-         getOTUSCommand = new GetOtuLabelsCommand(inputString);
+         getOTUSCommand = new GetOtusCommand(inputString);
          getOTUSCommand->execute();
          
          filenames = getOTUSCommand->getOutputFiles();

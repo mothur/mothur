@@ -16,7 +16,6 @@
 class SRAInfoCommand : public Command {
 public:
     SRAInfoCommand(string);
-    SRAInfoCommand();
     ~SRAInfoCommand(){}
     
     vector<string> setParameters();

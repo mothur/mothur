@@ -20,7 +20,6 @@ class PhylotypeCommand : public Command {
 	
 public:
 	PhylotypeCommand(string);	
-	PhylotypeCommand();
 	~PhylotypeCommand(){}
 	
 	vector<string> setParameters();

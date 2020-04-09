@@ -43,7 +43,6 @@ struct sharedIndexes {
 class IndicatorCommand : public Command {
 public:
 	IndicatorCommand(string);
-	IndicatorCommand();
 	~IndicatorCommand(){}
 	
 	vector<string> setParameters();

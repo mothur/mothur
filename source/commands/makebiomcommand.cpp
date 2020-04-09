@@ -105,6 +105,14 @@ vector<string> MakeBiomCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         CommandParameter pmatrixtype("matrixtype", "Multiple", "sparse-dense", "sparse", "", "", "","",false,false); parameters.push_back(pmatrixtype);
+        
+        abort = false; calledHelp = false; allLines = true;
+        
+        //initialize outputTypes
+        vector<string> tempOutNames;
+        outputTypes["biom"] = tempOutNames;
+        outputTypes["shared"] = tempOutNames;
+        outputTypes["relabund"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -156,106 +164,18 @@ string MakeBiomCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
-//**********************************************************************************************************************
-MakeBiomCommand::MakeBiomCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["biom"] = tempOutNames;
-        outputTypes["shared"] = tempOutNames;
-        outputTypes["relabund"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "MakeBiomCommand", "MakeBiomCommand");
-		exit(1);
-	}
-}
 //**********************************************************************************************************************
 MakeBiomCommand::MakeBiomCommand(string option) {
 	try {
-		abort = false; calledHelp = false;   
-		allLines = true;
-        
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["biom"] = tempOutNames;
-            outputTypes["shared"] = tempOutNames;
-            outputTypes["relabund"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("relabund");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("constaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["constaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("reftaxonomy");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("picrust");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["picrust"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("metadata");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
-				}
-			}
-            
             relabundfile = validParameter.validFile(parameters, "relabund");
             if (relabundfile == "not open") { abort = true; }
             else if (relabundfile == "not found") { relabundfile = ""; }
@@ -271,12 +191,12 @@ MakeBiomCommand::MakeBiomCommand(string option) {
                 //is there are current file available for either of these?
                 //give priority to shared, then relabund
                 sharedfile = current->getSharedFile();
-                if (sharedfile != "") {  inputFileName = sharedfile; fileFormat="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+                if (sharedfile != "") {  inputFileName = sharedfile; fileFormat="sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
                 else {
                     relabundfile = current->getRelAbundFile();
-                    if (relabundfile != "") {  inputFileName = relabundfile; fileFormat="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter."); m->mothurOutEndLine(); }
+                    if (relabundfile != "") {  inputFileName = relabundfile; fileFormat="relabund"; m->mothurOut("Using " + relabundfile + " as input file for the relabund parameter.\n");  }
                     else {
-                        m->mothurOut("No valid current files. You must provide a shared or relabund."); m->mothurOutEndLine(); abort = true;
+                        m->mothurOut("No valid current files. You must provide a shared or relabund.\n");  abort = true;
                     }
                 }
             }
@@ -318,16 +238,16 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			
             if (picrustOtuFile != "") {
                 picrust=true;
-                if (contaxonomyfile == "") {  m->mothurOut("[ERROR]: the constaxonomy parameter is required with the picrust parameter, aborting."); m->mothurOutEndLine(); abort = true;  }
-                if (referenceTax == "") {  m->mothurOut("[ERROR]: the reftaxonomy parameter is required with the picrust parameter, aborting."); m->mothurOutEndLine(); abort = true;  }
+                if (contaxonomyfile == "") {  m->mothurOut("[ERROR]: the constaxonomy parameter is required with the picrust parameter, aborting.\n");  abort = true;  }
+                if (referenceTax == "") {  m->mothurOut("[ERROR]: the reftaxonomy parameter is required with the picrust parameter, aborting.\n");  abort = true;  }
             }else { picrust=false; }
             
-            if ((contaxonomyfile != "") && (labels.size() > 1)) { m->mothurOut("[ERROR]: the contaxonomy parameter cannot be used with multiple labels."); m->mothurOutEndLine(); abort = true; }
+            if ((contaxonomyfile != "") && (labels.size() > 1)) { m->mothurOut("[ERROR]: the contaxonomy parameter cannot be used with multiple labels.\n");  abort = true; }
             
 			format = validParameter.valid(parameters, "matrixtype");				if (format == "not found") { format = "sparse"; }
 			
 			if ((format != "sparse") && (format != "dense")) {
-				m->mothurOut(format + " is not a valid option for the matrixtype parameter. Options are sparse and dense."); m->mothurOutEndLine(); abort = true; 
+				m->mothurOut(format + " is not a valid option for the matrixtype parameter. Options are sparse and dense.\n");  abort = true; 
 			}
 		}
         
@@ -344,144 +264,48 @@ int MakeBiomCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        SharedRAbundVectors* lookup = NULL;
-        SharedRAbundFloatVectors* lookupRel = NULL;
-        string lastLabel;
+        SharedRAbundVectors* lookup = NULL; SharedRAbundFloatVectors* lookupRel = NULL;
         
 		InputData input(inputFileName, fileFormat, Groups);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+        
         if (fileFormat == "sharedfile") {
-            lookup = input.getSharedRAbundVectors();
+            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
-            lastLabel = lookup->getLabel();
             getSampleMetaData(lookup);
         }else                        {
-            lookupRel = input.getSharedRAbundFloatVectors();
+            lookupRel = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookupRel->getNamesGroups();
-            lastLabel = lookupRel->getLabel();
             getSampleMetaData(lookupRel);
         }
         
         //if user did not specify a label, then use first one
-        if ((contaxonomyfile != "") && (labels.size() == 0)) {
-            allLines = false;
-            labels.insert(lastLabel);
-        }
-        
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
+        if ((contaxonomyfile != "") && (labels.size() == 0)) { allLines = false; labels.insert(lastLabel); }
         
         if (fileFormat == "sharedfile") {
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+            while (lookup != NULL) {
                 
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete lookup;  return 0; }
+                if (m->getControl_pressed()) { delete lookup; break; }
                 
-                if(allLines == 1 || labels.count(lookup->getLabel()) == 1){
-                    
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    getBiom(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                }
+                getBiom(lookup); delete lookup;
                 
-                if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookup->getLabel();
-                    
-                    delete lookup;
-                    lookup = input.getSharedRAbundVectors(lastLabel);
-                    m->mothurOut(lookup->getLabel()+"\n"); 
-                    
-                    getBiom(lookup);
-                    
-                    processedLabels.insert(lookup->getLabel());
-                    userLabels.erase(lookup->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookup->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookup->getLabel();
-                
-                //prevent memory leak and get next set
-                delete lookup;
-                lookup = input.getSharedRAbundVectors();				
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }else {
-            
-            //as long as you are not at the end of the file or done wih the lines you want
-            while((lookupRel != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-               
-                if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } delete lookupRel; return 0; }
+            while (lookupRel != NULL) {
+                            
+                if (m->getControl_pressed()) { delete lookupRel; break; }
                 
-                if(allLines == 1 || labels.count(lookupRel->getLabel()) == 1){
-                    
-                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                    getBiom(lookupRel);
-                    
-                    processedLabels.insert(lookupRel->getLabel());
-                    userLabels.erase(lookupRel->getLabel());
-                }
-                
-                if ((util.anyLabelsToProcess(lookupRel->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                    string saveLabel = lookupRel->getLabel();
-                    
-                    delete lookupRel;
-                    lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
-                    m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                    
-                    getBiom(lookupRel);
-                    
-                    processedLabels.insert(lookupRel->getLabel());
-                    userLabels.erase(lookupRel->getLabel());
-                    
-                    //restore real lastlabel to save below
-                    lookupRel->setLabels(saveLabel);
-                }
-                
-                lastLabel = lookupRel->getLabel();
-                
-                //prevent memory leak and get next set
-                delete lookupRel;
-                lookupRel = input.getSharedRAbundFloatVectors();
+                getBiom(lookupRel); delete lookupRel;
+                            
+                lookupRel = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }     
         
-		//output error messages about any remaining user labels
-		bool needToRun = false;
-		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-			else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-		}
-        
-		//run last label if you need to
-		if (needToRun )  {
-            if (fileFormat == "sharedfile") {
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                m->mothurOut(lookup->getLabel()+"\n"); 
-                getBiom(lookup);
-                
-                delete lookup;
-            }else {
-                delete lookupRel;
-                lookupRel = input.getSharedRAbundFloatVectors(lastLabel);
-                
-                m->mothurOut(lookupRel->getLabel()); m->mothurOutEndLine();
-                getBiom(lookupRel);
-                
-                delete lookupRel;
-            }
-		}
-		
-        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0; }     
-		
         //set sabund file as new current sabundfile
         string currentName = "";
 		itTypes = outputTypes.find("biom");
@@ -489,7 +313,6 @@ int MakeBiomCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setBiomFile(currentName); }
 		}
 
-        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
@@ -1340,7 +1163,6 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
     }
     
 }
-
 //**********************************************************************************************************************
 map<string, string> MakeBiomCommand::readGGOtuMap(){
 	try {

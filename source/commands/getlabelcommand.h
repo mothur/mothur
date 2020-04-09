@@ -18,7 +18,6 @@
 class GetlabelCommand : public Command {
 public:
 	GetlabelCommand(string);
-	GetlabelCommand();
 	~GetlabelCommand(){}
 	
 	vector<string> setParameters();

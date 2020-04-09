@@ -33,10 +33,10 @@
 #include "nocommands.h"
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
-#include "treegroupscommand.h"
+#include "treesharedcommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
-#include "matrixoutputcommand.h"
+#include "distsharedcommand.h"
 #include "getsabundcommand.h"
 #include "getrabundcommand.h"
 #include "seqsummarycommand.h"
@@ -48,7 +48,7 @@
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
 #include "systemcommand.h"
-#include "secondarystructurecommand.h"
+#include "aligncheckcommand.h"
 #include "getsharedotucommand.h"
 #include "getlistcountcommand.h"
 #include "classifyseqscommand.h"
@@ -107,7 +107,6 @@
 #include "getcurrentcommand.h"
 #include "setcurrentcommand.h"
 #include "sharedcommand.h"
-#include "getcommandinfocommand.h"
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
 #include "countgroupscommand.h"
@@ -123,9 +122,9 @@
 #include "createdatabasecommand.h"
 #include "makebiomcommand.h"
 #include "getcoremicrobiomecommand.h"
-#include "listotulabelscommand.h"
-#include "getotulabelscommand.h"
-#include "removeotulabelscommand.h"
+#include "listotuscommand.h"
+#include "getotuscommand.h"
+#include "removeotuscommand.h"
 #include "makecontigscommand.h"
 #include "sffmultiplecommand.h"
 #include "classifysvmsharedcommand.h"
@@ -163,6 +162,7 @@ HelpCommand::HelpCommand(string option)  {
     //allow user to run help
     if(option == "help") { help(); abort = true; calledHelp = true; }
     else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
     
     commandName = option;
     
@@ -270,8 +270,8 @@ int HelpCommand::execute(){
                 else if(commandName == "venn")					{   command = new VennCommand(optionString);					}
                 else if(commandName == "bin.seqs")				{   command = new BinSeqCommand(optionString);					}
                 else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);				}
-                else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);				}
-                else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);			}
+                else if(commandName == "tree.shared")			{   command = new TreeSharedCommand(optionString);				}
+                else if(commandName == "dist.shared")			{   command = new DistSharedCommand(optionString);			}
                 else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);				}
                 else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);					}
                 else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);				}
@@ -325,9 +325,9 @@ int HelpCommand::execute(){
                 else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
                 else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
                 else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
-                else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtuLabelsCommand(optionString);			}
-                else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtuLabelsCommand(optionString);			}
-                else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtuLabelsCommand(optionString);           }
+                else if((commandName == "get.otus")	|| (commandName == "get.otulabels"))			{	command = new GetOtusCommand(optionString);			}
+                else if((commandName == "remove.otus") || (commandName == "remove.otulabels"))			{	command = new RemoveOtusCommand(optionString);			}
+                else if((commandName == "list.otus")	||(commandName == "list.otulabels"))        {	command = new ListOtusCommand(optionString);           }
                 else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
                 else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
                 else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
@@ -347,7 +347,6 @@ int HelpCommand::execute(){
                 else if(commandName == "set.current")			{	command = new SetCurrentCommand(optionString);				}
                 else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
                 else if(commandName == "make.shared")			{	command = new SharedCommand(optionString);					}
-                else if(commandName == "get.commandinfo")		{	command = new GetCommandInfoCommand(optionString);			}
                 else if(commandName == "deunique.tree")			{	command = new DeuniqueTreeCommand(optionString);			}
                 else if((commandName == "count.seqs") || (commandName == "make.table"))			{	command = new CountSeqsCommand(optionString);				}
                 else if(commandName == "count.groups")			{	command = new CountGroupsCommand(optionString);				}

@@ -18,7 +18,6 @@ class FilterSharedCommand : public Command {
     
 public:
 	FilterSharedCommand(string);
-	FilterSharedCommand();
 	~FilterSharedCommand() {}
 	
 	vector<string> setParameters();

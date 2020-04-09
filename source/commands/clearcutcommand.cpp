@@ -40,6 +40,12 @@ vector<string> ClearcutCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["tree"] = tempOutNames;
+        outputTypes["matrixout"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -103,71 +109,19 @@ string ClearcutCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-ClearcutCommand::ClearcutCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["tree"] = tempOutNames;
-		outputTypes["matrixout"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClearcutCommand", "ClearcutCommand");
-		exit(1);
-	}
-}
 /**************************************************************************************/
 ClearcutCommand::ClearcutCommand(string option)  {	
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["tree"] = tempOutNames;
-			outputTypes["matrixout"] = tempOutNames;
-
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-			}
-
-			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") { fastafile = ""; }	
@@ -182,17 +136,17 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				//is there are current file available for either of these?
 				//give priority to phylip, then fasta
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") {  inputFile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
+				if (phylipfile != "") {  inputFile = phylipfile; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
 				else { 
 					fastafile = current->getFastaFile(); 
-					if (fastafile != "") { inputFile = fastafile;  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
+					if (fastafile != "") { inputFile = fastafile;  m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n"); }
 					else { 
-						m->mothurOut("No valid current files. You must provide a phylip or fasta file before you can use the clearcut command."); m->mothurOutEndLine(); 
+						m->mothurOut("No valid current files. You must provide a phylip or fasta file before you can use the clearcut command.\n");
 						abort = true;
 					}
 				}
 			}
-			if ((phylipfile != "") && (fastafile != "")) {  m->mothurOut("You must provide either a phylip formatted distance matrix or an aligned fasta file, not BOTH."); m->mothurOutEndLine(); abort=true; }
+			if ((phylipfile != "") && (fastafile != "")) {  m->mothurOut("You must provide either a phylip formatted distance matrix or an aligned fasta file, not BOTH.\n");  abort=true; }
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -244,7 +198,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			temp = validParameter.valid(parameters, "expdist");		if (temp == "not found"){	temp = "F";			}
 			expdist = util.isTrue(temp);
 			
-			if ((fastafile != "") && ((!DNA) && (!protein))) { m->mothurOut("You must specify the type of sequences you are using: DNA or protein"); m->mothurOutEndLine(); abort=true; }
+			if ((fastafile != "") && ((!DNA) && (!protein))) { m->mothurOut("You must specify the type of sequences you are using: DNA or protein.\n"); abort=true; }
 		}
 
 	}
@@ -350,8 +304,7 @@ int ClearcutCommand::execute() {
 				if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; current->setTreeFile(currentTree); }
 			}
 			
-			m->mothurOutEndLine();
-			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut("\nOutput File Names:\n");
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 		}

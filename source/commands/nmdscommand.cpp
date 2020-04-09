@@ -23,6 +23,13 @@ vector<string> NMDSCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["nmds"] = tempOutNames;
+        outputTypes["iters"] = tempOutNames;
+        outputTypes["stress"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -71,81 +78,25 @@ string NMDSCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
-NMDSCommand::NMDSCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["nmds"] = tempOutNames;
-		outputTypes["stress"] = tempOutNames;
-		outputTypes["iters"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "NMDSCommand", "NMDSCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-
 NMDSCommand::NMDSCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
-			map<string, string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("phylip");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("axes");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["axes"] = inputDir + it->second;		}
-				}
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["nmds"] = tempOutNames;
-			outputTypes["iters"] = tempOutNames;
-			outputTypes["stress"] = tempOutNames;
-			
-			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { phylipfile = ""; abort = true; }
 			else if (phylipfile == "not found") { 				
 				//if there is a current phylip file, use it
 				phylipfile = current->getPhylipFile(); 
-				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (phylipfile != "") { m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
+				else { 	m->mothurOut("You have no current phylip file and the phylip parameter is required.\n");  abort = true; }
 			}else { current->setPhylipFile(phylipfile); }	
 			
 			axesfile = validParameter.validFile(parameters, "axes");
@@ -173,7 +124,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			temp = validParameter.valid(parameters, "epsilon");	if (temp == "not found") {	temp = "0.000000000001";	}
 			util.mothurConvert(temp, epsilon); 
 			
-			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
+			if (mindim < 1) { m->mothurOut("mindim must be at least 1.\n");  abort = true; }
 			if (maxdim < mindim) { maxdim = mindim; }
 		}
 		
@@ -533,9 +484,9 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		}
 		
 		if (maxdim > count) { 
-			m->mothurOut("You requested maxdim = " + toString(maxdim) + ", but your file only includes " + toString(count) + ". Using " + toString(count) + "."); m->mothurOutEndLine(); 
+			m->mothurOut("You requested maxdim = " + toString(maxdim) + ", but your file only includes " + toString(count) + ". Using " + toString(count) + ".\n");  
 			maxdim = count; 
-			if (maxdim < mindim) { m->mothurOut("Also adjusting mindim to " + toString(maxdim-1) + "."); m->mothurOutEndLine(); }
+			if (maxdim < mindim) { m->mothurOut("Also adjusting mindim to " + toString(maxdim-1) + ".\n");  }
 		}
 		
 		vector< vector<double> > axes;  axes.resize(maxdim);
@@ -552,7 +503,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			in >> group; util.gobble(in);
 			
 			bool ignore = false;
-			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring."); m->mothurOutEndLine(); }
+			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring.\n");  }
 			
 			vector<double> thisGroupsAxes;
 			for (int i = 0; i < count; i++) {
@@ -570,7 +521,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		in.close();
 				
 		//sanity check
-		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
+		if (names.size() != orderedAxes.size()) { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting.\n");  m->setControl_pressed(true); return axes; }
 		
 		//put axes info in same order as distance file, just in case
 		for (int i = 0; i < names.size(); i++) {
@@ -583,7 +534,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 					axes[j][i] = thisGroupsAxes[j];
 				}
 				
-			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting."); m->mothurOutEndLine(); m->setControl_pressed(true); return axes; }
+			}else { m->mothurOut("[ERROR]: your axes file does not match your distance file, aborting.\n");  m->setControl_pressed(true); return axes; }
 		}
 		
 		return axes;

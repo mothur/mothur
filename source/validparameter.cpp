@@ -17,29 +17,12 @@ ValidParameters::ValidParameters() {
         current = CurrentFile::getInstance();
         locations = current->getLocations();
 		initParameterRanges();
-		commandName = "";
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidParameters", "ValidParameters");
 		exit(1);
 	}
 }
-/***********************************************************************/
-
-ValidParameters::ValidParameters(string c) {
-	try {
-		m = MothurOut::getInstance();
-        current = CurrentFile::getInstance();
-        locations = current->getLocations();
-		initParameterRanges();
-		commandName = c;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ValidParameters", "ValidParameters");
-		exit(1);
-	}
-}
-
 /***********************************************************************/
 
 ValidParameters::~ValidParameters() {}
@@ -53,20 +36,19 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		for(int i = 0; i < numParams; i++) {
 			if(cParams.at(i).compare(parameter) == 0) {
 				valid = true;
-				i = numParams;
+                break;
 			}
 		}
 		if(!valid) {
-			m->mothurOut(parameter + " is not a valid parameter.\n");
+			m->mothurOut("[WARNING]: " + parameter + " is not a valid parameter, ignoring.\n");
 			m->mothurOut("The valid parameters are: ");
 			for(int i = 0; i < numParams-1; i++)
 				m->mothurOut(cParams.at(i) + ", ");
 			m->mothurOut("and " + cParams.at(numParams-1) + ".\n");
 			return false;
 		}
-        
-		if(parameterRanges.count(parameter) != 1)
-			return true;
+		
+        if(parameterRanges.count(parameter) != 1) { return true; }
 	
 		int pVal;
 		double piSentinel = 3.14159;
@@ -306,13 +288,13 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                     inPhylip >> numTest >> name;
                     inPhylip.close();
                     
-                    if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting."); m->mothurOutEndLine(); return "not found"; }
+                    if (!util.isContainingOnlyDigits(numTest)) { m->mothurOut("[ERROR]: expected a number and got " + numTest + ". I suspect you entered a column formatted file as a phylip file, aborting.\n");  return "not found"; }
                 }
                 
                 //check for blank file
                 if (ableToOpen) {
                     if (util.isBlank(container[parameter])) {
-                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting."); m->mothurOutEndLine(); return "not found";
+                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found";
                     }
                 }
             }

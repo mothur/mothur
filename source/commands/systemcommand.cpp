@@ -13,6 +13,8 @@
 vector<string> SystemCommand::setParameters(){	
 	try {
 		CommandParameter pcommand("command", "String", "", "", "", "", "","",false,false); parameters.push_back(pcommand);
+        
+        abort = false; calledHelp = false;
 				
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -26,23 +28,16 @@ vector<string> SystemCommand::setParameters(){
 //**********************************************************************************************************************
 SystemCommand::SystemCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string, string> parameters = parser.getParameters();
-			map<string, string>::iterator it;
 			
 			ValidParameters validParameter;
-			
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
 			string commandOption = validParameter.valid(parameters, "command");			
 			if (commandOption == "not found") { commandOption = ""; }
 			else { command = commandOption; }

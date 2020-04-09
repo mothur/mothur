@@ -18,7 +18,6 @@
 class DegapSeqsCommand : public Command {
 public:
 	DegapSeqsCommand(string);
-	DegapSeqsCommand();
 	~DegapSeqsCommand(){}
 	
 	vector<string> setParameters();

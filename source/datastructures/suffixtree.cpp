@@ -75,7 +75,7 @@ string SuffixTree::getSeqName()	{
 void SuffixTree::print(){
 	vector<SuffixNode*> hold = nodeVector;
 	sort(hold.begin(), hold.end(), compareParents);
-	m->mothurOut("Address\t\tParent\tNode\tSuffix\tStartC\tEndC\tSuffix"); m->mothurOutEndLine();
+	m->mothurOut("Address\t\tParent\tNode\tSuffix\tStartC\tEndC\tSuffix\n"); 
 	for(int i=1;i<=nodeCounter;i++){
 		hold[i]->print(sequence, i);
 	}

@@ -35,7 +35,6 @@ class ShhherCommand : public Command {
 	
 public:
 	ShhherCommand(string);
-	ShhherCommand();
 	~ShhherCommand() {}
 	
 	vector<string> setParameters();

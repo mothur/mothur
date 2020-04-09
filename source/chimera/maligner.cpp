@@ -508,9 +508,9 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 	try {
 	
 		if (queryAlign.length() != chimera.length()) {
-			m->mothurOut("Error, alignment strings are of different lengths: "); m->mothurOutEndLine();
-			m->mothurOut(toString(queryAlign.length())); m->mothurOutEndLine(); 
-			m->mothurOut(toString(chimera.length())); m->mothurOutEndLine();
+			m->mothurOut("Error, alignment strings are of different lengths: \n"); 
+			m->mothurOut(toString(queryAlign.length())+ "\n");
+			m->mothurOut(toString(chimera.length())+ "\n");
 			return -1.0;
 		}
 

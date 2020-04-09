@@ -26,6 +26,13 @@ vector<string> PrimerDesignCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["summary"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -81,88 +88,18 @@ string PrimerDesignCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-PrimerDesignCommand::PrimerDesignCommand(){	
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-		outputTypes["summary"] = tempOutNames; 
-        outputTypes["fasta"] = tempOutNames;
-        outputTypes["list"] = tempOutNames;
-        
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PrimerDesignCommand", "PrimerDesignCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 PrimerDesignCommand::PrimerDesignCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-            vector<string> tempOutNames;
-            outputTypes["summary"] = tempOutNames; 
-            outputTypes["fasta"] = tempOutNames;
-            outputTypes["list"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
- 				string path;
-				it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-                
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-            }
-                        
-			//check for parameters
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
@@ -178,8 +115,8 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			if (fastafile == "not open") { fastafile = ""; abort=true;  }
 			else if (fastafile == "not found") {  
                 fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
             }else  { current->setFastaFile(fastafile); }
             
             //get listfile - it is required
@@ -187,13 +124,13 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			if (listfile == "not open") { listfile = ""; abort=true;  }
 			else if (listfile == "not found") {  
                 listfile = current->getListFile(); 
-				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current listfile and the list parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (listfile != "") { m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
+				else { 	m->mothurOut("You have no current listfile and the list parameter is required.\n");  abort = true; }
             }else  { current->setListFile(listfile); }
 
             
 			if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             
@@ -224,7 +161,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
 			processors = current->setProcessors(temp);
             
             label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
         
             if (countfile == "") { 
                 if (namefile == "") {
@@ -1049,7 +986,7 @@ char PrimerDesignCommand::getBase(vector<unsigned int> counts, int size){  //A,T
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] != 0)) {  conBase = '-'; }
 		//cutoff removed all counts
 		else if ((counts[0] == 0) && (counts[1] == 0) && (counts[2] == 0) && (counts[3] == 0) && (counts[4] == 0)) {  conBase = 'N'; }
-		else{ m->mothurOut("[ERROR]: cannot find consensus base."); m->mothurOutEndLine(); }
+		else{ m->mothurOut("[ERROR]: cannot find consensus base.\n");  }
 		
 		return conBase;
 		

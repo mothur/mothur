@@ -17,7 +17,6 @@ class KruskalWallisCommand : public Command {
 public:
 	    
 	KruskalWallisCommand(string);	
-	KruskalWallisCommand();
 	~KruskalWallisCommand(){}
 	
 	vector<string> setParameters();

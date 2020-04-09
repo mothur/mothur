@@ -52,6 +52,36 @@ vector<string> CollectCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+      
+        vector<string> tempOutNames;
+        outputTypes["sobs"] = tempOutNames;
+        outputTypes["chao"] = tempOutNames;
+        outputTypes["nseqs"] = tempOutNames;
+        outputTypes["coverage"] = tempOutNames;
+        outputTypes["ace"] = tempOutNames;
+        outputTypes["jack"] = tempOutNames;
+        outputTypes["shannon"] = tempOutNames;
+        outputTypes["shannoneven"] = tempOutNames;
+        outputTypes["shannonrange"] = tempOutNames;
+        outputTypes["npshannon"] = tempOutNames;
+        outputTypes["heip"] = tempOutNames;
+        outputTypes["smithwilson"] = tempOutNames;
+        outputTypes["simpson"] = tempOutNames;
+        outputTypes["simpsoneven"] = tempOutNames;
+        outputTypes["invsimpson"] = tempOutNames;
+        outputTypes["bootstrap"] = tempOutNames;
+        outputTypes["geometric"] = tempOutNames;
+        outputTypes["qstat"] = tempOutNames;
+        outputTypes["logseries"] = tempOutNames;
+        outputTypes["bergerparker"] = tempOutNames;
+        outputTypes["bstick"] = tempOutNames;
+        outputTypes["goodscoverage"] = tempOutNames;
+        outputTypes["efron"] = tempOutNames;
+        outputTypes["boneh"] = tempOutNames;
+        outputTypes["solow"] = tempOutNames;
+        outputTypes["shen"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -125,135 +155,20 @@ string CollectCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CollectCommand::CollectCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["sobs"] = tempOutNames;
-		outputTypes["chao"] = tempOutNames;
-		outputTypes["nseqs"] = tempOutNames;
-		outputTypes["coverage"] = tempOutNames;
-		outputTypes["ace"] = tempOutNames;
-		outputTypes["jack"] = tempOutNames;
-		outputTypes["shannon"] = tempOutNames;
-		outputTypes["shannoneven"] = tempOutNames;
-        outputTypes["shannonrange"] = tempOutNames;
-		outputTypes["npshannon"] = tempOutNames;
-		outputTypes["heip"] = tempOutNames;
-		outputTypes["smithwilson"] = tempOutNames;
-		outputTypes["simpson"] = tempOutNames;
-		outputTypes["simpsoneven"] = tempOutNames;
-		outputTypes["invsimpson"] = tempOutNames;
-		outputTypes["bootstrap"] = tempOutNames;
-		outputTypes["geometric"] = tempOutNames;
-		outputTypes["qstat"] = tempOutNames;
-		outputTypes["logseries"] = tempOutNames;
-		outputTypes["bergerparker"] = tempOutNames;
-		outputTypes["bstick"] = tempOutNames;
-		outputTypes["goodscoverage"] = tempOutNames;
-		outputTypes["efron"] = tempOutNames;
-		outputTypes["boneh"] = tempOutNames;
-		outputTypes["solow"] = tempOutNames;
-		outputTypes["shen"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CollectCommand", "CollectCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 CollectCommand::CollectCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
 		allLines = true;
 		
 		//allow user to run help
 		if(option == "help") { help(); calledHelp = true; abort = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			map<string,string>::iterator it;
 			
 			ValidParameters validParameter;
-		
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["sobs"] = tempOutNames;
-			outputTypes["chao"] = tempOutNames;
-			outputTypes["nseqs"] = tempOutNames;
-			outputTypes["coverage"] = tempOutNames;
-			outputTypes["ace"] = tempOutNames;
-			outputTypes["jack"] = tempOutNames;
-			outputTypes["shannon"] = tempOutNames;
-			outputTypes["shannoneven"] = tempOutNames;
-			outputTypes["npshannon"] = tempOutNames;
-			outputTypes["heip"] = tempOutNames;
-			outputTypes["smithwilson"] = tempOutNames;
-			outputTypes["simpson"] = tempOutNames;
-			outputTypes["simpsoneven"] = tempOutNames;
-            outputTypes["shannonrange"] = tempOutNames;
-			outputTypes["invsimpson"] = tempOutNames;
-			outputTypes["bootstrap"] = tempOutNames;
-			outputTypes["geometric"] = tempOutNames;
-			outputTypes["qstat"] = tempOutNames;
-			outputTypes["logseries"] = tempOutNames;
-			outputTypes["bergerparker"] = tempOutNames;
-			outputTypes["bstick"] = tempOutNames;
-			outputTypes["goodscoverage"] = tempOutNames;
-			outputTypes["efron"] = tempOutNames;
-			outputTypes["boneh"] = tempOutNames;
-			outputTypes["solow"] = tempOutNames;
-			outputTypes["shen"] = tempOutNames;
-			
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("rabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("sabund");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
-				}
-				
-				it = parameters.find("list");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["list"] = inputDir + it->second;		}
-				}
-			}
-			
-			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
 			else if (listfile == "not found") { listfile = ""; }
@@ -283,19 +198,18 @@ CollectCommand::CollectCommand(string option)  {
 				//give priority to shared, then list, then rabund, then sabund
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
+				if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
 				else { 
 					listfile = current->getListFile(); 
-					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter."); m->mothurOutEndLine(); }
+					if (listfile != "") { inputfile = listfile; format = "list"; m->mothurOut("Using " + listfile + " as input file for the list parameter.\n");  }
 					else { 
 						rabundfile = current->getRabundFile();
-						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter."); m->mothurOutEndLine(); }
+						if (rabundfile != "") { inputfile = rabundfile; format = "rabund"; m->mothurOut("Using " + rabundfile + " as input file for the rabund parameter.\n");  }
 						else { 
 							sabundfile = current->getSabundFile(); 
-							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter."); m->mothurOutEndLine(); }
+							if (sabundfile != "") { inputfile = sabundfile; format = "sabund"; m->mothurOut("Using " + sabundfile + " as input file for the sabund parameter.\n");  }
 							else { 
-								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); 
-								abort = true;
+								m->mothurOut("No valid current files. You must provide a list, sabund, rabund or shared file before you can use the collect.single command.\n"); abort = true;
 							}
 						}
 					}
@@ -358,202 +272,41 @@ int CollectCommand::execute(){
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->getControl_pressed()) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}    return 0; }
+			if (m->getControl_pressed()) {  break; }
 			
 			if (outputDir == "") { outputDir += util.hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
             map<string, string> variables; 
             variables["[filename]"] = fileNameRoot;
 		
-			if (inputFileNames.size() > 1) {
-				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
-			}
+			if (inputFileNames.size() > 1) { m->mothurOut("\nProcessing group " + groups[p] + "\n\n");  }
 		
-			ValidCalculators validCalculator;
-			
-			for (int i=0; i<Estimators.size(); i++) {
-				if (validCalculator.isValidCalculator("single", Estimators[i]) ) { 
-					if (Estimators[i] == "sobs") { 
-						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(getOutputFileName("sobs", variables))));
-						outputNames.push_back(getOutputFileName("sobs", variables)); outputTypes["sobs"].push_back(getOutputFileName("sobs", variables));
-					}else if (Estimators[i] == "chao") { 
-						cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(getOutputFileName("chao", variables))));
-						outputNames.push_back(getOutputFileName("chao", variables)); outputTypes["chao"].push_back(getOutputFileName("chao", variables));
-					}else if (Estimators[i] == "nseqs") { 
-						cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(getOutputFileName("nseqs", variables))));
-						outputNames.push_back(getOutputFileName("nseqs", variables)); outputTypes["nseqs"].push_back(getOutputFileName("nseqs", variables));
-					}else if (Estimators[i] == "coverage") { 
-						cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(getOutputFileName("coverage", variables))));
-						outputNames.push_back(getOutputFileName("coverage", variables)); outputTypes["coverage"].push_back(getOutputFileName("coverage", variables));
-					}else if (Estimators[i] == "ace") { 
-						cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(getOutputFileName("ace", variables))));
-						outputNames.push_back(getOutputFileName("ace", variables)); outputTypes["ace"].push_back(getOutputFileName("ace", variables));
-					}else if (Estimators[i] == "jack") { 
-						cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(getOutputFileName("jack", variables))));
-						outputNames.push_back(getOutputFileName("jack", variables)); outputTypes["jack"].push_back(getOutputFileName("jack", variables));
-					}else if (Estimators[i] == "shannon") { 
-						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(getOutputFileName("shannon", variables))));
-						outputNames.push_back(getOutputFileName("shannon", variables)); outputTypes["shannon"].push_back(getOutputFileName("shannon", variables));
-					}else if (Estimators[i] == "shannoneven") { 
-						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(getOutputFileName("shannoneven", variables))));
-						outputNames.push_back(getOutputFileName("shannoneven", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannoneven", variables));
-                    }else if (Estimators[i] == "shannonrange") {
-                            cDisplays.push_back(new CollectDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("shannonrange", variables))));
-                            outputNames.push_back(getOutputFileName("shannonrange", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannonrange", variables));
-					}else if (Estimators[i] == "npshannon") { 
-						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(getOutputFileName("npshannon", variables))));
-						outputNames.push_back(getOutputFileName("npshannon", variables)); outputTypes["npshannon"].push_back(getOutputFileName("npshannon", variables));
-					}else if (Estimators[i] == "heip") { 
-						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(getOutputFileName("heip", variables))));
-						outputNames.push_back(getOutputFileName("heip", variables)); outputTypes["heip"].push_back(getOutputFileName("heip", variables));
-					}else if (Estimators[i] == "smithwilson") { 
-						cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(getOutputFileName("smithwilson", variables))));
-						outputNames.push_back(getOutputFileName("smithwilson", variables)); outputTypes["smithwilson"].push_back(getOutputFileName("smithwilson", variables));
-					}else if (Estimators[i] == "simpson") { 
-						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(getOutputFileName("simpson", variables))));
-						outputNames.push_back(getOutputFileName("simpson", variables)); outputTypes["simpson"].push_back(getOutputFileName("simpson", variables));
-					}else if (Estimators[i] == "simpsoneven") { 
-						cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(getOutputFileName("simpsoneven", variables))));
-						outputNames.push_back(getOutputFileName("simpsoneven", variables)); outputTypes["simpsoneven"].push_back(getOutputFileName("simpsoneven", variables));
-					}else if (Estimators[i] == "invsimpson") { 
-						cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(getOutputFileName("invsimpson", variables))));
-						outputNames.push_back(getOutputFileName("invsimpson", variables)); outputTypes["invsimpson"].push_back(getOutputFileName("invsimpson", variables));
-					}else if (Estimators[i] == "bootstrap") { 
-						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(getOutputFileName("bootstrap", variables))));
-						outputNames.push_back(getOutputFileName("bootstrap", variables)); outputTypes["bootstrap"].push_back(getOutputFileName("bootstrap", variables));
-					}else if (Estimators[i] == "geometric") { 
-						cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(getOutputFileName("geometric", variables))));
-						outputNames.push_back(getOutputFileName("geometric", variables)); outputTypes["geometric"].push_back(getOutputFileName("geometric", variables));
-					}else if (Estimators[i] == "qstat") { 
-						cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(getOutputFileName("qstat", variables))));
-						outputNames.push_back(getOutputFileName("qstat", variables)); outputTypes["qstat"].push_back(getOutputFileName("qstat", variables));
-					}else if (Estimators[i] == "logseries") { 
-						cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(getOutputFileName("logseries", variables))));
-						outputNames.push_back(getOutputFileName("logseries", variables)); outputTypes["logseries"].push_back(getOutputFileName("logseries", variables));
-					}else if (Estimators[i] == "bergerparker") { 
-						cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(getOutputFileName("bergerparker", variables))));
-						outputNames.push_back(getOutputFileName("bergerparker", variables)); outputTypes["bergerparker"].push_back(getOutputFileName("bergerparker", variables));
-					}else if (Estimators[i] == "bstick") { 
-						cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(getOutputFileName("bstick", variables))));
-						outputNames.push_back(getOutputFileName("bstick", variables)); outputTypes["bstick"].push_back(getOutputFileName("bstick", variables));
-					}else if (Estimators[i] == "goodscoverage") { 
-						cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(getOutputFileName("goodscoverage", variables))));
-						outputNames.push_back(getOutputFileName("goodscoverage", variables)); outputTypes["goodscoverage"].push_back(getOutputFileName("goodscoverage", variables));
-					}else if (Estimators[i] == "efron") {
-						cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(getOutputFileName("efron", variables))));
-						outputNames.push_back(getOutputFileName("efron", variables)); outputTypes["efron"].push_back(getOutputFileName("efron", variables));
-					}else if (Estimators[i] == "boneh") {
-						cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(getOutputFileName("boneh", variables))));
-						outputNames.push_back(getOutputFileName("boneh", variables)); outputTypes["boneh"].push_back(getOutputFileName("boneh", variables));
-					}else if (Estimators[i] == "solow") {
-						cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(getOutputFileName("solow", variables))));
-						outputNames.push_back(getOutputFileName("solow", variables)); outputTypes["solow"].push_back(getOutputFileName("solow", variables));
-					}else if (Estimators[i] == "shen") {
-						cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(getOutputFileName("shen", variables))));
-						outputNames.push_back(getOutputFileName("shen", variables)); outputTypes["shen"].push_back(getOutputFileName("shen", variables));
-					}
-				}
-			}
+            fillCDisplays(variables); //adds a display for each calc
 		
 			//if the users entered no valid calculators don't execute command
 			if (cDisplays.size() == 0) { return 0; }
 			
-			InputData input(inputFileNames[p], format, nullVector);
-			order = input.getOrderVector();
-			string lastLabel = order->getLabel();
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
-			
-			if (m->getControl_pressed()) {  
-				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear();
-				delete order; return 0;
-			}
-
-
-			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-				if (m->getControl_pressed()) { 
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); delete order; return 0;
-				}
-
-				
-				if(allLines == 1 || labels.count(order->getLabel()) == 1){
-				
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					Collect cCurve(order, cDisplays);
-					cCurve.getCurve(freq);
-					
-					processedLabels.insert(order->getLabel());
-					userLabels.erase(order->getLabel());
-				}
-				//you have a label the user want that is smaller than this label and the last label has not already been processed 
-				if ((util.anyLabelsToProcess(order->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = order->getLabel();
-					
-					delete order;
-					order = (input.getOrderVector(lastLabel));
-					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-                    Collect cCurve(order, cDisplays);
-                    cCurve.getCurve(freq);
-					
-					processedLabels.insert(order->getLabel());
-					userLabels.erase(order->getLabel());
-					
-					//restore real lastlabel to save below
-					order->setLabel(saveLabel);
-				}
-				
-				lastLabel = order->getLabel();	
-				
-				delete order;		
-				order = (input.getOrderVector());
-			}
-			
-			
-			if (m->getControl_pressed()) { 
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); return 0;
-			}
-				
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
-			}
-			
-			//run last label if you need to
-			if (needToRun )  {
-				if (order != NULL) {	delete order;	}
-				order = (input.getOrderVector(lastLabel));
-				
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				
+            InputData input(inputFileNames[p], format, nullVector);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+            OrderVector* order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
+                   
+            while (order != NULL) {
+                       
+                if (m->getControl_pressed()) { delete order; break; }
+                       
                 Collect cCurve(order, cDisplays);
-                cCurve.getCurve(freq);
-				
-				if (m->getControl_pressed()) { 
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} outputTypes.clear(); delete order;return 0;
-				}
-				delete order;
-			}
-			
-			for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-			cDisplays.clear(); 
+                cCurve.getCurve(freq); delete order;
+                      
+                order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            
+            //delete displays
+            for(int i=0;i<cDisplays.size();i++){    delete cDisplays[i];    } cDisplays.clear();
 		}
-		
+        
         if (inputFileNames.size() > 1) {
             for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
         }
@@ -563,7 +316,6 @@ int CollectCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		
 		return 0;
 	}
 	catch(exception& e) {
@@ -571,7 +323,101 @@ int CollectCommand::execute(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int CollectCommand::fillCDisplays(map<string, string> variables) {
+    try {
+        
+        ValidCalculators validCalculator;
+        
+        for (int i=0; i<Estimators.size(); i++) {
+            if (validCalculator.isValidCalculator("single", Estimators[i]) ) {
+                if (Estimators[i] == "sobs") {
+                    cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(getOutputFileName("sobs", variables))));
+                    outputNames.push_back(getOutputFileName("sobs", variables)); outputTypes["sobs"].push_back(getOutputFileName("sobs", variables));
+                }else if (Estimators[i] == "chao") {
+                    cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(getOutputFileName("chao", variables))));
+                    outputNames.push_back(getOutputFileName("chao", variables)); outputTypes["chao"].push_back(getOutputFileName("chao", variables));
+                }else if (Estimators[i] == "nseqs") {
+                    cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(getOutputFileName("nseqs", variables))));
+                    outputNames.push_back(getOutputFileName("nseqs", variables)); outputTypes["nseqs"].push_back(getOutputFileName("nseqs", variables));
+                }else if (Estimators[i] == "coverage") {
+                    cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(getOutputFileName("coverage", variables))));
+                    outputNames.push_back(getOutputFileName("coverage", variables)); outputTypes["coverage"].push_back(getOutputFileName("coverage", variables));
+                }else if (Estimators[i] == "ace") {
+                    cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(getOutputFileName("ace", variables))));
+                    outputNames.push_back(getOutputFileName("ace", variables)); outputTypes["ace"].push_back(getOutputFileName("ace", variables));
+                }else if (Estimators[i] == "jack") {
+                    cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(getOutputFileName("jack", variables))));
+                    outputNames.push_back(getOutputFileName("jack", variables)); outputTypes["jack"].push_back(getOutputFileName("jack", variables));
+                }else if (Estimators[i] == "shannon") {
+                    cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(getOutputFileName("shannon", variables))));
+                    outputNames.push_back(getOutputFileName("shannon", variables)); outputTypes["shannon"].push_back(getOutputFileName("shannon", variables));
+                }else if (Estimators[i] == "shannoneven") {
+                    cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(getOutputFileName("shannoneven", variables))));
+                    outputNames.push_back(getOutputFileName("shannoneven", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannoneven", variables));
+                }else if (Estimators[i] == "shannonrange") {
+                        cDisplays.push_back(new CollectDisplay(new RangeShannon(alpha), new ThreeColumnFile(getOutputFileName("shannonrange", variables))));
+                        outputNames.push_back(getOutputFileName("shannonrange", variables)); outputTypes["shannoneven"].push_back(getOutputFileName("shannonrange", variables));
+                }else if (Estimators[i] == "npshannon") {
+                    cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(getOutputFileName("npshannon", variables))));
+                    outputNames.push_back(getOutputFileName("npshannon", variables)); outputTypes["npshannon"].push_back(getOutputFileName("npshannon", variables));
+                }else if (Estimators[i] == "heip") {
+                    cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(getOutputFileName("heip", variables))));
+                    outputNames.push_back(getOutputFileName("heip", variables)); outputTypes["heip"].push_back(getOutputFileName("heip", variables));
+                }else if (Estimators[i] == "smithwilson") {
+                    cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(getOutputFileName("smithwilson", variables))));
+                    outputNames.push_back(getOutputFileName("smithwilson", variables)); outputTypes["smithwilson"].push_back(getOutputFileName("smithwilson", variables));
+                }else if (Estimators[i] == "simpson") {
+                    cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(getOutputFileName("simpson", variables))));
+                    outputNames.push_back(getOutputFileName("simpson", variables)); outputTypes["simpson"].push_back(getOutputFileName("simpson", variables));
+                }else if (Estimators[i] == "simpsoneven") {
+                    cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(getOutputFileName("simpsoneven", variables))));
+                    outputNames.push_back(getOutputFileName("simpsoneven", variables)); outputTypes["simpsoneven"].push_back(getOutputFileName("simpsoneven", variables));
+                }else if (Estimators[i] == "invsimpson") {
+                    cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(getOutputFileName("invsimpson", variables))));
+                    outputNames.push_back(getOutputFileName("invsimpson", variables)); outputTypes["invsimpson"].push_back(getOutputFileName("invsimpson", variables));
+                }else if (Estimators[i] == "bootstrap") {
+                    cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(getOutputFileName("bootstrap", variables))));
+                    outputNames.push_back(getOutputFileName("bootstrap", variables)); outputTypes["bootstrap"].push_back(getOutputFileName("bootstrap", variables));
+                }else if (Estimators[i] == "geometric") {
+                    cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(getOutputFileName("geometric", variables))));
+                    outputNames.push_back(getOutputFileName("geometric", variables)); outputTypes["geometric"].push_back(getOutputFileName("geometric", variables));
+                }else if (Estimators[i] == "qstat") {
+                    cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(getOutputFileName("qstat", variables))));
+                    outputNames.push_back(getOutputFileName("qstat", variables)); outputTypes["qstat"].push_back(getOutputFileName("qstat", variables));
+                }else if (Estimators[i] == "logseries") {
+                    cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(getOutputFileName("logseries", variables))));
+                    outputNames.push_back(getOutputFileName("logseries", variables)); outputTypes["logseries"].push_back(getOutputFileName("logseries", variables));
+                }else if (Estimators[i] == "bergerparker") {
+                    cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(getOutputFileName("bergerparker", variables))));
+                    outputNames.push_back(getOutputFileName("bergerparker", variables)); outputTypes["bergerparker"].push_back(getOutputFileName("bergerparker", variables));
+                }else if (Estimators[i] == "bstick") {
+                    cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(getOutputFileName("bstick", variables))));
+                    outputNames.push_back(getOutputFileName("bstick", variables)); outputTypes["bstick"].push_back(getOutputFileName("bstick", variables));
+                }else if (Estimators[i] == "goodscoverage") {
+                    cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(getOutputFileName("goodscoverage", variables))));
+                    outputNames.push_back(getOutputFileName("goodscoverage", variables)); outputTypes["goodscoverage"].push_back(getOutputFileName("goodscoverage", variables));
+                }else if (Estimators[i] == "efron") {
+                    cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(getOutputFileName("efron", variables))));
+                    outputNames.push_back(getOutputFileName("efron", variables)); outputTypes["efron"].push_back(getOutputFileName("efron", variables));
+                }else if (Estimators[i] == "boneh") {
+                    cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(getOutputFileName("boneh", variables))));
+                    outputNames.push_back(getOutputFileName("boneh", variables)); outputTypes["boneh"].push_back(getOutputFileName("boneh", variables));
+                }else if (Estimators[i] == "solow") {
+                    cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(getOutputFileName("solow", variables))));
+                    outputNames.push_back(getOutputFileName("solow", variables)); outputTypes["solow"].push_back(getOutputFileName("solow", variables));
+                }else if (Estimators[i] == "shen") {
+                    cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(getOutputFileName("shen", variables))));
+                    outputNames.push_back(getOutputFileName("shen", variables)); outputTypes["shen"].push_back(getOutputFileName("shen", variables));
+                }
+            }
+        }
+        
+    }catch(exception& e) {
+        m->errorOut(e, "CollectCommand", "fillCDisplays");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 vector<string> CollectCommand::parseSharedFile(string filename) {
 	try {

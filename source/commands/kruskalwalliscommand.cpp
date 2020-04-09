@@ -20,6 +20,11 @@ vector<string> KruskalWallisCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		
+        abort = false; calledHelp = false; allLines = true;
+        
+        vector<string> tempOutNames;
+        outputTypes["kruskall-wallis"] = tempOutNames;
+        
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
 		return myArray;
@@ -61,76 +66,25 @@ string KruskalWallisCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(){
-	try {
-		abort = true; calledHelp = true;
-		setParameters();
-        vector<string> tempOutNames;
-        outputTypes["kruskall-wallis"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "KruskalWallisCommand", "KruskalWallisCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 KruskalWallisCommand::KruskalWallisCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;
-        allLines = true;
-		
-		//allow user to run help
+
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			//valid paramters for this command
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			vector<string> tempOutNames;
-            outputTypes["kruskall-wallis"] = tempOutNames;
-            
-			//if the user changes the input directory command factory will send this info to us in the output parameter
-			string inputDir = validParameter.valid(parameters, "inputdir");
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-                
-                string path;
-				it = parameters.find("design");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["desing"] = inputDir + it->second;		}
-				}
-				
-                it = parameters.find("shared");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
-				}
-            }
-            
-            //get shared file, it is required
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") {
 				//if there is a current shared file, use it
 				sharedfile = current->getSharedFile();
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
             
             //get shared file, it is required
@@ -139,8 +93,8 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
 			else if (designfile == "not found") {
 				//if there is a current shared file, use it
 				designfile = current->getDesignFile();
-				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current design file and the design parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (designfile != "") { m->mothurOut("Using " + designfile + " as input file for the design parameter.\n");  }
+				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
             
             //if the user changes the output directory command factory will send this info to us in the output parameter

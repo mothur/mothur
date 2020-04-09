@@ -22,7 +22,6 @@ class HeatMapCommand : public Command {
 
 public:
 	HeatMapCommand(string);
-	HeatMapCommand();
 	~HeatMapCommand(){}
 	
 	vector<string> setParameters();
@@ -40,12 +39,7 @@ public:
 	
 	
 private:
-	InputData* input;
-	RAbundVector* rabund;
-	SharedRAbundVectors* lookup;
-	SharedRAbundFloatVectors* lookupFloat;
-	HeatMap* heatmap;
-
+	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string format, groups, sorted, scale, label, outputDir, sharedfile, relabundfile, listfile, rabundfile, sabundfile, inputfile;

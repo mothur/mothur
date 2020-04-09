@@ -33,7 +33,7 @@ void FastaMap::readFastaFile(string inFileName) {
 				
 				itName = seqmap.find(name);
 				if (itName == seqmap.end()) { seqmap[name] = sequence;  }
-				else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct."); m->mothurOutEndLine(); }
+				else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct.\n");  }
 				
 				map<string,group>::iterator it = data.find(sequence);
 				if (it == data.end()) { 	//it's unique.
@@ -89,7 +89,7 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 			
 			itName = seqmap.find(name);
 			if (itName == seqmap.end()) { seqmap[name] = sequence;  }
-			else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct."); m->mothurOutEndLine(); }
+			else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct.\n");  }
 			
 			seqmap[name] = sequence;  
 			map<string,group>::iterator it = data.find(sequence);

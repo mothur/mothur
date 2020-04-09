@@ -111,7 +111,7 @@ void NeedlemanOverlap::alignPrimer(string A, string B){
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
         
-		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); m->mothurOutEndLine();  }
+		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + ".\n");   }
 		
 		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1
             

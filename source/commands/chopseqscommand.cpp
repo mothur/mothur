@@ -28,6 +28,16 @@ vector<string> ChopSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+        
+        abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["qfile"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -84,108 +94,25 @@ string ChopSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ChopSeqsCommand::ChopSeqsCommand(){	
-	try {
-		abort = true; calledHelp = true; 
-		setParameters();
-		vector<string> tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
-        outputTypes["qfile"] = tempOutNames;
-		outputTypes["accnos"] = tempOutNames;
-        outputTypes["name"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
-        outputTypes["count"] = tempOutNames;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "ChopSeqsCommand");
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(string option)  {
 	try {
-		abort = false; calledHelp = false;   
-		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
+        else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			vector<string> myArray = setParameters();
-			
-			OptionParser parser(option);
+			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
-			
-			ValidParameters validParameter;
-			map<string,string>::iterator it;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (!validParameter.isValidParameter(it->first, myArray, it->second)) {  abort = true;  }
-			}
-			
-			//initialize outputTypes
-			vector<string> tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
-			outputTypes["accnos"] = tempOutNames;
-            outputTypes["name"] = tempOutNames;
-            outputTypes["group"] = tempOutNames;
-            outputTypes["count"] = tempOutNames;
-            outputTypes["qfile"] = tempOutNames;
-		
-			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
-			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("qfile");
-                //user has given a template file
-                if(it != parameters.end()){
-                    path = util.hasPath(it->second);
-                    //if the user has not given a path then, add inputdir. else leave path alone.
-                    if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
-                }
-                
-                it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
-                
-                it = parameters.find("count");
-				//user has given a template file
-				if(it != parameters.end()){
-					path = util.hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["count"] = inputDir + it->second;		}
-				}
-			}
 
 			//check for required parameters
+            ValidParameters validParameter;
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  				//if there is a current fasta file, use it
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter."); m->mothurOutEndLine(); }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required."); m->mothurOutEndLine(); abort = true; }
+				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); } 	
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -209,11 +136,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			else { current->setCountFile(countfile); }
             
             if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count."); m->mothurOutEndLine(); abort = true;
+                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
             if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count."); m->mothurOutEndLine(); abort=true;
+                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -234,11 +161,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
             temp = validParameter.valid(parameters, "keepn");	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
             keepN = util.isTrue(temp);
             
-            if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true."); m->mothurOutEndLine(); abort = true;  }
+            if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true.\n");  abort = true;  }
 		
 			keep = validParameter.valid(parameters, "keep");		if (keep == "not found") { keep = "front"; } 
 				
-			if (numbases == 0)  { m->mothurOut("You must provide the number of bases you want to keep for the chops.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			if (numbases == 0)  { m->mothurOut("You must provide the number of bases you want to keep for the chops.seqs command.\n");  abort = true;  }
 		}
 
 	}
@@ -294,8 +221,8 @@ int ChopSeqsCommand::execute(){
                     if (groupfile != "") {  inputString += ", group=" + groupfile;  }
                 }
                 
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
-                m->mothurOut("Running command: remove.seqs(" + inputString + ")"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n"); 
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n"); 
                 current->setMothurCalling(true);
                 
                 Command* removeCommand = new RemoveSeqsCommand(inputString);
@@ -305,7 +232,7 @@ int ChopSeqsCommand::execute(){
                 
                 delete removeCommand;
                 current->setMothurCalling(false);
-                m->mothurOut("/******************************************/"); m->mothurOutEndLine();
+                m->mothurOut("/******************************************/\n"); 
                 
                 if (groupfile != "") {
                     thisOutputDir = outputDir;

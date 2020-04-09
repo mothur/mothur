@@ -103,7 +103,7 @@ int OptiBlastMatrix::readBlast(){
                     blastSingletonIndexSwap[indexB] = indexB;
                 }
             }
-        }else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
+        }else { m->mothurOut("Error in your blast file, cannot read.\n");  exit(1); }
         
         
         while(fileHandle){  //let's assume it's a triangular matrix...
@@ -329,7 +329,7 @@ int OptiBlastMatrix::readBlast(){
                     overlapNameMap[newB] = secondName;
                 }
             }
-        }else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
+        }else { m->mothurOut("Error in your blast file, cannot read.\n");  exit(1); }
         
         
         while(in){  //let's assume it's a triangular matrix...
