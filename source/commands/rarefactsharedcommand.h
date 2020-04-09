@@ -43,7 +43,7 @@ private:
     map<int, string> file2Group; //index in outputNames[i] -> group
 	bool abort, allLines, jumble, groupMode, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
-	string label, calc, groups, outputDir, sharedfile, designfile;
+	string label, calc, groups,  sharedfile, designfile;
 	vector<string>  Estimators, Groups, outputNames, Sets;
     
     int process(DesignMap&, string);

@@ -95,9 +95,6 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-
 			string temp;
 			temp = validParameter.valid(parameters, "filter");			if (temp == "not found") { temp = "F"; }
 			filter = util.isTrue(temp);
@@ -127,15 +124,15 @@ int ChimeraBellerophonCommand::execute(){
         
         long start = time(NULL);
 
-        MothurChimera* chimera = new Bellerophon(fastafile, filter, correction, window, increment, outputDir);
+        MothurChimera* chimera = new Bellerophon(fastafile, filter, correction, window, increment, outputdir);
         
         chimera->getChimeras();
         
         if (m->getControl_pressed()) { delete chimera;  return 0;	}
         
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("chimera", variables);
         string accnosFileName = getOutputFileName("accnos", variables);
         

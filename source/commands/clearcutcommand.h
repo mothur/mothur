@@ -39,7 +39,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string outputDir, phylipfile, fastafile, matrixout, inputFile, seed, ntrees;
+	string  phylipfile, fastafile, matrixout, inputFile, seed, ntrees;
 	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdoutWanted, kimura, jukes, protein, DNA;
 	bool abort;
 	vector<string> outputNames;

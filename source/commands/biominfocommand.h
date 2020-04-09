@@ -52,7 +52,7 @@ protected:
     
     vector<string> outputNames, otuNames, sampleNames, taxonomy;
     vector<int> indices, indptr, otudata;
-    string fileroot, outputDir, biomfile, label, basis, output, format;
+    string fileroot, biomfile, label, basis, output, format;
     bool firsttime, abort, relabund;
     int maxLevel, printlevel, nnz;
 

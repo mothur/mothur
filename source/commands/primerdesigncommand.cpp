@@ -133,11 +133,7 @@ PrimerDesignCommand::PrimerDesignCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
             }
 			
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = util.hasPath(listfile); //if user entered a file with a path then preserve it	
-			}
+            if (outputdir == ""){	 outputdir = util.hasPath(listfile);  }
             
             string temp = validParameter.valid(parameters, "cutoff");  if (temp == "not found") { temp = "100"; }
 			util.mothurConvert(temp, cutoff); 
@@ -225,7 +221,7 @@ int PrimerDesignCommand::execute(){
         vector<Sequence> conSeqs = createProcessesConSeqs(nameMap, seq2Bin, binLabels);
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = list->getLabel();
         string consFastaFile = getOutputFileName("fasta", variables);
         outputNames.push_back(consFastaFile); outputTypes["fasta"].push_back(consFastaFile);
@@ -288,7 +284,7 @@ int PrimerDesignCommand::execute(){
         
         //print new list file
         map<string, string> mvariables; 
-        mvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        mvariables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         mvariables["[extension]"] = util.getExtension(listfile);
         string newListFile = getOutputFileName("list", mvariables);
         ofstream outListTemp;

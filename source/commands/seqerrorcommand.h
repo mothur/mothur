@@ -69,7 +69,7 @@ private:
 	
     long long process(string, string, string, string, string, string, vector<Sequence>&);
 
-	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir, countfile;
+	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName,  countfile;
 	double threshold;
 	bool ignoreChimeras, aligned, abort;
 	int maxLength, totalBases, totalMatches, numRefs;

@@ -38,7 +38,7 @@ class UnifracWeightedCommand : public Command {
 	private:
         vector<string> Groups, outputNames; // AB. AC, BC...
 		bool abort, phylip, random, includeRoot, subsample, consensus, withReplacement;
-		string groups, itersString, outputForm, treefile, groupfile, namefile, countfile, sumFile, outputDir;
+		string groups, itersString, outputForm, treefile, groupfile, namefile, countfile, sumFile;
 		int processors, subsampleSize, subsampleIters, iters, numComp;
 		
 		void printWSummaryFile(int, vector<double>, vector<double>, vector<string>);

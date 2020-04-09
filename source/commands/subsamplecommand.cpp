@@ -124,7 +124,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -387,8 +387,8 @@ int SubSampleCommand::getSubSampleTree() {
         outputTree->assembleTree();
         newCt->removeGroup("doNotIncludeMe");
         
-        string treeOutputDir = outputDir;
-        if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+        string treeOutputDir = outputdir;
+        if (outputdir == "") {  treeOutputDir += util.hasPath(treefile);  }
         map<string, string> variables;
         variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
         variables["[extension]"] = util.getExtension(treefile);
@@ -399,8 +399,8 @@ int SubSampleCommand::getSubSampleTree() {
         outputTree->print(outTree, "both"); outTree.close();
         for (int i = 0; i < T.size(); i++) { delete T[i]; } delete subSampleTree; delete outputTree;
         
-        string countOutputDir = outputDir;
-        if (outputDir == "") {  countOutputDir += util.hasPath(cinputfile);  }
+        string countOutputDir = outputdir;
+        if (outputdir == "") {  countOutputDir += util.hasPath(cinputfile);  }
         variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(cinputfile));
         variables["[extension]"] = ".count_table";
         string countOutputFile = getOutputFileName("count",variables);
@@ -509,8 +509,8 @@ int SubSampleCommand::getSubSampleFasta() {
                 vector<string> sampledSeqs = sampledGm.getNamesSeqs();
                 for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
             
-                string groupOutputDir = outputDir;
-                if (outputDir == "") {  groupOutputDir += util.hasPath(groupfile);  }
+                string groupOutputDir = outputdir;
+                if (outputdir == "") {  groupOutputDir += util.hasPath(groupfile);  }
                 map<string, string> variables;
                 variables["[filename]"] = groupOutputDir + util.getRootName(util.getSimpleName(groupfile));
                 variables["[extension]"] = util.getExtension(groupfile);
@@ -529,8 +529,8 @@ int SubSampleCommand::getSubSampleFasta() {
             vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
             for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
             
-            string countOutputDir = outputDir;
-            if (outputDir == "") {  countOutputDir += util.hasPath(countfile);  }
+            string countOutputDir = outputdir;
+            if (outputdir == "") {  countOutputDir += util.hasPath(countfile);  }
             map<string, string> variables;
             variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(countfile));
             variables["[extension]"] = util.getExtension(countfile);
@@ -542,8 +542,8 @@ int SubSampleCommand::getSubSampleFasta() {
 		
 		if (subset.size() == 0) {  m->mothurOut("The size you selected is too large, skipping fasta file.\n");   return 0; }
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
@@ -755,8 +755,8 @@ int SubSampleCommand::getSubSampleShared() {
 //**********************************************************************************************************************
 int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
 	try {
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
@@ -777,8 +777,8 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
         out.close();
         
         if (constaxonomyfile != "") { //select otus from constaxonomy that are in new shared file. Also adjust the size column in the constaxonomy file
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
             variables["[extension]"] = util.getExtension(constaxonomyfile);
@@ -932,8 +932,8 @@ int SubSampleCommand::getSubSampleList() {
                 vector<string> sampledSeqs = sampledGm.getNamesSeqs();
                 for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
                 
-                string groupOutputDir = outputDir;
-                if (outputDir == "") {  groupOutputDir += util.hasPath(groupfile);  }
+                string groupOutputDir = outputdir;
+                if (outputdir == "") {  groupOutputDir += util.hasPath(groupfile);  }
                 map<string, string> variables;
                 variables["[filename]"] = groupOutputDir + util.getRootName(util.getSimpleName(groupfile));
                 variables["[extension]"] = util.getExtension(groupfile);
@@ -975,8 +975,8 @@ int SubSampleCommand::getSubSampleList() {
             vector<string> sampledSeqs = sampledCt.getNamesOfSeqs();
             for (int i = 0; i < sampledSeqs.size(); i++) { subset.insert(sampledSeqs[i]); }
         
-            string countOutputDir = outputDir;
-            if (outputDir == "") {  countOutputDir += util.hasPath(countfile);  }
+            string countOutputDir = outputdir;
+            if (outputdir == "") {  countOutputDir += util.hasPath(countfile);  }
             map<string, string> variables; 
             variables["[filename]"] = countOutputDir + util.getRootName(util.getSimpleName(countfile));
             variables["[extension]"] = util.getExtension(countfile);
@@ -1020,15 +1020,15 @@ int SubSampleCommand::getSubSampleList() {
                 outAccnos.close();
                 
                 m->mothurOut("Sampling taxonomy and name file... \n");
-                string thisNameOutputDir = outputDir;
-                if (outputDir == "") {  thisNameOutputDir += util.hasPath(namefile);  }
+                string thisNameOutputDir = outputdir;
+                if (outputdir == "") {  thisNameOutputDir += util.hasPath(namefile);  }
                 map<string, string> variables;
                 variables["[filename]"] = thisNameOutputDir + util.getRootName(util.getSimpleName(namefile));
                 variables["[extension]"] = util.getExtension(namefile);
                 string outputNameFileName = getOutputFileName("name", variables);
                 
-                string thisTaxOutputDir = outputDir;
-                if (outputDir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
+                string thisTaxOutputDir = outputdir;
+                if (outputdir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
                 variables["[filename]"] = thisTaxOutputDir + util.getRootName(util.getSimpleName(taxonomyfile));
                 variables["[extension]"] = util.getExtension(taxonomyfile);
                 string outputTaxFileName = getOutputFileName("taxonomy", variables);
@@ -1068,8 +1068,8 @@ int SubSampleCommand::getSubSampleList() {
 //**********************************************************************************************************************
 int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -1115,8 +1115,8 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
         out.close();
         
         if (constaxonomyfile != "") { //select otus from constaxonomy that are in new list file. Also adjust the size column in the constaxonomy file
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
             variables["[extension]"] = util.getExtension(constaxonomyfile);
@@ -1180,8 +1180,8 @@ void SubSampleCommand::getSubSampleRabund() {
         
         m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + ".\n");
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
         variables["[extension]"] = util.getExtension(rabundfile);
@@ -1243,8 +1243,8 @@ void SubSampleCommand::getSubSampleSabund() {
         
         m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + ".\n");
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
         variables["[extension]"] = util.getExtension(sabundfile);
@@ -1293,8 +1293,8 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 int SubSampleCommand::getTax(set<string>& subset) {
 	try {
 
-        string thisTaxOutputDir = outputDir;
-        if (outputDir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
+        string thisTaxOutputDir = outputdir;
+        if (outputdir == "") {  thisTaxOutputDir += util.hasPath(taxonomyfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisTaxOutputDir + util.getRootName(util.getSimpleName(taxonomyfile));
         variables["[extension]"] = util.getExtension(taxonomyfile);

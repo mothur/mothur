@@ -36,7 +36,7 @@ public:
 	
 private:
 	bool abort, hasNameMap;
-	string qualfile, outputDir, namefile, countfile;
+	string qualfile,  namefile, countfile;
 	vector<string> outputNames;
 	map<string, int> nameMap;
 	int processors;

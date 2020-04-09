@@ -165,8 +165,8 @@ SummaryCommand::SummaryCommand(string option)  {
 				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -250,7 +250,7 @@ int SummaryCommand::execute(){
 			numLines = 0; numCols = 0;
 			
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileNames[p]));
 			string fileNameRoot = getOutputFileName("summary",variables);
             variables["[tag]"] = "ave-std";
             string fileNameAve = getOutputFileName("summary",variables);
@@ -627,7 +627,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             
             string extension = util.getExtension(outputNames[i]);
             if (theseLabels.size() != numCols+1) { extension = ".ave-std" + extension;  }
-            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+            string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             filesTypesLabels[extension] = newLabel;
             filesTypesNumLines[extension] = stop;
@@ -652,7 +652,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
             
             string extension = itFiles->first;
             map<string, vector<string> > thisType = itFiles->second;
-            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+            string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
             newComboNames.push_back(combineFileName);
             //open combined file
             ofstream out;

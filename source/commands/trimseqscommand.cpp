@@ -153,12 +153,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			}else if (fastaFile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastaFile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(fastaFile); //if user entered a file with a path then preserve it	
-			}
-		
+			if (outputdir == ""){ outputdir += util.hasPath(fastaFile);  }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -298,7 +293,7 @@ int TrimSeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastaFile));
         variables["[tag]"] = "trim";
 		string trimSeqFile = getOutputFileName("fasta",variables);
         string trimQualFile = getOutputFileName("qfile",variables);
@@ -314,7 +309,7 @@ int TrimSeqsCommand::execute(){
 			outputTypes["qfile"].push_back(trimQualFile); outputTypes["qfile"].push_back(scrapQualFile);
 		}
 		
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(nameFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(nameFile));
         variables["[tag]"] = "trim";
 		string trimNameFile = getOutputFileName("name",variables);
         variables["[tag]"] = "scrap";
@@ -326,7 +321,7 @@ int TrimSeqsCommand::execute(){
 			outputTypes["name"].push_back(trimNameFile); outputTypes["name"].push_back(scrapNameFile);
 		}
         
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
         variables["[tag]"] = "trim";
         string trimCountFile = getOutputFileName("count",variables);
         variables["[tag]"] = "scrap";
@@ -864,7 +859,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
 
             if ((createGroup) && (countfile == "")){
                 map<string, string> myvariables;
-                myvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFile));
+                myvariables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastaFile));
                 groupFile = getOutputFileName("group",myvariables);
                 outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
             }

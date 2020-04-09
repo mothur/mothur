@@ -37,7 +37,7 @@ private:
 	
     CountTable ct;
 	bool abort, allLines;
-	string fastafile, listfile, namefile, countfile, label, outputDir;
+	string fastafile, listfile, namefile, countfile, label;
 	set<string> labels;
 	vector<string> outputNames;
 	map<string, string> fastaMap;

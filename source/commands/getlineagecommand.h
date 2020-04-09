@@ -40,7 +40,7 @@ class GetLineageCommand : public Command {
 	
 	private:
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
+		string fastafile, namefile, groupfile, alignfile, countfile, listfile, taxfile,  taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
 		
 		string readTax();

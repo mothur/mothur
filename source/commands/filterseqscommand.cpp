@@ -138,10 +138,9 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			}
 			
 			if (!abort) {
-				//if the user changes the output directory command factory will send this info to us in the output parameter 
-				outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-					outputDir = "";	
-					outputDir += util.hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
+				 
+                if (outputdir == ""){
+					outputdir += util.hasPath(fastafileNames[0]);
 				}
 			}
 			//check for optional parameter and set defaults
@@ -201,8 +200,8 @@ int FilterSeqsCommand::execute() {
 		
 		//prevent giantic file name
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + filterFileName + ".";
-		if (fastafileNames.size() > 3) { variables["[filename]"] = outputDir + "merge."; }
+        variables["[filename]"] = outputdir + filterFileName + ".";
+		if (fastafileNames.size() > 3) { variables["[filename]"] = outputdir + "merge."; }
 		string filterFile = getOutputFileName("filter", variables);  
 		
 		util.openOutputFile(filterFile, outFilter);
@@ -260,7 +259,7 @@ int FilterSeqsCommand::filterSequences() {
 		for (int s = 0; s < fastafileNames.size(); s++) {
 			
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafileNames[s]));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafileNames[s]));
             string filteredFasta = getOutputFileName("fasta", variables);
             
             vector<double> positions;

@@ -39,7 +39,7 @@ private:
     int lookForShortcutFiles(string baseName);
     
 	bool abort, filter, save;
-	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;
+	string fastafile, templatefile, consfile, quanfile, maskfile, inputDir;
 	int window, increment, numSeqs, templateSeqsLength;
 	vector<string> outputNames;
 	

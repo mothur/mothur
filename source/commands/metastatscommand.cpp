@@ -131,9 +131,9 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 				else { 	m->mothurOut("You have no current designfile and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	outputDir += util.hasPath(inputfile); //if user entered a file with a path then preserve it
+			 
+            if (outputdir == ""){
+                outputdir += util.hasPath(inputfile); 
 			}
 
 			//check for optional parameter and set defaults
@@ -358,7 +358,7 @@ int MetaStatsCommand::process(SharedRAbundVectors*& thisLookUp, DesignMap*& desi
                 
                 //get filename
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[distance]"] = thisLookUp->getLabel();
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);
@@ -479,7 +479,7 @@ int MetaStatsCommand::process(SharedCLRVectors*& thisCLR, DesignMap*& designMap)
                 
                 //get filename
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[distance]"] = thisCLR->getLabel();
                 variables["[group]"] = setA + "-" + setB;
                 string outputFileName = getOutputFileName("metastats",variables);

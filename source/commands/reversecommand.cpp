@@ -102,11 +102,6 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-			}
-
 		}
 	}
 	catch(exception& e) {
@@ -129,8 +124,8 @@ int ReverseSeqsCommand::execute(){
 			util.openInputFile(fastaFileName, inFASTA);
 			
 			ofstream outFASTA;
-			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir += util.hasPath(fastaFileName); } //if user entered a file with a path then preserve it
+			string tempOutputDir = outputdir;
+			if (outputdir == "") { tempOutputDir += util.hasPath(fastaFileName); } 
             map<string, string> variables; 
             variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastaFileName));
             variables["[extension]"] = util.getExtension(fastaFileName);
@@ -160,8 +155,8 @@ int ReverseSeqsCommand::execute(){
 			util.openInputFile(qualFileName, inQual);
 			
 			ofstream outQual;
-			string tempOutputDir = outputDir;
-			if (outputDir == "") { tempOutputDir += util.hasPath(qualFileName); } //if user entered a file with a path then preserve it
+			string tempOutputDir = outputdir;
+			if (outputdir == "") { tempOutputDir += util.hasPath(qualFileName); } 
             map<string, string> variables; 
             variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(qualFileName));
             variables["[extension]"] = util.getExtension(qualFileName);

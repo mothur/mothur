@@ -93,7 +93,7 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree");
@@ -450,8 +450,8 @@ int IndicatorCommand::GetIndicatorSpecies(){
         }
 
         
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("summary", variables);
@@ -591,8 +591,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
             if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
         }
         
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("summary",variables);
@@ -613,8 +613,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		m->mothurOut("\nNode\tSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
-		string treeOutputDir = outputDir;
-		if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+		string treeOutputDir = outputdir;
+		if (outputdir == "") {  treeOutputDir += util.hasPath(treefile);  }
         variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputTreeFileName = getOutputFileName("tree", variables);
 		

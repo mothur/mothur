@@ -90,7 +90,7 @@ private:
 
 	bool abort, allLines, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, label, outputDir, mode;
+	string outputFile, calc, groups, label,  mode;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
     int createProcesses(SharedRAbundVectors*&);

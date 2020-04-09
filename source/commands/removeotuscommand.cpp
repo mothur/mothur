@@ -123,8 +123,6 @@ RemoveOtusCommand::RemoveOtusCommand(string option)  {
 			else if (sharedfile == "not found") {  sharedfile = "";  }
             else { current->setSharedFile(sharedfile); }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	 outputDir = ""; 	}
             
             if ((constaxonomyfile == "") && (corraxesfile == "") && (otucorrfile == "") && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: constaxonomy, corraxes, otucorr, shared or list.\n");  abort = true; }
             
@@ -198,8 +196,8 @@ int RemoveOtusCommand::execute(){
 //**********************************************************************************************************************
 int RemoveOtusCommand::readClassifyOtu(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
         variables["[extension]"] = util.getExtension(constaxonomyfile);
@@ -253,8 +251,8 @@ int RemoveOtusCommand::readClassifyOtu(){
 //**********************************************************************************************************************
 int RemoveOtusCommand::readOtuAssociation(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(otucorrfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(otucorrfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(otucorrfile));
         variables["[extension]"] = util.getExtension(otucorrfile);
@@ -306,8 +304,8 @@ int RemoveOtusCommand::readOtuAssociation(){
 //**********************************************************************************************************************
 int RemoveOtusCommand::readCorrAxes(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(corraxesfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(corraxesfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(corraxesfile));
         variables["[extension]"] = util.getExtension(corraxesfile);
@@ -381,8 +379,8 @@ int RemoveOtusCommand::readShared(){
         
         lookup->removeOTUs(binsToRemove, true);
 
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
@@ -429,8 +427,8 @@ int RemoveOtusCommand::readList(){
             }else { removedCount++; }
         }
         
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);

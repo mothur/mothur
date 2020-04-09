@@ -36,7 +36,7 @@ public:
     
 private:
     bool abort;
-    string outputDir, accnosfile, constaxonomyfile, otucorrfile, corraxesfile, listfile, sharedfile, label;
+    string  accnosfile, constaxonomyfile, otucorrfile, corraxesfile, listfile, sharedfile, label;
     vector<string> outputNames;
     set<string> otulabels;
     ListVector* list;

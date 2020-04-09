@@ -196,10 +196,10 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                 abort=true;
             }
 						
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-                if (groupfile != "") { outputDir = util.hasPath(groupfile); }
-                else { outputDir = util.hasPath(countfile);  }
+			 
+            if (outputdir == ""){
+                if (groupfile != "") { outputdir = util.hasPath(groupfile); }
+                else { outputdir = util.hasPath(countfile);  }
             }
 			
             if (countfile == "") {
@@ -475,7 +475,7 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             splitGroups2Struct* dataBundle = new splitGroups2Struct(groupfile, countfile, namefile, Groups, lines[i+1].start, lines[i+1].end);
-            dataBundle->setFiles(fastafile, listfile, outputDir);
+            dataBundle->setFiles(fastafile, listfile, outputdir);
             data.push_back(dataBundle);
             
             if (isCount) {
@@ -486,7 +486,7 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         }
 
         splitGroups2Struct* dataBundle = new splitGroups2Struct(groupfile, countfile, namefile, Groups, lines[0].start, lines[0].end);
-        dataBundle->setFiles(fastafile, listfile, outputDir);
+        dataBundle->setFiles(fastafile, listfile, outputdir);
         if (isCount) {
             driverRunCount(dataBundle);
         }else {
@@ -677,7 +677,7 @@ int SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
         vector<std::thread*> workerThreads;
         vector<splitGroupsStruct*> data;
         
-        string outputfileRoot = outputDir + util.getRootName(util.getSimpleName(inputFile));
+        string outputfileRoot = outputdir + util.getRootName(util.getSimpleName(inputFile));
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {

@@ -49,7 +49,7 @@ public:
 
 private:
 	vector<string> outputNames;
-	string file, method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, countfile, distfile, format, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metricName, initialize;
+	string file, method, fileroot, tag, phylipfile, columnfile, namefile, countfile, distfile, format, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metricName, initialize;
 	double cutoff, splitcutoff, stableMetric;
 	int precision, length, processors, taxLevelCutoff, maxIters, numSingletons;
 	bool  abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist, runsensSpec, showabund; 

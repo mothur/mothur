@@ -138,8 +138,6 @@ AlignCommand::AlignCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
             ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-
             templateFileName = validParameter.validFile(parameters, "reference");
             if (templateFileName == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required for the align.seqs command, aborting.\n"); abort = true;
             }else if (templateFileName == "not open") { abort = true; }
@@ -224,8 +222,8 @@ int AlignCommand::execute(){
         time_t start = time(NULL);
         m->mothurOut("\nAligning sequences from " + fastafile + " ...\n" );
         
-        if (outputDir == "") {  outputDir += util.hasPath(fastafile); }
-        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        if (outputdir == "") {  outputdir += util.hasPath(fastafile); }
+        map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string alignFileName = getOutputFileName("fasta", variables);
         string reportFileName = getOutputFileName("alignreport", variables);
         string accnosFileName = getOutputFileName("accnos", variables);

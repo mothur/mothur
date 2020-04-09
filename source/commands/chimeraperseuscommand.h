@@ -40,7 +40,7 @@ public:
 	
 private:
 	bool abort, hasCount, dups;
-	string fastafile, countfile, outputDir;
+	string fastafile, countfile;
 	int processors, alignLength;
 	double cutoff, alpha, beta;
     vector<string> outputNames;

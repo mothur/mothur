@@ -34,7 +34,7 @@ public:
     
 private:
     bool abort, allLines;
-    string label, outputDir, constaxfile, sharedfile, listfile, relabundfile;
+    string label,  constaxfile, sharedfile, listfile, relabundfile;
     int taxLevelCutoff;
     vector<string> Groups, outputNames;
     set<string> labels;

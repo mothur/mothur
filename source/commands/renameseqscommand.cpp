@@ -110,7 +110,6 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){ outputDir = ""; }
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta");
@@ -209,8 +208,8 @@ int RenameSeqsCommand::execute() {
         else {
             
             //prepare filenames and open files
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
             string outFastaFile = thisOutputDir + util.getRootName(util.getSimpleName(fastaFile));
             map<string, string> variables;
             variables["[filename]"] = outFastaFile;
@@ -227,8 +226,8 @@ int RenameSeqsCommand::execute() {
             ofstream outName;
             map<string, vector<string> > nameMap;
             if (nameFile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(nameFile);  }
+                thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir += util.hasPath(nameFile);  }
                 string outNameFile = thisOutputDir + util.getRootName(util.getSimpleName(nameFile));
                 variables["[filename]"] = outNameFile;
                 variables["[extension]"] = util.getExtension(nameFile);
@@ -241,8 +240,8 @@ int RenameSeqsCommand::execute() {
             
             ofstream outGroup;
             if (groupfile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                 string outGroupFile = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                 variables["[filename]"] = outGroupFile;
                 variables["[extension]"] = util.getExtension(groupfile);
@@ -350,8 +349,8 @@ int RenameSeqsCommand::execute() {
             
             if (groupfile != "") {   outGroup.close(); }
             else if (countfile != "") {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                 string outCountFile = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                 variables["[filename]"] = outCountFile;
                 variables["[extension]"] = util.getExtension(countfile);
@@ -411,8 +410,8 @@ int RenameSeqsCommand::execute() {
 //**********************************************************************************************************************
 int RenameSeqsCommand::readQual(map<string, string>& oldMap){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
         variables["[extension]"] = util.getExtension(qualfile);
@@ -454,8 +453,8 @@ int RenameSeqsCommand::readQual(map<string, string>& oldMap){
 //**********************************************************************************************************************
 int RenameSeqsCommand::readTax(map<string, string>& oldMap){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
@@ -499,8 +498,8 @@ int RenameSeqsCommand::readTax(map<string, string>& oldMap){
 //**********************************************************************************************************************
 int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(contigsfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(contigsfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(contigsfile));
         variables["[extension]"] = util.getExtension(contigsfile);
@@ -548,8 +547,8 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
 //**********************************************************************************************************************
 int RenameSeqsCommand::readFasta(string thisFastaFile, map<string, string>& oldMap){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(thisFastaFile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(thisFastaFile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(thisFastaFile));
         variables["[extension]"] = util.getExtension(thisFastaFile);
@@ -639,8 +638,8 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
                 thisFile = temp.substr(pos+1);
             }
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(thisFile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(thisFile);  }
             string outMapFile = thisOutputDir + util.getSimpleName(thisFile);
             map<string, string> variables;
             variables["[filename]"] = outMapFile + ".";

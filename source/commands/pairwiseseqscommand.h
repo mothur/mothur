@@ -55,7 +55,7 @@ private:
 	void createProcesses(string);
     bool sanityCheck();
     
-	string fastaFileName, align, calc, outputDir, output, oldfastafile, column;
+	string fastaFileName, align, calc,  output, oldfastafile, column;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
 	int processors, longestBase, numDistsBelowCutoff;
 	vector<string> Estimators, outputNames;

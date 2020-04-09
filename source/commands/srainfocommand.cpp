@@ -92,10 +92,7 @@ SRAInfoCommand::SRAInfoCommand(string option)  {
             if (accnosfile == "not open") { accnosfile = ""; abort = true; }
             else if (accnosfile == "not found") { m->mothurOut("[ERROR]: The accnos parameter is required.\n");  abort = true; }
             
-            outputDir = validParameter.valid(parameters, "outputdir");        if (outputDir == "not found"){
-                outputDir = "";
-                outputDir += util.hasPath(accnosfile); //if user entered a file with a path then preserve it
-            }
+            if (outputdir == ""){ outputdir += util.hasPath(accnosfile); }
             
             string temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
             processors = current->setProcessors(temp);
@@ -196,8 +193,8 @@ int SRAInfoCommand::execute(){
         set<string> samples = util.readAccnos(accnosfile);
 
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-        if (outputDir == "") { thisOutputDir = util.hasPath(accnosfile); }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") { thisOutputDir = util.hasPath(accnosfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(accnosfile));
         variables["[tag]"] = "";
         string fileFileName = getOutputFileName("file",variables);
@@ -281,7 +278,7 @@ string SRAInfoCommand::runPreFetch(string sampleName){
         char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
         cPara.push_back(outputFile);
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleName))+".";
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sampleName))+".";
         string outputFileName = getOutputFileName("sra",variables);
         char* tempoutfile = new char[outputFileName.length()+1];
         *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
@@ -384,16 +381,16 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
 	#if defined NON_WINDOWS
 			outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", 2);
 			map<string, string> variables;
-			variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sampleFile));
+			variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sampleFile));
 			string outputFileName = getOutputFileName("fastq", variables);
 			tempoutfile = new char[outputFileName.length() + 1];
 			*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
 			cPara.push_back(outputFile);
 			cPara.push_back(tempoutfile);
 #else
-			if (outputDir != "") {
+			if (outputdir != "") {
 				outputFile = new char[9];     outputFile[0] = '\0'; strncat(outputFile, "--outdir", 8);
-				string outputFileName = outputDir;
+				string outputFileName = outputdir;
 				tempoutfile = new char[outputFileName.length() + 1];
 				*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), outputFileName.length());
 				cPara.push_back(outputFile);
@@ -421,8 +418,8 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         ifstream testfin, testrin;
         string tag = "fastq";
         if (compressGZ) {   tag += ".gz";   }
-        string ffastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
-        string rfastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
+        string ffastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
+        string rfastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
         
         bool found = false;
         //already exist??
@@ -443,8 +440,8 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         #if defined NON_WINDOWS
             if (compressGZ) { //run system command to compress files
                 string tag = "fastq";
-                string ffastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
-                string rfastq = outputDir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
+                string ffastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
+                string rfastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
                 
                 string inputString = "gzip -f " + ffastq;
                 runSystemCommand(inputString);

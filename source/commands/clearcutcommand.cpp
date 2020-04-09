@@ -149,8 +149,8 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			if ((phylipfile != "") && (fastafile != "")) {  m->mothurOut("You must provide either a phylip formatted distance matrix or an aligned fasta file, not BOTH.\n");  abort=true; }
 
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFile);	}
+			 
+			if (outputdir == ""){	outputdir = util.hasPath(inputFile);	}
 			
 			string temp;
 			temp = validParameter.valid(parameters, "version");		if (temp == "not found"){	temp = "F";			}
@@ -215,7 +215,7 @@ int ClearcutCommand::execute() {
 		
 		//prepare filename
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFile));
 		string outputName = getOutputFileName("tree", variables);
 		outputNames.push_back(outputName); outputTypes["tree"].push_back(outputName);
 		
@@ -270,12 +270,12 @@ int ClearcutCommand::execute() {
 		if (jukes)				{  clearcutParameters[parameterCount] = new char[8];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--jukes", 7);  parameterCount++;	}
 		if (kimura)				{ clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--kimura", 8);  parameterCount++;		}
 		if (matrixout != "")	{  
-			string tempMatrix =  "--matrixout=" + outputDir + matrixout; 
+			string tempMatrix =  "--matrixout=" + outputdir + matrixout;
 			clearcutParameters[parameterCount] = new char[tempMatrix.length()+1];
 			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempMatrix.c_str(), tempMatrix.length());
 			parameterCount++;
-			outputNames.push_back((outputDir + matrixout));
-			outputTypes["matrixout"].push_back((outputDir + matrixout));
+			outputNames.push_back((outputdir + matrixout));
+			outputTypes["matrixout"].push_back((outputdir + matrixout));
 		}
 
 		if (ntrees != "1")		{  

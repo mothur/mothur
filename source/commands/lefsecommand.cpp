@@ -146,9 +146,9 @@ LefseCommand::LefseCommand(string option)  {
 				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = util.hasPath(inputfile); //if user entered a file with a path then preserve it
+            
+            if (outputdir == ""){
+				outputdir = util.hasPath(inputfile); 
 			}
             
             string label = validParameter.valid(parameters, "label");
@@ -965,7 +965,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
 int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels) {
     try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = label;
         string outputFileName = getOutputFileName("summary",variables);
 		ofstream out;

@@ -169,8 +169,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
 			
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+            
+			
 			
 			string path;
 			map<string, string>::iterator it = parameters.find("reference");
@@ -285,8 +285,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
                 string rootFileName = namefile;
                 if (rootFileName == "") { rootFileName = groupfile; }
                 
-                if (outputDir == "") { outputDir = util.hasPath(rootFileName); }
-                map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(rootFileName));
+                if (outputdir == "") { outputdir = util.hasPath(rootFileName); }
+                map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(rootFileName));
                 string outputFileName = getOutputFileName("count", variables);
                 
                 CountTable ct; ct.createTable(namefile, groupfile, nullVector); ct.printCompressedTable(outputFileName);
@@ -311,9 +311,9 @@ int ChimeraSlayerCommand::execute(){
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
         long start = time(NULL);
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("chimera", variables);
         string accnosFileName = getOutputFileName("accnos", variables);
         string trimFastaFileName = getOutputFileName("fasta", variables);
@@ -354,7 +354,7 @@ int ChimeraSlayerCommand::execute(){
             
         }else { //you have provided a groupfile
             if (hasCount) {
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
                 newCountFile = getOutputFileName("count", variables);
             }
             
@@ -599,7 +599,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(map<string, string>& fileGroup, 
 		
         if (!hasCount) {  countfile = getCountFile(fastafile);  }
         
-        string newFastaFile = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "-sortedTemp.fasta";
+        string newFastaFile = outputdir + util.getRootName(util.getSimpleName(fastafile)) + "-sortedTemp.fasta";
         
 		if (countfile == "") { //no groups
             
@@ -633,7 +633,7 @@ int ChimeraSlayerCommand::setUpForSelfReference(map<string, string>& fileGroup, 
                     string thisGroupsFastaFile = thisGroupsFiles[0];
                     string thisGroupsCountFile = thisGroupsFiles[1];
                     
-                    newFastaFile = outputDir + util.getRootName(util.getSimpleName(fastafile)) + groups[i] + "-sortedTemp.fasta";
+                    newFastaFile = outputdir + util.getRootName(util.getSimpleName(fastafile)) + groups[i] + "-sortedTemp.fasta";
                     priority = sortFastaFile(thisGroupsFastaFile, thisGroupsCountFile, newFastaFile);
                     fileToPriority[newFastaFile] = priority;
                     fileGroup[newFastaFile] = groups[i];
@@ -696,9 +696,9 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			long start = time(NULL);
 			string thisFastaName = itFile->first;
 			map<string, int> thisPriority = itFile->second;
-			string thisoutputFileName = outputDir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
-			string thisaccnosFileName = outputDir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.accnos";
-			string thistrimFastaFileName = outputDir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.fasta";
+			string thisoutputFileName = outputdir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
+			string thisaccnosFileName = outputdir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.accnos";
+			string thistrimFastaFileName = outputdir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.fasta";
 			
 			m->mothurOut("\nChecking sequences from group: " + fileGroup[thisFastaName] + ".\n");
 			

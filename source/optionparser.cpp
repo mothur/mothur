@@ -17,6 +17,7 @@ OptionParser::OptionParser(string option, vector<string> parametersAllowedByThis
         current = CurrentFile::getInstance();
         
         ValidParameters validParameter;
+        fillFileTypes(fileTypes);
         
 		if (option != "") {
 			
@@ -66,6 +67,7 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 	try {
 		m = MothurOut::getInstance();
         current = CurrentFile::getInstance();
+        fillFileTypes(fileTypes);
 		if (option != "") {
 			
 			string key, value;		
@@ -188,13 +190,8 @@ map<string, string> OptionParser::getParameters() {
             }else{ it++; }
         }
         
-        string inputDir = "";
-        it = parameters.find("inputdir");
-        if (it != parameters.end()){
-            inputDir = it->second;
-            
-            set<string> fileTypes;
-            fillFileTypes(fileTypes);
+        string inputDir = current->getInputDir();
+        if (inputDir != "") {
             
             for (it = parameters.begin(); it != parameters.end(); it++) {
                 if (fileTypes.count(it->first) != 0) {

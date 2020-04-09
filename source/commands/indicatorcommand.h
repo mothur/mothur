@@ -59,7 +59,7 @@ public:
 	
 private:
 	DesignMap* designMap;
-	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
+	string treefile, sharedfile, relabundfile, groups, label, inputFileName,  designfile;
     bool abort;
     int iters, processors;
     vector<string> outputNames, Groups, namesSeqs;

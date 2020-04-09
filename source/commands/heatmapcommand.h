@@ -42,7 +42,7 @@ private:
 	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, sorted, scale, label, outputDir, sharedfile, relabundfile, listfile, rabundfile, sabundfile, inputfile;
+	string format, groups, sorted, scale, label,  sharedfile, relabundfile, listfile, rabundfile, sabundfile, inputfile;
 	vector<string> Groups, outputNames;
 	int numOTU, fontSize;
 

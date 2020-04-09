@@ -104,10 +104,8 @@ AmovaCommand::AmovaCommand(string option) {
 			OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter
-            ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
 			
+            ValidParameters validParameter;
 			phylipFileName = validParameter.validFile(parameters, "phylip");
 			if (phylipFileName == "not open") { phylipFileName = ""; abort = true; }
 			else if (phylipFileName == "not found") { 
@@ -157,7 +155,7 @@ int AmovaCommand::execute(){
 		//read design file
 		designMap = new DesignMap(designFileName);
 
-		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
+		if (outputdir == "") { outputdir = util.hasPath(phylipFileName); }
 						
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);
@@ -204,7 +202,7 @@ int AmovaCommand::execute(){
 		
 		//create a new filename
 		ofstream AMOVAFile;
-        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipFileName));
+        map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipFileName));
 		string AMOVAFileName = getOutputFileName("amova", variables);	
         
 		util.openOutputFile(AMOVAFileName, AMOVAFile);

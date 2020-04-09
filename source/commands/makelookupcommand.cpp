@@ -98,9 +98,8 @@ MakeLookupCommand::MakeLookupCommand(string option)  {
 			if (refFastaFileName == "not open") { abort = true; }
 			else if (refFastaFileName == "not found") { refFastaFileName = ""; m->mothurOut("[ERROR]: reference parameter is required.\n");   abort = true; }
                       
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = util.hasPath(flowFileName); //if user entered a file with a path then preserve it
+            if (outputdir == ""){
+				outputdir = util.hasPath(flowFileName); 
 			}
             
             string temp = validParameter.valid(parameters, "threshold");	if (temp == "not found"){	temp = "10000";	}
@@ -311,7 +310,7 @@ int MakeLookupCommand::execute(){
         
         //output data table.  column one is the probability of each homopolymer length
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(flowFileName));
 		string outputFile = getOutputFileName("lookup",variables);
 		outputNames.push_back(outputFile); outputTypes["lookup"].push_back(outputFile);
         

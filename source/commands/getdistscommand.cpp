@@ -77,7 +77,7 @@ GetDistsCommand::GetDistsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -171,8 +171,8 @@ int GetDistsCommand::execute(){
 //**********************************************************************************************************************
 int GetDistsCommand::readPhylip(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(phylipfile));
         variables["[extension]"] = util.getExtension(phylipfile);
@@ -332,8 +332,8 @@ int GetDistsCommand::readPhylip(){
 //**********************************************************************************************************************
 int GetDistsCommand::readColumn(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(columnfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(columnfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(columnfile));
         variables["[extension]"] = util.getExtension(columnfile);

@@ -36,7 +36,7 @@ public:
 	
 private:
 	bool abort, allLines;
-	string taxonomyFileName, label, outputDir, namefile, countfile;
+	string taxonomyFileName, label,  namefile, countfile;
 	set<string> labels; //holds labels to be used
 	int cutoff;
 	map<string, string> namemap;

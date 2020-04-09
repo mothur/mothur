@@ -113,8 +113,8 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
 			}else if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else { current->setFastaFile(fastafile); }
 			
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);	}
+             
+					if (outputdir == ""){    outputdir = util.hasPath(fastafile);	}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -222,8 +222,8 @@ int PcrSeqsCommand::execute(){
         long start = time(NULL);
         fileAligned = true; pairedOligos = false;
         
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
@@ -240,8 +240,8 @@ int PcrSeqsCommand::execute(){
 		
 		if (m->getControl_pressed()) {  return 0; }
         
-        thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("accnos",variables);
 
@@ -277,8 +277,8 @@ int PcrSeqsCommand::execute(){
                 current->setMothurCalling(false);
                 
                 if (groupfile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                     variables["[extension]"] = util.getExtension(groupfile);
                     string outGroup = getOutputFileName("group", variables);
@@ -287,8 +287,8 @@ int PcrSeqsCommand::execute(){
                 }
                 
                 if (namefile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
                     variables["[extension]"] = util.getExtension(namefile);
                     string outName = getOutputFileName("name", variables);
@@ -297,8 +297,8 @@ int PcrSeqsCommand::execute(){
                 }
                 
                 if (countfile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                     variables["[extension]"] = util.getExtension(countfile);
                     string outCount = getOutputFileName("count", variables);
@@ -307,8 +307,8 @@ int PcrSeqsCommand::execute(){
                 }
                 
                 if (taxfile != "")              {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
                     variables["[extension]"] = util.getExtension(taxfile);
                     string outputFileName = getOutputFileName("taxonomy", variables);

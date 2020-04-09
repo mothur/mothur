@@ -36,7 +36,7 @@ private:
 		float freq;
 		int iters, processors, numUniquesInName, subsampleSize;
 		bool abort, rarefy, summary, collect, scale, subsample;
-		string groups, outputDir, treefile, groupfile, namefile, countfile;
+		string groups,  treefile, groupfile, namefile, countfile;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
         //map<string, int> getRootForGroups(Tree* t);

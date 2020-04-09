@@ -113,7 +113,7 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta");
@@ -430,8 +430,8 @@ int GetLineageCommand::runGetOTUs(string accnosFileName){
 //**********************************************************************************************************************
 string GetLineageCommand::readTax(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
@@ -493,8 +493,8 @@ string GetLineageCommand::readTax(){
 //**********************************************************************************************************************
 string GetLineageCommand::readConsTax(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(constaxonomy);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomy);  }
 		map<string, string> variables;
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomy));
         variables["[extension]"] = util.getExtension(constaxonomy);

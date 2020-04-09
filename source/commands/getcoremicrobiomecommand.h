@@ -40,7 +40,6 @@ private:
     vector<string> Groups;
     set<string> labels;
     bool abort;
-    string outputDir;
     vector<string> outputNames;
     float abund;
     int samples, factor;

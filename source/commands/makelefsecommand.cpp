@@ -129,11 +129,7 @@ MakeLefseCommand::MakeLefseCommand(string option)  {
 			}
 			
 			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("[ERROR]: You may not use both a shared and relabund file.\n");  abort = true;  }
-			
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = ""; 			}
-            
+			 
             scale = validParameter.valid(parameters, "scale");				if (scale == "not found") { scale = "totalgroup"; }
 			
 			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
@@ -185,9 +181,9 @@ int MakeLefseCommand::execute(){
 //**********************************************************************************************************************
 int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloatVectors*& lookup){
 	try {
-        if (outputDir == "") { outputDir = util.hasPath(inputFile); }
+        if (outputdir == "") { outputdir = util.hasPath(inputFile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFile));
         variables["[distance]"] = lookup->getLabel();
 		string outputFile = getOutputFileName("lefse",variables);
 		outputNames.push_back(outputFile); outputTypes["lefse"].push_back(outputFile);

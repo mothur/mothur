@@ -110,11 +110,7 @@ PCACommand::PCACommand(string option)  {
 				}
 			}
 				
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(inputFile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){	 outputdir += util.hasPath(inputFile); }
 						
 			string temp = validParameter.valid(parameters, "metric");	if (temp == "not found"){	temp = "T";				}
 			metric = util.isTrue(temp); 
@@ -327,7 +323,7 @@ int PCACommand::process(SharedRAbundFloatVectors*& lookupFloat){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		string fbase = outputDir + util.getRootName(util.getSimpleName(inputFile));
+		string fbase = outputdir + util.getRootName(util.getSimpleName(inputFile));
 		//string outputFileName = fbase + lookupFloat[0]->getLabel();
 		output(fbase, lookupFloat->getLabel(), Groups, X, d);
 		

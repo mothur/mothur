@@ -79,7 +79,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+            
             
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.valid(parameters, "inputdir");		
@@ -124,9 +124,9 @@ int MakeGroupCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = util.hasPath(fastaFileNames[0]); }
+		if (outputdir == "") { outputdir = util.hasPath(fastaFileNames[0]); }
 			
-		filename = outputDir + filename;
+		filename = outputdir + filename;
 		
 		ofstream out;
 		util.openOutputFile(filename, out);

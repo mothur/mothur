@@ -49,7 +49,7 @@ private:
     float match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels;
     vector<float> error_dist;
     bool abort, bygroup;
-    string fastafile, outputDir, countfile, pc_method, align_method, align;
+    string fastafile,  countfile, pc_method, align_method, align;
     vector<string> outputNames;
     
     void createProcessesGroups(map<string, vector<string> >&, vector<string>, string, string);

@@ -33,7 +33,7 @@ public:
     
 private:
     bool abort;
-    string outputDir, flowFileName, errorFileName, flowOrder, refFastaFileName, barcodeSequence, keySequence;
+    string  flowFileName, errorFileName, flowOrder, refFastaFileName, barcodeSequence, keySequence;
     vector<string> outputNames;
     int thresholdCount;
     

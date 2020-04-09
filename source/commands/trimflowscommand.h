@@ -44,7 +44,7 @@ private:
 	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs, numLinkers, numSpacers;
 	float signal, noise;
 	bool fasta, pairedOligos, reorient, allFiles, abort, createGroup;
-	string flowOrder, flowFileName, oligoFileName, outputDir;
+	string flowOrder, flowFileName, oligoFileName;
     
     map<int, oligosPair> pairedBarcodes;
     map<int, oligosPair> pairedPrimers;

@@ -86,9 +86,8 @@ int SystemCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        string outputDir = current->getOutputDir();
-        if (outputDir == "") { outputDir = "./"; }
-        string redirectFileName = outputDir + "commandScreen.output";
+        if (outputdir == "") { outputdir = "./"; }
+        string redirectFileName = outputdir + "commandScreen.output";
         
 		//if command contains a redirect don't add the redirect
 		bool usedRedirect = false;

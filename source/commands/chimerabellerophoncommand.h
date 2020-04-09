@@ -38,7 +38,7 @@ public:
 private:
 
 	bool abort, filter, correction;
-	string fastafile, outputDir;
+	string fastafile;
 	int processors, window, increment, numSeqs;
 	vector<string> outputNames;
 

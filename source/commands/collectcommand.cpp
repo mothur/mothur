@@ -190,8 +190,8 @@ CollectCommand::CollectCommand(string option)  {
 			else {  format = "sharedfile"; inputfile = sharedfile; current->setSharedFile(sharedfile); }
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			 
+			
 			
 			if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) { 
 				//is there are current file available for any of these?
@@ -274,8 +274,8 @@ int CollectCommand::execute(){
 			
 			if (m->getControl_pressed()) {  break; }
 			
-			if (outputDir == "") { outputDir += util.hasPath(inputFileNames[p]); }
-			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
+			if (outputdir == "") { outputdir += util.hasPath(inputFileNames[p]); }
+			string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(inputFileNames[p]));
             map<string, string> variables; 
             variables["[filename]"] = fileNameRoot;
 		

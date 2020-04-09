@@ -131,9 +131,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
                 else { m->mothurOut("Unable to open " + maskfile + ".\n"); abort = true; } //erase from file list
             }else if (maskfile == "default") { m->mothurOut("Using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013.\n");  }
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-            if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+			 
+			
+            if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
 		
 			consfile = validParameter.validFile(parameters, "conservation");
 			if (consfile == "not open") { abort = true; }
@@ -214,7 +214,7 @@ int ChimeraPintailCommand::execute(){
 
 int ChimeraPintailCommand::checkChiemras(){
 	try {
-        MothurChimera* chimera = new Pintail(fastafile, templatefile, filter, maskfile, consfile, quanfile, window, increment, outputDir, current->getVersion());
+        MothurChimera* chimera = new Pintail(fastafile, templatefile, filter, maskfile, consfile, quanfile, window, increment, outputdir, current->getVersion());
         
         if (m->getControl_pressed()) { delete chimera;  return 0;	}
         
@@ -224,7 +224,7 @@ int ChimeraPintailCommand::checkChiemras(){
         
         string outputFileName, accnosFileName;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         if (maskfile != "") { variables["[tag]"] = util.getSimpleName(util.getRootName(maskfile)); }
         outputFileName = getOutputFileName("chimera", variables);
         accnosFileName = getOutputFileName("accnos", variables);

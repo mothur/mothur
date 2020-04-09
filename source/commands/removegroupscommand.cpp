@@ -116,7 +116,7 @@ RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+            
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -314,8 +314,8 @@ int RemoveGroupsCommand::execute(){
                 }
             }
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
             variables["[extension]"] = util.getExtension(countfile);
@@ -421,8 +421,8 @@ int RemoveGroupsCommand::execute(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readFasta(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
@@ -477,8 +477,8 @@ void RemoveGroupsCommand::readFasta(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readShared(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
 		
 		//get group names from sharedfile so we can set Groups to the groupNames we want to keep
 		//that way we can take advantage of the reads in inputdata and sharedRabundVector
@@ -545,8 +545,8 @@ void RemoveGroupsCommand::readShared(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readList(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -638,8 +638,8 @@ void RemoveGroupsCommand::readList(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readName(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
@@ -716,8 +716,8 @@ void RemoveGroupsCommand::readName(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readGroup(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
@@ -762,8 +762,8 @@ void RemoveGroupsCommand::readGroup(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readDesign(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(designfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(designfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(designfile));
         variables["[extension]"] = util.getExtension(designfile);
@@ -806,8 +806,8 @@ void RemoveGroupsCommand::readDesign(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readTax(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
@@ -855,8 +855,8 @@ void RemoveGroupsCommand::readTax(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readPhylip(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(phylipfile));
         variables["[extension]"] = util.getExtension(phylipfile);
@@ -1015,8 +1015,8 @@ void RemoveGroupsCommand::readPhylip(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::readColumn(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(columnfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(columnfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(columnfile));
         variables["[extension]"] = util.getExtension(columnfile);

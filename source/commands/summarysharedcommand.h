@@ -85,7 +85,7 @@ private:
 	string label, calc, groups, sharedfile, output;
 	vector<string>  Estimators, Groups, outputNames, sumCalculatorsNames;
 	
-	string format, outputDir;
+	string format;
 	int numGroups, processors, subsampleSize, iters, numCalcs;
 	int process(SharedRAbundVectors*, string, string, vector<string>);
     int printSims(ostream&, vector< vector<double> >&, vector<string>);

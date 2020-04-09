@@ -82,7 +82,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -153,9 +153,9 @@ int GetListCountCommand::execute(){
 void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames;
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[tag]"] = list->getLabel();
 		string outputFileName = getOutputFileName("otu", variables);
 		

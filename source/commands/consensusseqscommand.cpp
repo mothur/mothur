@@ -131,8 +131,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			string temp = validParameter.valid(parameters, "cutoff");  if (temp == "not found") { temp = "100"; }
 			util.mothurConvert(temp, cutoff); 
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);	}
+			if (outputdir == ""){	outputdir = util.hasPath(fastafile);	}
 			
             if (countfile == "") {
                 if (namefile == ""){
@@ -167,7 +166,7 @@ int ConsensusSeqsCommand::execute(){
 			
 			ofstream outSummary;
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 			string outputSummaryFile = getOutputFileName("summary", variables);
 			util.openOutputFile(outputSummaryFile, outSummary);
 			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
@@ -281,7 +280,7 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 		
 		ofstream outSummary;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = list->getLabel();
 		string outputSummaryFile = getOutputFileName("summary", variables);
 		util.openOutputFile(outputSummaryFile, outSummary);

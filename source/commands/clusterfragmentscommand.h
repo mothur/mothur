@@ -49,7 +49,7 @@ public:
 private:
     CountTable ct;
 	bool abort;
-	string fastafile, namefile, countfile, outputDir;
+	string fastafile, namefile, countfile;
 	int diffs, percent;
 	vector<seqRNode> alignSeqs; 
 	map<string, string> names; //represents the names file first column maps to second column

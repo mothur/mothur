@@ -48,7 +48,7 @@ public:
 private:
 	
 	bool abort;
-	string phylipfile, outputDir, axesfile;
+	string phylipfile,  axesfile;
 	int maxdim, mindim, maxIters, iters;
 	double epsilon;
 	vector<string> outputNames;

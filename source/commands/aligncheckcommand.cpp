@@ -105,12 +105,10 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
-			
+            if (outputdir == "") {
+                outputdir += util.hasPath(fastafile); 
+            }
+            
             if (countfile == "") {
                 if ((namefile == "") && (fastafile != "")){
                     vector<string> files; files.push_back(fastafile); 
@@ -149,7 +147,7 @@ int AlignCheckCommand::execute(){
 		
 		ofstream out;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 		string outfile = getOutputFileName("aligncheck",variables);
 		util.openOutputFile(outfile, out);
 		

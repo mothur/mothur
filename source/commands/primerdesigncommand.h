@@ -39,7 +39,7 @@ private:
     
     bool abort, allLines, large;
     int cutoff, pdiffs, length, processors, alignedLength;
-    string outputDir, listfile, otulabel, namefile, countfile, fastafile, label;
+    string  listfile, otulabel, namefile, countfile, fastafile, label;
     double minTM, maxTM;
     vector<string> outputNames;
 

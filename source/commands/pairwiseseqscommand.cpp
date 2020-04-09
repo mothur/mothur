@@ -103,7 +103,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not found") {
@@ -198,7 +198,7 @@ int PairwiseSeqsCommand::execute(){
 		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
         numDistsBelowCutoff = 0;
 
-        if (outputDir == "") {  outputDir += util.hasPath(fastaFileName); }
+        if (outputdir == "") {  outputdir += util.hasPath(fastaFileName); }
         
         ifstream inFASTA;
         util.openInputFile(fastaFileName, inFASTA);
@@ -215,8 +215,8 @@ int PairwiseSeqsCommand::execute(){
         string outputFile = "";
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastaFileName));
-        if ((oldfastafile != "") && (column != ""))  {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(oldfastafile));  }
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastaFileName));
+        if ((oldfastafile != "") && (column != ""))  {  variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(oldfastafile));  }
         
         if (output == "lt") { //does the user want lower triangle phylip formatted file
             variables["[outputtag]"] = "phylip";

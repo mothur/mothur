@@ -139,7 +139,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n"); abort=true;
             }
 			
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
+					if (outputdir == ""){    outputdir = util.hasPath(treefile);	}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -231,7 +231,7 @@ int UnifracUnweightedCommand::execute() {
         delete reader;
         
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
 		sumFile = getOutputFileName("uwsummary",variables);
 		outputNames.push_back(sumFile); outputTypes["uwsummary"].push_back(sumFile);
 		util.openOutputFile(sumFile, outSum);
@@ -279,7 +279,7 @@ int UnifracUnweightedCommand::execute() {
             
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
 
-			userData = unweighted.getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
+			userData = unweighted.getValues(T[i], processors, outputdir);  //userData[0] = unweightedscore
 		
 			if (m->getControl_pressed()) { break; }
 			
@@ -322,7 +322,7 @@ int UnifracUnweightedCommand::execute() {
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Unweighted thisUnweighted(includeRoot, Groups);
-                iterData = thisUnweighted.getValues(subSampleTree, processors, outputDir); //userData[0] = weightedscore
+                iterData = thisUnweighted.getValues(subSampleTree, processors, outputdir); //userData[0] = weightedscore
         
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
@@ -424,7 +424,7 @@ int UnifracUnweightedCommand::getAverageSTDMatrices(vector< vector<double> >& di
         if (m->getDebug()) { m->mothurOut("[DEBUG]: done filling matrix.\n"); }
         
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "unweighted.ave";
         string aveFileName = getOutputFileName("phylip",variables);
@@ -516,7 +516,7 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         
         //create a new filename
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "unweighted.cons";
         string conFile = getOutputFileName("tree",variables);				
@@ -543,7 +543,7 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
         
         //create a new filename
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "unweighted.all";
         string outputFile = getOutputFileName("tree",variables);				
@@ -625,7 +625,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
             for (int f = 0; f < numComp; f++) { util.mothurRandomShuffle(randomTreeNodes[f]);  } //randomize labels
             
             //we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
-            randomData = unweighted.getValues(thisTree, randomTreeNodes, processors, outputDir);
+            randomData = unweighted.getValues(thisTree, randomTreeNodes, processors, outputdir);
             
             if (m->getControl_pressed()) { return 0; }
 			
@@ -675,7 +675,7 @@ void UnifracUnweightedCommand::printUnweightedFile(int treeNum) {
 		tags.push_back("RandFreq"); tags.push_back("RandCumul");
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(treeNum);
         string unFileName = getOutputFileName("unweighted", variables);
         FileOutput* output = new ColumnFile(unFileName, itersString);
@@ -740,7 +740,7 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 	try {
 		string phylipFileName;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+		variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(i+1);
 		if ((outputForm == "lt") || (outputForm == "square")) {
             variables["[tag2]"] = "unweighted.phylip";

@@ -169,8 +169,8 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+            
+            
             
             string path;
             map<string,string>::iterator it = parameters.find("reference");
@@ -260,8 +260,8 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                     string rootFileName = namefile;
                     if (rootFileName == "") { rootFileName = groupfile; }
                     
-                    if (outputDir == "") { outputDir = util.hasPath(rootFileName); }
-                    map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(rootFileName));
+                    if (outputdir == "") { outputdir = util.hasPath(rootFileName); }
+                    map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(rootFileName));
                     string outputFileName = getOutputFileName("count", variables);
                     
                     CountTable ct; ct.createTable(namefile, groupfile, nullVector); ct.printCompressedTable(outputFileName);
@@ -530,9 +530,9 @@ int ChimeraVsearchCommand::execute(){
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
         long start = time(NULL);
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = "denovo";
         if (templatefile != "self") { variables["[tag]"] = "ref"; }
         string outputFileName = getOutputFileName("chimera", variables);
@@ -547,7 +547,7 @@ int ChimeraVsearchCommand::execute(){
         if (hasCount) {
             CountTable ct;
             if (ct.testGroups(countfile)) { hasGroups = true; }
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
             newCountFile = getOutputFileName("count", variables);
         }
         

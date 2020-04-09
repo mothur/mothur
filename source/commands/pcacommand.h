@@ -38,7 +38,7 @@ public:
 private:
 
 	bool abort, metric;
-	string outputDir, mode, inputFile, label, groups, sharedfile, relabundfile;
+	string  mode, inputFile, label, groups, sharedfile, relabundfile;
 	vector<string> outputNames, Groups;
 	set<string> labels;
 	LinearAlgebra linearCalc;

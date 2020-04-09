@@ -97,9 +97,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-			
             namefile = validParameter.validFile(parameters, "name");
             if (namefile == "not open") { namefile = ""; abort = true; }
             else if (namefile == "not found") {  namefile = "";  }
@@ -161,13 +158,13 @@ int ChimeraCheckCommand::execute(){
 
 int ChimeraCheckCommand::checkChimeras(){
 	try {
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("chimera", variables);
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
         
-        MothurChimera* chimera = new ChimeraCheckRDP(fastafile, templatefile, namefile, svg, increment, ksize, outputDir);
+        MothurChimera* chimera = new ChimeraCheckRDP(fastafile, templatefile, namefile, svg, increment, ksize, outputdir);
         
 		ofstream out;
 		util.openOutputFile(outputFileName, out);

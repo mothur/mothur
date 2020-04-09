@@ -131,7 +131,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
@@ -408,8 +408,8 @@ int ClusterCommand::runVsearchCluster(){
         
         map<string, int> counts;
         map<string, string> variables;
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile)); tag = method;
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile)); tag = method;
 
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = tag;
@@ -619,8 +619,8 @@ int ClusterCommand::runMothurCluster(){
         else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method, adjust);	}
         tag = cluster->getTag();
         
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         
         map<string, string> variables;
         variables["[filename]"] = fileroot;
@@ -808,8 +808,8 @@ int ClusterCommand::runOptiCluster(){
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         tag = "opti_" + metric->getName();
         
         string listFileName = fileroot+ tag + ".list";
@@ -946,8 +946,8 @@ int ClusterCommand::runUniqueCluster(){
             }
         }
         
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         
         tag = "unique";
         string listFileName = fileroot+ tag + ".list";

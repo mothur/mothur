@@ -34,7 +34,7 @@ public:
 	
 private:
 	vector<string> fileNames, outputNames;
-	string outputFileName, fastafile, namefile, countfile, taxfile, outputDir;
+	string outputFileName, fastafile, namefile, countfile, taxfile;
 	int numInputFiles;
 	bool abort;
     bool appendMode;

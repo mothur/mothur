@@ -101,10 +101,7 @@ SparccCommand::SparccCommand(string option)  {
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
-			}
+            if (outputdir == ""){ outputdir = util.hasPath(sharedfile);  }
 
 			normalizeMethod = validParameter.valid(parameters, "method");
 			if (normalizeMethod == "not found") { normalizeMethod = "dirichlet"; }
@@ -206,7 +203,7 @@ int SparccCommand::process(SharedRAbundVectors*& shared){
         int numGroups = data.size();
 
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = shared->getLabel();
 
 

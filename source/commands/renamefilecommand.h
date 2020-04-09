@@ -36,7 +36,7 @@ public:
     
     
 private:
-    string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, countfile, summaryfile, inputfile, outputDir;
+    string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, countfile, summaryfile, inputfile;
     string treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, flowfile, filefile, outputfile, constaxonomyfile, prefix;
     bool mothurGenerated, abort, deleteOld;
     

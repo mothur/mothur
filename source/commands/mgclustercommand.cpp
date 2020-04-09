@@ -114,11 +114,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			if (blastfile == "not open") { blastfile = ""; abort = true; }	
 			else if (blastfile == "not found") { blastfile = ""; }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(blastfile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){ outputdir += util.hasPath(blastfile);  }
 			
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
@@ -197,7 +193,7 @@ int MGClusterCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        fileroot = outputDir + util.getRootName(util.getSimpleName(blastfile));
+        fileroot = outputdir + util.getRootName(util.getSimpleName(blastfile));
         tag = "";
         if (method == "furthest")		{ tag = "fn";  }
         else if (method == "nearest")	{ tag = "nn";  }
@@ -311,7 +307,7 @@ int MGClusterCommand::runOptiCluster(){
 
         m->mothurOutEndLine(); m->mothurOut("Clustering " + distfile); m->mothurOutEndLine();
         
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
         
         ofstream listFile;
         util.openOutputFile(listFileName,	listFile);

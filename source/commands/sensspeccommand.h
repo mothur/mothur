@@ -43,7 +43,6 @@ private:
 	void outputStatistics(string, string, int);
 
 	string listFile, distFile, sensSpecFileName, phylipfile, columnfile, namefile, countfile;
-	string outputDir;
 	string format;
 	vector<string> outputNames;
 	set<string> labels; //holds labels to be used

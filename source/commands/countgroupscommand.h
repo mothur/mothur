@@ -32,7 +32,7 @@ public:
 	
 	
 private:
-	string sharedfile, groupfile, countfile, outputDir, groups, accnosfile;
+	string sharedfile, groupfile, countfile,  groups, accnosfile;
 	bool abort;
 	vector<string> Groups;
     vector<string> outputNames;

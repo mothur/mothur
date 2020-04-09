@@ -40,7 +40,7 @@ public:
 	
 private:
 	bool abort;
-	string outputDir, fastafile, namefile, groupfile;
+	string  fastafile, namefile, groupfile;
 	int processors;
 	double sigma;
 	vector<string> outputNames;

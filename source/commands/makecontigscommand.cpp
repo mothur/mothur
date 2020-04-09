@@ -277,12 +277,6 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
                 }
 			}
 
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-                 outputDir = "";
-            }
-
-
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
@@ -384,8 +378,8 @@ int MakeContigsCommand::execute(){
         } else {  return 0; }
 
         if (groupMap.size() != 0) {
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir = util.hasPath(inputFile); }
             map<string, string> vars;
             vars["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             vars["[tag]"] = "";
@@ -556,11 +550,11 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
         vector<string> qualOrIndexInputs;
         delim = '>';
         map<string, string> variables;
-        string thisOutputDir = outputDir;
+        string thisOutputDir = outputdir;
 
         if (ffastafile != "") {
             inputFile = ffastafile;
-            if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
+            if (outputdir == "") {  thisOutputDir = util.hasPath(inputFile); }
             fileInputs.push_back(ffastafile); fileInputs.push_back(rfastafile);
 
             if (fqualfile != "") {
@@ -578,7 +572,7 @@ unsigned long long MakeContigsCommand::processSingleFileOption(string& outFastaF
             delim = '>';
         }else { //ffastqfile
             inputFile = ffastqfile;
-            if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
+            if (outputdir == "") {  thisOutputDir = util.hasPath(inputFile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             variables["[tag]"] = "trim";
             outQualFile = getOutputFileName("qfile",variables);
@@ -963,8 +957,8 @@ unsigned long long MakeContigsCommand::processMultipleFileOption(string& composi
         unsigned long long numReads = 0;
 
         map<string, string> cvars;
-        string compOutputDir = outputDir;
-        if (outputDir == "") { compOutputDir = util.hasPath(file); }
+        string compOutputDir = outputdir;
+        if (outputdir == "") { compOutputDir = util.hasPath(file); }
         cvars["[filename]"] = compOutputDir + util.getRootName(util.getSimpleName(file));
         cvars["[tag]"] = "trim";
         compositeFastaFile = getOutputFileName("fasta",cvars);

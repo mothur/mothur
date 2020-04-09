@@ -89,7 +89,7 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
             
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree");
@@ -218,8 +218,8 @@ int ClassifyTreeCommand::execute(){
 int ClassifyTreeCommand::getClassifications(Tree*& T){
 	try {
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(treefile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(treefile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputFileName = getOutputFileName("summary", variables);
@@ -234,8 +234,8 @@ int ClassifyTreeCommand::getClassifications(Tree*& T){
 		if (groupfile != "") { out << "Group\t"; } 
         out << "NumRep\tTaxonomy" << endl; 
 		
-		string treeOutputDir = outputDir;
-		if (outputDir == "") {  treeOutputDir += util.hasPath(treefile);  }
+		string treeOutputDir = outputdir;
+		if (outputdir == "") {  treeOutputDir += util.hasPath(treefile);  }
         variables["[filename]"] = treeOutputDir + util.getRootName(util.getSimpleName(treefile));
 		string outputTreeFileName = getOutputFileName("tree", variables);
 		

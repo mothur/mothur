@@ -135,7 +135,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
+					if (outputdir == ""){    outputdir = util.hasPath(treefile);	}
 			
 			string temp;
 			temp = validParameter.valid(parameters, "freq");			if (temp == "not found") { temp = "100"; }
@@ -287,7 +287,7 @@ int PhyloDiversityCommand::execute(){
 			
 			ofstream outRare;
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
             variables["[tag]"] = toString(i+1);
 			string outSumFile = getOutputFileName("summary",variables);
 			string outRareFile = getOutputFileName("rarefy",variables);

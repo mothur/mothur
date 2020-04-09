@@ -100,7 +100,7 @@ private:
 
 	bool abort, allLines, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
-	string phylipfile, columnfile, namefile, calc, groups, label, outputDir;
+	string phylipfile, columnfile, namefile, calc, groups, label;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
     int createProcesses(SharedRAbundVectors*& thisLookup, CountTable&);

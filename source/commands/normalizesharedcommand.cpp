@@ -114,8 +114,8 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			}
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 			
 			
 
@@ -248,7 +248,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundVectors*& thisLookUp, bool& pr
 	try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
         
@@ -329,7 +329,7 @@ int NormalizeSharedCommand::normalize(SharedRAbundFloatVectors*& thisLookUp, boo
 	try {
         vector<string> lookupGroups = thisLookUp->getNamesGroups();
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = thisLookUp->getLabel();
 		string outputFileName = getOutputFileName("shared",variables);
 		ofstream out;

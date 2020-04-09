@@ -99,7 +99,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -310,8 +310,8 @@ int SplitAbundCommand::process(ListVector* thisList) {
         vector<string> accnosOTUs = writeAccnos(tag+"_OTUS", rareOTUs, abundOTUs); //return rare, abund accnos files
         
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-        if (outputDir == "") { thisOutputDir = util.hasPath(listfile); }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") { thisOutputDir = util.hasPath(listfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[tag]"] = tag;
         variables["[tag2]"] = "rare";
@@ -354,7 +354,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
         string rareCount, abundCount, rareName, abundName, rareFasta, abundFasta, rareGroup, abundGroup;
         string inputString2 = "";
         if (countfile != "") {
-            if (outputDir == "") { thisOutputDir = util.hasPath(countfile); }
+            if (outputdir == "") { thisOutputDir = util.hasPath(countfile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
             variables["[tag]"] = tag;
             variables["[tag2]"] = "rare";
@@ -363,7 +363,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
             abundCount = getOutputFileName("count",variables);
             inputString2 += ", count=" + countfile;
         }else if (groupfile != "") {
-            if (outputDir == "") { thisOutputDir = util.hasPath(groupfile); }
+            if (outputdir == "") { thisOutputDir = util.hasPath(groupfile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
             variables["[tag]"] = tag;
             variables["[tag2]"] = "rare";
@@ -374,7 +374,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
         }
         
         if (fastafile != "")   {
-            if (outputDir == "") { thisOutputDir = util.hasPath(fastafile); }
+            if (outputdir == "") { thisOutputDir = util.hasPath(fastafile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
             variables["[tag]"] = tag;
             variables["[tag2]"] = "rare";
@@ -385,7 +385,7 @@ int SplitAbundCommand::process(ListVector* thisList) {
         }
         
         if (namefile != "")   {
-            if (outputDir == "") { thisOutputDir = util.hasPath(namefile); }
+            if (outputdir == "") { thisOutputDir = util.hasPath(namefile); }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
             variables["[tag]"] = tag;
             variables["[tag2]"] = "rare";
@@ -490,8 +490,8 @@ int SplitAbundCommand::splitCount() { //countfile
         vector<string> accnosNames = writeAccnos("", rareNames, abundNames); //return rare, abund accnos files
         
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-        if (outputDir == "") { thisOutputDir = util.hasPath(fastafile); }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") { thisOutputDir = util.hasPath(fastafile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = "";
         variables["[tag2]"] = "rare";
@@ -499,7 +499,7 @@ int SplitAbundCommand::splitCount() { //countfile
         variables["[tag2]"] = "abund";
         string abundFasta = getOutputFileName("fasta",variables);
         
-        if (outputDir == "") { thisOutputDir = util.hasPath(countfile); }
+        if (outputdir == "") { thisOutputDir = util.hasPath(countfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
         variables["[tag]"] = "";
         variables["[tag2]"] = "rare";
@@ -590,8 +590,8 @@ int SplitAbundCommand::splitNames() { //namefile
         vector<string> accnosNames = writeAccnos("", rareNames, abundNames); //return rare, abund accnos files
     
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-        if (outputDir == "") { thisOutputDir = util.hasPath(groupfile); }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") { thisOutputDir = util.hasPath(groupfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[tag]"] = "";
         variables["[tag2]"] = "rare";
@@ -599,7 +599,7 @@ int SplitAbundCommand::splitNames() { //namefile
         variables["[tag2]"] = "abund";
         string abundGroup = getOutputFileName("group",variables);
         
-        if (outputDir == "") { thisOutputDir = util.hasPath(fastafile); }
+        if (outputdir == "") { thisOutputDir = util.hasPath(fastafile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = "";
         variables["[tag2]"] = "rare";
@@ -607,7 +607,7 @@ int SplitAbundCommand::splitNames() { //namefile
         variables["[tag2]"] = "abund";
         string abundFasta = getOutputFileName("fasta",variables);
         
-        if (outputDir == "") { thisOutputDir = util.hasPath(namefile); }
+        if (outputdir == "") { thisOutputDir = util.hasPath(namefile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[tag]"] = "";
         variables["[tag2]"] = "rare";
@@ -672,8 +672,8 @@ vector<string> SplitAbundCommand::writeAccnos(string tag, set<string> rareNames,
 	try {
         vector<string> outputAccnosFiles;
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-        if (outputDir == "") { thisOutputDir = util.hasPath(inputFile); }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") { thisOutputDir = util.hasPath(inputFile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
         variables["[tag]"] = tag;
         variables["[tag2]"] = "rare";

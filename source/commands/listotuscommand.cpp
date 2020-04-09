@@ -124,11 +124,8 @@ ListOtusCommand::ListOtusCommand(string option)  {
 					}
 				}
 			}
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = util.hasPath(inputFileName); //if user entered a file with a path then preserve it	
-			}
+             
+			if (outputdir == ""){ outputdir = util.hasPath(inputFileName);  }
             
             string groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
@@ -227,7 +224,7 @@ int ListOtusCommand::printList(vector<string> currentLabels, string distance){
 	try {
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = distance;
         string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
@@ -251,7 +248,7 @@ int ListOtusCommand::createList(string constaxFile){
     try {
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
         ofstream out;

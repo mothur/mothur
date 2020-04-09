@@ -37,7 +37,7 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, relabundfile, label, inputFileName, format, listfile, constaxonomy;
+    string  sharedfile, relabundfile, label, inputFileName, format, listfile, constaxonomy;
     vector<string> outputNames;
     vector<string> Groups;
     set<string> labels;

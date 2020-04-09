@@ -32,7 +32,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string treefile, taxonomyfile, groupfile, namefile, countfile, outputDir, output;
+	string treefile, taxonomyfile, groupfile, namefile, countfile, output;
 	bool abort;
 	vector<string> outputNames;
     int numUniquesInName, cutoff;

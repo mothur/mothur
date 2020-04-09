@@ -127,10 +127,8 @@ MergeOTUsCommand::MergeOTUsCommand(string option)  {
                 }
             }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-                outputDir = "";
-                outputDir += util.hasPath(constaxfile); //if user entered a file with a path then preserve it
+            if (outputdir == ""){
+                outputdir += util.hasPath(constaxfile); 
             }
             
             //check for optional parameter and set defaults
@@ -240,8 +238,8 @@ int MergeOTUsCommand::mergeSharedOTUs(vector<TaxNode>& nodes){
     try {
         string numNodes = toString(nodes.size());
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
@@ -302,8 +300,8 @@ int MergeOTUsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, b
         
         if (m->getControl_pressed()) { delete merged; return 0; }
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxfile));
         variables["[label]"] = thisLookUp->getLabel();
@@ -364,8 +362,8 @@ int MergeOTUsCommand::mergeListOTUs(vector<TaxNode>& nodes){
     try {
         string numNodes = toString(nodes.size());
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -420,8 +418,8 @@ int MergeOTUsCommand::process(ListVector*& list, ofstream& out, bool& printHeade
         
         if (m->getControl_pressed()) { delete merged; return 0; }
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxfile));
         variables["[label]"] = list->getLabel();
@@ -486,8 +484,8 @@ int MergeOTUsCommand::mergeRelabundOTUs(vector<TaxNode>& nodes){
     try {
         string numNodes = toString(nodes.size());
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(relabundfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(relabundfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(relabundfile));
         variables["[extension]"] = util.getExtension(relabundfile);
@@ -547,8 +545,8 @@ int MergeOTUsCommand::process(SharedRAbundFloatVectors*& thisLookUp, ofstream& o
         
         if (m->getControl_pressed()) { delete merged; return 0; }
         
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(constaxfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxfile));
         variables["[label]"] = thisLookUp->getLabel();

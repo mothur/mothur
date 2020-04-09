@@ -35,7 +35,7 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, normalizeMethod;
+    string  sharedfile, normalizeMethod;
     int numSamplings, maxIterations, numPermutations, processors;
     set<string> labels;
     vector<string> Groups;

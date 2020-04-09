@@ -114,11 +114,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			else if (countfile == "not found") { countfile = ""; }
 			else { current->setCountFile(countfile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){	 outputdir += util.hasPath(taxonomyFileName);  }
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
@@ -156,7 +152,7 @@ int PhylotypeCommand::execute(){
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 
 		//make it as long as the longest taxonomy in the file 
-		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff, outputDir);
+		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff, outputdir);
 		
 		if (m->getControl_pressed()) { delete taxEqual; return 0; }
 		
@@ -178,7 +174,7 @@ int PhylotypeCommand::execute(){
 		
 		ofstream outList, outRabund, outSabund;
         map<string, string> variables;
-        string fileroot = outputDir + util.getRootName(util.getSimpleName(taxonomyFileName));
+        string fileroot = outputdir + util.getRootName(util.getSimpleName(taxonomyFileName));
         variables["[filename]"] = fileroot;
         variables["[clustertag]"] = "tx";
         string sabundFileName = getOutputFileName("sabund", variables);

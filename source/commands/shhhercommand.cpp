@@ -90,7 +90,7 @@ ShhherCommand::ShhherCommand(string option) {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
             
 			//check for required parameters
 			flowFileName = validParameter.validFile(parameters, "flow");
@@ -107,8 +107,8 @@ ShhherCommand::ShhherCommand(string option) {
 			else{
 				ofstream temp;
                 
-                string thisoutputDir = outputDir;
-                if (outputDir == "") {  thisoutputDir =  util.hasPath(flowFilesFileName); } //if user entered a file with a path then preserve it
+                string thisoutputDir = outputdir;
+                if (outputdir == "") {  thisoutputDir =  util.hasPath(flowFilesFileName); } 
                 
 				//we want to rip off .files, and also .flow if its there
                 string fileroot = util.getRootName(util.getSimpleName(flowFilesFileName));
@@ -143,7 +143,7 @@ ShhherCommand::ShhherCommand(string option) {
                 if (flowFileVector.size() == 0) {  m->mothurOut("[ERROR]: no valid files.\n");  abort = true; }
             }
             else{
-                if (outputDir == "") { outputDir = util.hasPath(flowFileName); }
+                if (outputdir == "") { outputdir = util.hasPath(flowFileName); }
                 flowFileVector.push_back(flowFileName);
             }
 		
@@ -512,8 +512,8 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 if (m->getControl_pressed()) { break; }
                 
                 if ((large) && (g == 0)) {  flowFileName = filenames[i]; theseFlowFileNames[0] = filenames[i]; }
-                string thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir = util.hasPath(flowFileName);  }
+                string thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir = util.hasPath(flowFileName);  }
                 map<string, string> variables; 
                 variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(flowFileName));
                 string qualityFileName = getOutputFileName("qfile",variables);
