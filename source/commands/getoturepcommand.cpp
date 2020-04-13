@@ -426,7 +426,7 @@ int GetOTURepCommand::readDist() {
 	}
 }
 //**********************************************************************************************************************
-int GetOTURepCommand::createCount() {
+void GetOTURepCommand::createCount() {
     try {
         CountTable ct; ct.createTable(namefile, groupfile, nullVector);
         

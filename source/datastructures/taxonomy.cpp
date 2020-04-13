@@ -125,7 +125,7 @@ vector<Taxon> Taxonomy::parseTax(string tax){
             if(tax[i] == ';'){
                 
                 string newtaxon = taxon; float confidence = 0;
-                bool hasConfidence = util.hasConfidenceScore(newtaxon, confidence);
+                util.hasConfidenceScore(newtaxon, confidence);
                 
                 Taxon thisTax(newtaxon, confidence);
                 consTaxs.push_back(thisTax);

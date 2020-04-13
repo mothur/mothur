@@ -307,7 +307,7 @@ double Utils::getRandomDouble0to1(){
 }
 
 /*********************************************************************************************/
-unsigned long long Utils::getRAMUsed() {
+double Utils::getRAMUsed() {
     try {
 
 #if defined (__APPLE__) || (__MACH__)
@@ -334,7 +334,7 @@ unsigned long long Utils::getRAMUsed() {
     }
 }
 /*********************************************************************************************/
-unsigned long long Utils::getTotalRAM() {
+double Utils::getTotalRAM() {
     try {
 
 #if defined NON_WINDOWS

@@ -83,7 +83,7 @@ private:
 	int processNames(string, string);
 	int processFastaNames(string, string, FastaMap*&);
     int readDist();
-    int createCount();
+    void createCount();
 };
 
 #endif

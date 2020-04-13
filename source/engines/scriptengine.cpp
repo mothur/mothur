@@ -140,6 +140,11 @@ string ScriptEngine::getNextCommand(string& commandString) {
             if (evPos == string::npos) { }//no '$' , nothing to do
             else { replaceVariables(nextcommand); }
         }
+        
+        double ramUsed, total;
+        ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
+        m->mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + "Gigabytes . Total Ram: " + toString(total/(double)GIG) + "Gigabytes.\n\n");
+        
         return nextcommand;
     }
     catch(exception& e) {

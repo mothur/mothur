@@ -168,10 +168,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             else { current->setGroupFile(groupfile); hasGroup = true; }
             
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
-            
-            
-            
-            
+
             string path;
             map<string,string>::iterator it = parameters.find("reference");
             //user has given a template file
@@ -608,7 +605,7 @@ int ChimeraVsearchCommand::execute(){
             
             //paralellized in vsearch
             map<string, vector<string> > seqs2RemoveByGroup;
-            int totalSeqs = createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, seqs2RemoveByGroup);
+            createProcessesGroups(group2Files, outputFileName, newFasta, accnosFileName, alnsFileName, newCountFile, groups, seqs2RemoveByGroup);
             
             
             if (hasCount && dups) {

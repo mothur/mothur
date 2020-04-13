@@ -63,7 +63,7 @@ int Collect::getSharedCurve(float percentFreq = 0.01){
         
         //create and initialize vector of sharedvectors, one for each group
         vector<string> groups = sharedorder->getGroups();
-        int numGroups = groups.size();
+        
         for (int i = 0; i < groups.size(); i++) {
             SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getMaxRank()+1);
             temp->setLabel(sharedorder->getLabel());

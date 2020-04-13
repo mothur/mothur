@@ -477,7 +477,7 @@ void SharedCLRVectors::removeGroups(vector<string> g){
 int SharedCLRVectors::removeGroups(int minSize, bool silent){
     try {
         vector<string> Groups;
-        bool remove = false;
+        
         for (vector<SharedCLRVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
                 if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating.\n"); }

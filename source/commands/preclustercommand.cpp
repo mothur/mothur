@@ -849,7 +849,7 @@ void print(string newfasta, string newname, preClusterData* params){
         params->m->mothurOut("/******************************************/\n");
         params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
         
-        Command* getCommand = new GetSeqsCommand(inputString);
+        GetSeqsCommand* getCommand = new GetSeqsCommand(inputString);
         getCommand->execute();
         
         map<string, vector<string> > filenames = getCommand->getOutputFiles();
@@ -906,6 +906,7 @@ int PreClusterCommand::execute(){
             current->setMothurCalling(true);
             SequenceCountParser cparser(countfile, fastafile, nullVector);
             current->setMothurCalling(false);
+            cout << " groups = "<< cparser.getNamesOfGroups().size() << endl;
             groups = cparser.getNamesOfGroups();
             group2Files = cparser.getFiles();
             

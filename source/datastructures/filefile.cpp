@@ -50,7 +50,7 @@ FileFile::FileFile(){
         exit(1);
     }
 }
-/*
+
  file option 1
  
  sfffile1   oligosfile1

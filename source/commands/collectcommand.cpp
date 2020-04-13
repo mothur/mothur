@@ -324,7 +324,7 @@ int CollectCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int CollectCommand::fillCDisplays(map<string, string> variables) {
+void CollectCommand::fillCDisplays(map<string, string> variables) {
     try {
         
         ValidCalculators validCalculator;

@@ -318,7 +318,7 @@ int RareFactCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int RareFactCommand::fillRDisplays(map<string, string> variables, map<int, string>& file2Group, int thisGroup) {
+void RareFactCommand::fillRDisplays(map<string, string> variables, map<int, string>& file2Group, int thisGroup) {
     try {
         
         ValidCalculators validCalculator;

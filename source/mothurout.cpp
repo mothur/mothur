@@ -329,7 +329,7 @@ void MothurOut::errorOut(exception& e, string object, string function) {
     int pos = errorType.find("bad_alloc");
     mothurOut("[ERROR]: " + errorType);
     
-    unsigned long long ramUsed, total;
+    double ramUsed, total;
     Utils util;
     ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
     mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + "Gigabytes . Total Ram: " + toString(total/(double)GIG) + "Gigabytes.\n\n");

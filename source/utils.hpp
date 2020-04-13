@@ -69,8 +69,8 @@ public:
     bool isInteger(string);
     bool allSpaces(string);
     bool isLabelEquivalent(string, string);
-    unsigned long long getRAMUsed();
-    unsigned long long getTotalRAM();
+    double getRAMUsed();
+    double getTotalRAM();
     void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
     
     //file operations

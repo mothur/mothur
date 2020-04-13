@@ -59,7 +59,7 @@ private:
     
 	
 	vector<string> parseSharedFile(string);
-    int fillCDisplays(map<string, string>);
+    void fillCDisplays(map<string, string>);
 
 
 };

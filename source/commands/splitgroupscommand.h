@@ -184,8 +184,8 @@ private:
 	bool abort;
     int processors;
     
-    int splitCountOrGroup(bool);
-    int splitFastqOrFlow(string, string);
+    void splitCountOrGroup(bool);
+    void splitFastqOrFlow(string, string);
 };
 
 /***************************************************************************************/
