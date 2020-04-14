@@ -145,9 +145,11 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
             else { replaceVariables(nextcommand); }
         }
        
-        double ramUsed, total;
-        ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
-        m->mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + "Gigabytes . Total Ram: " + toString(total/(double)GIG) + "Gigabytes.\n\n");
+        if (m->getDebug()) {
+            double ramUsed, total;
+            ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
+            m->mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n\n");
+        }
         
         return nextcommand;
     }

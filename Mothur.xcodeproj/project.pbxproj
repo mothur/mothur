@@ -1138,7 +1138,7 @@
 		48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optiblastmatrix.hpp; path = source/datastructures/optiblastmatrix.hpp; sourceTree = "<group>"; };
 		48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optifitcluster.cpp; path = source/optifitcluster.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optifitcluster.hpp; path = source/optifitcluster.hpp; sourceTree = SOURCE_ROOT; };
-		48FD9946243E5FB10017C521 /* Makefile_cluster */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile_cluster; sourceTree = "<group>"; };
+		48FD9946243E5FB10017C521 /* Makefile_cluster */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile_cluster; sourceTree = SOURCE_ROOT; };
 		7B2181FE17AD777B00286E6A /* classifysvmsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = classifysvmsharedcommand.cpp; path = source/commands/classifysvmsharedcommand.cpp; sourceTree = SOURCE_ROOT; };
 		7B2181FF17AD777B00286E6A /* classifysvmsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = classifysvmsharedcommand.h; path = source/commands/classifysvmsharedcommand.h; sourceTree = SOURCE_ROOT; };
 		7B21820117AD77BD00286E6A /* svm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = svm.cpp; path = source/svm/svm.cpp; sourceTree = SOURCE_ROOT; };
