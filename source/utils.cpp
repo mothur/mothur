@@ -1022,10 +1022,13 @@ int Utils::renameFile(string oldName, string newName){
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
             if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
-            string command = "rm " + newName;
-            system(command.c_str());
+            mothurRemove(newName);
         }
         
+        int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+        /*
         if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
         
         string command = "mv " + oldName + " " + newName;
@@ -1041,6 +1044,7 @@ int Utils::renameFile(string oldName, string newName){
         
             if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
         }
+         */
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
@@ -1070,19 +1074,18 @@ int Utils::copyFile(string oldName, string newName){
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
             if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
-            string command = "rm " + newName;
-            system(command.c_str());
+            mothurRemove(newName);
         }
+        appendFiles(oldName, newName);
+        //if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
         
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
+        //string command = "cp " + oldName + " " + newName;
         
-        string command = "cp " + oldName + " " + newName;
+        //if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
         
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
+        //int returnCode = system(command.c_str());
         
-        int returnCode = system(command.c_str());
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+       // if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
 #else
         mothurRemove(newName);
         appendFiles(oldName, newName);
