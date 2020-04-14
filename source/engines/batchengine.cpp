@@ -13,6 +13,7 @@
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev) : Engine(tpath) {
     try {
+        batchFile = util.removeQuotes(batchFile);
         openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
         if (!openedBatch) {
             if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
