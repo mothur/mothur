@@ -463,14 +463,11 @@ string RemoveLineageCommand::readTax(){
 		
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
-		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-            noConfidenceTaxons[i] = listOfTaxons[i];
             bool hasCon = false;
-            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
-            noConfidenceTaxons[i] = listOfTaxons[i];
-            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
+            taxonsHasConfidence[i] = hasCon;
 		}
 		
 		while(!in.eof()){
@@ -484,7 +481,7 @@ string RemoveLineageCommand::readTax(){
             vector<Taxon> otuTax = thisSeq.getTaxons();
             util.removeQuotes(otuTax);
             
-            if (!util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+            if (!util.searchTax(otuTax, taxonsHasConfidence, searchTaxons)) {
                 wroteSomething = true; out << name << '\t' << tax << endl;
             }else { outAccnos << name << endl; }
 		}
@@ -527,14 +524,11 @@ string RemoveLineageCommand::readConsTax(){
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
-		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-            noConfidenceTaxons[i] = listOfTaxons[i];
             bool hasCon = false;
-            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);  taxonsHasConfidence[i] = hasCon;
-            noConfidenceTaxons[i] = listOfTaxons[i];
-            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
+            searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
+            taxonsHasConfidence[i] = hasCon;
 		}
 		
         int numR = 0;
@@ -546,7 +540,7 @@ string RemoveLineageCommand::readConsTax(){
             vector<Taxon> otuTax = thisOtu.getTaxons();
             util.removeQuotes(otuTax);
             
-            if (!util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+            if (!util.searchTax(otuTax, taxonsHasConfidence, searchTaxons)) {
                 thisOtu.printConsTax(out);
                 wroteSomething = true;
             }else {

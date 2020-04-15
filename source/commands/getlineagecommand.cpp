@@ -449,14 +449,11 @@ string GetLineageCommand::readTax(){
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
-		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-            noConfidenceTaxons[i] = listOfTaxons[i];
             bool hasCon = false;
             searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
             taxonsHasConfidence[i] = hasCon;
-            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
 		}
 		
 		while(!in.eof()){
@@ -470,7 +467,7 @@ string GetLineageCommand::readTax(){
 			vector<Taxon> otuTax = thisSeq.getTaxons();
             util.removeQuotes(otuTax);
             
-			if (util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+			if (util.searchTax(otuTax, taxonsHasConfidence, searchTaxons)) {
                 out << name << '\t' << tax << endl;
                 outAccnos << name << endl; wroteSomething = true;
             }
@@ -515,15 +512,11 @@ string GetLineageCommand::readConsTax(){
 		bool wroteSomething = false;
 		vector<bool> taxonsHasConfidence; taxonsHasConfidence.resize(listOfTaxons.size(), false);
 		vector< vector<Taxon> > searchTaxons; searchTaxons.resize(listOfTaxons.size());
-		vector<string> noConfidenceTaxons; noConfidenceTaxons.resize(listOfTaxons.size(), "");
 		
 		for (int i = 0; i < listOfTaxons.size(); i++) {
-            noConfidenceTaxons[i] = listOfTaxons[i];
             bool hasCon = false;
             searchTaxons[i] = util.getTaxons(listOfTaxons[i], hasCon);
             taxonsHasConfidence[i] = hasCon;
-            noConfidenceTaxons[i] = listOfTaxons[i];
-            if (hasCon) { util.removeConfidences(noConfidenceTaxons[i]); }
         }
         
 		while(!in.eof()){
@@ -534,7 +527,7 @@ string GetLineageCommand::readConsTax(){
             vector<Taxon> otuTax = thisOtu.getTaxons();
             util.removeQuotes(otuTax);
             
-            if (util.searchTax(otuTax, listOfTaxons, taxonsHasConfidence, noConfidenceTaxons, searchTaxons)) {
+            if (util.searchTax(otuTax, taxonsHasConfidence, searchTaxons)) {
                 wroteSomething = true; outAccnos << thisOtu.getName() << endl;
                 thisOtu.printConsTax(out);
             }
