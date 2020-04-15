@@ -31,7 +31,7 @@ public:
     
 private:
     
-    bool aligned;
+    bool isAligned;
     int alignedLength;
     double cutoff;
     

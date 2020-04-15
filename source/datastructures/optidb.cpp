@@ -10,7 +10,7 @@
 #include "onegapdist.h"
 
 /**************************************************************************************************/
-OptiDB::OptiDB(double c) : Database(), cutoff(c), aligned(true), alignedLength(0) {
+OptiDB::OptiDB(double c) : Database(), cutoff(c), isAligned(true), alignedLength(0) {
     calc = new oneGapDist(cutoff);
 }
 /**************************************************************************************************/
@@ -43,7 +43,7 @@ void OptiDB::addSequences(vector<Sequence> seqs)  {
         if (seqs.size() == 1) {
             string aligned = seqs[0].getAligned();
             
-            if (alignedLength != aligned.length()) { aligned = false; }
+            if (alignedLength != aligned.length()) { isAligned = false; }
             
             for (int i = 0; i < aligned.length(); i++) {
                 vector<char> thisSpot;
@@ -57,7 +57,7 @@ void OptiDB::addSequences(vector<Sequence> seqs)  {
             for (int i = 0; i < seqs.size(); i++) {
                 string aligned = seqs[i].getAligned();
                 
-                if (alignedLength != aligned.length()) { aligned = false; break; }
+                if (alignedLength != aligned.length()) { isAligned = false; break; }
                 
                 for (int j = 0; j < alignedLength; j++) { otuData[j].push_back(aligned[j]); }
             }
@@ -76,7 +76,7 @@ void OptiDB::addSequences(vector<Sequence> seqs)  {
             }
         }
         
-        if (!aligned) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); }
+        if (!isAligned) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); }
         
         classifierOTU thisOtu(otuData, seqs.size());
         reference.push_back(thisOtu);
