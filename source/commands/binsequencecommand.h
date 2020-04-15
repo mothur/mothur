@@ -41,7 +41,7 @@ private:
 	CountTable ct;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, listfile, countfile, label, outputDir;
+	string filename, fastafile, listfile, countfile, label;
 	vector<string> outputNames;
 	
 	int process(ListVector*, FastaMap&);

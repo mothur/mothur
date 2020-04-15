@@ -119,10 +119,8 @@ DistanceCommand::DistanceCommand(string option) {
 			else if (column == "not open") { abort = true; }	
 			else { current->setColumnFile(column); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
+            if (outputdir == ""){
+				outputdir += util.hasPath(fastafile); 
 			}
 
 			//check for optional parameter and set defaults
@@ -190,8 +188,8 @@ int DistanceCommand::execute(){
 		
 		string outputFile;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
-        if ((oldfastafile != "") && (column != ""))  { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(oldfastafile)); }
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+        if ((oldfastafile != "") && (column != ""))  { variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(oldfastafile)); }
             
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
             variables["[outputtag]"] = "phylip";

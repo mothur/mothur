@@ -36,7 +36,7 @@ public:
 private:
 
 	bool abort, metric;
-	string phylipfile, filename, fbase, outputDir;
+	string phylipfile, filename, fbase;
 	vector<string> outputNames;
 	LinearAlgebra linearCalc;
 	

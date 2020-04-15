@@ -103,11 +103,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			if (axesfile == "not open") { axesfile = ""; abort = true; }
 			else if (axesfile == "not found") { axesfile = "";  }				
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
-			}
+			 if (outputdir == ""){	 outputdir += util.hasPath(phylipfile);  }
 			
 			string temp = validParameter.valid(parameters, "mindim");	if (temp == "not found") {	temp = "2";	}
 			util.mothurConvert(temp, mindim);
@@ -156,7 +152,7 @@ int NMDSCommand::execute(){
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipfile));
 		string outputFileName = getOutputFileName("iters",variables);
 		string stressFileName = getOutputFileName("stress",variables);
 		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);

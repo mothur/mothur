@@ -151,10 +151,8 @@ ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
                 }
             } else { current->setDesignFile(designfile); }
 
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");
-            if (outputDir == "not found") {
-                outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
+            if (outputdir == "") {
+                outputdir = util.hasPath(sharedfile); 
             }
 
             //Groups must be checked later to make sure they are valid.
@@ -473,7 +471,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
             RankedFeatureList rankedFeatureList = svmRfe.getOrderedFeatureList(svmDataset, trainer, linearKernelConstantRange, linearKernelSmoCRange);
 
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
             variables["[distance]"] = lookup[0]->getLabel();
             string filename = getOutputFileName("summary", variables);
             outputNames.push_back(filename);
@@ -510,7 +508,7 @@ void ClassifySvmSharedCommand::processSharedAndDesignData(vector<SharedRAbundVec
             MultiClassSVM* mcsvm = trainer.train(kernelParameterRangeMap);
 
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
             variables["[distance]"] = lookup[0]->getLabel();
             string filename = getOutputFileName("summary", variables);
             outputNames.push_back(filename);
@@ -565,7 +563,7 @@ void ClassifySvmSharedCommand::trainSharedAndDesignData(vector<SharedRAbundVecto
         m->mothurOut("done training" ); m->mothurOutEndLine();
 
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup[0]->getLabel();
         string filename = getOutputFileName("summary", variables);
         outputNames.push_back(filename);

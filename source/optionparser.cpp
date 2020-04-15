@@ -17,6 +17,7 @@ OptionParser::OptionParser(string option, vector<string> parametersAllowedByThis
         current = CurrentFile::getInstance();
         
         ValidParameters validParameter;
+        fillFileTypes(fileTypes);
         
 		if (option != "") {
 			
@@ -31,7 +32,8 @@ OptionParser::OptionParser(string option, vector<string> parametersAllowedByThis
                 //if value is wrapped in '' preserve spaces
                 if ((value[0] == '\'') && (value[(value.length()-1)] == '\'')) {  value = value.substr(1); value = value.substr(0, (value.length()-1)); }
                 else {
-                    value = util.splitWhiteSpace(value).front();
+                    //value = util.splitWhiteSpace(value).front();
+                    value = util.trimWhiteSpace(value);
                 }
 				
                 if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, value)) {} //ignore invalid parameters
@@ -46,7 +48,8 @@ OptionParser::OptionParser(string option, vector<string> parametersAllowedByThis
             //if value is wrapped in '' preserve spaces
             if ((option[0] == '\'') && (option[(option.length()-1)] == '\'')) {  option = option.substr(1); option = option.substr(0, (option.length()-1)); }
             else {
-                option = util.splitWhiteSpace(option).front();
+                //option = util.splitWhiteSpace(option).front();
+                option = util.trimWhiteSpace(option);
             }
             
 			if (!validParameter.isValidParameter(key, parametersAllowedByThisCommand, option)) {} //ignore invalid parameters
@@ -64,6 +67,7 @@ OptionParser::OptionParser(string option, map<string, string>& copy) {
 	try {
 		m = MothurOut::getInstance();
         current = CurrentFile::getInstance();
+        fillFileTypes(fileTypes);
 		if (option != "") {
 			
 			string key, value;		
@@ -186,13 +190,8 @@ map<string, string> OptionParser::getParameters() {
             }else{ it++; }
         }
         
-        string inputDir = "";
-        it = parameters.find("inputdir");
-        if (it != parameters.end()){
-            inputDir = it->second;
-            
-            set<string> fileTypes;
-            fillFileTypes(fileTypes);
+        string inputDir = current->getInputDir();
+        if (inputDir != "") {
             
             for (it = parameters.begin(); it != parameters.end(); it++) {
                 if (fileTypes.count(it->first) != 0) {

@@ -147,9 +147,9 @@ int GetMIMarksPackageCommand::execute(){
             for (int i = 0; i < tempGroups.size(); i++) { Groups.insert(tempGroups[i]); }
         }
         
-        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
+        if (outputdir == "") { outputdir += util.hasPath(inputfile); }
         map<string, string> variables;
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
 		string outputFileName = getOutputFileName("tsv", variables);
 		
         ofstream out;

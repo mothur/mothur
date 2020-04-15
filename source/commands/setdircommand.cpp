@@ -149,6 +149,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("outputDir=" + output + "\n");
                 current->setOutputDir(output);
             }else {
+                output = util.removeQuotes(output);
                 if (util.mkDir(output)) {
                     m->mothurOut("outputDir=" + output + "\n");
                     current->setOutputDir(output);
@@ -164,6 +165,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("inputDir=" + input+ "\n");
                 current->setInputDir(input);
             }else {
+                input = util.removeQuotes(input);
                 if (util.dirCheck(input)) {
                     m->mothurOut("inputDir=" + input+ "\n");
                     current->setInputDir(input);
@@ -189,6 +191,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("tempDefault=" + tempdefault+ "\n");
                 current->setDefaultPath(tempdefault);
             }else {
+                tempdefault = util.removeQuotes(tempdefault);
                 if (util.mkDir(tempdefault)) {
                     m->mothurOut("tempDefault=" + tempdefault+ "\n");
                     current->setDefaultPath(tempdefault);
@@ -208,6 +211,7 @@ int SetDirectoryCommand::execute(){
 #endif
             }else if (toolsLocation == "") {  //do nothing
             }else {
+                toolsLocation = util.removeQuotes(toolsLocation);
                 if (util.dirCheck(toolsLocation)) {
                     m->mothurOut("tools=" + toolsLocation+ "\n");
                     current->setToolsPath(toolsLocation);
@@ -222,6 +226,7 @@ int SetDirectoryCommand::execute(){
                 m->mothurOut("Blast Location=" + blastLocation+ "\n");
                 current->setBlastPath(blastLocation);
             }else {
+                blastLocation = util.removeQuotes(blastLocation);
                 if (util.dirCheck(blastLocation)) {
                     m->mothurOut("Blast Location=" + blastLocation+ "\n");
                     current->setBlastPath(blastLocation);

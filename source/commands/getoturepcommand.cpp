@@ -129,7 +129,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta");
@@ -426,12 +426,12 @@ int GetOTURepCommand::readDist() {
 	}
 }
 //**********************************************************************************************************************
-int GetOTURepCommand::createCount() {
+void GetOTURepCommand::createCount() {
     try {
         CountTable ct; ct.createTable(namefile, groupfile, nullVector);
         
-        if (outputDir == "") { outputDir = util.hasPath(namefile); }
-        map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
+        if (outputdir == "") { outputdir = util.hasPath(namefile); }
+        map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(namefile));
         countfile = getOutputFileName("count", variables);
         
         ct.printCompressedTable(countfile);
@@ -675,14 +675,14 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string nameRep;
 
 		//create output file
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
 				
 		ofstream newNamesOutput;
 		string outputNamesFile;
 		map<string, string> files; //group -> filenameAW
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         
 		if (Groups.size() == 0) { //you don't want to use groups
             variables["[tag]"] = processList->getLabel();
@@ -700,7 +700,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			for (int i=0; i<Groups.size(); i++) {
                 variables["[tag]"] = processList->getLabel();
                 variables["[group]"] = Groups[i];
-				outputNamesFile = outputDir + util.getRootName(util.getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
+				outputNamesFile = outputdir + util.getRootName(util.getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".";
                 if (countfile == "") { 
                     outputNamesFile = getOutputFileName("name", variables);
                     outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
@@ -813,9 +813,9 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 	try{
 
 		//create output file
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[tag]"] = label;
 		string outputFileName = getOutputFileName("fasta",variables);
 		util.openOutputFile(outputFileName, out);
@@ -972,7 +972,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 	try{
 		
 		//create output file
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
 		
 		ofstream out2;
 		string tempNameFile = filename + ".temp";

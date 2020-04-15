@@ -90,8 +90,7 @@ MakeCLRCommand::MakeCLRCommand(string option) {
                 else { m->mothurOut("[ERROR]: No valid current shared file. You must provide a shared file, quitting.\n"); abort = true; }
             }else {  current->setSharedFile(sharedfile); }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");        if (outputDir == "not found"){    outputDir = util.hasPath(sharedfile);        }
+            if (outputdir == ""){    outputdir = util.hasPath(sharedfile);        }
             
             //check for optional parameter and set defaults
             // ...at some point should added some additional type checking...
@@ -135,7 +134,7 @@ int MakeCLRCommand::execute(){
         Groups = lookup->getNamesGroups();
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         string outputFileName = getOutputFileName("clr",variables);
         bool printHeaders = true;
         

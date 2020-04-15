@@ -88,12 +88,7 @@ DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {
 				fastaFile = current->getFastaFile(); 
 				if (fastaFile != "") { m->mothurOut("Using " + fastaFile + " as input file for the fasta parameter.\n");  }
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
-			}else { current->setFastaFile(fastaFile); }	
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-			}
+			}else { current->setFastaFile(fastaFile); }
 			
 			nameFile = validParameter.validFile(parameters, "name");
 			if (nameFile == "not open") { abort = true; }
@@ -132,8 +127,8 @@ int DeUniqueSeqsCommand::execute() {
 
 		//prepare filenames and open files
 		ofstream out;
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
         string outFastaFile = thisOutputDir + util.getRootName(util.getSimpleName(fastaFile));
        
         map<string, string> variables;
@@ -151,8 +146,8 @@ int DeUniqueSeqsCommand::execute() {
             ct.readTable(countfile, true, false);
             
             if (ct.hasGroupInfo()) {
-                thisOutputDir = outputDir;
-                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                 outGroupFile = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                 variables["[filename]"] = outGroupFile;
                 outGroupFile = getOutputFileName("group", variables);

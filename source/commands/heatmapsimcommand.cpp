@@ -109,17 +109,17 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	inputfile = phylipfile; current->setPhylipFile(phylipfile); if (outputDir == "") { outputDir += util.hasPath(phylipfile); }  }
+			else {  format = "phylip"; 	inputfile = phylipfile; current->setPhylipFile(phylipfile); if (outputdir == "") { outputdir += util.hasPath(phylipfile); }  }
 			
 			columnfile = validParameter.validFile(parameters, "column");
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	inputfile = columnfile; current->setColumnFile(columnfile); if (outputDir == "") { outputDir += util.hasPath(columnfile); } }
+			else {  format = "column";	inputfile = columnfile; current->setColumnFile(columnfile); if (outputdir == "") { outputdir += util.hasPath(columnfile); } }
 			
 			sharedfile = validParameter.validFile(parameters, "shared");
 			if (sharedfile == "not open") { abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
-			else {  format = "shared";	inputfile = sharedfile; current->setSharedFile(sharedfile); if (outputDir == "") { outputDir += util.hasPath(sharedfile); } }
+			else {  format = "shared";	inputfile = sharedfile; current->setSharedFile(sharedfile); if (outputdir == "") { outputdir += util.hasPath(sharedfile); } }
 			
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; }	
@@ -170,8 +170,8 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			}
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -253,7 +253,7 @@ int HeatMapSimCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		heatmap = new HeatMapSim(outputDir, inputfile, fontsize);
+		heatmap = new HeatMapSim(outputdir, inputfile, fontsize);
 		
 		if (format == "shared") { runCommandShared();   }
 		else                    {	runCommandDist();	}

@@ -94,7 +94,7 @@ SharedCommand::SharedCommand(string option)  {
 			 map<string, string> parameters = parser.getParameters();
 
 			 ValidParameters validParameter;
-			 outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			 
 
 			 //check for required parameters
 			 listfile = validParameter.validFile(parameters, "list");
@@ -254,12 +254,12 @@ int SharedCommand::execute(){
 int SharedCommand::createSharedFromCount() {
     try {
         //getting output filename
-        if (outputDir == "") { outputDir += util.hasPath(countfile); }
+        if (outputdir == "") { outputdir += util.hasPath(countfile); }
         string label = "asv";
         if (labels.size() != 0) { label = *labels.begin(); }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
         variables["[distance]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
         outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
@@ -298,10 +298,10 @@ int SharedCommand::createSharedFromBiom() {
 	try {
         //getting output filename
         string filename = biomfile;
-		if (outputDir == "") { outputDir += util.hasPath(filename); }
+		if (outputdir == "") { outputdir += util.hasPath(filename); }
 
         map<string, string> variables;
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
 		filename = getOutputFileName("shared",variables);
 		outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
 
@@ -451,7 +451,7 @@ int SharedCommand::createSharedFromBiom() {
             else { groupNames = Groups; }
 
             //set fileroot
-            fileroot = outputDir + util.getRootName(util.getSimpleName(biomfile));
+            fileroot = outputdir + util.getRootName(util.getSimpleName(biomfile));
         }
 
         if (m->getControl_pressed()) {  out.close(); util.mothurRemove(filename); return 0; }
@@ -733,17 +733,17 @@ int SharedCommand::createSharedFromListGroup() {
         string filename = "";
         if (!pickedGroups) {
             string filename = listfile;
-            if (outputDir == "") { outputDir += util.hasPath(filename); }
+            if (outputdir == "") { outputdir += util.hasPath(filename); }
 
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
             filename = getOutputFileName("shared",variables);
             outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
             util.openOutputFile(filename, out);
         }
 
         //set fileroot
-        fileroot = outputDir + util.getRootName(util.getSimpleName(listfile));
+        fileroot = outputdir + util.getRootName(util.getSimpleName(listfile));
         map<string, string> variables;
 		variables["[filename]"] = fileroot;
         string errorOff = "no error";
@@ -788,7 +788,7 @@ int SharedCommand::createSharedFromListGroup() {
                 groups+=Groups[numGroups-1];
             }else { groups = "merge"; }
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
             variables["[group]"] = groups;
             string newGroupFile = getOutputFileName("group",variables);
             outputTypes["group"].push_back(newGroupFile);
@@ -835,10 +835,10 @@ int SharedCommand::createSharedFromListGroup() {
                 //if picked groups must split the shared file by label
                 if (pickedGroups) {
                     string filename = listfile;
-                    if (outputDir == "") { outputDir += util.hasPath(filename); }
+                    if (outputdir == "") { outputdir += util.hasPath(filename); }
 
                     map<string, string> variables;
-                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                    variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                     variables["[distance]"] = lookup->getLabel();
                     filename = getOutputFileName("shared",variables);
                     outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
@@ -876,10 +876,10 @@ int SharedCommand::createSharedFromListGroup() {
                 //if picked groups must split the shared file by label
                 if (pickedGroups) {
                     string filename = listfile;
-                    if (outputDir == "") { outputDir += util.hasPath(filename); }
+                    if (outputdir == "") { outputdir += util.hasPath(filename); }
 
                     map<string, string> variables;
-                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                    variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                     variables["[distance]"] = lookup->getLabel();
                     filename = getOutputFileName("shared",variables);
                     outputNames.push_back(filename); outputTypes["shared"].push_back(filename);
@@ -934,10 +934,10 @@ int SharedCommand::createSharedFromListGroup() {
             //if picked groups must split the shared file by label
             if (pickedGroups) {
                 string filename = listfile;
-                if (outputDir == "") { outputDir += util.hasPath(filename); }
+                if (outputdir == "") { outputdir += util.hasPath(filename); }
 
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                 variables["[distance]"] = lookup->getLabel();
                 filename = getOutputFileName("shared",variables);
                 outputNames.push_back(filename); outputTypes["shared"].push_back(filename);

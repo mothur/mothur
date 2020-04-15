@@ -37,7 +37,7 @@ public:
 private:
 	bool abort, allLines, pickedGroups, makeRelabund;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, method, sharedfile, relabundfile, format, inputfile;
+	string groups, label,  method, sharedfile, relabundfile, format, inputfile;
 	int norm;
 	vector<string> Groups, outputNames;
 		

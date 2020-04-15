@@ -43,7 +43,7 @@ private:
 	CountTable* ct; 
 	CountTable* savect;
 	vector<string> groupComb; // AB. AC, BC...
-	string sumFile, randomtree, allGroups, outputDir, treefile, groupfile, namefile, countfile;
+	string sumFile, randomtree, allGroups,  treefile, groupfile, namefile, countfile;
 	int iters, numGroups, numComp, counter, processors, numUniquesInName;
 	vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 	vector< vector<float> > userTreeScores; //scores for users trees for each comb.

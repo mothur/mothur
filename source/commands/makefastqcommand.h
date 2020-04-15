@@ -36,7 +36,7 @@ public:
 	
 private:
 	
-	string fastafile, qualfile, outputDir, format;
+	string fastafile, qualfile,  format;
 	bool abort;
 	vector<string> outputNames;
 	

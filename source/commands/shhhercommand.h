@@ -51,7 +51,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 private:
 	bool abort, large;
-	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
+	string  flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName, compositeNamesFileName;
 
 	int maxIters, largeSize;
 	float cutoff, sigma, minDelta;

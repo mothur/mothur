@@ -91,11 +91,7 @@ PCOACommand::PCOACommand(string option)  {
 			
 			filename = phylipfile;  
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){	 outputdir += util.hasPath(phylipfile);  }
 			
 			string temp = validParameter.valid(parameters, "metric");	if (temp == "not found"){	temp = "T";				}
 			metric = util.isTrue(temp); 
@@ -121,7 +117,7 @@ int PCOACommand::execute(){
 		vector<string> names;
 		vector<vector<double> > D;
 	
-		fbase = outputDir + util.getRootName(util.getSimpleName(filename));
+		fbase = outputdir + util.getRootName(util.getSimpleName(filename));
 		
 		ReadPhylipVector readFile(filename);
 		names = readFile.read(D);

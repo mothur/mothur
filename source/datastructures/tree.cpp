@@ -358,7 +358,7 @@ void Tree::getSubTree(Tree* Ctree, vector<string> seqs) {
 	}
 }
 /*****************************************************************/
-int Tree::pruneNewTree(Tree* copy, vector<string> namesToInclude) {
+void Tree::pruneNewTree(Tree* copy, vector<string> namesToInclude) {
     try {
         
         Utils util;

@@ -33,7 +33,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 private:
 	
-	string sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
+	string sharedfile, relabundfile, metadatafile, groups, label, inputFileName,  method;
 	bool abort, pickedGroups, allLines;
     double cutoff;
 	set<string> labels;

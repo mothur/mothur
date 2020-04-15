@@ -123,11 +123,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 				} 
 			}else { current->setGroupFile(groupfile); }	
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(phylipfile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){ outputdir += util.hasPath(phylipfile);  }
 						
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -185,9 +181,9 @@ int LibShuffCommand::execute(){
 		if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
 			m->mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  m->mothurOutEndLine();				
 			//create new group file
-			if(outputDir == "") { outputDir += util.hasPath(groupfile); }
+			if(outputdir == "") { outputdir += util.hasPath(groupfile); }
 			
-			string newGroupFile = outputDir + util.getRootName(util.getSimpleName(groupfile)) + "editted.groups";
+			string newGroupFile = outputdir + util.getRootName(util.getSimpleName(groupfile)) + "editted.groups";
 			outputNames.push_back(newGroupFile);
 			ofstream outGroups;
 			util.openOutputFile(newGroupFile, outGroups);
@@ -299,7 +295,7 @@ int LibShuffCommand::printCoverageFile() {
 
 		ofstream outCov;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipfile));
 		summaryFile = getOutputFileName("coverage", variables);
 		util.openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
@@ -394,7 +390,7 @@ int LibShuffCommand::printSummaryFile() {
 
 		ofstream outSum;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipfile));
 		summaryFile = getOutputFileName("libshuffsummary",variables);
 		util.openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);

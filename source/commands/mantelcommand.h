@@ -32,7 +32,7 @@ public:
 	
 private:
 	
-	string phylipfile1, phylipfile2, outputDir, method;
+	string phylipfile1, phylipfile2,  method;
 	bool abort;
 	int iters;
 	

@@ -131,8 +131,8 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
             
             if ((groupfile != "") && (oligosfile != "")) { m->mothurOut("You must enter ONLY ONE of the following: oligos or group.\n");  abort = true;  }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");	if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}
+			 
+				if (outputdir == ""){    outputdir = util.hasPath(inputfile); 	}
 			
 			string temp;
 			temp = validParameter.valid(parameters, "fasta");	if(temp == "not found"){	temp = "T";	}
@@ -279,7 +279,7 @@ int ParseFastaQCommand::execute(){
                         groupCounts[pacbioGroup] = seqNames.size();
                         
                         map<string, string> variables;
-                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFile));
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFile));
                         string fastaFile = getOutputFileName("fasta",variables);
                         string qualFile = getOutputFileName("qfile",variables);
                         if (fasta) { util.appendFiles(fastaFile, pacbioFastaFileName); }
@@ -320,8 +320,8 @@ int ParseFastaQCommand::execute(){
 		
         if (split > 1) {
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir = util.hasPath(inputFile); }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir = util.hasPath(inputFile); }
             map<string, string> vars;
             vars["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             string outputGroupFileName = getOutputFileName("group",vars);
@@ -496,10 +496,10 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         
         //open Output Files
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         string ffastaFile = getOutputFileName("fasta",variables);
         string fqualFile = getOutputFileName("qfile",variables);
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputReverse));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputReverse));
         string rfastaFile = getOutputFileName("fasta",variables);
         string rqualFile = getOutputFileName("qfile",variables);
         ofstream outfFasta, outfQual, outrFasta, outrQual;
@@ -677,7 +677,7 @@ set<string> ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimO
         
         //open Output Files
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         string fastaFile = getOutputFileName("fasta",variables);
         string qualFile = getOutputFileName("qfile",variables);
         ofstream outFasta, outQual;
@@ -1090,7 +1090,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
         //make blank files for scrap matches
         ofstream temp, tempff, tempfq, rtemp, temprf, temprq;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         variables["[group]"] = "scrap";
         if (fileOption > 0) {  variables["[tag]"] = "forward"; }
         ffqnoMatchFile = getOutputFileName("fastq", variables);

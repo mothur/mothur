@@ -49,7 +49,7 @@ private:
     int getSummaryReport();
  
     bool abort;
-    string fastafile, namefile, groupfile, alignreport, outputDir, qualfile, taxonomy, countfile, contigsreport, summaryfile, fileType, badAccnosFile;
+    string fastafile, namefile, groupfile, alignreport,  qualfile, taxonomy, countfile, contigsreport, summaryfile, fileType, badAccnosFile;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, minOverlap, oStart, oEnd, mismatches, maxN, maxInsert;
     float minSim, minScore, criteria;
 	vector<string> outputNames;

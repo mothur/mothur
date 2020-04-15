@@ -58,7 +58,7 @@ private:
 
 	bool abort, sim, cutOffSet;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation, metric, initialize;
+	string method, fileroot, tag, phylipfile, columnfile, namefile, format, distfile, countfile, fastafile, inputDir, vsearchLocation, metric, initialize;
 	double cutoff, stableMetric;
     float adjust;
 	string showabund, timing, metricName;

@@ -29,6 +29,12 @@ public:
             if (temppath == "") { path = util.findProgramPath("mothur"); }
             else { path = temppath; }
             
+            if (path != "") {
+                string lastChar = path.substr(path.length()-1);
+                if (lastChar != PATH_SEPARATOR) { path += PATH_SEPARATOR; }
+                path = util.getFullPathName(path);
+            }
+            
             current->setProgramPath(util.getFullPathName(path));
             current->setBlastPath(current->getProgramPath());
             
@@ -60,7 +66,7 @@ public:
    
     virtual void replaceVariables(string& nextCommand) {
         for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
-            int pos = nextCommand.find("$"+it->first);
+            unsigned long pos = nextCommand.find("$"+it->first);
             while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
                 nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
                 pos = nextCommand.find(it->first);
@@ -70,19 +76,22 @@ public:
     
     virtual string findType(string nextCommand) {
         string type = "command";
-           
-        //determine if this is a command or environmental variable
-        //we know commands must include '(' characters for search for that
-        int openParen = nextCommand.find_first_of('(');
-        if (openParen == string::npos) { //no '(' character -> assume not a command, treat as environmental variable if contains an equals
-            //if no '=' sign than not an environmental variable
-            int equalsSign = nextCommand.find_first_of('=');
-            if (equalsSign != string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
-                type = "environment";
-            }
-        }
-            
-        return type;
+        
+         //determine if this is a command or batch file / environmental variable
+         //we know commands must include '(' characters for search for that
+         unsigned long openParen = nextCommand.find_first_of('(');
+         if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile / environmental variable
+             //are you another batch file or an environmental variable
+             //if no '=' sign than not an environmental variable
+             int equalsSign = nextCommand.find_first_of('=');
+             if (equalsSign == string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
+                 type = "batch";
+             }else { //assume environmental variable. filenames can contain '=' characters, but this is a rare case
+                 type = "environment";
+             }
+         }
+                 
+         return type;
     }
     
     virtual void setEnvironmentVariables(map<string, string> ev) {

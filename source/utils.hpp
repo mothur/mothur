@@ -69,8 +69,8 @@ public:
     bool isInteger(string);
     bool allSpaces(string);
     bool isLabelEquivalent(string, string);
-    unsigned long long getRAMUsed();
-    unsigned long long getTotalRAM();
+    double getRAMUsed();
+    double getTotalRAM();
     void getCurrentDate(string& thisYear, string& thisMonth, string& thisDay);
     
     //file operations
@@ -264,6 +264,7 @@ public:
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);
+    string trimWhiteSpace(string input);
     
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename
@@ -273,11 +274,9 @@ public:
     bool hasConfidenceScore(string&, float&); //taxon, confidence score. Returns taxon with confidence removed and confidence score.  If no confidence score, then confidence=0
     bool hasConfidenceScore(vector<Taxon> taxons); //returns true if taxons have positve confidences
     vector<Taxon> getTaxons(string, bool&);
-    bool findTaxon(vector<Taxon> tax, string searchTax);
-    bool searchTax(vector<Taxon>, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector<Taxon> > searchTaxons);
+    bool findTaxon(vector<Taxon> tax, vector<Taxon> searchTax);
+    bool searchTax(vector<Taxon>, vector<bool> taxonsHasConfidence, vector< vector<Taxon> > searchTaxons);
 
-    
-    
 private:
     MothurOut* m;
     bool modifyNames;

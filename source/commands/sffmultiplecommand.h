@@ -36,7 +36,7 @@ public:
 	
 private:
     string inputDir;
-	string filename, outputDir, flowOrder, lookupFileName, minDelta;
+	string filename,  flowOrder, lookupFileName, minDelta;
 	vector<string> outputNames;
 	bool abort, trim, large, flip, allFiles, keepforward, append, makeGroup;
 	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs, sdiffs, ldiffs;

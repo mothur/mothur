@@ -97,9 +97,9 @@ KruskalWallisCommand::KruskalWallisCommand(string option)  {
 				else { 	m->mothurOut("You have no current design file and the design parameter is required.\n");  abort = true; }
 			}else { current->setDesignFile(designfile); }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = util.hasPath(sharedfile); //if user entered a file with a path then preserve it
+            
+            if (outputdir == ""){
+				outputdir = util.hasPath(sharedfile); 
 			}
             
             string label = validParameter.valid(parameters, "label");
@@ -168,7 +168,7 @@ int KruskalWallisCommand::execute(){
 int KruskalWallisCommand::process(vector<SharedRAbundVector*>& lookup, DesignMap& designMap, vector<string> currentLabels) {
 	try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup[0]->getLabel();
 		string outputFileName = getOutputFileName("kruskall-wallis",variables);
         

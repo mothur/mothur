@@ -99,7 +99,6 @@ RenameFileCommand::RenameFileCommand(string option)  {
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
             
             int numFiles = 0;
             //check for parameters
@@ -235,7 +234,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name\n");   abort=true; }
                 outputfile = "";
-            }else { mothurGenerated=false; if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  } }
+            }else { mothurGenerated=false; if (outputdir != "") { outputfile = outputdir + util.getSimpleName(outputfile);  } }
             
             
             if ((!mothurGenerated) && (numFiles > 1)) {
@@ -246,7 +245,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
                 m->mothurOut("[ERROR]: You must allow mothur to generate the filenames or input one file at a time with a new name, not both.\n"); abort= true;
             }
             
-            if (outputDir != "") { outputfile = outputDir + util.getSimpleName(outputfile);  }
+            if (outputdir != "") { outputfile = outputdir + util.getSimpleName(outputfile);  }
         }
         
     }
@@ -428,8 +427,8 @@ string RenameFileCommand::getNewName(string inputFileName, string type){
                 extension = ".cons.taxonomy";
             }
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(inputFileName);  }
             
             newName = thisOutputDir + basicName;
             if (tag != "") { newName += "." + tag; }

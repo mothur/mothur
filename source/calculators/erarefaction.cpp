@@ -12,7 +12,7 @@
 ERarefaction::ERarefaction(int inc) : increment(inc), DiversityCalculator(true) {}
 /***********************************************************************/
 
-int ERarefaction::getValues(SAbundVector* rank, vector<double>& values){
+void ERarefaction::getValues(SAbundVector* rank, vector<double>& values){
     try {
         int maxRank = rank->getMaxRank();
         int sampled = rank->getNumSeqs(); //nl
@@ -51,8 +51,6 @@ int ERarefaction::getValues(SAbundVector* rank, vector<double>& values){
 
             }
         }
-        
-        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "ERarefaction", "getValues");

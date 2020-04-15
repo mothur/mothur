@@ -179,13 +179,13 @@ public:
 private:
 	vector<string> outputNames;
 	vector<linePair> lines;
-	string outputDir, namefile, groupfile, countfile, groups, fastafile, flowfile, fastqfile, format, listfile;
+	string  namefile, groupfile, countfile, groups, fastafile, flowfile, fastqfile, format, listfile;
 	vector<string> Groups;
 	bool abort;
     int processors;
     
-    int splitCountOrGroup(bool);
-    int splitFastqOrFlow(string, string);
+    void splitCountOrGroup(bool);
+    void splitFastqOrFlow(string, string);
 };
 
 /***************************************************************************************/

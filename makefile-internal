@@ -4,7 +4,7 @@ USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.44.0\""
+VERSION = "\"1.44.1\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11
@@ -96,7 +96,7 @@ endif
 # INCLUDE directories for mothur
 #
 #
-    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/metastats:source/randomforest:source/read:source/svm
+    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm
     skipUchime := source/uchime_src/
     subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))

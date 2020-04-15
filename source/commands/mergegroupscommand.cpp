@@ -97,7 +97,7 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 			
 			//check for required parameters
 			designfile = validParameter.validFile(parameters, "design");
@@ -323,8 +323,8 @@ int MergeGroupsCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out,
 int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 	try {
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
@@ -366,8 +366,8 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
 int MergeGroupsCommand::processGroupFile(DesignMap*& designMap){
 	try {
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
@@ -528,8 +528,8 @@ int MergeGroupsCommand::processCountFile(DesignMap*& designMap){
             util.mothurRemove(accnosFile);
         }
     
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
         variables["[extension]"] = util.getExtension(countfile);

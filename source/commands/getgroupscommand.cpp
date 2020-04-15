@@ -115,7 +115,7 @@ GetGroupsCommand::GetGroupsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -280,8 +280,8 @@ int GetGroupsCommand::execute(){
             
             if (!ct.hasGroupInfo()) { m->mothurOut("[ERROR]: your count file does not contain group info, aborting.\n"); return 0; }
             
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
             variables["[extension]"] = util.getExtension(countfile);
@@ -387,8 +387,8 @@ int GetGroupsCommand::execute(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readFasta(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
@@ -446,8 +446,8 @@ void GetGroupsCommand::readFasta(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readShared(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
 		
 		InputData input(sharedfile, "sharedfile", Groups);
 		SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -495,8 +495,8 @@ void GetGroupsCommand::readShared(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readList(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -583,8 +583,8 @@ void GetGroupsCommand::readList(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readName(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
@@ -665,8 +665,8 @@ void GetGroupsCommand::readName(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readGroup(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
@@ -713,8 +713,8 @@ void GetGroupsCommand::readGroup(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readDesign(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(designfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(designfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(designfile));
         variables["[extension]"] = util.getExtension(designfile);
@@ -746,8 +746,8 @@ void GetGroupsCommand::readDesign(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readTax(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
@@ -798,8 +798,8 @@ void GetGroupsCommand::readTax(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readPhylip(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(phylipfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(phylipfile));
         variables["[extension]"] = util.getExtension(phylipfile);
@@ -956,8 +956,8 @@ void GetGroupsCommand::readPhylip(){
 //**********************************************************************************************************************
 void GetGroupsCommand::readColumn(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(columnfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(columnfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(columnfile));
         variables["[extension]"] = util.getExtension(columnfile);

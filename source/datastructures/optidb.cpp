@@ -98,6 +98,15 @@ void OptiDB::generateDB()  {
         exit(1);
     }
 }
-
+/**************************************************************************************************/
+OptiData* OptiDB::findClosestSequences(Sequence*, int n) const  {
+    try {
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiDB", "findClosestSequences");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 

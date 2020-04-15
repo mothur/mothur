@@ -32,7 +32,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }
 	
 private:
-	string sffFilename, outputDir, file, currentFileName;
+	string sffFilename,  file, currentFileName;
 	vector<string> filenames, outputNames;
 	bool abort, keyTrim;
     int numTotalReads, allFilesnumFlowReads, allFileskeyLength;

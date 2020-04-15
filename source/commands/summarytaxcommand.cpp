@@ -120,11 +120,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(taxfile); //if user entered a file with a path then preserve it	
-			}
+            if (outputdir == ""){ outputdir += util.hasPath(taxfile);  }
             
             string temp = validParameter.valid(parameters, "relabund");		if (temp == "not found"){	temp = "false";			}
 			relabund = util.isTrue(temp);
@@ -226,7 +222,7 @@ int SummaryTaxCommand::execute(){
 		//print summary file
 		ofstream outTaxTree;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(taxfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(taxfile));
 		string summaryFile = getOutputFileName("summary",variables);
 		util.openOutputFile(summaryFile, outTaxTree);
 		taxaSum->print(outTaxTree, output);

@@ -34,7 +34,7 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, phylipfile, columnfile, outputDir;
+	string accnosfile, phylipfile, columnfile;
 	bool abort;
 	vector<string> outputNames;
 	

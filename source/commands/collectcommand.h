@@ -53,13 +53,13 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
+	string label, calc, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames;
     
 	
 	vector<string> parseSharedFile(string);
-    int fillCDisplays(map<string, string>);
+    void fillCDisplays(map<string, string>);
 
 
 };

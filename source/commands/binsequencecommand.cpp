@@ -107,12 +107,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 			else if (listfile == "not open") { listfile = ""; abort = true; }	
 			else { current->setListFile(listfile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = "";	
-				outputDir += util.hasPath(listfile); //if user entered a file with a path then preserve it	
-			}
-			
+            if (outputdir == "") { outputdir = util.hasPath(listfile); }
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -148,8 +143,8 @@ BinSeqCommand::BinSeqCommand(string option) {
                 string rootFileName = namesfile;
                 if (rootFileName == "") { rootFileName = groupfile; }
                 
-                if (outputDir == "") { outputDir = util.hasPath(rootFileName); }
-                map<string, string> variables; variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(rootFileName));
+                if (outputdir == "") { outputdir = util.hasPath(rootFileName); }
+                map<string, string> variables; variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(rootFileName));
                 string outputFileName = getOutputFileName("count", variables);
 
                 CountTable ct; ct.createTable(namesfile, groupfile, nullVector); ct.printCompressedTable(outputFileName);
@@ -255,7 +250,7 @@ int BinSeqCommand::execute(){
 int BinSeqCommand::process(ListVector* list, FastaMap& fasta) {
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = list->getLabel();
         string outputFileName = getOutputFileName("fasta", variables);
         

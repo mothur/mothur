@@ -32,7 +32,7 @@ public:
 	
 private:
 	
-	string outputFile, sharedfile, outputDir;
+	string outputFile, sharedfile;
 	vector<string> outputNames;
 	ofstream out;
 	ifstream in;

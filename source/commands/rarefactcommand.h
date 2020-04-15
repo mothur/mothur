@@ -46,11 +46,10 @@ private:
 	vector<string>  Estimators;
 	vector<string> inputFileNames, outputNames;
 	vector<string> Groups;
-	string outputDir;
 	
 	vector<string> parseSharedFile(string, map<string, set<int> >&);
 	vector<string> createGroupFile(vector<string>&, map<int, string>);
-    int fillRDisplays(map<string, string>, map<int, string>&, int);
+    void fillRDisplays(map<string, string>, map<int, string>&, int);
 };
 
 #endif

@@ -38,7 +38,7 @@ public:
 	
 private:
     bool abort, keepprimer, keepdots, fileAligned, pairedOligos;
-	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile, outputDir, nomatch;
+	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile,  nomatch;
 	int start, end, processors, length, pdiffs, rdiffs;
     vector<string> outputNames;
     

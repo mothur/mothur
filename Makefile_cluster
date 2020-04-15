@@ -1,0 +1,68 @@
+USEREADLINE ?= yes
+USEBOOST ?= yes
+VERSION = "\"1.44.1\""
+RELEASE_DATE = "\"4/13/20\""
+MOTHUR_TOOLS="\"/nfs/turbo/schloss-lab/bin/mothur_src/tools/\"" 
+
+# Optimize to level 3:
+	CXXFLAGS += -O3 -std=c++11 -pthread -mtune=generic -DVERSION=${VERSION} -DRELEASE_DATE=${RELEASE_DATE} -DMOTHUR_TOOLS=${MOTHUR_TOOLS}
+	LDFLAGS += -std=c++11 -pthread
+
+# if you do not want to use the readline library, set this to no.
+# make sure you have the library installed
+ifeq  ($(strip $(USEREADLINE)),yes)
+	CXXFLAGS += -DUSE_READLINE
+	LIBS += -lreadline
+endif
+
+#The boost libraries allow you to read gz files.
+ifeq  ($(strip $(USEBOOST)),yes)
+	#statically link so the boost install is not required on users machine
+	LDFLAGS += -L ${BOOST_LIBRARY_DIR}
+
+    LIBS += -lboost_iostreams -lz
+    CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
+endif
+
+
+
+#
+# INCLUDE directories for mothur
+#
+#
+	VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/metastats:source/read:source/svm:source/engines
+    skipUchime := source/uchime_src/
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), source/, $(wildcard source/*/))))
+	subDirIncludes = $(patsubst %, -I %, $(subdirs))
+	subDirLinking =  $(patsubst %, -L%, $(subdirs))
+	CXXFLAGS += -I. $(subDirIncludes)
+	LDFLAGS += $(subDirLinking)
+
+
+#
+# Get the list of all .cpp files, rename to .o files
+#
+	OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
+	OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
+	OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+	OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
+
+mothur : $(OBJECTS) 
+	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS)  $(LIBS)
+	strip mothur
+
+
+install : mothur
+
+
+%.o : %.c %.h
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+%.o : %.cpp %.h
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+%.o : %.cpp %.hpp
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+
+
+
+clean :
+	@rm -f $(OBJECTS)

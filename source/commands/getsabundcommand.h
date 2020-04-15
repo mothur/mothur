@@ -33,7 +33,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string filename, format, inputfile, listfile, rabundfile, outputDir, countfile;
+	string filename, format, inputfile, listfile, rabundfile,  countfile;
 	ofstream out;
 	vector<string> outputNames;
 

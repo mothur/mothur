@@ -34,7 +34,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 private:
 
-	string axesfile, sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
+	string axesfile, sharedfile, relabundfile, metadatafile, groups, label, inputFileName,  method;
 	bool abort, pickedGroups;
 	int numaxes;
 	set<string> names;

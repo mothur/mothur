@@ -23,7 +23,6 @@ public:
 private:
     ifstream inputBatchFile;
     string getNextCommand(ifstream&);
-    string findType(string);
     string batchFileName;
     bool openedBatch;
     time_t bstart;

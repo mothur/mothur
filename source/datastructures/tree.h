@@ -70,7 +70,7 @@ private:
     void printBranch(int, ostream&, string);
 	int populateNewTree(vector<Node>&, int, int&);
 	void printBranch(int, ostream&, string, vector<Node>&);
-    int pruneNewTree(Tree* copy, vector<string> namesToInclude);
+    void pruneNewTree(Tree* copy, vector<string> namesToInclude);
     
 	MothurOut* m;
     vector<string> Treenames;

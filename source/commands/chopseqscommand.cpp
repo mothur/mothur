@@ -143,8 +143,8 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			 
+			
 			
 			string temp = validParameter.valid(parameters, "numbases");	if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, numbases);   
@@ -182,8 +182,8 @@ int ChopSeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("fasta", variables);
         outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
@@ -196,8 +196,8 @@ int ChopSeqsCommand::execute(){
         if (m->getControl_pressed()) {  return 0; }
         
         if (qualfile != "") {
-            thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+            thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
             string outputQualFileName = getOutputFileName("qfile", variables);
             outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
@@ -235,8 +235,8 @@ int ChopSeqsCommand::execute(){
                 m->mothurOut("/******************************************/\n"); 
                 
                 if (groupfile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                     string outGroup = getOutputFileName("group", variables);
                     util.renameFile(filenames["group"][0], outGroup);
@@ -244,8 +244,8 @@ int ChopSeqsCommand::execute(){
                 }
                 
                 if (namefile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
                     string outName = getOutputFileName("name", variables);
                     util.renameFile(filenames["name"][0], outName);
@@ -253,8 +253,8 @@ int ChopSeqsCommand::execute(){
                 }
                 
                 if (countfile != "") {
-                    thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                    thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                     string outCount = getOutputFileName("count", variables);
                     util.renameFile(filenames["count"][0], outCount);

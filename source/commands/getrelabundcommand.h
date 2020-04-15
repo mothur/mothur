@@ -37,7 +37,7 @@ private:
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, scale, sharedfile;
+	string groups, label,  scale, sharedfile;
 	vector<string> Groups, outputNames;
 	
 	int getRelAbundance(SharedRAbundVectors*&, ofstream&);

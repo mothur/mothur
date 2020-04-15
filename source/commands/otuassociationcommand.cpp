@@ -109,7 +109,7 @@ OTUAssociationCommand::OTUAssociationCommand(string option)  {
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
 			}
 			
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);	}
+					if (outputdir == ""){    outputdir = util.hasPath(inputFileName);	}
 			
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; }
@@ -210,7 +210,7 @@ void OTUAssociationCommand::processShared(){
 void OTUAssociationCommand::process(SharedRAbundVectors*& lookup){
 	try {
 		map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
 		string outputFileName = getOutputFileName("otucorr",variables);
@@ -312,7 +312,7 @@ void OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 	try {
 		
 		map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         variables["[tag]"] = method;
         string outputFileName = getOutputFileName("otucorr",variables);

@@ -92,8 +92,8 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			}else { current->setSharedFile(sharedfile); }
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(sharedfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -132,7 +132,7 @@ int GetRelAbundCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("relabund", variables);
 		ofstream out;
 		util.openOutputFile(outputFileName, out);

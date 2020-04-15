@@ -29,7 +29,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
         m->mothurOut("\n/******************************************/\n");
         m->mothurOut("Running command: split.groups(" + inputString + ")\n");
         
-        Command* splitCommand = new SplitGroupCommand(inputString);
+        SplitGroupCommand* splitCommand = new SplitGroupCommand(inputString);
         splitCommand->execute();
         
         //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]

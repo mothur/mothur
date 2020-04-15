@@ -257,8 +257,8 @@ int SRACommand::execute(){
         if (m->getDebug()) { m->mothurOut("[DEBUG]: finished sanity check.\n"); }
         
         //create xml file
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(inputfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(inputfile);  }
 		map<string, string> variables;
         variables["[filename]"] = thisOutputDir + "submission.";
         string outputFileName = getOutputFileName("xml", variables);

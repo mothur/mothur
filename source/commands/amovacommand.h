@@ -41,7 +41,7 @@ private:
 	bool abort;
 	vector<string> outputNames, Sets;
 
-	string outputDir, inputDir, designFileName, phylipFileName;
+	string inputDir, designFileName, phylipFileName;
 	DesignMap* designMap;
 	vector< vector<double> > distanceMatrix;
 	int iters;

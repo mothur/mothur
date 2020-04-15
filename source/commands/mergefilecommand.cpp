@@ -79,7 +79,6 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
 
             string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){    inputDir = "";        }
@@ -151,9 +150,9 @@ MergeFileCommand::MergeFileCommand(string option)  {
                         else { fileNames.erase(fileNames.begin()+i); i--; } //erase from file list
                         
                         path = util.hasPath(fileNames[i]);
-                        if (path != "") { if (outputDir == "") { outputDir = path; } }
+                        if (path != "") { if (outputdir == "") { outputdir = path; } }
                     }
-                    if (outputDir != "") { outputFileName = outputDir + util.getSimpleName(outputFileName);  }
+                    if (outputdir != "") { outputFileName = outputdir + util.getSimpleName(outputFileName);  }
                 }
             }
 			
@@ -200,8 +199,8 @@ int MergeFileCommand::execute(){
 
 string MergeFileCommand::mergeFileData(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);

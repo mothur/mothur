@@ -76,8 +76,8 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             selectedPackage = validParameter.valid(parameters, "package");
             if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey."; }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(xmlFile);		}
+            
+            		if (outputdir == ""){    outputdir = util.hasPath(xmlFile);		}
             
         }
     }
@@ -178,7 +178,7 @@ int MimarksAttributesCommand::execute(){
         
         ofstream out;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(xmlFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(xmlFile));
         string outputFileName = getOutputFileName("source",variables);
         outputNames.push_back(outputFileName); outputTypes["source"].push_back(outputFileName);
         util.openOutputFile(outputFileName, out);

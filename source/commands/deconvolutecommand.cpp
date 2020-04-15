@@ -93,9 +93,9 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	 outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it
+			 
+            if (outputdir == ""){
+				outputdir += util.hasPath(fastafile); 
 			}
 			
 			namefile = validParameter.validFile(parameters, "name");
@@ -145,7 +145,7 @@ int DeconvoluteCommand::execute() {
         
 		//prepare filenames and open files
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string outNameFile = getOutputFileName("name", variables);
         string outCountFile = getOutputFileName("count", variables);
         variables["[extension]"] = util.getExtension(fastafile);
@@ -158,7 +158,7 @@ int DeconvoluteCommand::execute() {
             if (namefile == outNameFile){
                 //prepare filenames and open files
                 map<string, string> mvariables;
-                mvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+                mvariables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
                 mvariables["[tag]"] = "unique";
                 outNameFile = getOutputFileName("name", mvariables);
             }
@@ -169,7 +169,7 @@ int DeconvoluteCommand::execute() {
             if (countfile == outCountFile){
                 //prepare filenames and open files
                 map<string, string> mvariables;
-                mvariables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+                mvariables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
                 mvariables["[tag]"] = "unique";
                 outCountFile = getOutputFileName("count", mvariables);   }
         }

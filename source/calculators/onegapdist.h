@@ -21,6 +21,7 @@ public:
     oneGapDist() {} //sets cutoff to 1.0
     oneGapDist(double c) : DistCalc(c) {}
 	
+    //finds the distance from A to each seq in otu.
     //this function calcs the distance using only the columns provided, if cols is empty, use all
     vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols);
     

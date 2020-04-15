@@ -101,8 +101,8 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) {
 			else if (fastafile == "not open") { abort = true; }	
 			else { current->setFastaFile(fastafile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			 
+			
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -291,16 +291,16 @@ int ShhhSeqsCommand::execute() {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it		
+		if (outputdir == "") { outputdir = util.hasPath(fastafile);  }	
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFileName = getOutputFileName("fasta",variables);
 		string nameFileName = getOutputFileName("name",variables);
 		string mapFileName = getOutputFileName("map",variables);
 		
 		if (groupfile != "") {
-            mapFileName = outputDir + util.getRootName(util.getSimpleName(fastafile))  + "shhh.";
+            mapFileName = outputdir + util.getRootName(util.getSimpleName(fastafile))  + "shhh.";
 			vector<string> mapFileNames = createProcessesGroups(outputFileName, nameFileName, mapFileName);
 
 			if (m->getControl_pressed()) {    return 0;	}	
@@ -326,7 +326,7 @@ int ShhhSeqsCommand::execute() {
             if (m->getControl_pressed()) { delete correct; return 0; }
 			
 			//calc distances for cluster
-			string distFileName = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "shhh.dist";
+			string distFileName = outputdir + util.getRootName(util.getSimpleName(fastafile)) + "shhh.dist";
 			correct->execute(distFileName);
 			delete correct;
 			
@@ -447,7 +447,7 @@ struct shhhseqsData {
     string fastafile;
     string namefile;
     string groupfile;
-    string newFFile, newNFile, newMFile, outputDir, extension;
+    string newFFile, newNFile, newMFile,  extension, outputDir;
     MothurOut* m;
     int sigma, count;
     vector<string> groups;
@@ -572,7 +572,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
             string extension = toString(i+1) + ".temp";
             util.mothurRemove(newFName+extension);
             util.mothurRemove(newNName+extension);
-            shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[i+1], sigma, extension);
+            shhhseqsData* dataBundle = new shhhseqsData(outputdir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[i+1], sigma, extension);
             data.push_back(dataBundle);
             
             std::thread* thisThread = new std::thread(driverShhSeqsGroups, dataBundle);
@@ -581,7 +581,7 @@ vector<string> ShhhSeqsCommand::createProcessesGroups(string newFName, string ne
         
         util.mothurRemove(newFName);
         util.mothurRemove(newNName);
-        shhhseqsData* dataBundle = new shhhseqsData(outputDir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[0], sigma, "");
+        shhhseqsData* dataBundle = new shhhseqsData(outputdir, fastafile, namefile, groupfile, newFName, newNName, newMName, dividedGroupNames[0], sigma, "");
         driverShhSeqsGroups(dataBundle);
         vector<string> mapFileNames = dataBundle->mapfileNames;
         delete dataBundle;

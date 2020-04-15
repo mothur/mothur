@@ -79,7 +79,6 @@ public:
     
 private:
     bool abort, allLines, subsample, withReplacement;
-    string outputDir;
     vector<string> outputNames;
     string sharedfile, method, calc;
     int minpartitions, maxpartitions, optimizegap, iters, subsampleSize;

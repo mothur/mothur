@@ -221,11 +221,7 @@ TreeSharedCommand::TreeSharedCommand(string option)  {
             
             if (subsample && (format != "sharedfile")) { m->mothurOut("[ERROR]: the subsample parameter can only be used with a shared file.\n"); abort=true; }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(inputfile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){ outputdir += util.hasPath(inputfile);  }
 		}
 
 	}
@@ -343,7 +339,7 @@ int TreeSharedCommand::execute(){
 
 			//create a new filename
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
 			string outputFile = getOutputFileName("tree",variables);	
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				//printSims(cout, matrix, Treenames);
@@ -730,7 +726,7 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 //printSims(cout, matrix, Treenames);
                 //create a new filename
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "ave";
@@ -752,7 +748,7 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 
                 //create a new filename
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "all";
@@ -819,7 +815,7 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 
                 //create a new filename
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
                 variables["[calc]"] = Estimators[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[tag]"] = "";

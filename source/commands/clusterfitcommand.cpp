@@ -139,7 +139,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+            
             
             selfReference = true; refdistfile = ""; distfile = "";
             
@@ -335,8 +335,8 @@ int ClusterFitCommand::execute(){
         if (namefile != "") { dupsFile = namefile; nameOrCount = "name"; }
         else { CountTable ct; ct.readTable(countfile, false, false); counts = ct.getNameMap();  }
         
-        if (outputDir == "") { outputDir += util.hasPath(distfile); }
-        fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+        if (outputdir == "") { outputdir += util.hasPath(distfile); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         
         map<string, string> variables;
         variables["[filename]"] = fileroot;
@@ -794,7 +794,7 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
         
         ofstream sensSpecFile;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
         string sensSpecFileName = getOutputFileName("sensspec",variables);
         util.openOutputFile(sensSpecFileName, sensSpecFile);
         outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
@@ -967,7 +967,7 @@ string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMet
 
         ofstream sensSpecFile;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFileName));
         string sensSpecFileName = getOutputFileName("sensspec",variables);
         util.openOutputFile(sensSpecFileName, sensSpecFile);
         outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
@@ -1112,7 +1112,6 @@ string ClusterFitCommand::calcDists() {
     try {
         if (columnfile == "") { //calc user distances
             string options = "fasta=" + fastafile + ", cutoff=" + toString(cutoff);
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             current->setMothurCalling(true);
             
             //calc dists for fastafile
@@ -1135,7 +1134,6 @@ string ClusterFitCommand::calcDists() {
         
         if (refAlignLength == alignLength) {
             string options = "fitcalc=t, fasta=" + reffastafile + ", oldfasta=" + fastafile + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
             //dists between reffasta and fastafile
             m->mothurOut("/******************************************/\n");
@@ -1152,7 +1150,6 @@ string ClusterFitCommand::calcDists() {
         }else {
             //filter each file to improve distance calc time
             string options = "fasta=" + reffastafile + ", vertical=t";
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
             m->mothurOut("\nRunning vertical filter to improve distance calculation time\n\n");
             
@@ -1169,7 +1166,6 @@ string ClusterFitCommand::calcDists() {
             m->mothurOut("/******************************************/\n");
             
             options = "fasta=" + fastafile + ", reference=" + filteredRef;
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
             //align fasta to refFasta
             m->mothurOut("/******************************************/\n");
@@ -1184,7 +1180,6 @@ string ClusterFitCommand::calcDists() {
             m->mothurOut("/******************************************/\n");
             
             options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + alignedFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
             //dists between reffasta and fastafile
             m->mothurOut("/******************************************/\n");

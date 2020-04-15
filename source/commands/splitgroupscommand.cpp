@@ -196,10 +196,10 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
                 abort=true;
             }
 						
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-                if (groupfile != "") { outputDir = util.hasPath(groupfile); }
-                else { outputDir = util.hasPath(countfile);  }
+			 
+            if (outputdir == ""){
+                if (groupfile != "") { outputdir = util.hasPath(groupfile); }
+                else { outputdir = util.hasPath(countfile);  }
             }
 			
             if (countfile == "") {
@@ -433,12 +433,10 @@ int driverRunCount(splitGroups2Struct* params){
             params->m->mothurOut("/******************************************/\n");
             params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
             
-            Command* getCommand = new GetSeqsCommand(inputString);
-            getCommand->execute();
+            GetSeqsCommand getCommand(inputString);
+            getCommand.execute();
             
-            map<string, vector<string> > filenames = getCommand->getOutputFiles();
-            
-            delete getCommand;
+            map<string, vector<string> > filenames = getCommand.getOutputFiles();
             
             if (params->fastafile != "") {
                 params->util.renameFile(filenames["fasta"][0], files[0]);
@@ -466,7 +464,7 @@ int driverRunCount(splitGroups2Struct* params){
     }
 }
 //**********************************************************************************************************************
-int SplitGroupCommand::splitCountOrGroup(bool isCount){
+void SplitGroupCommand::splitCountOrGroup(bool isCount){
     try {
         //create array of worker threads
         vector<std::thread*> workerThreads;
@@ -475,7 +473,7 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             splitGroups2Struct* dataBundle = new splitGroups2Struct(groupfile, countfile, namefile, Groups, lines[i+1].start, lines[i+1].end);
-            dataBundle->setFiles(fastafile, listfile, outputDir);
+            dataBundle->setFiles(fastafile, listfile, outputdir);
             data.push_back(dataBundle);
             
             if (isCount) {
@@ -486,7 +484,7 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         }
 
         splitGroups2Struct* dataBundle = new splitGroups2Struct(groupfile, countfile, namefile, Groups, lines[0].start, lines[0].end);
-        dataBundle->setFiles(fastafile, listfile, outputDir);
+        dataBundle->setFiles(fastafile, listfile, outputdir);
         if (isCount) {
             driverRunCount(dataBundle);
         }else {
@@ -496,7 +494,9 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
         for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
             outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
         }
-
+        
+        delete dataBundle;
+        
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
 
@@ -508,8 +508,6 @@ int SplitGroupCommand::splitCountOrGroup(bool isCount){
             delete data[i];
             delete workerThreads[i];
         }
-        
-        delete dataBundle;
     }
     catch(exception& e) {
         m->errorOut(e, "SplitGroupCommand", "splitCountOrGroup");
@@ -671,13 +669,13 @@ int driverSplitFastq(splitGroupsStruct* params){
     }
 }
 //**********************************************************************************************************************
-int SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
+void SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
     try {
         //create array of worker threads
         vector<std::thread*> workerThreads;
         vector<splitGroupsStruct*> data;
         
-        string outputfileRoot = outputDir + util.getRootName(util.getSimpleName(inputFile));
+        string outputfileRoot = outputdir + util.getRootName(util.getSimpleName(inputFile));
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -714,7 +712,6 @@ int SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
         }
         
         delete dataBundle;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "SplitGroupCommand", "splitFastqOrFlow");

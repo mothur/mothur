@@ -43,7 +43,7 @@ private:
 	
 	bool abort, allLines, nseqs, sharedOtus;
 	set<string> labels; //holds labels to be used
-	string format, groups, calc, label, outputDir, sharedfile, listfile, inputfile;
+	string format, groups, calc, label,  sharedfile, listfile, inputfile;
 	vector<string> Estimators, Groups, outputNames;
 	
 	set< set<int> > findCombinations(int);

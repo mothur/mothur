@@ -24,7 +24,11 @@
 class Command {
 	
 	public:
-		Command() {  m = MothurOut::getInstance();  current = CurrentFile::getInstance(); }
+		Command() {
+            m = MothurOut::getInstance();  current = CurrentFile::getInstance();
+            inputdir = current->getInputDir();
+            outputdir = current->getOutputDir();
+        }
 		
 		//needed by gui
 		virtual string getCommandName() = 0;
@@ -137,6 +141,7 @@ class Command {
         Utils util;
         CurrentFile* current;
 		bool calledHelp;
+        string inputdir, outputdir;
 			
 		map<string, vector<string> > outputTypes;
 		vector<CommandParameter> parameters;

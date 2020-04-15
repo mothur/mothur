@@ -111,8 +111,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
-			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not found") {				
@@ -426,11 +424,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		int size;
 		
 		//create output file
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
 				
 		ofstream out;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = processList->getLabel();
 		string outputFile = getOutputFileName("constaxonomy", variables);
 		util.openOutputFile(outputFile, out);

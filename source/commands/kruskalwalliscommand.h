@@ -41,7 +41,7 @@ public:
     
 private:
     bool abort, allLines;
-    string outputDir, sharedfile, designfile, mclass;
+    string  sharedfile, designfile, mclass;
     vector<string> outputNames;
     set<string> labels;
     

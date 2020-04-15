@@ -37,7 +37,7 @@ class GetCurrentCommand : public Command {
 		vector<string> outputNames;
 		bool abort;
 	
-		string clearTypes, outputDir;
+		string clearTypes;
 		vector<string> types;
 		
 };

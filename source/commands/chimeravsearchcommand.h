@@ -108,7 +108,7 @@ public:
     
 private:
     bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, dups;
-    string fastafile, templatefile, outputDir, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
+    string fastafile, templatefile, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
     int processors;
     vsearchVariables* vars;
     vector<string> outputNames;

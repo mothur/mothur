@@ -102,10 +102,9 @@ CooccurrenceCommand::CooccurrenceCommand(string option) {
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n"); abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
+			 
+            if (outputdir == ""){    outputdir = util.hasPath(sharedfile);		}
 
-			
 			metric = validParameter.valid(parameters, "metric");				if (metric == "not found") { metric = "cscore"; }
 			
 			if ((metric != "cscore") && (metric != "checker") && (metric != "combo") && (metric != "vratio")) {
@@ -151,7 +150,7 @@ int CooccurrenceCommand::execute(){
 
         ofstream out;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("summary", variables);
         util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName);  outputTypes["summary"].push_back(outputFileName);

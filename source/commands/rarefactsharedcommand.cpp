@@ -120,8 +120,8 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			else { current->setDesignFile(designfile); }
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(sharedfile);		}
 			
 			
 			//check for optional parameter and set defaults
@@ -248,7 +248,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         Groups = lookup->getNamesGroups();
         if (lookup->size() < 2) { m->mothurOut("[ERROR]: I cannot run the command without at least 2 valid groups.");  delete lookup; return 0; }
         
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         
         vector<string> newGroups = lookup->getNamesGroups();
         if (thisSet != "") {  //make groups only filled with groups from this set so that's all inputdata will read
@@ -488,7 +488,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 		for (int i = 0; i < outputNames.size(); i++) {
             
 			string extension = util.getExtension(outputNames[i]);
-            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+            string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
 			ifstream in;
@@ -529,7 +529,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
-			string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
+			string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
 			util.openOutputFileAppend(combineFileName, out);
 			newFileNames.push_back(combineFileName);
 			map<string, string> thisTypesFiles = it->second; //it->second maps filename to group

@@ -35,7 +35,7 @@ public:
 private:
     bool abort, allLines;
     set<string> labels; //holds labels to be used
-    string groups, label, outputDir, sharedfile, zeroReplacement;
+    string groups, label,  sharedfile, zeroReplacement;
     vector<string> Groups, outputNames;
     double zeroReplacementValue;
         

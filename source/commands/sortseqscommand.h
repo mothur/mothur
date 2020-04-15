@@ -37,7 +37,7 @@ public:
 	
 private:
     map<string, int> names;
-    string accnosfile, fastafile, namefile, taxfile, qualfile, flowfile, outputDir;
+    string accnosfile, fastafile, namefile, taxfile, qualfile, flowfile;
     bool abort, large;
     vector<string> outputNames;
     

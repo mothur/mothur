@@ -108,7 +108,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num, vector
 		}else{
 			int bestIndex = 0;
 			int bestMatch = -1;
-            time_t start = time(NULL);
+            
 			for(int i=0;i<numSeqs;i++){	
 				
 				if (matches[i] > bestMatch) {

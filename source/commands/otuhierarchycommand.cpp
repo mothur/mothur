@@ -91,11 +91,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			}else if (listFile == "not open") { abort = true; }	
 			else { current->setListFile(listFile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(listFile); //if user entered a file with a path then preserve it	
-			}
+            if (outputdir == ""){	 outputdir += util.hasPath(listFile);  }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -160,7 +156,7 @@ int OtuHierarchyCommand::execute(){
 		
 		ofstream out;
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
         variables["[distance1]"] = list1Label;
         variables["[tag]"] = "-"; 
         variables["[distance2]"] = list2Label;

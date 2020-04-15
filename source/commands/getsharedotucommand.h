@@ -47,7 +47,7 @@ class GetSharedOTUCommand : public Command {
         CountTable* ct;
 		
 		set<string> labels;
-		string fastafile, label, groups, listfile, groupfile, sharedfile, output, userGroups, outputDir, format, countfile;
+		string fastafile, label, groups, listfile, groupfile, sharedfile, output, userGroups,  format, countfile;
 		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;

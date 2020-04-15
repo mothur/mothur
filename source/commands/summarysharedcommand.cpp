@@ -110,8 +110,8 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			}else { current->setSharedFile(sharedfile); }
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(sharedfile);		}
 			
 
 			//check for optional parameter and set defaults
@@ -279,7 +279,7 @@ int SummarySharedCommand::execute(){
 		
 		ofstream outputFileHandle, outAll;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
 		string outputFileName = getOutputFileName("summary",variables);
 		
 		//if the users entered no valid calculators don't execute command
@@ -728,7 +728,7 @@ int SummarySharedCommand::process(SharedRAbundVectors* thisLookup, string sumFil
                         }
                         
                         map<string, string> variables; 
-                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
                         variables["[calc]"] = sumCalculatorsNames[i];
                         variables["[distance]"] = thisLookup->getLabel();
                         variables["[outputtag]"] = output;
@@ -779,7 +779,7 @@ int SummarySharedCommand::process(SharedRAbundVectors* thisLookup, string sumFil
                 }
                 
                 map<string, string> variables; 
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
                 variables["[calc]"] = sumCalculatorsNames[i];
                 variables["[distance]"] = thisLookup->getLabel();
                 variables["[outputtag]"] = output;

@@ -90,7 +90,7 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -127,9 +127,9 @@ CreateDatabaseCommand::CreateDatabaseCommand(string option)  {
 			}
 			else if ((sharedfile != "") && (listfile != "")) { m->mothurOut("When executing a create.database command you must enter ONLY ONE of the following: relabund, shared or list.\n"); abort = true; }
             
-            if (sharedfile != "") { if (outputDir == "") { outputDir = util.hasPath(sharedfile); } }
-            else if (listfile != ""){ if (outputDir == "") { outputDir = util.hasPath(listfile); } }
-            else { if (outputDir == "") { outputDir = util.hasPath(relabundfile); } }
+            if (sharedfile != "") { if (outputdir == "") { outputdir = util.hasPath(sharedfile); } }
+            else if (listfile != ""){ if (outputdir == "") { outputdir = util.hasPath(listfile); } }
+            else { if (outputdir == "") { outputdir = util.hasPath(relabundfile); } }
 			
 			contaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (contaxonomyfile == "not found") {  //if there is a current list file, use it
@@ -241,9 +241,9 @@ int CreateDatabaseCommand::execute(){
         
         
         map<string, string> variables; 
-        if (listfile != "") {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile)); }
-        else if (sharedfile != "") { variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile)); }
-        else {  variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(relabundfile)); }
+        if (listfile != "") {  variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile)); }
+        else if (sharedfile != "") { variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile)); }
+        else {  variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(relabundfile)); }
         string outputFileName = getOutputFileName("database", variables); 
         outputNames.push_back(outputFileName); outputTypes["database"].push_back(outputFileName);
         

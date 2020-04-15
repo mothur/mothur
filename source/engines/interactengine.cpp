@@ -7,6 +7,7 @@
 //
 
 #include "interactengine.hpp"
+#include "batchengine.hpp"
 
 /***********************************************************************/
 
@@ -90,7 +91,7 @@ string InteractEngine::getCommand()  {
                 
                 if(nextCommand != NULL) {  add_history(nextCommand);  }
                 else{ //^D causes null string and we want it to quit mothur
-                    nextCommand = strdup("quit");
+                    nextCommand = strdup("quit()");
                 }
                 
                 m->mothurOutJustToLog("\nmothur > " + toString(nextCommand) + "\n");
@@ -124,7 +125,21 @@ string InteractEngine::getCommand()  {
             m->mothurOut("Setting environment variable " + key + " to " + value + "\n");
             
             returnCommand = getCommand();
+          
+        }else if (type == "batch") {
+            m->mothurOutClearBuffer();
+            m->mothurOut("/*****************************************************************************/\n");
             
+            BatchEngine newBatchEngine(path, returnCommand, environmentalVariables);
+            
+            if (newBatchEngine.getOpenedBatch()) {
+                bool bail = false;
+                while(!bail)    {    bail = newBatchEngine.getInput();    }
+            }
+            m->mothurOutClearBuffer();
+            m->mothurOut("/*****************************************************************************/\n");
+            
+            returnCommand = getCommand();
         }else { //assume command, look for environmental variables to replace
             
             int evPos = returnCommand.find_first_of('$');
@@ -132,6 +147,12 @@ string InteractEngine::getCommand()  {
             else { replaceVariables(returnCommand); }
         }
              
+        if (m->getDebug()) {
+            double ramUsed, total;
+            ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
+            m->mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n\n");
+        }
+        
         return returnCommand;
     }
     catch(exception& e) {

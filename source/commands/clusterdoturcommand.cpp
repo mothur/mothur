@@ -87,7 +87,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
@@ -177,8 +177,8 @@ int ClusterDoturCommand::execute(){
 		list = cluster->getListVector();
 		rabund = cluster->getRAbundVector();
 								
-		if (outputDir == "") { outputDir += util.hasPath(phylipfile); }
-		fileroot = outputDir + util.getRootName(util.getSimpleName(phylipfile));
+		if (outputdir == "") { outputdir += util.hasPath(phylipfile); }
+		fileroot = outputdir + util.getRootName(util.getSimpleName(phylipfile));
 			
         map<string, string> variables; 
         variables["[filename]"] = fileroot;

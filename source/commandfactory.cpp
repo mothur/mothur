@@ -347,6 +347,8 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
+            outputOption = util.trimWhiteSpace(outputOption);
+            outputOption = util.removeQuotes(outputOption);
             if(util.mkDir(outputOption)){
                 current->setOutputDir(outputOption);
                 m->mothurOut("Setting output directory to: " + outputOption); m->mothurOutEndLine();
@@ -363,6 +365,8 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
+            intputOption = util.trimWhiteSpace(intputOption);
+            intputOption = util.removeQuotes(intputOption);
             if(util.dirCheck(intputOption)){
                 current->setInputDir(intputOption); 
                 m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
@@ -412,21 +416,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 
         Command* command = NULL;
         
-        if (commandName != "help") {
-            checkForRedirects(optionString);
-            
-            //user has opted to redirect output from dir where input files are located to some other place
-            if (current->getOutputDir() != "") {
-                if (optionString != "") { optionString += ", outputdir=" + current->getOutputDir(); }
-                else { optionString += "outputdir=" + current->getOutputDir(); }
-            }
-            
-            //user has opted to redirect input from dir where mothur.exe is located to some other place
-            if (current->getInputDir() != "") {
-                if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
-                else { optionString += "inputdir=" + current->getInputDir(); }
-            }
-        }
+        if (commandName != "help") { checkForRedirects(optionString); }
         
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}

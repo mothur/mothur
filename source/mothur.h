@@ -156,6 +156,7 @@ using namespace std;
 typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
+const vector<int> nullIntVector; //used to pass blank ints
 
 /**************************************************************************************************/
 struct classifierOTU {

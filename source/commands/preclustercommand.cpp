@@ -130,11 +130,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			else if (fastafile == "not open") { abort = true; }
 			else { current->setFastaFile(fastafile); }
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){
-				outputDir = "";
-				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it
-			}
+			 if (outputdir == ""){ outputdir += util.hasPath(fastafile); }
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -245,8 +241,8 @@ PreClusterCommand::PreClusterCommand(string option) {
                     string rootFileName = namefile;
                     if (rootFileName == "") { rootFileName = groupfile; }
                     
-                    if (outputDir == "") { outputDir = util.hasPath(rootFileName); }
-                    string outputFileName = outputDir + util.getRootName(util.getSimpleName(rootFileName)) + "count_table";
+                    if (outputdir == "") { outputdir = util.hasPath(rootFileName); }
+                    string outputFileName = outputdir + util.getRootName(util.getSimpleName(rootFileName)) + "count_table";
                     
                     CountTable ct; ct.createTable(namefile, groupfile, nullVector); ct.printCompressedTable(outputFileName);
                     outputNames.push_back(outputFileName);
@@ -853,7 +849,7 @@ void print(string newfasta, string newname, preClusterData* params){
         params->m->mothurOut("/******************************************/\n");
         params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
         
-        Command* getCommand = new GetSeqsCommand(inputString);
+        GetSeqsCommand* getCommand = new GetSeqsCommand(inputString);
         getCommand->execute();
         
         map<string, vector<string> > filenames = getCommand->getOutputFiles();
@@ -883,7 +879,7 @@ int PreClusterCommand::execute(){
         
         string numProcessors = current->getProcessors();
         
-        string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        string fileroot = outputdir + util.getRootName(util.getSimpleName(fastafile));
         map<string, string> variables;
         variables["[filename]"] = fileroot;
         
@@ -910,6 +906,7 @@ int PreClusterCommand::execute(){
             current->setMothurCalling(true);
             SequenceCountParser cparser(countfile, fastafile, nullVector);
             current->setMothurCalling(false);
+            cout << " groups = "<< cparser.getNamesOfGroups().size() << endl;
             groups = cparser.getNamesOfGroups();
             group2Files = cparser.getFiles();
             

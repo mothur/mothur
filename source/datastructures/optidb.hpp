@@ -25,7 +25,7 @@ public:
     void addSequences(vector<Sequence>); //add otu with multiple seqs
     void generateDB();
     
-    OptiData* findClosestSequences(Sequence*, int n); //seq, numColumnsToUse -> returns matrix containing references "close" to sequence
+    OptiData* findClosestSequences(Sequence*, int n) const; //seq, numColumnsToUse -> returns matrix containing references "close" to sequence
     
     
     
