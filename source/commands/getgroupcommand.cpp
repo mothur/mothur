@@ -71,8 +71,8 @@ GetgroupCommand::GetgroupCommand(string option)  {
 			}else { current->setSharedFile(sharedfile); }
 			
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(sharedfile);		}
 		}
 	}
 	catch(exception& e) {

@@ -36,7 +36,6 @@ public:
     
 private:
     bool abort, allLines, otulabel, hasGroupInfo;
-    string outputDir;
     vector<string> outputNames, Groups;
     string sharedfile, designfile, constaxonomyfile, relabundfile, scale, label, inputFile;
     

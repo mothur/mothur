@@ -114,8 +114,8 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			else if (fastafile == "not open") { fastafile = ""; abort = true; }	
 			else { current->setFastaFile(fastafile); }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile); 	}
+			 
+			if (outputdir == ""){	outputdir = util.hasPath(fastafile); 	}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -212,7 +212,7 @@ int ClusterFragmentsCommand::execute(){
 		if(numSeqs % 100 != 0)	{ m->mothurOutJustToScreen(toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n");	}
 	
 		
-		string fileroot = outputDir + util.getRootName(util.getSimpleName(fastafile));
+		string fileroot = outputdir + util.getRootName(util.getSimpleName(fastafile));
         map<string, string> variables; 
         variables["[filename]"] = fileroot;
 		string newFastaFile = getOutputFileName("fasta", variables);

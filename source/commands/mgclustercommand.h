@@ -52,7 +52,7 @@ private:
 	vector<seqDist> overlapMatrix;
 	vector<string> outputNames;
 	
-	string blastfile, method, namefile, countfile, overlapFile, distFile, outputDir, sabundFileName, rabundFileName, listFileName, metric, initialize, tag, fileroot;
+	string blastfile, method, namefile, countfile, overlapFile, distFile,  sabundFileName, rabundFileName, listFileName, metric, initialize, tag, fileroot;
 	ofstream sabundFile, rabundFile, listFile;
 	double cutoff;
 	float penalty, adjust, stableMetric;

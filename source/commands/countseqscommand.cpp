@@ -125,8 +125,8 @@ CountSeqsCommand::CountSeqsCommand(string option)  {
             string temp = validParameter.valid(parameters, "compress");			if (temp == "not found") { temp = "t"; }
             compress = util.isTrue(temp);
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			 
+			
 		}
 		
 	}
@@ -148,8 +148,8 @@ int CountSeqsCommand::execute(){
             CountTable ct;
             ct.readTable(countfile, true, false, Groups);
             
-            if (outputDir == "") { outputDir = util.hasPath(countfile); }
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+            if (outputdir == "") { outputdir = util.hasPath(countfile); }
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
             
             if (compress) {
                 variables["[distance]"] = "sparse";
@@ -165,8 +165,8 @@ int CountSeqsCommand::execute(){
                 ct.printTable(outputFileName, false);
             }
         }else if (namefile != "") {
-            if (outputDir == "") { outputDir = util.hasPath(namefile); }
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(namefile));
+            if (outputdir == "") { outputdir = util.hasPath(namefile); }
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(namefile));
             string outputFileName = getOutputFileName("count", variables);
             
             long start = time(NULL);
@@ -177,8 +177,8 @@ int CountSeqsCommand::execute(){
             m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.\n\n");
             m->mothurOut("Total number of sequences: " + toString(total) + "\n");
         }else {
-            if (outputDir == "") { outputDir = util.hasPath(sharedfile); }
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+            if (outputdir == "") { outputdir = util.hasPath(sharedfile); }
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
             
             InputData input(sharedfile, "sharedfile", Groups);
             set<string> processedLabels;

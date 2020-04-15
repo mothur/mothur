@@ -115,7 +115,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
                     if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }	
 			}			
 			
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);	}
+					if (outputdir == ""){    outputdir = util.hasPath(inputFileName);	}
 			
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }	
@@ -218,7 +218,7 @@ int CorrAxesCommand::execute(){
 		// calc the r values																//
 		/************************************************************************************/
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[tag]"] = method;
 		string outputFileName = getOutputFileName("corraxes", variables);
 		outputNames.push_back(outputFileName); outputTypes["corraxes"].push_back(outputFileName);	

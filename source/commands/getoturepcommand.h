@@ -65,7 +65,7 @@ private:
     map<string, int> nameMap;
     OptiData* matrix;
     CountTable ct;
-	string filename, fastafile, listfile, namefile, groupfile, sorted, phylipfile, countfile, columnfile, distFile, format, outputDir, groups, method;
+	string filename, fastafile, listfile, namefile, groupfile, sorted, phylipfile, countfile, columnfile, distFile, format,  groups, method;
 	ofstream out;
 	ifstream in, inNames, inRow;
 	bool abort, allLines, groupError, weighted, hasGroups, rename, cutoffSet;
@@ -83,7 +83,7 @@ private:
 	int processNames(string, string);
 	int processFastaNames(string, string, FastaMap*&);
     int readDist();
-    int createCount();
+    void createCount();
 };
 
 #endif

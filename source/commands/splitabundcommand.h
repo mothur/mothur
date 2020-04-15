@@ -55,7 +55,7 @@ private:
 	vector<string> outputNames;
     CountTable ct;
 	
-	string outputDir, listfile, namefile, groupfile, countfile, label, groups, fastafile, inputFile;
+	string  listfile, namefile, groupfile, countfile, label, groups, fastafile, inputFile;
 	set<string> labels;
 	bool abort, allLines, accnos;
 	float cutoff;

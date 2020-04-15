@@ -49,7 +49,7 @@ public:
     
 private:
     bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion;
-    string outputDir, sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat, sets, inputfile, clrfile, format;
+    string  sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat, sets, inputfile, clrfile, format;
     vector<string> outputNames, Sets;
     set<string> labels;
     double anovaAlpha, wilcoxonAlpha, fBoots, ldaThreshold;

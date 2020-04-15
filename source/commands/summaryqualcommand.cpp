@@ -99,11 +99,7 @@ SummaryQualCommand::SummaryQualCommand(string option)  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(qualfile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){	 outputdir += util.hasPath(qualfile);  }
 			
 			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
@@ -151,7 +147,7 @@ int SummaryQualCommand::execute(){
 		
 		//print summary file
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(qualfile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(qualfile));
 		string summaryFile = getOutputFileName("summary",variables);
 		printQual(summaryFile, position, averageQ, scores);
 		

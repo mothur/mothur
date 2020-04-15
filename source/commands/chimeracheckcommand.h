@@ -40,7 +40,7 @@ private:
 	int checkChimeras();
 
 	bool abort, svg, save;
-	string fastafile, templatefile, namefile, outputDir;
+	string fastafile, templatefile, namefile;
 	int increment, ksize, numSeqs, templateSeqsLength;
 	vector<string> outputNames;
 };

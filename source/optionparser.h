@@ -32,6 +32,7 @@ private:
 	MothurOut* m;
     CurrentFile* current;
     Utils util;
+    set<string> fileTypes;
 
     void fillFileTypes(set<string>&);
 };

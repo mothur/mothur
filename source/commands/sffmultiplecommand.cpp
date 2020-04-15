@@ -134,7 +134,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
- 			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+ 			
 			
 			filename = validParameter.validFile(parameters, "file");
             if (filename == "not open") { filename = ""; abort = true; }
@@ -287,7 +287,7 @@ int SffMultipleCommand::execute(){
 		vector<string> sffFiles, oligosFiles;
         readFile(sffFiles, oligosFiles);
         
-        string thisOutputDir = outputDir;
+        string thisOutputDir = outputdir;
         if (thisOutputDir == "") { thisOutputDir = util.hasPath(filename); }
         string fileroot = thisOutputDir + util.getRootName(util.getSimpleName(filename));
         map<string, string> variables; 

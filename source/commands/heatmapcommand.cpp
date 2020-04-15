@@ -150,8 +150,8 @@ HeatMapCommand::HeatMapCommand(string option) {
 				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -204,7 +204,7 @@ int HeatMapCommand::execute(){
         set<string> userLabels = labels;
         string lastLabel = "";
         
-        HeatMap heatmap(sorted, scale, numOTU, fontSize, outputDir, inputfile);
+        HeatMap heatmap(sorted, scale, numOTU, fontSize, outputdir, inputfile);
 		
 		if (format == "sharedfile") {
             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);

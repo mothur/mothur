@@ -88,7 +88,7 @@ MakeFileCommand::MakeFileCommand(string option)  {
                 else { abort = true; }
             }
             
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = inputDir;		}
+            		if (outputdir == ""){    outputdir = inputDir;		}
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             typeFile = validParameter.valid(parameters, "type");
@@ -174,7 +174,7 @@ int MakeFileCommand::execute(){
             
             if (singles.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + prefix + ".";
+                variables["[filename]"] = outputdir + prefix + ".";
                 if (paired.size() != 0) { variables["[tag]"] = "single"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;
@@ -191,7 +191,7 @@ int MakeFileCommand::execute(){
 
             if (paired.size() != 0) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + prefix + ".";
+                variables["[filename]"] = outputdir + prefix + ".";
                 if (singles.size() != 0) { variables["[tag]"] = "paired"; }
                 string filename = getOutputFileName("file",variables);
                 ofstream out;

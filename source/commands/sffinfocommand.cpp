@@ -118,7 +118,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
             
             string inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){    inputDir = "";        }
@@ -268,7 +268,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 	try {
         oligosObject = new Oligos();
 		currentFileName = input;
-		if (outputDir == "") {  outputDir += util.hasPath(input); }
+		if (outputdir == "") {  outputdir += util.hasPath(input); }
 		
 		if (accnos != "")	{  readAccnosFile(accnos);  }
 		else				{	seqNames.clear();		}
@@ -287,7 +287,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
         
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
-        string rootName = outputDir + util.getRootName(util.getSimpleName(input));
+        string rootName = outputdir + util.getRootName(util.getSimpleName(input));
         if(rootName.find_last_of(".") == rootName.npos){ rootName += "."; }
         
         map<string, string> variables; 
@@ -1511,7 +1511,7 @@ int SffInfoCommand::parseSffTxt() {
 		ifstream inSFF;
 		util.openInputFile(sfftxtFilename, inSFF);
 		
-		if (outputDir == "") {  outputDir += util.hasPath(sfftxtFilename); }
+		if (outputdir == "") {  outputdir += util.hasPath(sfftxtFilename); }
 		
 		//output file names
 		ofstream outFasta, outQual, outFlow;
@@ -1810,7 +1810,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
                         
                         ofstream temp;
                         map<string, string> variables;
-                        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(currentFileName));
                         variables["[group]"] = comboGroupName;
                         string thisFilename = getOutputFileName("sff",variables);
                         if (uniqueNames.count(thisFilename) == 0) {
@@ -1826,7 +1826,7 @@ bool SffInfoCommand::readOligos(string oligoFile){
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(currentFileName));
         variables["[group]"] = "scrap";
 		noMatchFile = getOutputFileName("sff",variables);
         util.mothurRemove(noMatchFile);
@@ -1874,7 +1874,7 @@ bool SffInfoCommand::readGroup(string oligoFile){
 		filehandles.resize(groups.size());
         for (int i = 0; i < filehandles.size(); i++) {
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(currentFileName));
                 variables["[group]"] = groups[i];
                 string thisFilename = getOutputFileName("sff",variables);
                 outputNames.push_back(thisFilename);
@@ -1886,7 +1886,7 @@ bool SffInfoCommand::readGroup(string oligoFile){
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(currentFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(currentFileName));
         variables["[group]"] = "scrap";
 		noMatchFile = getOutputFileName("sff",variables);
         util.mothurRemove(noMatchFile);

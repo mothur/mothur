@@ -201,8 +201,8 @@ MakeBiomCommand::MakeBiomCommand(string option) {
                 }
             }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputFileName);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputFileName);		}
             
             contaxonomyfile = validParameter.validFile(parameters, "constaxonomy");
 			if (contaxonomyfile == "not found") {  contaxonomyfile = "";  }
@@ -327,7 +327,7 @@ int MakeBiomCommand::execute(){
 int MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup){
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
 		ofstream out;
@@ -468,7 +468,7 @@ int MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup){
 int MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup){
     try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
         ofstream out;
@@ -981,7 +981,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundVectors*& lookup, map<strin
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("shared",variables);
         outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
@@ -1147,7 +1147,7 @@ int MakeBiomCommand::getGreenGenesOTUIDs(SharedRAbundFloatVectors*& lookup, map<
         labelTaxMap = newLabelTaxMap;
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("relabund",variables);
         outputNames.push_back(outputFileName); outputTypes["relabund"].push_back(outputFileName);

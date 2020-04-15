@@ -224,11 +224,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			if (taxonomy == "not open") { abort = true; }
 			else if (taxonomy == "not found") { taxonomy = ""; }	
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			 if (outputdir == ""){	 outputdir += util.hasPath(fastafile);  }
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -360,7 +356,7 @@ int ScreenSeqsCommand::execute(){
         }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         badAccnosFile =  getOutputFileName("accnos",variables);
 
         if ((contigsreport == "") && (summaryfile == "") && (alignreport == "")) {   numFastaSeqs = screenFasta(badSeqNames);  }
@@ -404,8 +400,8 @@ int ScreenSeqsCommand::execute(){
                 util.mothurRemove(strippedAccnos);
                 
                 if (groupfile != "") {
-                    string thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+                    string thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                     variables["[extension]"] = util.getExtension(groupfile);
                     string outGroup = getOutputFileName("group", variables);
@@ -414,8 +410,8 @@ int ScreenSeqsCommand::execute(){
                 }
                 
                 if (namefile != "") {
-                    string thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                    string thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
                     variables["[extension]"] = util.getExtension(namefile);
                     string outName = getOutputFileName("name", variables);
@@ -424,8 +420,8 @@ int ScreenSeqsCommand::execute(){
                 }
                 
                 if (countfile != "") {
-                    string thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                    string thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                     variables["[extension]"] = util.getExtension(countfile);
                     string outCount = getOutputFileName("count", variables);
@@ -434,8 +430,8 @@ int ScreenSeqsCommand::execute(){
                 }
                 
                 if (qualfile != "") {
-                    string thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+                    string thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
                     variables["[extension]"] = util.getExtension(qualfile);
                     string outQual = getOutputFileName("qfile", variables);
@@ -444,8 +440,8 @@ int ScreenSeqsCommand::execute(){
                 }
                 
                 if (taxonomy != "") {
-                    string thisOutputDir = outputDir;
-                    if (outputDir == "") {  thisOutputDir += util.hasPath(taxonomy);  }
+                    string thisOutputDir = outputdir;
+                    if (outputdir == "") {  thisOutputDir += util.hasPath(taxonomy);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxonomy));
                     variables["[extension]"] = util.getExtension(taxonomy);
                     string outTax = getOutputFileName("taxonomy", variables);
@@ -528,7 +524,7 @@ string ScreenSeqsCommand::printAccnos(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::runFastaScreening(map<string, string>& badSeqNames){
 	try{
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
 		string goodSeqFile = getOutputFileName("fasta", variables);
 		outputNames.push_back(goodSeqFile); outputTypes["fasta"].push_back(goodSeqFile);
@@ -582,7 +578,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
     try {
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(alignreport));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(alignreport));
         string outSummary =  getOutputFileName("alignreport",variables);
         outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
         
@@ -673,7 +669,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
     try{
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(contigsreport));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(contigsreport));
         string outSummary =  getOutputFileName("contigsreport",variables);
         outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
         
@@ -762,7 +758,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
 int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
 	try{
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(summaryfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(summaryfile));
         string outSummary =  getOutputFileName("summary",variables);
 		outputNames.push_back(outSummary); outputTypes["summary"].push_back(outSummary);
         

@@ -90,7 +90,7 @@ MantelCommand::MantelCommand(string option)  {
 			if (phylipfile2 == "not open") { phylipfile2 = ""; abort = true; }
 			else if (phylipfile2 == "not found") { phylipfile2 = ""; m->mothurOut("phylip2 is a required parameter for the mantel command.\n"); abort = true;  }
 			
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(phylipfile1);	}
+					if (outputdir == ""){    outputdir = util.hasPath(phylipfile1);	}
 			
 			method = validParameter.valid(parameters, "method");		if (method == "not found"){	method = "pearson";		}
 			
@@ -177,7 +177,7 @@ int MantelCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
 		
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipfile1));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipfile1));
 		string outputFile = getOutputFileName("mantel",variables);
 		outputNames.push_back(outputFile); outputTypes["mantel"].push_back(outputFile);
 		ofstream out;

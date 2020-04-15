@@ -35,7 +35,6 @@ public:
 private:
     bool abort, requiredonly, setOligosParameter;
     string oligosfile, groupfile, package, inputfile, file, inputDir;
-    string outputDir;
     vector<string> outputNames;
     set<string> Groups;
     

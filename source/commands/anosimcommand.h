@@ -36,7 +36,7 @@ public:
 private:
 	bool abort;
 	DesignMap* designMap;
-	string outputDir, inputDir, designFileName, phylipFileName;
+	string inputDir, designFileName, phylipFileName;
 	
 	vector<vector<double> > convertToRanks(vector<vector<double> >);
 	double calcR(vector<vector<double> >, map<string, vector<int> >);

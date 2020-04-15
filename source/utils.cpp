@@ -307,7 +307,7 @@ double Utils::getRandomDouble0to1(){
 }
 
 /*********************************************************************************************/
-unsigned long long Utils::getRAMUsed() {
+double Utils::getRAMUsed() {
     try {
 
 #if defined (__APPLE__) || (__MACH__)
@@ -334,7 +334,7 @@ unsigned long long Utils::getRAMUsed() {
     }
 }
 /*********************************************************************************************/
-unsigned long long Utils::getTotalRAM() {
+double Utils::getTotalRAM() {
     try {
 
 #if defined NON_WINDOWS
@@ -1022,10 +1022,13 @@ int Utils::renameFile(string oldName, string newName){
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
             if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
-            string command = "rm " + newName;
-            system(command.c_str());
+            mothurRemove(newName);
         }
         
+        int renameOk = rename(oldName.c_str(), newName.c_str());
+        
+        if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
+        /*
         if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
         
         string command = "mv " + oldName + " " + newName;
@@ -1041,6 +1044,7 @@ int Utils::renameFile(string oldName, string newName){
         
             if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
         }
+         */
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
@@ -1070,19 +1074,18 @@ int Utils::copyFile(string oldName, string newName){
 #if defined NON_WINDOWS
         if (exist) { //you could open it so you want to delete it
             if(m->getDebug()) { m->mothurOut("[DEBUG]: removing old copy of " + newName + "\n"); }
-            string command = "rm " + newName;
-            system(command.c_str());
+            mothurRemove(newName);
         }
+        appendFiles(oldName, newName);
+        //if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
         
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
+        //string command = "cp " + oldName + " " + newName;
         
-        string command = "cp " + oldName + " " + newName;
+        //if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
         
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
+        //int returnCode = system(command.c_str());
         
-        int returnCode = system(command.c_str());
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
+       // if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
 #else
         mothurRemove(newName);
         appendFiles(oldName, newName);
@@ -6059,16 +6062,27 @@ bool Utils::isContainingOnlyDigits(string input) {
 
  The word "Chloroplast" in the taxon string gets matched to the lineage Chloroplastida in the taxonomy (above) and wipes out all of the green algae.*/
 
-bool Utils::findTaxon(vector<Taxon> tax, string stax) {
+bool Utils::findTaxon(vector<Taxon> tax, vector<Taxon> stax) {
     try {
         
-        
-        string searchTax = stax;
-        if (searchTax[searchTax.length()-1] == ';') { searchTax = stax.substr(0, searchTax.length()-1); }
-        
-        auto it = find_if(tax.begin(), tax.end(), [&searchTax](const Taxon& obj) { return obj.name == searchTax;});
+        //looking to find something like "unknown" or "Proteobacteria"
+        if (stax.size() == 1) {
+            string searchTax = stax[0].name;
+            auto it = find_if(tax.begin(), tax.end(), [&searchTax](const Taxon& obj) { return obj.name == searchTax;});
 
-        if (it != tax.end()) { return true; }
+            if (it != tax.end()) { return true; }
+            else { return false; }
+            
+        }else { //looking to find something like "Bacteria;Proteobacteria;Alphaproteobacteria;Rickettsiales;Anaplasmataceae;Wolbachia;"
+            
+            if (stax.size() > tax.size()) { return false; } //we are looking for a more specific taxonomy, not a match
+            else {
+                for (int i = 0; i < stax.size(); i++) {
+                    if (stax[i].name != tax[i].name) { return false; }
+                }
+                return true;
+            }
+        }
         
         return false;
     }
@@ -6078,59 +6092,52 @@ bool Utils::findTaxon(vector<Taxon> tax, string stax) {
     }
 }
 /**************************************************************************************************/
-bool Utils::searchTax(vector<Taxon> userTaxons, vector<string> listOfTaxons, vector<bool> taxonsHasConfidence, vector<string> noConfidenceTaxons, vector< vector<Taxon> > searchTaxons) {
+bool Utils::searchTax(vector<Taxon> userTaxons, vector<bool> taxonsHasConfidence, vector< vector<Taxon> > searchTaxons) {
     try {
-        for (int j = 0; j < listOfTaxons.size(); j++) {
-
-            //if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
-            if (!taxonsHasConfidence[j]) {
-                if (findTaxon(userTaxons, noConfidenceTaxons[j])) { //this sequence contains the taxon the user wants
+        bool userDataHasConfidence = hasConfidenceScore(userTaxons);
+        
+        for (int j = 0; j < searchTaxons.size(); j++) {
+            
+            bool foundTaxonMatch = findTaxon(userTaxons, searchTaxons[j]);
+            
+            if (foundTaxonMatch) {
+                //searchTaxon or user taxons don't include confidence scores so ingnore them
+                if (!taxonsHasConfidence[j] || !userDataHasConfidence) {
                     return true;  //since you belong to at least one of the taxons we want you are included so no need to search for other
-                }
-            }else{//if listOfTaxons[i] has them and you don't them remove taxons
-                if (!hasConfidenceScore(userTaxons)) {
+                }else {
+                    bool good = true;
 
-                    if (findTaxon(userTaxons, noConfidenceTaxons[j])) { //this sequence contains the taxon the user wants
-                        return true;  //since you belong to at least one of the taxons we want you are included so no need to search for other
-                    }
-                }else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
-                    
-                    if (findTaxon(userTaxons, noConfidenceTaxons[j])) { //if yes, then are the confidences okay
+                    //the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
+                    //we want to "line them up", so we will find the the index where the searchstring starts
+                    int index = 0;
+                    for (int i = 0; i < userTaxons.size(); i++) {
 
-                        bool good = true; //bool hasCon;
-
-                        //the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
-                        //we want to "line them up", so we will find the the index where the searchstring starts
-                        int index = 0;
-                        for (int i = 0; i < userTaxons.size(); i++) {
-
-                            if (userTaxons[i].name == searchTaxons[j][0].name) {
-                                index = i;
-                                int spot = 0;
-                                bool goodspot = true;
-                                //is this really the start, or are we dealing with a taxon of the same name?
-                                while ((spot < searchTaxons[j].size()) && ((i+spot) < userTaxons.size())) {
-                                    if (userTaxons[i+spot].name != searchTaxons[j][spot].name) { goodspot = false; break; }
-                                    else { spot++; }
-                                }
-
-                                if (goodspot) { break; }
+                        if (userTaxons[i].name == searchTaxons[j][0].name) {
+                            index = i;
+                            int spot = 0;
+                            bool goodspot = true;
+                            //is this really the start, or are we dealing with a taxon of the same name?
+                            while ((spot < searchTaxons[j].size()) && ((i+spot) < userTaxons.size())) {
+                                if (userTaxons[i+spot].name != searchTaxons[j][spot].name) { goodspot = false; break; }
+                                else { spot++; }
                             }
+
+                            if (goodspot) { break; }
                         }
-
-                        for (int i = 0; i < searchTaxons[j].size(); i++) {
-
-                            if ((i+index) < userTaxons.size()) { //just in case, should never be false
-                                if (userTaxons[i+index].confidence < searchTaxons[j][i].confidence) { //is the users cutoff less than the search taxons
-                                    good = false;
-                                    break;
-                                }
-                            }else { good = false; break; }
-                        }
-
-                        //passed the test so add you
-                        if (good) { return true; }
                     }
+
+                    for (int i = 0; i < searchTaxons[j].size(); i++) {
+
+                        if ((i+index) < userTaxons.size()) { //just in case, should never be false
+                            if (userTaxons[i+index].confidence < searchTaxons[j][i].confidence) { //is the users cutoff less than the search taxons
+                                good = false;
+                                break;
+                            }
+                        }else { good = false; break; }
+                    }
+
+                    //passed the test so add you
+                    if (good) { return true; }
                 }
             }
         }
@@ -6162,6 +6169,13 @@ vector<Taxon> Utils::getTaxons(string tax, bool& hasConfidence) {
             else{ taxon += tax[i]; }
         }
 
+        if (taxon != "") {
+            float confidence = 0;
+            hasConfidence = hasConfidenceScore(taxon, confidence);
+
+            Taxon temp(taxon, confidence); t.push_back(temp);
+        }
+        
         return t;
     }
     catch(exception& e) {

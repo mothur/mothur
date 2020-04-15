@@ -42,7 +42,7 @@ private:
     
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile, sets, sharedfile, clrfile, inputfile, format;
+	string groups, label,  inputDir, designfile, sets, sharedfile, clrfile, inputfile, format;
 	vector<string> Groups, outputNames, Sets;
 	vector< vector<string> > namesOfGroupCombos;
 	int iters, processors;

@@ -139,7 +139,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
+					if (outputdir == ""){    outputdir = util.hasPath(treefile);	}
 			
 																	
 			//check for optional parameter and set defaults
@@ -269,7 +269,7 @@ int UnifracWeightedCommand::execute() {
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
             vector<double> randomData; randomData.resize(numComp,0); //weighted score info for random trees. data[0] = weightedscore AB, data[1] = weightedscore AC...
             
-            userData = weighted.getValues(T[i], processors, outputDir); //userData[0] = weightedscore
+            userData = weighted.getValues(T[i], processors, outputdir); //userData[0] = weightedscore
             if (m->getControl_pressed()) { break; }
             
             if (phylip) {	createPhylipFile((i+1), userData);          }
@@ -298,7 +298,7 @@ int UnifracWeightedCommand::execute() {
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Weighted thisWeighted(includeRoot, Groups);
-                iterData = thisWeighted.getValues(subSampleTree, processors, outputDir); //userData[0] = weightedscore
+                iterData = thisWeighted.getValues(subSampleTree, processors, outputdir); //userData[0] = weightedscore
                 
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
@@ -375,7 +375,7 @@ int UnifracWeightedCommand::getAverageSTDMatrices(vector< vector<double> >& dist
         }
         
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+		variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "weighted.ave";
         string aveFileName = getOutputFileName("phylip",variables);
@@ -452,7 +452,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         
         //create a new filename
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "weighted.cons";
         string conFile = getOutputFileName("tree",variables);							
@@ -476,7 +476,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
         
         //create a new filename
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
         variables["[tag]"] = toString(treeNum+1);
         variables["[tag2]"] = "weighted.all";
         string outputFile = getOutputFileName("tree",variables);				
@@ -525,7 +525,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
 int UnifracWeightedCommand::runRandomCalcs(Tree* thisTree, CountTable* ct, vector<double> usersScores, int iter, vector<double>& WScoreSig, vector<string> groupComb) {
 	try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(iter);
         string wFileName = getOutputFileName("weighted", variables); 
         ColumnFile output(wFileName, itersString); ofstream out; util.openOutputFile(wFileName, out); out.close();
@@ -723,7 +723,7 @@ vector<double> UnifracWeightedCommand::createProcesses(Tree* t, CountTable* ct, 
 void UnifracWeightedCommand::printWSummaryFile(int treeIndex, vector<double> utreeScores, vector<double> WScoreSig, vector<string> groupComb) {
 	try {
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(treeIndex);
         sumFile = getOutputFileName("wsummary",variables);
         outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
@@ -772,7 +772,7 @@ void UnifracWeightedCommand::createPhylipFile(int treeIndex, vector<double> utre
         
         string phylipFileName;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getSimpleName(treefile);
+        variables["[filename]"] = outputdir + util.getSimpleName(treefile);
         variables["[tag]"] = toString(treeIndex);
         if ((outputForm == "lt") || (outputForm == "square")) {
             variables["[tag2]"] = "weighted.phylip";

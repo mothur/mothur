@@ -36,7 +36,7 @@ private:
 
     vector< vector<double> >  savedPositions;
 
-	string vertical, filter, fasta, hard, outputDir, filterFileName;
+	string vertical, filter, fasta, hard,  filterFileName;
 	vector<string> fastafileNames;	
 	int alignmentLength, processors;
 	vector<int> bufferSizes;

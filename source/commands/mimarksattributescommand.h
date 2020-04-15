@@ -90,7 +90,7 @@ private:
     string trimTags(string& value);
     
     bool abort;
-    string outputDir, xmlFile, selectedPackage;
+    string  xmlFile, selectedPackage;
     vector<string> outputNames;
 };
 

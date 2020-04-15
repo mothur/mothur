@@ -36,7 +36,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string sffFilename, sfftxtFilename, outputDir, accnosName, currentFileName, oligosfile, noMatchFile, groupfile;
+	string sffFilename, sfftxtFilename,  accnosName, currentFileName, oligosfile, noMatchFile, groupfile;
 	vector<string> outputNames;
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos, hasOligos, hasGroup, reorient, pairedOligos;
 	int mycount, split, numBarcodes, numFPrimers, numLinkers, numSpacers, numRPrimers, pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, numNoMatch;

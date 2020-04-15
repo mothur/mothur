@@ -181,8 +181,8 @@ EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
             else { hasSample = true; current->setSampleFile(samplefile);  }
             
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+            
+            
             
             if ((sharedfile == "") && (listfile == "") && (rabundfile == "") && (sabundfile == "")) {
                 //is there are current file available for any of these?
@@ -380,8 +380,8 @@ int EstimatorSingleCommand::processSharedFile() {
         SharedRAbundVectors* shared = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = shared->getNamesGroups();
         
-        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        if (outputdir == "") { outputdir += util.hasPath(inputfile); }
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(inputfile));
         
         map<string, string> variables;
         variables["[filename]"] = fileNameRoot;
@@ -462,8 +462,8 @@ int EstimatorSingleCommand::processSingleSample() {
         
         SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         
-        if (outputDir == "") { outputDir += util.hasPath(inputfile); }
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        if (outputdir == "") { outputdir += util.hasPath(inputfile); }
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(inputfile));
         
         map<string, string> variables;
         variables["[filename]"] = fileNameRoot;

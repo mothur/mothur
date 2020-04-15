@@ -64,10 +64,6 @@ MergeCountCommand::MergeCountCommand(string option)  {
             if(fileList == "not found") { m->mothurOut("[ERROR]: you must enter two or more count file names\n");   abort=true;  }
             else{ 	util.splitAtDash(fileList, fileNames);	}
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            string outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found")	{	outputDir = "";		}
-            
-            
             numInputFiles = fileNames.size();
             ifstream testFile;
             if(numInputFiles == 0){
@@ -90,7 +86,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
             
             outputFileName = validParameter.valid(parameters, "output");
             if (outputFileName == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
-            else if (outputDir != "") { outputFileName = outputDir + util.getSimpleName(outputFileName);  }
+            else if (outputdir != "") { outputFileName = outputdir + util.getSimpleName(outputFileName);  }
         }
         
     }

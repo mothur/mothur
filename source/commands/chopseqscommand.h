@@ -36,7 +36,7 @@ class ChopSeqsCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }		
 	
 	private:
-		string fastafile, outputDir, keep, namefile, groupfile, countfile, qualfile;
+		string fastafile, keep, namefile, groupfile, countfile, qualfile;
 		bool abort, countGaps, Short, keepN;
 		int numbases, processors;
 		vector<string> outputNames;

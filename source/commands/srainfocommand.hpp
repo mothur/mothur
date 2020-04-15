@@ -35,7 +35,7 @@ private:
     
     bool abort, compressGZ;
     vector<string> outputNames;
-    string accnosfile, outputDir, outputType, fasterQLocation, prefetchLocation;
+    string accnosfile,  outputType, fasterQLocation, prefetchLocation;
     int processors, maxSize;
     
     string runPreFetch(string);

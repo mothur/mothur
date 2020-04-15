@@ -156,7 +156,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
 			
             fastafile = validParameter.validFile(parameters, "fasta");
             if (fastafile == "not found") {
@@ -191,8 +190,8 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
             
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+            
+            
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -336,14 +335,14 @@ int ClassifySeqsCommand::execute(){
             else if (!foundDot && (baseTName[i] == '.')) {  foundDot = true; }
         }
         
-        if (outputDir == "") { outputDir += util.hasPath(fastafile); }
+        if (outputdir == "") { outputdir += util.hasPath(fastafile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = RippedTaxName;
         variables["[tag2]"] = outputMethodTag;
         string newTaxonomyFile = getOutputFileName("taxonomy", variables);
         string newaccnosFile = getOutputFileName("accnos", variables);
-        string tempTaxonomyFile = outputDir + util.getRootName(util.getSimpleName(fastafile)) + "taxonomy.temp";
+        string tempTaxonomyFile = outputdir + util.getRootName(util.getSimpleName(fastafile)) + "taxonomy.temp";
         string taxSummary = getOutputFileName("taxsummary", variables);
         
         if ((method == "knn") && (search == "distance")) {

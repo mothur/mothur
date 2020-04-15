@@ -87,7 +87,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 			
 			randomtree = validParameter.valid(parameters, "random");		if (randomtree == "not found") { randomtree = ""; }
 			
@@ -128,8 +128,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			string outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	if (randomtree == "")  { outputDir += util.hasPath(treefile); } }
+			if (outputdir == ""){  	if (randomtree == "")  { outputdir += util.hasPath(treefile); } }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -180,9 +179,9 @@ int ParsimonyCommand::execute() {
             ct = T[0]->getCountTable();
             delete reader;
 	
-			if(outputDir == "") { outputDir += util.hasPath(treefile); }
+			if(outputdir == "") { outputdir += util.hasPath(treefile); }
             map<string, string> variables; 
-            variables["[filename]"] = outputDir + util.getSimpleName(treefile) +  ".";
+            variables["[filename]"] = outputdir + util.getSimpleName(treefile) +  ".";
             
 			output = new ColumnFile(getOutputFileName("parsimony",variables), itersString);
 			outputNames.push_back(getOutputFileName("parsimony",variables));
@@ -195,10 +194,10 @@ int ParsimonyCommand::execute() {
 		}else { //user wants random distribution
 			getUserInput();
 				
-			if(outputDir == "") { outputDir += util.hasPath(randomtree); }
-			output = new ColumnFile(outputDir+ util.getSimpleName(randomtree), itersString);
-			outputNames.push_back(outputDir+ util.getSimpleName(randomtree));
-			outputTypes["parsimony"].push_back(outputDir+ util.getSimpleName(randomtree));
+			if(outputdir == "") { outputdir += util.hasPath(randomtree); }
+			output = new ColumnFile(outputdir+ util.getSimpleName(randomtree), itersString);
+			outputNames.push_back(outputdir+ util.getSimpleName(randomtree));
+			outputTypes["parsimony"].push_back(outputdir+ util.getSimpleName(randomtree));
 		}
 			
 		//set users groups to analyze
@@ -240,7 +239,7 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
-				userData = pars.getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
+				userData = pars.getValues(T[i], processors, outputdir);  //data = AB, AC, BC, ABC.
 				
 				if (m->getControl_pressed()) { 
 					 delete output;
@@ -278,7 +277,7 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree(stableRandom);
 
 				//get pscore of random tree
-				randomData = pars.getValues(randT, processors, outputDir);
+				randomData = pars.getValues(randT, processors, outputdir);
 				
 				if (m->getControl_pressed()) { 
                       delete output; delete randT; delete stableRandom;
@@ -322,7 +321,7 @@ int ParsimonyCommand::execute() {
 				}
 
 				//get pscore of random tree
-				randomData = pars.getValues(randT, processors, outputDir);
+				randomData = pars.getValues(randT, processors, outputdir);
 				
 				if (m->getControl_pressed()) { 
 					 delete output; delete randT; delete ct;

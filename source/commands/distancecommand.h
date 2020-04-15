@@ -80,7 +80,7 @@ public:
 private:
 	
     SequenceDB alignDB;
-	string output, fastafile, calc, outputDir, oldfastafile, column, compress;
+	string output, fastafile, calc,  oldfastafile, column, compress;
     int processors;
     long long numNewFasta, numSeqs, numDistsBelowCutoff;
 	float cutoff;

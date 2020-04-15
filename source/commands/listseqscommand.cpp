@@ -86,7 +86,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			fastafiles = validParameter.validFiles(parameters, "fasta");
@@ -328,10 +328,10 @@ int ListSeqsCommand::execute(){
         
 		if (m->getControl_pressed()) { outputTypes.clear();  return 0; }
 		
-		if (outputDir == "") {  outputDir += util.hasPath(inputFileName);  }
+		if (outputdir == "") {  outputdir += util.hasPath(inputFileName);  }
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
 		string outputFileName = getOutputFileName("accnos", variables);
 
         util.printAccnos(outputFileName, names);

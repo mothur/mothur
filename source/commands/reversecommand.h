@@ -33,7 +33,7 @@ public:
 private:
 
 	bool abort;
-	string fastaFileName, qualFileName, outputDir;
+	string fastaFileName, qualFileName;
 	vector<string> outputNames;
 	
 };

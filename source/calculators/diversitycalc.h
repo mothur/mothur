@@ -48,7 +48,7 @@ public:
     virtual bool requiresSample() { return requiresSamples; }
     virtual vector<double> getValues(int, vector<mcmcSample>&)  { return results;   }
     virtual vector<string> getValues(SAbundVector* rank)        { return outputs;   }
-    virtual int getValues(SAbundVector* rank, vector<double>& ) { return 0;         }
+    virtual void getValues(SAbundVector* rank, vector<double>& ) {         }
     
 protected:
     Utils util;

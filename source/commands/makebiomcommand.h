@@ -34,7 +34,7 @@ public:
 	
 private:
     
-	string sharedfile, relabundfile, contaxonomyfile, metadatafile, groups, outputDir, format, label, referenceTax, picrustOtuFile, inputFileName, fileFormat;
+	string sharedfile, relabundfile, contaxonomyfile, metadatafile, groups,  format, label, referenceTax, picrustOtuFile, inputFileName, fileFormat;
 	vector<string> outputNames, Groups, sampleMetadata;
 	set<string> labels;
     

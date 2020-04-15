@@ -13,6 +13,7 @@
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev) : Engine(tpath) {
     try {
+        batchFile = util.removeQuotes(batchFile);
         openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
         if (!openedBatch) {
             if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
@@ -107,9 +108,9 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         //allow user to omit the () on the help and quit commands
         if (nextcommand == "quit") { nextcommand = "quit()"; }
         if (nextcommand == "help") { nextcommand = "help()"; }
-        cout << nextcommand << endl;
+        
         string type = findType(nextcommand);
-        cout << type << endl;
+       
         if (type == "batch") {
             m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
@@ -145,6 +146,12 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
             else { replaceVariables(nextcommand); }
         }
        
+        if (m->getDebug()) {
+            double ramUsed, total;
+            ramUsed = util.getRAMUsed(); total = util.getTotalRAM();
+            m->mothurOut("RAM used: " + toString(ramUsed/(double)GIG) + " Gigabytes. Total Ram: " + toString(total/(double)GIG) + " Gigabytes.\n\n");
+        }
+        
         return nextcommand;
     }
     catch(exception& e) {
@@ -152,32 +159,5 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         exit(1);
     }
 }
-/***********************************************************************/
-string BatchEngine::findType(string nextCommand) {
-    try {
-        string type = "command";
-       
-        //determine if this is a command or batch file / environmental variable
-        //we know commands must include '(' characters for search for that
-        int openParen = nextCommand.find_first_of('(');
-        if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile / environmental variable
-            //are you another batch file or an environmental variable
-            //if no '=' sign than not an environmental variable
-            int equalsSign = nextCommand.find_first_of('=');
-            if (equalsSign == string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
-                type = "batch";
-            }else { //assume environmental variable. filenames can contain '=' characters, but this is a rare case
-                type = "environment";
-            }
-        }
-                
-        return type;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BatchEngine", "findType");
-        exit(1);
-    }
-}
-
 /***********************************************************************/
 

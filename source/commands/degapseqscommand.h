@@ -36,7 +36,7 @@ private:
     
     int processors;
 	bool abort;
-	string fastafile, outputDir;
+	string fastafile;
 	vector<string> outputNames;
     
     long long createProcesses(string, string);

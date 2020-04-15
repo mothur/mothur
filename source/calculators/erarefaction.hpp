@@ -18,7 +18,7 @@ class ERarefaction : public DiversityCalculator   {
 public:
     
     ERarefaction(int inc);
-    int getValues(SAbundVector* rank, vector<double>&);
+    void getValues(SAbundVector* rank, vector<double>&);
     
     string getTag() { return "e"; }
     

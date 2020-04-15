@@ -182,8 +182,8 @@ RareFactCommand::RareFactCommand(string option)  {
 				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -258,7 +258,7 @@ int RareFactCommand::execute(){
 		map<int, string> file2Group; //index in outputNames[i] -> group
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(inputFileNames[p]));
+			string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(inputFileNames[p]));
             map<string, string> variables;
             variables["[filename]"] = fileNameRoot;
 						
@@ -318,7 +318,7 @@ int RareFactCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int RareFactCommand::fillRDisplays(map<string, string> variables, map<int, string>& file2Group, int thisGroup) {
+void RareFactCommand::fillRDisplays(map<string, string> variables, map<int, string>& file2Group, int thisGroup) {
     try {
         
         ValidCalculators validCalculator;
@@ -398,7 +398,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 		for (int i = 0; i < outputNames.size(); i++) {
             
 			string extension = util.getExtension(outputNames[i]);
-            string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
+            string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
 			ifstream in;
@@ -440,7 +440,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
-			string combineFileName = outputDir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
+			string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + it->first;
 			util.openOutputFileAppend(combineFileName, out);
             out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
             

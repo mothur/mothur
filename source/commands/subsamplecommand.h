@@ -42,7 +42,7 @@ private:
 	bool abort, pickedGroups, allLines, persample, withReplacement;
 	string listfile, groupfile, countfile, sharedfile, rabundfile, sabundfile, fastafile, namefile, taxonomyfile, treefile, constaxonomyfile;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir;
+	string groups, label;
 	vector<string> Groups, outputNames;
 	int size;
 	//vector<string> names;

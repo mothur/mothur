@@ -38,7 +38,7 @@ public:
 	
 	
 private:
-    string metric, matrix, outputDir;
+    string metric, matrix;
     string label, sharedfile, groups;
     bool abort, allLines;
     set<string> labels;

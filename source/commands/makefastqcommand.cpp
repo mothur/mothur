@@ -98,8 +98,8 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 				else { 	m->mothurOut("You have no current qualfile and the qfile parameter is required.\n");  abort = true; }
 			}else { current->setQualFile(qualfile); }	
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(fastafile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(fastafile);		}
             
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
             
@@ -122,7 +122,7 @@ int MakeFastQCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFile = getOutputFileName("fastq",variables);
 		outputNames.push_back(outputFile); outputTypes["fastq"].push_back(outputFile);
 		

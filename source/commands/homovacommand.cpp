@@ -87,7 +87,7 @@ HomovaCommand::HomovaCommand(string option) {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
+			
 			
 			phylipFileName = validParameter.validFile(parameters, "phylip");
 			if (phylipFileName == "not open") { phylipFileName = ""; abort = true; }
@@ -123,7 +123,7 @@ HomovaCommand::HomovaCommand(string option) {
 				util.splitAtDash(sets, Sets);
 			}
 		}
-		if (outputDir == "") { outputDir = util.hasPath(phylipFileName); }
+		if (outputdir == "") { outputdir = util.hasPath(phylipFileName); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HomovaCommand", "HomovaCommand");
@@ -187,7 +187,7 @@ int HomovaCommand::execute(){
 		//create a new filename
 		ofstream HOMOVAFile;
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(phylipFileName));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(phylipFileName));
 		string HOMOVAFileName = getOutputFileName("homova", variables);				
 		util.openOutputFile(HOMOVAFileName, HOMOVAFile);
 		outputNames.push_back(HOMOVAFileName); outputTypes["homova"].push_back(HOMOVAFileName);

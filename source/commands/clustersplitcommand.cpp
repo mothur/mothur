@@ -180,7 +180,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			file = validParameter.validFile(parameters, "file");
@@ -454,7 +454,7 @@ int ClusterSplitCommand::execute(){
                     estart = time(NULL);
                     m->mothurOut("Converting to column format...\n");
                     
-                    ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
+                    ReadCluster* convert = new ReadCluster(distfile, cutoff, outputdir, false);
                     
                     NameAssignment* nameMap = NULL;
                     convert->setFormat("phylip");
@@ -494,9 +494,9 @@ int ClusterSplitCommand::execute(){
                 else if (splitmethod == "fasta")		{
                     if ((method == "agc") || (method == "dgc")) {
                         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
-                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputDir, "fasta");
+                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputdir, "fasta");
                     }else{
-                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputDir, "distance");
+                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputdir, "distance");
                     }
                 }
                 else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta.\n");  return 0;		}
@@ -727,8 +727,8 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 //**********************************************************************************************************************
 int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> userLabels, ListVector* listSingle){
 	try {
-		if (outputDir == "") { outputDir += util.hasPath(distfile); }
-		fileroot = outputDir + util.getRootName(util.getSimpleName(distfile));
+		if (outputdir == "") { outputdir += util.hasPath(distfile); }
+		fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
 		
         map<string, string> variables; 
         variables["[filename]"] = fileroot;
@@ -843,7 +843,7 @@ struct clusterData {
     bool showabund, classic, useName, useCount, deleteFiles, cutoffNotSet;
     double cutoff, stableMetric;
     ofstream outList, outRabund, outSabund;
-    string tag, method, outputDir, vsearchLocation, metricName, initialize;
+    string tag, method,  vsearchLocation, metricName, initialize, outputDir;
     vector< map<string, string> > distNames;
     set<string> labels;
     vector<string> listFileNames;
@@ -1492,7 +1492,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[i+1], cutoffNotSet, cutoff, precision, length, method, outputDir, vsearchLocation);
+            clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[i+1], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation);
             dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
             dataBundle->setNamesCount(namefile, countfile);
             data.push_back(dataBundle);
@@ -1501,7 +1501,7 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         }
         
         
-        clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[0], cutoffNotSet, cutoff, precision, length, method, outputDir, vsearchLocation);
+        clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[0], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation);
         dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
         dataBundle->setNamesCount(namefile, countfile);
         cluster(dataBundle);
@@ -1535,8 +1535,8 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
 
 int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > distNames) {
 	try{
-		string thisOutputDir = outputDir;
-		if (outputDir == "") { thisOutputDir = util.hasPath(fastafile); }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") { thisOutputDir = util.hasPath(fastafile); }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFileName = getOutputFileName("column", variables);
@@ -1629,8 +1629,8 @@ string ClusterSplitCommand::printFile(string singleton, vector< map<string, stri
     try {
         ofstream out;
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-		if (outputDir == "") { thisOutputDir = util.hasPath(distfile); }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") { thisOutputDir = util.hasPath(distfile); }
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(distfile));
 		string outputFileName = getOutputFileName("file", variables);
         util.openOutputFile(outputFileName, out);

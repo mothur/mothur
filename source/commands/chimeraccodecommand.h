@@ -37,7 +37,7 @@ public:
 		
 private:
 	bool abort, filter, save;
-	string fastafile, templatefile, outputDir, maskfile;
+	string fastafile, templatefile, maskfile;
 	int window, numwanted, numSeqs, templateSeqsLength;
 	vector<string> outputNames;
     

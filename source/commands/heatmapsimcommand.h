@@ -42,7 +42,7 @@ private:
 	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, label, calc, sharedfile, phylipfile, columnfile, countfile, namefile, outputDir, inputfile;
+	string format, groups, label, calc, sharedfile, phylipfile, columnfile, countfile, namefile,  inputfile;
 	vector<string> Estimators, Groups, outputNames;
 	int fontsize;
 	

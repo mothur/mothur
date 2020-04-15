@@ -83,7 +83,7 @@ CountGroupsCommand::CountGroupsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -157,8 +157,8 @@ int CountGroupsCommand::execute(){
 		
 		if (groupfile != "") {
             map<string, string> variables; 
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
@@ -187,8 +187,8 @@ int CountGroupsCommand::execute(){
         
         if (countfile != "") {
             map<string, string> variables; 
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
@@ -222,8 +222,8 @@ int CountGroupsCommand::execute(){
             Groups = lookup->getNamesGroups();
 			
             map<string, string> variables; 
-            string thisOutputDir = outputDir;
-            if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+            string thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
             string outputFileName = getOutputFileName("summary", variables);
             outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);

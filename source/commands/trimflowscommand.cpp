@@ -116,12 +116,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 				} 
 			}else if (flowFileName == "not open") { flowFileName = ""; abort = true; }	
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(flowFileName); //if user entered a file with a path then preserve it	
-			}
-			
+			if (outputdir == ""){	 outputdir += util.hasPath(flowFileName);  }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -212,7 +207,7 @@ int TrimFlowsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(flowFileName));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(flowFileName));
         string fastaFileName = getOutputFileName("fasta",variables);
 		if(fasta){ outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName); }
         

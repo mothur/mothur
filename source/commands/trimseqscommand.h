@@ -40,7 +40,7 @@ public:
 	
 private:    
 	bool abort, createGroup;
-	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile, outputDir;
+	string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile;
 	
 	bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient, logtransform;
 	int maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;

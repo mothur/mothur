@@ -78,9 +78,6 @@ GetCurrentCommand::GetCurrentCommand(string option)  {
 			clearTypes = validParameter.valid(parameters, "clear");
 			if (clearTypes == "not found") { clearTypes = ""; }
 			else { util.splitAtDash(clearTypes, types);	}
-            
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
 		}
 		
 	}
@@ -177,7 +174,7 @@ int GetCurrentCommand::execute(){
         
 		if (current->hasCurrentFiles()) {
             map<string, string> variables;
-            variables["[filename]"] = util.getFullPathName(outputDir);
+            variables["[filename]"] = util.getFullPathName(outputdir);
             string filename = getOutputFileName("summary", variables);
             
 			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
@@ -190,9 +187,9 @@ int GetCurrentCommand::execute(){
             m->mothurOutEndLine(); m->mothurOut("Current input directory saved by mothur: " + inputDir); m->mothurOutEndLine();
         }
         
-        string outputDir = current->getOutputDir();
-        if (outputDir != "") {
-            m->mothurOutEndLine(); m->mothurOut("Current output directory saved by mothur: " + outputDir); m->mothurOutEndLine();
+        string outputdir = current->getOutputDir();
+        if (outputdir != "") {
+            m->mothurOutEndLine(); m->mothurOut("Current output directory saved by mothur: " + outputdir); m->mothurOutEndLine();
         }
         string defaultPath = current->getDefaultPath();
         if (defaultPath != "") {

@@ -42,7 +42,7 @@ public:
 private:
 
 	vector<string> outputNames;	
-	string outputDir, inputDir, fastaQFile, format, oligosfile, groupfile, file, inputfile, ffastq, rfastq;
+	string  inputDir, fastaQFile, format, oligosfile, groupfile, file, inputfile, ffastq, rfastq;
 	bool abort, fasta, qual, pacbio, pairedOligos, reorient, createFileGroup, hasIndex;
     int pdiffs, bdiffs, ldiffs, sdiffs, tdiffs, split, numBarcodes, numPrimers, numLinkers, numSpacers, numRPrimers, fileOption;
     GroupMap* groupMap;

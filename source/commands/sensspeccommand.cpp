@@ -154,11 +154,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
                 m->mothurOut("[WARNING]: there is no reason to include a name file with a phylip file. Ignoring.\n"); abort = false;
             }
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter
-			outputDir = validParameter.valid(parameters, "outputdir");
-			if (outputDir == "not found"){
-				outputDir = ""; outputDir += util.hasPath(listFile); //if user entered a file with a path then preserve it
-			}
+			if (outputdir == ""){ outputdir += util.hasPath(listFile); }
 
 			string temp = validParameter.valid(parameters, "cutoff");		if (temp == "not found") { temp = "-1.00"; }
 			util.mothurConvert(temp, cutoff);
@@ -174,7 +170,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			}
 
             map<string, string> variables;
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listFile));
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
 			sensSpecFileName = getOutputFileName("sensspec",variables);
 		}
 

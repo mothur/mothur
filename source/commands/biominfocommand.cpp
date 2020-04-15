@@ -120,8 +120,6 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             map<string, string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-            
             //check for required parameters
             biomfile = validParameter.validFile(parameters, "biom");
             if (biomfile == "not open") { biomfile = ""; abort = true; }
@@ -402,10 +400,10 @@ int BiomInfoCommand::extractFilesFromHDF5() {
     try {
         //getting output filename
         string filename = biomfile;
-        if (outputDir == "") { outputDir += util.hasPath(filename); }
+        if (outputdir == "") { outputdir += util.hasPath(filename); }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
         string taxFilename = getOutputFileName("constaxonomy",variables);
@@ -596,10 +594,10 @@ int BiomInfoCommand::createFilesFromBiom() {
     try {
         //getting output filename
         string filename = biomfile;
-        if (outputDir == "") { outputDir += util.hasPath(filename); }
+        if (outputdir == "") { outputdir += util.hasPath(filename); }
         
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
         variables["[tag]"] = label;
         string sharedFilename = getOutputFileName("shared",variables);
         outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
@@ -760,7 +758,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             if (hasTaxonomy) {
                 //write taxonomy file
                 map<string, string> variables;
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                 variables["[tag]"] = label;
                 string taxFilename = getOutputFileName("taxonomy",variables);
                 outputNames.push_back(taxFilename); outputTypes["taxonomy"].push_back(taxFilename);
@@ -781,7 +779,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 outTax.close();
                 
                 //write taxonomy file
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                 variables["[tag]"] = label;
                 variables["[tag2]"] = "";
                 string taxSumFilename = getOutputFileName("taxsummary",variables);
@@ -797,7 +795,7 @@ int BiomInfoCommand::createFilesFromBiom() {
             }
             
             //set fileroot
-            fileroot = outputDir + util.getRootName(util.getSimpleName(biomfile));
+            fileroot = outputdir + util.getRootName(util.getSimpleName(biomfile));
         }
         
         if (m->getControl_pressed()) {  out.close(); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
@@ -830,7 +828,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                 if ((lookup->getNumBins() == conTaxonomy.size()) && (lookup->getNumBins() == otuNames.size())) {
                     //write taxonomy file
                     map<string, string> variables;
-                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                    variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                     variables["[tag]"] = label;
                     string taxFilename = getOutputFileName("constaxonomy",variables);
                     outputNames.push_back(taxFilename); outputTypes["constaxonomy"].push_back(taxFilename);
@@ -880,7 +878,7 @@ int BiomInfoCommand::createFilesFromBiom() {
                     outTax.close();
                     
                     //write taxonomy file
-                    variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(filename));
+                    variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
                     variables["[tag]"] = label;
                     variables["[tag2]"] = "cons";
                     string taxSumFilename = getOutputFileName("taxsummary",variables);

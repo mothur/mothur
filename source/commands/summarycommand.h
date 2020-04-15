@@ -40,7 +40,7 @@ private:
 
 	bool abort, allLines, groupMode, subsample, withReplacement;
 	set<string> labels; //holds labels to be used
-	string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
+	string label, calc,  sharedfile, listfile, rabundfile, sabundfile, format, inputfile;
 	vector<string>  Estimators;
 	vector<string> inputFileNames, outputNames;
 	vector<string> groups;

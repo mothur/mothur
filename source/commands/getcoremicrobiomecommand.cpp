@@ -112,10 +112,7 @@ GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
 				}
 			}
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = util.hasPath(inputFileName); //if user entered a file with a path then preserve it	
-			}
+           if (outputdir == ""){	 outputdir = util.hasPath(inputFileName);  }
             
             string groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
@@ -171,7 +168,6 @@ int GetCoreMicroBiomeCommand::execute(){
         
         if (format == "sharedfile") { //convert to relabund
             string options = "shared=" + sharedfile;
-            if (outputDir != "")                            { options += ", outputdir=" + outputDir;    }
             
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: get.relabund(" + options + ")\n");
@@ -226,7 +222,7 @@ int GetCoreMicroBiomeCommand::execute(){
 int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputFileName));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[tag]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("coremicrobiome", variables);
         outputNames.push_back(outputFileName);  outputTypes["coremicrobiome"].push_back(outputFileName);
@@ -317,7 +313,7 @@ int GetCoreMicroBiomeCommand::createTable(SharedRAbundFloatVectors*& lookup){
         if (m->getControl_pressed()) { return 0; }
         
         if ((samples != -1) || (!util.isEqual(abund, -1)))  {
-            string outputFileName2 = outputDir + util.getRootName(util.getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
+            string outputFileName2 = outputdir + util.getRootName(util.getSimpleName(inputFileName)) + lookup->getLabel() + ".core.microbiomelist";
             outputNames.push_back(outputFileName2);  outputTypes["coremicrobiome"].push_back(outputFileName2);
             ofstream out2;
             util.openOutputFile(outputFileName2, out2);

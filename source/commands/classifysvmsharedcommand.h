@@ -41,7 +41,6 @@ public:
 
 private:
     bool abort;
-    string outputDir;
     vector<string> outputNames, Groups;
 
     string sharedfile, designfile;

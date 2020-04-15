@@ -112,7 +112,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
@@ -300,8 +300,8 @@ int RemoveSeqsCommand::execute(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readFasta(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
@@ -369,8 +369,8 @@ void RemoveSeqsCommand::readFastq(){
 		ifstream in;
 		util.openInputFile(fastqfile, in);
 		
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
         variables["[extension]"] = util.getExtension(fastqfile);
@@ -422,8 +422,8 @@ void RemoveSeqsCommand::readFastq(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readQual(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
 		map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
         variables["[extension]"] = util.getExtension(qualfile);
@@ -482,8 +482,8 @@ void RemoveSeqsCommand::readQual(){
 void RemoveSeqsCommand::readCount(){
 	try {
         
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
         variables["[extension]"] = util.getExtension(countfile);
@@ -516,8 +516,8 @@ void RemoveSeqsCommand::readCount(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readList(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -608,8 +608,8 @@ void RemoveSeqsCommand::readList(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readName(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
@@ -707,8 +707,8 @@ void RemoveSeqsCommand::readName(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readGroup(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(groupfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
@@ -761,8 +761,8 @@ void RemoveSeqsCommand::readGroup(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readTax(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(taxfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
@@ -820,8 +820,8 @@ void RemoveSeqsCommand::readTax(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void RemoveSeqsCommand::readAlign(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(alignfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(alignfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
 		string outputFileName = getOutputFileName("alignreport", variables);
@@ -883,8 +883,8 @@ void RemoveSeqsCommand::readAlign(){
 //contigsreport file has a column header line then all other lines contain 8 columns.  we just want the first column since that contains the name
 void RemoveSeqsCommand::readContigs(){
     try {
-        string thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(contigsreportfile);  }
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(contigsreportfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(contigsreportfile));
         string outputFileName = getOutputFileName("contigsreport", variables);

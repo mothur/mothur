@@ -296,7 +296,7 @@ int CountTable::createTable(string namefile, string groupfile, vector<string> se
         }
         if (groupfile != "") { delete groupMap; }
 
-        return 0;
+        return total;
     }
 	catch(exception& e) {
 		m->errorOut(e, "CountTable", "createTable");
@@ -354,7 +354,10 @@ int CountTable::readTable(string file, string format) {
 /************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
     try {
-        return (readTable(file, readGroups, mothurRunning, nullVector));
+        
+        readTable(file, readGroups, mothurRunning, nullVector);
+       
+        return total;
     }
     catch(exception& e) {
         m->errorOut(e, "CountTable", "readTable");
@@ -364,7 +367,8 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning) {
 /************************************************************/
 int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning) {
     try {
-        return (readTable(in, readGroups, mothurRunning, nullVector));
+        readTable(in, readGroups, mothurRunning, nullVector);
+        return total;
     }
     catch(exception& e) {
         m->errorOut(e, "CountTable", "readTable");
@@ -418,6 +422,8 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
         readTable(in, readGroups, mothurRunning, selectedGroups);
         
         in.close();
+        
+        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "CountTable", "readTable");
@@ -493,7 +499,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
 
         bool error = false;
         string name;
-        int thisTotal;
+        int thisTotal = 0;
         uniques = 0;
         total = 0;
         while (!in.eof()) {

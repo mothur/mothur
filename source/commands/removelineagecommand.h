@@ -37,7 +37,7 @@ class RemoveLineageCommand : public Command {
 	
 	private:
 		vector<string> outputNames, listOfTaxons;
-		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile, outputDir, taxons, sharedfile, constaxonomy, label;
+		string fastafile, namefile, groupfile, alignfile, listfile, countfile, taxfile,  taxons, sharedfile, constaxonomy, label;
 		bool abort, dups;
 		
         string readTax();

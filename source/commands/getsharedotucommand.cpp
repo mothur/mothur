@@ -98,7 +98,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -306,9 +306,9 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		ofstream outNames;
 		string outputFileNames;
 		
-		if (outputDir == "") { outputDir += util.hasPath(listfile); }
+		if (outputdir == "") { outputdir += util.hasPath(listfile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(listfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listfile));
         variables["[distance]"] = shared->getLabel();
         variables["[group]"] = userGroups;
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
@@ -419,8 +419,8 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
-			if (outputDir == "") { outputDir += util.hasPath(fastafile); }
-            variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+			if (outputdir == "") { outputdir += util.hasPath(fastafile); }
+            variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 			string outputFileFasta = getOutputFileName("fasta", variables);
 			ofstream outFasta;
 			util.openOutputFile(outputFileFasta, outFasta);
@@ -501,9 +501,9 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 	try {
 		
 		string outputFileNames;
-		if (outputDir == "") { outputDir += util.hasPath(sharedfile); }
+		if (outputdir == "") { outputdir += util.hasPath(sharedfile); }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         variables["[group]"] = userGroups;
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }

@@ -101,7 +101,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
 			
 			//check for file parameters
 			listfile = validParameter.validFile(parameters, "list");
@@ -298,8 +298,8 @@ int RemoveRareCommand::processList(){
 			}
 		}
         
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(listfile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(listfile));
         variables["[extension]"] = util.getExtension(listfile);
@@ -454,8 +454,8 @@ int RemoveRareCommand::processList(){
 //**********************************************************************************************************************
 void RemoveRareCommand::processSabund(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sabundfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sabundfile));
         variables["[extension]"] = util.getExtension(sabundfile);
@@ -496,8 +496,8 @@ void RemoveRareCommand::processSabund(){
 //**********************************************************************************************************************
 void RemoveRareCommand::processRabund(){
 	try {
-		string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
+		string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(rabundfile);  }
         map<string, string> variables; 
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(rabundfile));
         variables["[extension]"] = util.getExtension(rabundfile);
@@ -568,8 +568,8 @@ void RemoveRareCommand::processShared(){
 void RemoveRareCommand::processLookup(SharedRAbundVectors*& lookup){
 	try {
 		
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(sharedfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);

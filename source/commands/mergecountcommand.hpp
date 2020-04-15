@@ -37,7 +37,7 @@ public:
 private:
     
     bool abort;
-    string outputDir, inputDir, countfile, output, outputFileName;
+    string  inputDir, countfile, output, outputFileName;
     vector<string> outputNames, fileNames;
     int numInputFiles;
     

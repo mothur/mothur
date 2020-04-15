@@ -91,7 +91,7 @@ DeuniqueTreeCommand::DeuniqueTreeCommand(string option)  {
 				else { 	m->mothurOut("You have no current name file and the name parameter is required.\n");  abort = true; }
 			}else { current->setNameFile(namefile); }
 			
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(treefile);	}
+					if (outputdir == ""){    outputdir = util.hasPath(treefile);	}
 		}
 	}
 	catch(exception& e) {
@@ -115,7 +115,7 @@ int DeuniqueTreeCommand::execute() {
 		
 		//print new Tree
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(treefile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(treefile));
 		string outputFile = getOutputFileName("tree", variables);
 		outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 		ofstream out;

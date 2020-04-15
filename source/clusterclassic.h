@@ -22,8 +22,8 @@ class ClusterClassic {
 	
 public:
 	ClusterClassic(float, string, bool);
-	int readPhylipFile(string, NameAssignment*);
-    int readPhylipFile(string, CountTable*);
+	void readPhylipFile(string, NameAssignment*);
+    void readPhylipFile(string, CountTable*);
 	void update(double&);
 	double getSmallDist() { return smallDist; }	
 	int getNSeqs() { return nseqs; }	

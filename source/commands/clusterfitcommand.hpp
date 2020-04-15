@@ -48,7 +48,7 @@ private:
     string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount, accnosfile;
     string comboDistFile;
     
-    string method, fileroot, tag, outputDir, inputDir, metric, initialize, metricName, criteria, refWeight;
+    string method, fileroot, tag,  inputDir, metric, initialize, metricName, criteria, refWeight;
     double cutoff, stableMetric;
     float adjust, fitPercent;
     int precision, length, maxIters, processors, denovoIters;

@@ -137,11 +137,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			if (outputdir == ""){	 outputdir += util.hasPath(fastafile);  }
 			
 			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
@@ -169,7 +165,7 @@ int SeqSummaryCommand::execute(){
         long start = time(NULL);
         
         map<string, string> variables; 
-		variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 		string outputFile = getOutputFileName("summary",variables);
         
         string nameOrCount = countfile;

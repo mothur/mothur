@@ -81,7 +81,7 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
  			
 			ValidParameters validParameter;
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";		}
+			
             
             string inputDir = validParameter.valid(parameters, "inputdir");
                        if (inputDir == "not found"){    inputDir = "";        }
@@ -137,7 +137,7 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
             
             outputFile = validParameter.valid(parameters, "output");
 			if (outputFile == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
-			if (outputDir != "") { outputFile = outputDir + util.getSimpleName(outputFile);  }
+			if (outputdir != "") { outputFile = outputdir + util.getSimpleName(outputFile);  }
             
             string temp = validParameter.valid(parameters, "keytrim");				if (temp == "not found") { temp = "F"; }
             keyTrim = util.isTrue(temp);
@@ -156,12 +156,12 @@ int MergeSfffilesCommand::execute(){
         
         if (file != "") {
             readFile();
-            if (outputDir == "") { outputDir = util.hasPath(file); }
+            if (outputdir == "") { outputdir = util.hasPath(file); }
         }
         ofstream out;
         map<string, string> variables;
-        string thisOutputDir = outputDir;
-		if (outputDir == "") {  thisOutputDir += util.hasPath(outputFile);  }
+        string thisOutputDir = outputdir;
+		if (outputdir == "") {  thisOutputDir += util.hasPath(outputFile);  }
         variables["[filename]"] = thisOutputDir + util.getSimpleName(outputFile);
 		outputFile = getOutputFileName("sff",variables);
         util.openOutputFileBinary(outputFile, out);

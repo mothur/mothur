@@ -17,6 +17,7 @@ nbproject/
 mothur
 Mothur.1
 DerivedData/
+mothur.entitlements
 
 *.stdout
 
@@ -24,3 +25,5 @@ uchime
 
 *.stderr
 *.pat
+
+tools/

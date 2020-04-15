@@ -37,7 +37,7 @@ public:
 private:
     
     bool abort, allLines, burnSampleSet, burnSet, createSampling, itersSet;
-    string label, calc, outputDir, sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
+    string label, calc,  sharedfile, listfile, rabundfile, sabundfile, format, inputfile, samplefile;
     double freq, sigmaAlpha, sigmaBeta, sigmaS, sigmaN, coverage;
     int iters, burn, burnSample, fitIters;
     vector<string> outputNames;

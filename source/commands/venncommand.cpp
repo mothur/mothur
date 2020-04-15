@@ -127,8 +127,8 @@ VennCommand::VennCommand(string option)  {
 				}
 			}
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile);		}
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile);		}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -238,7 +238,7 @@ int VennCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct.\n"); return 0;  }
 		
-		venn = new Venn(outputDir, nseqs, inputfile, fontsize, sharedOtus); 
+		venn = new Venn(outputdir, nseqs, inputfile, fontsize, sharedOtus); 
 		InputData input(inputfile, format, Groups);
 		
 		string lastLabel;

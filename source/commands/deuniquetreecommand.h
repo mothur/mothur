@@ -38,7 +38,7 @@ private:
 	int numUniquesInName;
 	
 	bool abort;
-	string outputDir, treefile, namefile;
+	string  treefile, namefile;
 	vector<string> outputNames;
 	map<string, string> nameMap;
 	int readNamesFile();

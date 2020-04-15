@@ -148,9 +148,6 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-			
 			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
 			
@@ -173,8 +170,8 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
                     string rootFileName = namefile;
                     if (rootFileName == "") { rootFileName = groupfile; }
                     
-                    if (outputDir == "") { outputDir = util.hasPath(rootFileName); }
-                    string outputFileName = outputDir + util.getRootName(util.getSimpleName(rootFileName)) + "count_table";
+                    if (outputdir == "") { outputdir = util.hasPath(rootFileName); }
+                    string outputFileName = outputdir + util.getRootName(util.getSimpleName(rootFileName)) + "count_table";
                     
                     CountTable ct; ct.createTable(namefile, groupfile, nullVector); ct.printCompressedTable(outputFileName);
                     outputNames.push_back(outputFileName); 
@@ -359,9 +356,9 @@ int ChimeraPerseusCommand::execute(){
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
         long start = time(NULL);
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string outputFileName = getOutputFileName("chimera", variables);
         string accnosFileName = getOutputFileName("accnos", variables);
         string newCountFile = "";
@@ -377,7 +374,7 @@ int ChimeraPerseusCommand::execute(){
             vector<string> groups;
             if (ct.testGroups(countfile, groups)) { //fills groups if count file has them
                 
-                variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(countfile));
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
                 newCountFile = getOutputFileName("count", variables);
                 
                 vector<string> groups;

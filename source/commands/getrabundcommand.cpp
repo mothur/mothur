@@ -140,8 +140,8 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			
 			if ((countfile != "") && (listfile == "")) { m->mothurOut("[ERROR]: You can only use the count file with a list file, aborting.\n"); abort = true; }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(inputfile); 	}			
+			 
+					if (outputdir == ""){    outputdir = util.hasPath(inputfile); 	}			
 		}
 	}
 	catch(exception& e) {
@@ -157,7 +157,7 @@ int GetRAbundCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
 		filename = getOutputFileName("rabund", variables);
 		util.openOutputFile(filename, out);
         

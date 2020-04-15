@@ -40,7 +40,7 @@ public:
 	
 private:
 	set<string> names;
-	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile, outputDir, groups, sharedfile, phylipfile, columnfile, sets;
+	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile,  groups, sharedfile, phylipfile, columnfile, sets;
 	bool abort;
 	vector<string> outputNames, Groups, Sets;
 	GroupMap* groupMap;

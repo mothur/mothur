@@ -111,9 +111,7 @@ SetCurrentCommand::SetCurrentCommand(string option)  {
             else if (currentFile == "not found") {  currentFile = "";  }
             if (currentFile != "") { readCurrentFiles(); } //setting variables overwrites the settings in the file.
             
-            //if the user changes the output directory command factory will send this info to us in the output parameter
-            outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){  outputDir = ""; }
-			
+            
 			//check for parameters
 			phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { m->mothurOut("Ignoring: " + parameters["phylip"]); m->mothurOutEndLine(); phylipfile = ""; }
@@ -354,7 +352,7 @@ int SetCurrentCommand::execute(){
         
         if (current->hasCurrentFiles()) {
             map<string, string> variables;
-            variables["[filename]"] = util.getFullPathName(outputDir);
+            variables["[filename]"] = util.getFullPathName(outputdir);
             string filename = getOutputFileName("summary", variables);
             
             current->printCurrentFiles(filename);

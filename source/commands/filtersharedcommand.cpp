@@ -111,8 +111,8 @@ FilterSharedCommand::FilterSharedCommand(string option) {
 				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
 			}else { current->setSharedFile(sharedfile); }
 			
-            //if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = util.hasPath(sharedfile);	}
+             
+					if (outputdir == ""){    outputdir = util.hasPath(sharedfile);	}
             
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -241,7 +241,7 @@ int FilterSharedCommand::execute(){
 int FilterSharedCommand::processShared(SharedRAbundVectors*& sharedLookup) {
 	try {
         map<string, string> variables; 
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[extension]"] = util.getExtension(sharedfile);
         variables["[distance]"] = sharedLookup->getLabel();
 		string outputFileName = getOutputFileName("shared", variables);        

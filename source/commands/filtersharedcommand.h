@@ -35,7 +35,7 @@ public:
 private:	
 	bool abort, pickedGroups, allLines, makeRare, keepties;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, sharedfile, accnosfile;
+	string groups, label,  sharedfile, accnosfile;
 	vector<string> Groups, outputNames;
 	int minAbund, minTotal, minSamples;
     float minPercent, minPercentSamples, rarePercent;

@@ -53,7 +53,7 @@ private:
 	
 	vector<string> Groups, outputNames, order;
 	set<string> labels;
-	string fileroot, outputDir, listfile, groupfile, biomfile, ordergroupfile, countfile;
+	string fileroot,  listfile, groupfile, biomfile, ordergroupfile, countfile;
 	bool firsttime, pickedGroups, abort, allLines;
 
 };

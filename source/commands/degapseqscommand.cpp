@@ -94,10 +94,9 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
             string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
             processors = current->setProcessors(temp);
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	
-				outputDir = "";	outputDir += util.hasPath(fastafile); //if user entered a file with a path then preserve it
-			}
+			 
+            if (outputdir == ""){   outputdir += util.hasPath(fastafile); }
+			
 		}
 	}
 	catch(exception& e) {
@@ -113,8 +112,8 @@ int DegapSeqsCommand::execute(){
 
         m->mothurOut("Degapping sequences from " + fastafile + " ...\n" );
         
-        string tempOutputDir = outputDir;
-        if (outputDir == "") { tempOutputDir = util.hasPath(fastafile); }
+        string tempOutputDir = outputdir;
+        if (outputdir == "") { tempOutputDir = util.hasPath(fastafile); }
         map<string, string> variables;
         variables["[filename]"] = tempOutputDir + util.getRootName(util.getSimpleName(fastafile));
         string degapFile = getOutputFileName("fasta", variables);

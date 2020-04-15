@@ -152,9 +152,9 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if(reportFileName == "not found"){	reportFileName = "";	}
 			else if (reportFileName == "not open") { reportFileName = ""; abort = true; }	
 			
-			outputDir = validParameter.valid(parameters, "outputdir");
-			if (outputDir == "not found"){ //if user entered a file with a path then preserve it
-				outputDir = util.hasPath(queryFileName); }
+			
+			if (outputdir == ""){ 
+				outputdir = util.hasPath(queryFileName); }
 			
             if ((countfile != "") && (namesFileName != "")) { m->mothurOut("You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
@@ -209,7 +209,7 @@ int SeqErrorCommand::execute(){
         substitutionMatrix.resize(6);
         for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
 		
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorSummaryFileName = getOutputFileName("errorsummary",variables);
@@ -686,7 +686,7 @@ vector<Sequence> SeqErrorCommand::getReferences(string refFileName){
 
 void SeqErrorCommand::printSubMatrix(vector<vector<int> >& substitutionMatrix){
 	try {
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string subMatrixFileName = getOutputFileName("errormatrix",variables);
@@ -736,7 +736,7 @@ void SeqErrorCommand::printSubMatrix(vector<vector<int> >& substitutionMatrix){
 
 void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, map<char, vector<int> >& errorReverse){
 	try{
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorForwardFileName = getOutputFileName("errorforward",variables);
@@ -785,7 +785,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> >& errorForward, ma
 
 void SeqErrorCommand::printErrorQuality(map<char, vector<int> >& qScoreErrorMap){
 	try{
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorQualityFileName = getOutputFileName("errorquality",variables);
@@ -820,7 +820,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> >& qualForwardMap, vecto
 				}
 			}
 		}
-        string fileNameRoot = outputDir + util.getRootName(util.getSimpleName(queryFileName));
+        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
         map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string qualityForwardFileName = getOutputFileName("errorqualforward",variables);

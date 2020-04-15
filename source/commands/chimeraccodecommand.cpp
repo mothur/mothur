@@ -102,9 +102,6 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
             
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.valid(parameters, "outputdir");		if (outputDir == "not found"){	outputDir = "";	}
-			
 			maskfile = validParameter.valid(parameters, "mask");
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
@@ -146,10 +143,10 @@ int ChimeraCcodeCommand::execute(){
         
         long start = time(NULL);
         
-        if (outputDir == "") { outputDir = util.hasPath(fastafile);  }//if user entered a file with a path then preserve it
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         string outputFileName, accnosFileName;
         map<string, string> variables;
-        variables["[filename]"] = outputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         string mapInfo = getOutputFileName("mapinfo", variables);
         if (maskfile != "") { variables["[tag]"] = maskfile; }
         outputFileName = getOutputFileName("chimera", variables);
@@ -162,7 +159,7 @@ int ChimeraCcodeCommand::execute(){
         if (m->getControl_pressed()) { util.mothurRemove(outputFileName); util.mothurRemove(accnosFileName);  return 0; }
         
         ofstream outHeader;
-        string tempHeader = outputDir + util.getRootName(util.getSimpleName(fastafile)) + maskfile + "ccode.chimeras.tempHeader";
+        string tempHeader = outputdir + util.getRootName(util.getSimpleName(fastafile)) + maskfile + "ccode.chimeras.tempHeader";
         util.openOutputFile(tempHeader, outHeader); outHeader << "For full window mapping info refer to " << mapInfo << endl << endl; outHeader.close();
         
         util.appendFiles(outputFileName, tempHeader);
@@ -198,7 +195,7 @@ int ChimeraCcodeCommand::execute(){
 
 int ChimeraCcodeCommand::driver(string outputFName, string filename, string accnos){
 	try {
-        MothurChimera* chimera = new Ccode(fastafile, templatefile, filter, maskfile, window, numwanted, outputDir);
+        MothurChimera* chimera = new Ccode(fastafile, templatefile, filter, maskfile, window, numwanted, outputdir);
         
         //is your template aligned?
         if (chimera->getUnaligned()) { m->mothurOut("[ERROR]: Your reference sequences are unaligned, please correct.\n");  delete chimera; return 0; }

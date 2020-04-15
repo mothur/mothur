@@ -37,7 +37,7 @@ public:
 	
 private:
 	
-	string filename, listfile, sabundfile, inputfile, format, outputDir, countfile, sharedfile;
+	string filename, listfile, sabundfile, inputfile, format,  countfile, sharedfile;
 	ofstream out;
 	vector<string> outputNames, Groups;
 
