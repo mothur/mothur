@@ -192,7 +192,7 @@ int DistanceCommand::execute(){
             Sequence seqI = alignDB.get(0);
             vector<int> colsToUse;
             for (int i = 0; i < seqI.getAligned().length(); i++) {
-                if (i % 10 == 0){ colsToUse.push_back(i); cout << i << endl; }
+                if (i % 8 == 0){ colsToUse.push_back(i); cout << i << endl; }
             }
             for(int i=0;i<numNewFasta;i++){
                 
@@ -215,18 +215,22 @@ int DistanceCommand::execute(){
                     Sequence sampledI("sampledI", seqISampledAligned);
                     Sequence sampledJ("sampledJ", seqJSampledAligned);
                     
-                    dist = distCalculator->calcDist(sampledI, sampledJ);
                     
-                    cout << sampledI.getName() << '\t' << sampledJ.getName() << '\t' << dist << endl;
                     
                     classifierOTU seqJOTU(seqJ.getAligned());
-                    vector<double> distOTU = distCalculator->calcDist(seqI, seqJOTU, colsToUse);
+                    vector<double> distOTU = distCalculator->calcDist(seqI, seqJOTU, nullIntVector);
                     
                     cout << seqI.getName() << '\t' << seqJ.getName() << '\t' << distOTU[0] << endl;
                     
-                    vector<string> thisAligned; thisAligned.push_back(seqJ.getAligned()); thisAligned.push_back(seqJ.getAligned());  thisAligned.push_back(seqI.getAligned());
+                    vector<string> thisAligned; thisAligned.push_back(seqJ.getAligned());  thisAligned.push_back(seqI.getAligned());
                     
                     classifierOTU seqAOTU(thisAligned);
+                    
+                    cout << seqISampledAligned << endl << seqJSampledAligned << endl;
+                    
+                    dist = distCalculator->calcDist(sampledI, sampledJ);
+                    
+                    cout << sampledI.getName() << '\t' << sampledJ.getName() << '\t' << dist << endl;
                     
                     distOTU = distCalculator->calcDist(seqI, seqAOTU, colsToUse);
                     

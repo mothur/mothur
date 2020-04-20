@@ -149,7 +149,7 @@ vector<double> oneGapIgnoreTermGapDist::calcDist(Sequence A, classifierOTU otu, 
                     bool openGapA = false;
                     bool openGapB = false;
                     
-                    for(int i=starts[h];i<ends[h];i++){
+                    for(int i=starts[h];i<=ends[h];i++){
                         
                         char seqA = seq.otuData[cols[i]][0];
                         vector<char> otuChars = otu.otuData[cols[i]];
