@@ -176,7 +176,68 @@ int DistanceCommand::execute(){
 		
 		//save number of new sequence
 		numNewFasta = alignDB.getNumSeqs();
-		
+        
+        if (true) {
+            DistCalc* distCalculator;
+            if (countends) {
+                if (calc == "nogaps")            {    distCalculator = new ignoreGaps(cutoff);    }
+                else if (calc == "eachgap")    {    distCalculator = new eachGapDist(cutoff);    }
+                else if (calc == "onegap")        {    distCalculator = new oneGapDist(cutoff);    }
+            }else {
+                if (calc == "nogaps")        {    distCalculator = new ignoreGaps(cutoff);                    }
+                else if (calc == "eachgap"){    distCalculator = new eachGapIgnoreTermGapDist(cutoff);    }
+                else if (calc == "onegap")    {    distCalculator = new oneGapIgnoreTermGapDist(cutoff);        }
+            }
+            
+            Sequence seqI = alignDB.get(0);
+            vector<int> colsToUse;
+            for (int i = 0; i < seqI.getAligned().length(); i++) {
+                if (i % 10 == 0){ colsToUse.push_back(i); cout << i << endl; }
+            }
+            for(int i=0;i<numNewFasta;i++){
+                
+                Sequence seqI = alignDB.get(i);
+                
+                for(int j=0;j<i;j++){
+                    
+                    if (m->getControl_pressed()) { break;  }
+                    
+                    Sequence seqJ = alignDB.get(j);
+                    double dist = distCalculator->calcDist(seqI, seqJ);
+                    
+                    cout << seqI.getName() << '\t' << seqJ.getName() << '\t' << dist << endl;
+                    
+                    string seqISampledAligned = ""; string seqJSampledAligned = "";
+                    for (int k = 0; k < colsToUse.size(); k++) {
+                        seqISampledAligned += seqI.getAligned()[colsToUse[k]];
+                        seqJSampledAligned += seqJ.getAligned()[colsToUse[k]];
+                    }
+                    Sequence sampledI("sampledI", seqISampledAligned);
+                    Sequence sampledJ("sampledJ", seqJSampledAligned);
+                    
+                    dist = distCalculator->calcDist(sampledI, sampledJ);
+                    
+                    cout << sampledI.getName() << '\t' << sampledJ.getName() << '\t' << dist << endl;
+                    
+                    classifierOTU seqJOTU(seqJ.getAligned());
+                    vector<double> distOTU = distCalculator->calcDist(seqI, seqJOTU, colsToUse);
+                    
+                    cout << seqI.getName() << '\t' << seqJ.getName() << '\t' << distOTU[0] << endl;
+                    
+                    vector<string> thisAligned; thisAligned.push_back(seqJ.getAligned()); thisAligned.push_back(seqJ.getAligned());  thisAligned.push_back(seqI.getAligned());
+                    
+                    classifierOTU seqAOTU(thisAligned);
+                    
+                    distOTU = distCalculator->calcDist(seqI, seqAOTU, colsToUse);
+                    
+                    for (int k = 0; k < distOTU.size(); k++) {
+                        cout << seqI.getName() << '\t' << k << '\t' << distOTU[k] << endl;
+                    }
+                }
+            }
+            
+            delete distCalculator;
+        }
 		//sanity check the oldfasta and column file as well as add oldfasta sequences to alignDB
         if ((oldfastafile != "") && (column != ""))  {	if (!(sanityCheck())) { return 0; }  }
 		

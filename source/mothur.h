@@ -188,6 +188,25 @@ struct classifierOTU {
         }
         numSeqs = 1;
     }
+    classifierOTU(vector<string> otu) {
+        int alignedLength = 0;
+        bool error = false;
+        if (otu.size() != 0) { alignedLength = otu[0].length(); }
+        for (int j = 0; j < otu.size(); j++) { if (otu[j].length() != alignedLength) { error = true;} }
+        
+        if (!error) {
+            for (int i = 0; i < alignedLength; i++) {
+                vector<char> thisSpot; set<char> thisChars;
+                for (int j = 0; j < otu.size(); j++) {
+                    thisSpot.push_back(otu[j][i]);
+                    thisChars.insert(otu[j][i]);
+                }
+                if (thisChars.size() == 1) { thisSpot.clear(); thisSpot.push_back(*thisChars.begin()); }// all same, reduce to 1.
+                otuData.push_back(thisSpot);
+            }
+            numSeqs = otu.size();
+        }else { numSeqs = 0; }
+    }
     classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
 };
 

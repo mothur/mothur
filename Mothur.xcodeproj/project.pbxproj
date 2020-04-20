@@ -48,6 +48,7 @@
 		4815BEC922970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
 		4815BECA22970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
+		481E40DB244DFF5A0059C925 /* onegapignore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40DA244DFF5A0059C925 /* onegapignore.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
 		481FB5271AC0ADBA0076CFF3 /* mothurout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B75D12D37EC400DA6239 /* mothurout.cpp */; };
@@ -948,6 +949,7 @@
 		4815BECB229717E100677EE2 /* diversitycalc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = diversitycalc.h; path = source/calculators/diversitycalc.h; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
+		481E40DA244DFF5A0059C925 /* onegapignore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = onegapignore.cpp; path = source/calculators/onegapignore.cpp; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		481FB51B1AC0A63E0076CFF3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = TestMothur/main.cpp; sourceTree = SOURCE_ROOT; };
 		481FB5281AC19F8B0076CFF3 /* setseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = setseedcommand.cpp; path = source/commands/setseedcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2337,6 +2339,7 @@
 				A7E9B77312D37EC400DA6239 /* onegapdist.h */,
 				48998B68242E785100DBD0A9 /* onegapdist.cpp */,
 				A7E9B77412D37EC400DA6239 /* onegapignore.h */,
+				481E40DA244DFF5A0059C925 /* onegapignore.cpp */,
 			);
 			name = distcalcs;
 			sourceTree = "<group>";
@@ -3823,6 +3826,7 @@
 				A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */,
 				48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */,
 				48E544491E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
+				481E40DB244DFF5A0059C925 /* onegapignore.cpp in Sources */,
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
 				48F1C16A23D78D7B0034DAAF /* sharedclrvectors.cpp in Sources */,

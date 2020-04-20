@@ -89,6 +89,7 @@ public:
     DistCalc(const DistCalc& d) : dist(d.dist) { m = MothurOut::getInstance(); }
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) = 0;
+    virtual vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols) { vector<double> dists; dists.resize(otu.numSeqs, 1.0); return dists; }
     
 protected:
     double dist;
