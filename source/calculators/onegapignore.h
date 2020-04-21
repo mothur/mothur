@@ -18,7 +18,6 @@ class oneGapIgnoreTermGapDist : public DistCalc {
 	
 public:
 	
-	oneGapIgnoreTermGapDist() {}
     oneGapIgnoreTermGapDist(double c) : DistCalc(c) {}
 	
     //finds the distance from A to each seq in otu.
@@ -30,8 +29,6 @@ public:
 private:
        
     
-       vector<int> setStarts(classifierOTU seqA, classifierOTU otu, vector<int> cols);
-       vector<int> setEnds(classifierOTU seqA, classifierOTU otu, vector<int> cols);
        
 
 };

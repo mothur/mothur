@@ -496,17 +496,18 @@ int driverLt(pairwiseData* params){
         
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
+        double cutoff = 1.0;
         if (params->countends) {
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
-                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
+                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
-                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
             }
         }
         
@@ -583,17 +584,18 @@ int driverSquare(pairwiseData* params){
         
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
+        double cutoff = 1.0;
         if (params->countends) {
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
-                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist();	}
+                if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
-                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                if (params->distcalcType == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                else if (params->distcalcType == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                else if (params->distcalcType == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
             }
         }
         

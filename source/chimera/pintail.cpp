@@ -31,7 +31,7 @@ Pintail::Pintail(string filename, string temp, bool f, string mask, string cons,
 		increment = inc; 
 		outputDir = o; 
 		
-		distcalculator = new eachGapDist();
+        distcalculator = new eachGapDist(1.0);
 		decalc = new DeCalculator();
 		
 		doPrep(version);

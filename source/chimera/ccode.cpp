@@ -23,7 +23,7 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	window = win;
 	numWanted = numW;
 	
-	distCalc = new eachGapDist();
+     distCalc = new eachGapDist(1.0);
 	decalc = new DeCalculator();
 	
      Utils util;

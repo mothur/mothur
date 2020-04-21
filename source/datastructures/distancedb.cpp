@@ -19,7 +19,7 @@ DistanceDB::DistanceDB() : Database() {
 	try {
 		templateAligned = true;  
 		templateSeqsLength = 0; 
-		distCalculator = new eachGapIgnoreTermGapDist();
+        distCalculator = new eachGapIgnoreTermGapDist(1.0);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceDB", "DistanceDB");
