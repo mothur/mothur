@@ -12,39 +12,22 @@
 
 double oneGapIgnoreTermGapDist::calcDist(Sequence A, Sequence B){
     try {
-        int difference = 0;
-        bool openGapA = false;
-        bool openGapB = false;
-        int start = 0;
-        int end = 0;
-        bool overlap = false;
-        
         string seqA = A.getAligned();
         string seqB = B.getAligned();
-        int alignLength = (int)seqA.length();
         
-        // this assumes that sequences start and end with '.'s instead of'-'s.
-        for(int i=0;i<alignLength;i++){
-            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){ //skip leading gaps
-                start = i;
-                
-                overlap = true;
-                break;
-            }
-        }
-        for(int i=alignLength-1;i>=0;i--){
-            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){ //ignore terminal gaps
-                end = i;
-                
-                overlap = true;
-                break;
-            }
-        }
+        int alignLength = (int)seqA.length();
+        bool overlap = false;
+        
+        int start = setStartIgnoreTermGap(seqA, seqB, overlap);
+        int end = setEndIgnoreTermGap(seqA, seqB, overlap);
         
         //non-overlapping sequences
         if (!overlap) { return 1.0000; }
     
         int maxMinLength = end - start;
+        int difference = 0;
+        bool openGapA = false;
+        bool openGapB = false;
         
         for(int i=start;i<=end;i++){
             if(seqA[i] == '-' && seqB[i] == '-'){    maxMinLength--;    } //comparing gaps, ignore

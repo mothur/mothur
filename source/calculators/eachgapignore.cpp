@@ -12,35 +12,20 @@
 
 double eachGapIgnoreTermGapDist::calcDist(Sequence A, Sequence B){
     try {
-        int diff = 0;
-        int start = 0;
-        int end = 0;
-        bool overlap = false;
-        
         string seqA = A.getAligned();
         string seqB = B.getAligned();
-        int alignLength = seqA.length();
         
-        for(int i=0;i<alignLength;i++){
-            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
-                start = i;
-                overlap = true;
-                break;
-            }
-        }
-        for(int i=alignLength-1;i>=0;i--){
-            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
-                end = i;
-                overlap = true;
-                break;
-            }
-        }
+        int alignLength = seqA.length();
+        bool overlap = false;
+        
+        int start = setStartIgnoreTermGap(seqA, seqB, overlap);
+        int end = setEndIgnoreTermGap(seqA, seqB, overlap);
         
         //non-overlapping sequences
         if (!overlap) { return 1.0000; }
         
         int maxMinLength = end - start + 1;
-        
+        int diff = 0;
         for(int i=start;i<alignLength;i++){
             if(seqA[i] == '.' || seqB[i] == '.'){ //reached terminal gaps, so quit
                 break;

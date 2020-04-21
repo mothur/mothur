@@ -15,27 +15,13 @@ double oneGapDist::calcDist(Sequence A, Sequence B){
         int difference = 0;
         bool openGapA = false;
         bool openGapB = false;
-        int start = 0;
         
         string seqA = A.getAligned();
         string seqB = B.getAligned();
         int alignLength = seqA.length();
         
-        for(int i=0;i<alignLength;i++){
-            if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
-                start = i;
-                break;
-            }
-        }
-        
-        
-        int end = 0;
-        for(int i=alignLength-1;i>=0;i--){
-            if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
-                end = i;
-                break;
-            }
-        }
+        int start = setStart(seqA, seqB);
+        int end = setEnd(seqA, seqB);
         
         int maxMinLength = end - start + 1;
         

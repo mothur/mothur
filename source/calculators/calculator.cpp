@@ -9,6 +9,93 @@
 #include "calculator.h"
 
 /***********************************************************************/
+int DistCalc::setStart(string seqA, string seqB) {
+    try {
+        int start = 0;
+        int alignLength = seqA.length();
+        
+        for(int i=0;i<alignLength;i++){
+            if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
+                start = i;
+                break;
+            }
+        }
+        
+        return start;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistCalc", "setStart");
+        exit(1);
+    }
+}
+/***********************************************************************/
+int DistCalc::setEnd(string seqA, string seqB) {
+    try {
+        int end = 0;
+        int alignLength = seqA.length();
+        
+        for(int i=alignLength-1;i>=0;i--){
+            if((seqA[i] != '.' || seqB[i] != '.')){ //one of you is not a terminal gap
+                end = i;
+                break;
+            }
+        }
+        return end;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistCalc", "setEnd");
+        exit(1);
+    }
+}
+/***********************************************************************/
+// this assumes that sequences start and end with '.'s instead of'-'s.
+int DistCalc::setStartIgnoreTermGap(string seqA, string seqB, bool& overlap) {
+    try {
+        
+        int start = 0;
+        int alignLength = seqA.length();
+        
+        for(int i=0;i<alignLength;i++){
+            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){ //skip leading gaps
+                start = i;
+                
+                overlap = true;
+                break;
+            }
+        }
+        
+        return start;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistCalc", "setStartIgnoreTermGap");
+        exit(1);
+    }
+}
+/***********************************************************************/
+// this assumes that sequences start and end with '.'s instead of'-'s.
+int DistCalc::setEndIgnoreTermGap(string seqA, string seqB, bool& overlap) {
+    try {
+        
+        int end = 0;
+        int alignLength = seqA.length();
+        
+        for(int i=alignLength-1;i>=0;i--){
+            if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){ //ignore terminal gaps
+                end = i;
+                
+                overlap = true;
+                break;
+            }
+        }
+        
+        return end;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistCalc", "setEndIgnoreTermGap");
+        exit(1);
+    }
+}
+/***********************************************************************/
 
 vector<int> DistCalc::setStartsIgnoreTermGap(classifierOTU seqA, classifierOTU otu, vector<int> cols){
     try {

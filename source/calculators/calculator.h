@@ -102,6 +102,11 @@ protected:
     vector<int> setStarts(classifierOTU seqA, classifierOTU otu, vector<int> cols);
     vector<int> setEnds(classifierOTU seqA, classifierOTU otu, vector<int> cols);
     
+    int setStart(string, string);
+    int setEnd(string, string);
+    int setStartIgnoreTermGap(string, string, bool&);
+    int setEndIgnoreTermGap(string, string, bool&);
+    
 };
 
 /**************************************************************************************************/
