@@ -8,18 +8,33 @@
 
 #include "optidb.hpp"
 #include "onegapdist.h"
+#include "ignoregaps.h"
+#include "eachgapdist.h"
+#include "eachgapignore.h"
+#include "onegapdist.h"
+#include "onegapignore.h"
 
 /**************************************************************************************************/
-OptiDB::OptiDB(double c) : Database(), cutoff(c), aligned(true), alignedLength(0) {
-    calc = new oneGapDist(cutoff);
+OptiDB::OptiDB(double c, string calcMethod, bool countends) : Database(), cutoff(c), aligned(true), alignedLength(0) {
+    
+    if (countends) {
+        if (calcMethod == "nogaps")         {    distCalculator = new ignoreGaps(cutoff);       }
+        else if (calcMethod == "eachgap")   {    distCalculator = new eachGapDist(cutoff);      }
+        else if (calcMethod == "onegap")    {    distCalculator = new oneGapDist(cutoff);       }
+    }else {
+        if (calcMethod == "nogaps")         {    distCalculator = new ignoreGaps(cutoff);                }
+        else if (calcMethod == "eachgap")   {    distCalculator = new eachGapIgnoreTermGapDist(cutoff);  }
+        else if (calcMethod == "onegap")    {    distCalculator = new oneGapIgnoreTermGapDist(cutoff);   }
+    }
 }
 /**************************************************************************************************/
 //adds otu with seq as only reference included
 void OptiDB::addSequence(Sequence seq)  {
     try {
+        classifierOTU thisOtu(seq.getAligned());
+        reference.push_back(thisOtu);
         
-        vector<Sequence> seqs; seqs.push_back(seq);
-        addSequences(seqs);
+        numSeqs++; //this is the number of otus
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "addSequence");
@@ -28,60 +43,21 @@ void OptiDB::addSequence(Sequence seq)  {
 }
 /**************************************************************************************************/
 //adds otu with seqs in it
-void OptiDB::addSequences(vector<Sequence> seqs)  {
+void OptiDB::addSequences(vector<Sequence> refs)  {
     try {
         
-        if (seqs.size() == 0) { return; } //sanity check
+        if (refs.size() == 0) { return; } //sanity check
         else {
-            if (alignedLength == 0) { //first otu, lets set it
-                alignedLength = seqs[0].getAligned().length();
-            }
+            vector<string> seqs;
+            for (int i = 0; i < refs.size(); i++) { seqs.push_back(refs[i].getAligned()); }
+            
+            classifierOTU thisOtu(seqs);
+            reference.push_back(thisOtu);
+            
+            numSeqs++; //this is the number of otus
+            
+            if (thisOtu.numSeqs == 0) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); aligned = false; m->setControl_pressed(true); }
         }
-        
-        vector<vector<char> > otuData;
-        
-        if (seqs.size() == 1) {
-            string aligned = seqs[0].getAligned();
-            
-            if (alignedLength != aligned.length()) { aligned = false; }
-            
-            for (int i = 0; i < aligned.length(); i++) {
-                vector<char> thisSpot;
-                thisSpot.push_back(aligned[i]);
-                
-                otuData.push_back(thisSpot);
-            }
-        }else {
-            otuData.resize(alignedLength);
-            
-            for (int i = 0; i < seqs.size(); i++) {
-                string aligned = seqs[i].getAligned();
-                
-                if (alignedLength != aligned.length()) { aligned = false; break; }
-                
-                for (int j = 0; j < alignedLength; j++) { otuData[j].push_back(aligned[j]); }
-            }
-            
-            //check for identical columns
-            for (int i = 0; i < otuData.size(); i++) { //for each alignment column
-                bool identical = true;
-                char thisChar = otuData[i][0]; //set it first seq in otu
-                
-                for (int j = 1; j < otuData[i].size(); j++) { //for each seq in the otu
-                    if (otuData[i][j] != thisChar) { identical = false; j += otuData[i].size(); }
-                }
-                
-                //if all seqs are identical in this column, reduce to 1 to save space
-                if (identical) { otuData[i].clear(); otuData[i].push_back(thisChar); }
-            }
-        }
-        
-        if (!aligned) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); }
-        
-        classifierOTU thisOtu(otuData, seqs.size());
-        reference.push_back(thisOtu);
-        
-        numSeqs++; //this is the number of otus
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "addSequences");

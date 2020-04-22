@@ -195,6 +195,7 @@ struct classifierOTU {
         for (int j = 0; j < otu.size(); j++) { if (otu[j].length() != alignedLength) { error = true;} }
         
         if (!error) {
+            
             for (int i = 0; i < alignedLength; i++) {
                 vector<char> thisSpot; set<char> thisChars;
                 for (int j = 0; j < otu.size(); j++) {
@@ -205,7 +206,7 @@ struct classifierOTU {
                 otuData.push_back(thisSpot);
             }
             numSeqs = otu.size();
-        }else { numSeqs = 0; }
+        }else {  numSeqs = 0; }
     }
     classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
 };

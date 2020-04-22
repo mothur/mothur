@@ -18,7 +18,7 @@ class OptiDB : public Database {
 
 public:
     
-    OptiDB(double);
+    OptiDB(double, string, bool); //cutoff, calcMethod, countends
     ~OptiDB() {}
     
     void addSequence(Sequence); //add otu with single seq
@@ -35,9 +35,10 @@ private:
     int alignedLength;
     double cutoff;
     
+    
     vector<classifierOTU> reference;
     
-    DistCalc* calc;
+    DistCalc* distCalculator;
     
 };
 
