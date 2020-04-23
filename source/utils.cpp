@@ -3792,7 +3792,8 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
             if (m->getControl_pressed()) { break; }
 
             string line = trimWhiteSpace(getline(in));
-            checkName(line); names.push_back(line);
+            checkName(line);
+            if (line != "") { names.push_back(line); }
         }
         in.close();
 
