@@ -11,7 +11,6 @@
 
 #include "mothur.h"
 #include "classify.h"
-#include "optidata.hpp"
 
 /**************************************************************************************************/
 
@@ -24,10 +23,15 @@ public:
     string getTaxonomy(Sequence*, string&, bool&) { return "not done yet"; }
     
 private:
-    OptiData* matrix;
     
-        
-    vector< vector<string> > binReferences();
+    vector< vector< vector<float> > > charGenusProb;    //[locationInAlignment][base][genus]
+                                        //charGenusProb[0][3][392] = probability that a sequence within genus that's index in the tree is 392 would contain 'C' at alignment position 0; charGenusProb[23][0][392] = probability that a sequence within genus that's index in the tree is 392 would contain 'A' at alignment position 23;
+    
+    vector<int> genusTotals; //number of sequence at each genus
+    vector<int> genusNodes;  //indexes in phyloTree where genus' are located
+    
+    int alignmentLength;
+    void readProbFile(ifstream&, ifstream&);
 
     
 };

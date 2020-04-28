@@ -232,6 +232,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             //look for vsearch exe
             path = current->getProgramPath();
             
+            if (!foundTool) { abort = true; }
             if (foundTool && !abort) {
                         
                 if (versionOutputs.size() != 0) {

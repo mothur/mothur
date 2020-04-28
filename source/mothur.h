@@ -157,7 +157,7 @@ typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
 const vector<int> nullIntVector; //used to pass blank ints
-
+const vector<char> nullCharVector; //used to pass blank char
 /**************************************************************************************************/
 struct classifierOTU {
     vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU
@@ -178,7 +178,7 @@ struct classifierOTU {
      otuData[i] > {charInAllCols} if all chars in otuData[i] are identical. ie, ignore column
      otuData[i] > {a} all seqs contain 'a' in column i of alignment
      */
-    
+    classifierOTU(){ numSeqs = 0; }
     classifierOTU(string aligned) {
         for (int i = 0; i < aligned.length(); i++) {
             vector<char> thisSpot;
@@ -188,7 +188,10 @@ struct classifierOTU {
         }
         numSeqs = 1;
     }
-    classifierOTU(vector<string> otu) {
+    classifierOTU(vector<string> otu) { readSeqs(otu); }
+    classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
+    
+    void readSeqs(vector<string> otu) {
         int alignedLength = 0;
         bool error = false;
         if (otu.size() != 0) { alignedLength = otu[0].length(); }
@@ -208,9 +211,8 @@ struct classifierOTU {
             numSeqs = otu.size();
         }else {  numSeqs = 0; }
     }
-    classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
+    
 };
-
 
 //******************************************************
 struct mcmcSample {
