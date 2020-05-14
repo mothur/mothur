@@ -663,7 +663,7 @@ int driverPcr(pcrData* params){
                 if (totalDiffs > (params->pdiffs + params->rdiffs)) { trashCode += "t"; goodSeq = false; }
                 
                 //remove super short reads
-                if (currSeq.getUnaligned() == "") { goodSeq = false;  }
+                if (currSeq.getUnaligned() == "") { goodSeq = false;  currSeq.setAligned("NNNNNNN"); }
                 
                 if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);

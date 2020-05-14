@@ -60,8 +60,7 @@ public:
 	
 	
 private:
-	ListVector* list;
-	GroupMap* groupMap;
+	
     map<string, int> nameMap;
     OptiData* matrix;
     CountTable ct;
@@ -75,13 +74,12 @@ private:
     float cutoff;
 	int precision;
     
-	void readNamesFile(FastaMap*&);
-	//void readNamesFile(bool);
-	int process(ListVector*);
+	void readNamesFile(FastaMap&);
+    int process(ListVector*, GroupMap&);
 	string findRep(vector<string>, map<string, long long>&, string); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
     string findRepAbund(vector<string>, string);
 	int processNames(string, string);
-	int processFastaNames(string, string, FastaMap*&);
+	int processFastaNames(string, string, FastaMap&, GroupMap&);
     int readDist();
     void createCount();
 };
