@@ -23,7 +23,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance-align", "kmer", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
-		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "wang-knn-zap-opti", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
         CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
@@ -67,7 +67,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The name parameter allows you add a names file with your fasta file.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
-		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
+		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, opti, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is all available.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
@@ -308,15 +308,15 @@ int ClassifySeqsCommand::execute(){
         
         string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());	}
-		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber(), current->getVersion());				}
+		else if(method == "opti"){    classify = new OptiClassifier(taxonomyFileName, templateFileName, cutoff, iters, writeShortcuts, current->getVersion());    }
+        else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber(), current->getVersion());				}
         else if(method == "zap"){	
             outputMethodTag = search + "_" + outputMethodTag;
             if (search == "kmer") {   classify = new KmerTree(templateFileName, taxonomyFileName, kmerSize, cutoff); }
             else {  classify = new AlignTree(templateFileName, taxonomyFileName, cutoff);  }
         }
 		else {
-			m->mothurOut(search + " is not a valid method option. I will run the command using wang.");
-			m->mothurOutEndLine();
+			m->mothurOut(search + " is not a valid method option. I will run the command using wang.\n");
 			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());
 		}
 		

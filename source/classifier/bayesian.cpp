@@ -12,7 +12,7 @@
 #include "phylosummary.h"
 
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh, string version) :
+Bayesian::Bayesian(string txfile, string tempFile, string method, int ksize, int cutoff, int i, int tid, bool f, bool sh, string version) :
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 	try {
 		
@@ -20,7 +20,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		flip = f;
         shortcuts = sh;
         string baseName = tempFile;
-        string baseTName = tfile;
+        string baseTName = txfile;
         Utils util;
         
         /************calculate the probablity that each word will be in a specific taxonomy*************/
@@ -64,7 +64,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         }else{
 		
 			//create search database and names vector
-			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0, version);
+			generateDatabaseAndNames(txfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0, version);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
 			if (m->getControl_pressed()) {  util.mothurRemove(phyloTreeName);  util.mothurRemove(probFileName); util.mothurRemove(probFileName2); }
@@ -86,7 +86,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 				wordGenusProb.resize(numKmers);
                 for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
 			
-				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
+                for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size(), 0.0);		}
                 ofstream out; ofstream out2;
 
                 if (shortcuts) { 

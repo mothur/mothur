@@ -17,7 +17,8 @@
 class OptiClassifier : public Classify {
     
 public:
-    OptiClassifier(string reffasta, string reftax, string mothurVersion);
+    
+    OptiClassifier(string reftax, string reffasta, int cutoff, int iters, bool shortcuts, string mothurVersion);
     ~OptiClassifier() {}
     
     string getTaxonomy(Sequence*, string&, bool&) { return "not done yet"; }
@@ -30,7 +31,7 @@ private:
     vector<int> genusTotals; //number of sequence at each genus
     vector<int> genusNodes;  //indexes in phyloTree where genus' are located
     
-    int alignmentLength;
+    int confidenceThreshold, iters;
     void readProbFile(ifstream&, ifstream&);
 
     
