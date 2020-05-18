@@ -23,6 +23,8 @@ public:
             m = MothurOut::getInstance();
             current = CurrentFile::getInstance();
             
+            m->resetCommandErrors();
+            
             string temppath = tpath.substr(0, (tpath.find_last_of("othur")-5));
             
             //this will happen if you set the path variable to contain mothur's exe location

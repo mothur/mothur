@@ -477,7 +477,7 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
-		DistCalc* distcalculator = new eachGapDist();
+        DistCalc* distcalculator = new eachGapDist(1.0);
 		
 		string queryUnAligned = querySeq.getUnaligned();
 		int numBases = int(queryUnAligned.length() * 0.33);
@@ -637,7 +637,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		
 		Sequence* seqsMatch;  
 		
-		DistCalc* distcalculator = new eachGapDist();
+        DistCalc* distcalculator = new eachGapDist(1.0);
 		int index = 0;
 		int smallest = 1000000;
 		

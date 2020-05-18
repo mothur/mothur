@@ -207,7 +207,7 @@ int ChimeraSlayer::doPrep() {
 				databaseLeft->generateDB();
 				
 			}else {	
-				databaseLeft->readKmerDB(kmerFileTestLeft);	
+				databaseLeft->readDB(kmerFileTestLeft);
 			}
 			kmerFileTestLeft.close();
 			
@@ -237,9 +237,7 @@ int ChimeraSlayer::doPrep() {
 				}
 				databaseRight->generateDB();
 				
-			}else {	
-				databaseRight->readKmerDB(kmerFileTestRight);	
-			}
+			}else {	 databaseRight->readDB(kmerFileTestRight);	 }
 			kmerFileTestRight.close();
 			
 			databaseRight->setNumSeqs(templateSeqs.size());

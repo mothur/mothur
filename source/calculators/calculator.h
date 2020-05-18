@@ -84,18 +84,29 @@ protected:
 class DistCalc {
     
 public:
-    DistCalc(){ setCutoff = false; dist = 0; cutoff = 1.0;  m = MothurOut::getInstance(); } //no cutoff
-    DistCalc(double c){ setCutoff = true; dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
-    DistCalc(const DistCalc& d) : dist(d.dist) { m = MothurOut::getInstance(); }
+    DistCalc(double c){ dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
+
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) = 0;
+    virtual vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols) { vector<double> dists; dists.resize(otu.numSeqs, 1.0); return dists; }
     
 protected:
     double dist;
     MothurOut* m;
     Utils util;
     double cutoff;
-    bool setCutoff;
+    
+    vector<int> setStartsIgnoreTermGap(classifierOTU seqA, classifierOTU otu, vector<int> cols);
+    vector<int> setEndsIgnoreTermGap(classifierOTU seqA, classifierOTU otu, vector<int> cols);
+    
+    vector<int> setStarts(classifierOTU seqA, classifierOTU otu, vector<int> cols);
+    vector<int> setEnds(classifierOTU seqA, classifierOTU otu, vector<int> cols);
+    
+    int setStart(string, string);
+    int setEnd(string, string);
+    int setStartIgnoreTermGap(string, string, bool&);
+    int setEndIgnoreTermGap(string, string, bool&);
+    
 };
 
 /**************************************************************************************************/

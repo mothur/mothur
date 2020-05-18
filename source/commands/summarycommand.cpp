@@ -321,7 +321,8 @@ int SummaryCommand::execute(){
 			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
 		
-        for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }
+        if ((format != "sharedfile")) {}
+        else { for (int p = 0; p < inputFileNames.size(); p++) { util.mothurRemove(inputFileNames[p]); }}
         
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }  return 0;  }
 		

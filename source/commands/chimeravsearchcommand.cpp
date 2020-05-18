@@ -221,7 +221,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                 if(!ableToOpen) {
                     m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
                     foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
-                }
+                }else { foundTool = true; }
             }
 
             
@@ -232,6 +232,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
             //look for vsearch exe
             path = current->getProgramPath();
             
+            if (!foundTool) { abort = true; }
             if (foundTool && !abort) {
                         
                 if (versionOutputs.size() != 0) {

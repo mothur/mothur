@@ -51,15 +51,15 @@ public:
     
     virtual ~Database(){};
     virtual void generateDB() = 0;
-    virtual void readKmerDB(ifstream&){};
+    virtual void readDB(ifstream&){};
     virtual void addSequence(Sequence) = 0;  //add sequence to search engine
     virtual void addSequences(vector<Sequence> seqs) { for (int i = 0; i < seqs.size(); i++) { addSequence(seqs[i]); } }
 
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
     
-    
 	virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) const = 0;  // returns indexes of n closest sequences to query
 	
+    virtual vector< vector<int> > get(int i, char& s) { s='x'; vector< vector<int> > blank; return blank; }
     virtual int getLongestBase() {	return longest+1;		}
     virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };
 	virtual int getReversed(int) { return 0; } 

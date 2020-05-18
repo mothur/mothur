@@ -378,7 +378,6 @@ void alignDriver(alignStruct* params) {
 				//if there is a possibility that this sequence should be reversed
 				if (candidateSeq->getNumBases() < numBasesNeeded) {
 					numFlipped_1++;
-					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (params->flip) {
 				
@@ -406,19 +405,15 @@ void alignDriver(alignStruct* params) {
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
-							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
+                            params->accnosWriter->write(candidateSeq->getName()+ '\n');
                             numFlipped_0++;
-						}else{  
-							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
+						}else{
 							delete nast2;
                             delete templateSeq2;
 							delete copy;	
 						}
                         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: done.\n"); }
 					}
-					
-					//create accnos file with names
-					params->accnosWriter->write(candidateSeq->getName() + wasBetter + "\n");
 				}
 				
 				report.setTemplate(templateSeq);

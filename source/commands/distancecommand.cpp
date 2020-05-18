@@ -176,7 +176,70 @@ int DistanceCommand::execute(){
 		
 		//save number of new sequence
 		numNewFasta = alignDB.getNumSeqs();
-		
+        
+        if (false) {
+            DistCalc* distCalculator;
+            if (countends) {
+                if (calc == "nogaps")            {    distCalculator = new ignoreGaps(cutoff);    }
+                else if (calc == "eachgap")    {    distCalculator = new eachGapDist(cutoff);    }
+                else if (calc == "onegap")        {    distCalculator = new oneGapDist(cutoff);    }
+            }else {
+                if (calc == "nogaps")        {    distCalculator = new ignoreGaps(cutoff);                    }
+                else if (calc == "eachgap"){    distCalculator = new eachGapIgnoreTermGapDist(cutoff);    }
+                else if (calc == "onegap")    {    distCalculator = new oneGapIgnoreTermGapDist(cutoff);        }
+            }
+            
+            Sequence seqI = alignDB.get(0);
+            vector<int> colsToUse;
+            for (int i = 0; i < seqI.getAligned().length(); i++) {
+                if (i % 8 == 0){ colsToUse.push_back(i); cout << i << endl; }
+            }
+            for(int i=0;i<numNewFasta;i++){
+                
+                Sequence seqI = alignDB.get(i);
+                
+                for(int j=0;j<i;j++){
+                    
+                    if (m->getControl_pressed()) { break;  }
+                    
+                    Sequence seqJ = alignDB.get(j);
+                    double dist = distCalculator->calcDist(seqI, seqJ);
+                    
+                    cout << "seq2seq Dist = "  << dist << endl;
+                    
+                    string seqISampledAligned = ""; string seqJSampledAligned = "";
+                    for (int k = 0; k < colsToUse.size(); k++) {
+                        seqISampledAligned += seqI.getAligned()[colsToUse[k]];
+                        seqJSampledAligned += seqJ.getAligned()[colsToUse[k]];
+                    }
+                    Sequence sampledI("sampledI", seqISampledAligned);
+                    Sequence sampledJ("sampledJ", seqJSampledAligned);
+                    
+                    classifierOTU seqJOTU(seqJ.getAligned());
+                    vector<double> distOTU = distCalculator->calcDist(seqI, seqJOTU, nullIntVector);
+                    
+                    cout << "seq2OTU Dist = " << distOTU[0] << endl;
+                    
+                    vector<string> thisAligned; thisAligned.push_back(seqJ.getAligned());  thisAligned.push_back(seqI.getAligned());
+                    
+                    classifierOTU seqAOTU(thisAligned);
+                    
+                    //cout << seqISampledAligned << endl << seqJSampledAligned << endl;
+                    
+                    dist = distCalculator->calcDist(sampledI, sampledJ);
+                    
+                    cout << "sampled seq2seq dist = " << dist << endl;
+                    
+                    distOTU = distCalculator->calcDist(seqI, seqAOTU, colsToUse);
+                    
+                    for (int k = 0; k < distOTU.size(); k++) {
+                        cout << "sampled seq2OTU dist = "  << distOTU[k] << endl;
+                    }
+                }
+            }
+            
+            delete distCalculator;
+        }
 		//sanity check the oldfasta and column file as well as add oldfasta sequences to alignDB
         if ((oldfastafile != "") && (column != ""))  {	if (!(sanityCheck())) { return 0; }  }
 		
@@ -338,17 +401,18 @@ void driverLt(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
+        double cutoff = 1.0;
         if (params->countends) {
             if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist();	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist();	}
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
             }
         }
         
@@ -404,17 +468,18 @@ void driverSquare(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
+        double cutoff = 1.0;
         if (params->countends) {
             if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps();	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist();	    }
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist();	}
+                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	    }
+                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps();					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
+                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
             }
         }
         int startTime = time(NULL);
