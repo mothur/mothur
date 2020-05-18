@@ -9,6 +9,7 @@
 #include "optidb.hpp"
 
 /**************************************************************************************************/
+
 OptiDB::OptiDB(string referenceFileName, string v) : Database() {
     alignedLength = 0;
     baseMap['A'] = 0;
@@ -71,6 +72,7 @@ void OptiDB::convertSequences()  {
         
         if (refs.size() == 0) { return; } //sanity check
         else {
+
             vector<string> seqs;
             for (int i = 0; i < refs.size(); i++) {
                 lengths.insert(refs[i].getAligned().length());

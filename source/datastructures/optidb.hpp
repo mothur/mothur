@@ -33,7 +33,9 @@ public:
     
 private:
     
+
     string optiDBName, version;
+
     int alignedLength;
     classifierOTU reference;
     map<char, int> baseMap;
