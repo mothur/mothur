@@ -121,8 +121,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				accnosfile = current->getAccnosFile();
 				if (accnosfile != "") {  m->mothurOut("Using " + accnosfile + " as input file for the accnos parameter.\n");  }
 				else { 
-					m->mothurOut("You have no valid accnos file and accnos is required.\n");  
-					abort = true;
+					m->mothurOut("[ERROR]: You have no valid accnos file and accnos is required.\n"); abort = true;
 				}  
 			}else { current->setAccnosFile(accnosfile); }	
 			

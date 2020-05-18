@@ -732,6 +732,8 @@ void GetGroupsCommand::readDesign(){
         if (numGroupsFound > 0) { wroteSomething = true; }
 				
         out.close();
+        
+        names.clear(); names = util.mothurConvert(Groups);
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain groups from the groups you wish to get.\n");   }
 		outputTypes["design"].push_back(outputFileName); outputNames.push_back(outputFileName);

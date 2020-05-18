@@ -48,6 +48,11 @@
 		4815BEC922970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
 		4815BECA22970FA700677EE2 /* sishift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEC722970FA700677EE2 /* sishift.cpp */; };
 		481623E21B56A2DB004C60B7 /* pcrseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */; };
+		481E40DB244DFF5A0059C925 /* onegapignore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40DA244DFF5A0059C925 /* onegapignore.cpp */; };
+		481E40DD244F52460059C925 /* ignoregaps.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40DC244F52460059C925 /* ignoregaps.cpp */; };
+		481E40DF244F619D0059C925 /* eachgapignore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40DE244F619D0059C925 /* eachgapignore.cpp */; };
+		481E40E1244F62980059C925 /* calculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40E0244F62980059C925 /* calculator.cpp */; };
+		481E40E3244F6A050059C925 /* eachgapdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481E40E2244F6A050059C925 /* eachgapdist.cpp */; };
 		481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 481FB51B1AC0A63E0076CFF3 /* main.cpp */; };
 		481FB5261AC0ADA00076CFF3 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DB12D37EC400DA6239 /* sequence.cpp */; };
 		481FB5271AC0ADBA0076CFF3 /* mothurout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B75D12D37EC400DA6239 /* mothurout.cpp */; };
@@ -948,6 +953,11 @@
 		4815BECB229717E100677EE2 /* diversitycalc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = diversitycalc.h; path = source/calculators/diversitycalc.h; sourceTree = SOURCE_ROOT; };
 		481623E11B56A2DB004C60B7 /* pcrseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pcrseqscommand.cpp; path = source/commands/pcrseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		481623E31B58267D004C60B7 /* INSTALL.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = INSTALL.md; sourceTree = SOURCE_ROOT; };
+		481E40DA244DFF5A0059C925 /* onegapignore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = onegapignore.cpp; path = source/calculators/onegapignore.cpp; sourceTree = SOURCE_ROOT; };
+		481E40DC244F52460059C925 /* ignoregaps.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ignoregaps.cpp; path = source/calculators/ignoregaps.cpp; sourceTree = SOURCE_ROOT; };
+		481E40DE244F619D0059C925 /* eachgapignore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = eachgapignore.cpp; path = source/calculators/eachgapignore.cpp; sourceTree = SOURCE_ROOT; };
+		481E40E0244F62980059C925 /* calculator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = calculator.cpp; path = source/calculators/calculator.cpp; sourceTree = SOURCE_ROOT; };
+		481E40E2244F6A050059C925 /* eachgapdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = eachgapdist.cpp; path = source/calculators/eachgapdist.cpp; sourceTree = SOURCE_ROOT; };
 		481FB5191AC0A63E0076CFF3 /* TestMothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		481FB51B1AC0A63E0076CFF3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = TestMothur/main.cpp; sourceTree = SOURCE_ROOT; };
 		481FB5281AC19F8B0076CFF3 /* setseedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = setseedcommand.cpp; path = source/commands/setseedcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2332,11 +2342,15 @@
 			isa = PBXGroup;
 			children = (
 				A7E9B6D512D37EC400DA6239 /* eachgapdist.h */,
+				481E40E2244F6A050059C925 /* eachgapdist.cpp */,
 				A7E9B6D612D37EC400DA6239 /* eachgapignore.h */,
+				481E40DE244F619D0059C925 /* eachgapignore.cpp */,
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
+				481E40DC244F52460059C925 /* ignoregaps.cpp */,
 				A7E9B77312D37EC400DA6239 /* onegapdist.h */,
 				48998B68242E785100DBD0A9 /* onegapdist.cpp */,
 				A7E9B77412D37EC400DA6239 /* onegapignore.h */,
+				481E40DA244DFF5A0059C925 /* onegapignore.cpp */,
 			);
 			name = distcalcs;
 			sourceTree = "<group>";
@@ -2719,6 +2733,7 @@
 			isa = PBXGroup;
 			children = (
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
+				481E40E0244F62980059C925 /* calculator.cpp */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
 				A7E9B86112D37EC400DA6239 /* treecalculator.h */,
 				4815BECB229717E100677EE2 /* diversitycalc.h */,
@@ -3522,6 +3537,7 @@
 				A7E9B8A212D37EC400DA6239 /* classifyotucommand.cpp in Sources */,
 				A7E9B8A312D37EC400DA6239 /* classifyseqscommand.cpp in Sources */,
 				488C1DE6241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */,
+				481E40E1244F62980059C925 /* calculator.cpp in Sources */,
 				A7E9B8A412D37EC400DA6239 /* clearcut.cpp in Sources */,
 				48ED1E79235E1ACA003E66F7 /* scriptengine.cpp in Sources */,
 				A7E9B8A512D37EC400DA6239 /* clearcutcommand.cpp in Sources */,
@@ -3535,6 +3551,7 @@
 				48E5446C1E9D3A8C00FF6AB8 /* f1score.cpp in Sources */,
 				A7E9B8AC12D37EC400DA6239 /* cmdargs.cpp in Sources */,
 				A7E9B8AD12D37EC400DA6239 /* collect.cpp in Sources */,
+				481E40DF244F619D0059C925 /* eachgapignore.cpp in Sources */,
 				A7E9B8AE12D37EC400DA6239 /* collectcommand.cpp in Sources */,
 				A7E9B8AF12D37EC400DA6239 /* collectsharedcommand.cpp in Sources */,
 				A7E9B8B012D37EC400DA6239 /* commandfactory.cpp in Sources */,
@@ -3633,6 +3650,7 @@
 				A7E9B90612D37EC400DA6239 /* needlemanoverlap.cpp in Sources */,
 				A7E9B90712D37EC400DA6239 /* noalign.cpp in Sources */,
 				A7E9B90812D37EC400DA6239 /* nocommands.cpp in Sources */,
+				481E40DD244F52460059C925 /* ignoregaps.cpp in Sources */,
 				A7E9B90912D37EC400DA6239 /* normalizesharedcommand.cpp in Sources */,
 				A7E9B90A12D37EC400DA6239 /* npshannon.cpp in Sources */,
 				A7E9B90B12D37EC400DA6239 /* odum.cpp in Sources */,
@@ -3823,6 +3841,7 @@
 				A754149714840CF7005850D1 /* summaryqualcommand.cpp in Sources */,
 				48705AC619BE32C50075E977 /* mergesfffilecommand.cpp in Sources */,
 				48E544491E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
+				481E40DB244DFF5A0059C925 /* onegapignore.cpp in Sources */,
 				A7A3C8C914D041AD00B1BFBE /* otuassociationcommand.cpp in Sources */,
 				A7A32DAA14DC43B00001D2E5 /* sortseqscommand.cpp in Sources */,
 				48F1C16A23D78D7B0034DAAF /* sharedclrvectors.cpp in Sources */,
@@ -3845,6 +3864,7 @@
 				48E5447C1E9D3F0400FF6AB8 /* fdr.cpp in Sources */,
 				484976DF22552E0B00F3A291 /* erarefaction.cpp in Sources */,
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
+				481E40E3244F6A050059C925 /* eachgapdist.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
 				835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */,

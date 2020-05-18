@@ -143,7 +143,6 @@ int MakeFileCommand::execute(){
             string lastFile = "";
             for (int i = 0; i < fastqFiles.size()-1; i++) {
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) + ".\n"); }
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
                 
                 if (m->getControl_pressed()) { break; }
@@ -167,10 +166,13 @@ int MakeFileCommand::execute(){
                         i++;
                     }
                 }else{
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + fastqFiles[i] + ".\n"); }
                     singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i];
                 }
             }
-            if (lastFile != fastqFiles[fastqFiles.size()-1]) { singles.push_back(util.getSimpleName(fastqFiles[fastqFiles.size()-1])); }
+            if (lastFile != fastqFiles[fastqFiles.size()-1]) {
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + fastqFiles[fastqFiles.size()-1] + ".\n"); }
+                singles.push_back(util.getSimpleName(fastqFiles[fastqFiles.size()-1])); }
             
             if (singles.size() != 0) {
                 map<string, string> variables;
@@ -339,7 +341,6 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
 
 int MakeFileCommand::fillAccnosFile(string tempFile){
     try {
-        
         string findCommand = "";
         string tempOut = tempFile;
         tempFile = "\"" + tempFile + "\"";
@@ -371,7 +372,8 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
             if (m->getControl_pressed()) { break; }
            
             in >> filename; util.gobble(in);
-            
+
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: Found file " + filename + ".\n"); }
             //ignore hidden files
             if (filename[0] != '.') { out << filename << endl; }
         }

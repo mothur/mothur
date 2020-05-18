@@ -34,7 +34,7 @@ Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc
 			for (int i = 0; i < seqs.size(); i++) {  runFilter(seqs[i]);  }
 		}
 		
-		distCalculator = new eachGapDist();
+        distCalculator = new eachGapDist(1.0);
 		
 		//set default window to 25% of sequence length
 		string seq0 = seqs[0]->getAligned();

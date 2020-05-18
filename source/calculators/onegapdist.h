@@ -18,7 +18,6 @@ class oneGapDist : public DistCalc {
 	
 public:
 	
-    oneGapDist() {} //sets cutoff to 1.0
     oneGapDist(double c) : DistCalc(c) {}
 	
     //finds the distance from A to each seq in otu.
@@ -27,12 +26,7 @@ public:
     
     double calcDist(Sequence A, Sequence B); //calc distance between 2 seqeunces
     
-private:
-    
- 
-    vector<int> setStarts(classifierOTU seqA, classifierOTU otu, vector<int> cols);
-    vector<int> setEnds(classifierOTU seqA, classifierOTU otu, vector<int> cols);
-    
+  
 	
 };
 

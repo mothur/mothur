@@ -3792,7 +3792,8 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
             if (m->getControl_pressed()) { break; }
 
             string line = trimWhiteSpace(getline(in));
-            checkName(line); names.push_back(line);
+            checkName(line);
+            if (line != "") { names.push_back(line); }
         }
         in.close();
 
@@ -4116,6 +4117,36 @@ string Utils::trimTax(string tax, int trimLevel) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "trimTax");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+string Utils::toUpper(string item) {
+    try{
+        string newItem = "";
+        
+        for (int i = 0; i < item.length(); i++) {
+            newItem += toupper(item[i]);
+        }
+        return newItem;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "toUpper");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+string Utils::toLower(string item) {
+    try{
+        string newItem = "";
+        
+        for (int i = 0; i < item.length(); i++) {
+            newItem += tolower(item[i]);
+        }
+        return newItem;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "toLower");
         exit(1);
     }
 }
@@ -5041,8 +5072,10 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
-            m->mothurOut(lookup->getLabel()+"\n");
-            processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            if (lookup != NULL) {
+                m->mothurOut(lookup->getLabel()+"\n");
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            }
             return lookup;
         }
         
@@ -5115,8 +5148,10 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            m->mothurOut(lookup->getLabel()+"\n");
-            processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            if (lookup != NULL) {
+                m->mothurOut(lookup->getLabel()+"\n");
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            }
             return lookup;
         }
         
@@ -5189,8 +5224,10 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedCLRVectors(lastLabel);
-            m->mothurOut(lookup->getLabel()+"\n");
-            processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            if (lookup != NULL) {
+                m->mothurOut(lookup->getLabel()+"\n");
+                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
+            }
             return lookup;
         }
         
@@ -5263,8 +5300,10 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         if (needToRun )  {
             delete list;
             list = input.getListVector(lastLabel);
-            m->mothurOut(list->getLabel()+"\n");
-            processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
+            if (list != NULL) {
+                m->mothurOut(list->getLabel()+"\n");
+                processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
+            }
             return list;
         }
         
@@ -5337,8 +5376,10 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete rabund;
             rabund = input.getRAbundVector(lastLabel);
-            m->mothurOut(rabund->getLabel()+"\n");
-            processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+            if (rabund != NULL) {
+                m->mothurOut(rabund->getLabel()+"\n");
+                processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
+            }
             return rabund;
         }
         
@@ -5411,8 +5452,10 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete sabund;
             sabund = input.getSAbundVector(lastLabel);
-            m->mothurOut(sabund->getLabel()+"\n");
-            processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+            if (sabund != NULL) {
+                m->mothurOut(sabund->getLabel()+"\n");
+                processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
+            }
             return sabund;
         }
         
@@ -5485,8 +5528,10 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
         if (needToRun )  {
             delete order;
             order = input.getOrderVector(lastLabel);
-            m->mothurOut(order->getLabel()+"\n");
-            processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            if (order != NULL) {
+                m->mothurOut(order->getLabel()+"\n");
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            }
             return order;
         }
         
@@ -5559,8 +5604,10 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
         if (needToRun )  {
             delete order;
             order = input.getSharedOrderVector(lastLabel);
-            m->mothurOut(order->getLabel()+"\n");
-            processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            if (order != NULL) {
+                m->mothurOut(order->getLabel()+"\n");
+                processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
+            }
             return order;
         }
         

@@ -74,7 +74,7 @@ string SplitAbundCommand::getOutputPattern(string type) {
         
         if (type == "fasta")        {  pattern = "[filename],[tag],[tag2],fasta";            }
         else if (type == "list")    {   pattern = "[filename],[tag],[tag2],list";            }
-        else if (type == "name")    {   pattern = "[filename],[tag],names";           }
+        else if (type == "name")    {   pattern = "[filename],[tag],names-[filename],[tag],[tag2],names";           }
         else if (type == "count")   {   pattern = "[filename],[tag],[tag2],count_table-[filename],[tag],count_table";     }
         else if (type == "group")   {   pattern = "[filename],[tag],[tag2],groups";          }
         else if (type == "accnos")  {   pattern = "[filename],[tag],[tag2],accnos";          }

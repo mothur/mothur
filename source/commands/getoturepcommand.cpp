@@ -309,25 +309,23 @@ int GetOTURepCommand::execute(){
         
         if (m->getControl_pressed()) { return 0; }
         
+        GroupMap groupMap;
         if (groupfile != "") {
             //read in group map info.
-            groupMap = new GroupMap(groupfile);
-            int error = groupMap->readMap();
-            if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile.\n");  groupfile = "";  }
+            GroupMap groupMap(groupfile);
+            int error = groupMap.readMap();
+            if (error == 1) { m->mothurOut("Error reading your groupfile. Proceeding without groupfile.\n");  groupfile = "";  }
         }
-        
-        list = NULL;
         
         if (!cutoffSet) {
             InputData input(listfile, "list", Groups);
-            list = input.getListVector();
+            ListVector* list = input.getListVector();
             string lastLabel = list->getLabel();
             m->mothurOut("You did not provide a label, using " + lastLabel + ".\n");
             if (lastLabel == "unique") { cutoff = 0.0; }
             
             if (method == "distance") { readDist(); }
-            process(list);
-            delete list;
+            process(list, groupMap); delete list;
         }
         else { //multiple cutoffs
             for (set<string>::iterator it = cutoffs.begin(); it != cutoffs.end(); it++) {
@@ -337,19 +335,20 @@ int GetOTURepCommand::execute(){
                 if (method == "distance") { readDist(); }
                 
                 InputData input(listfile, "list", Groups);
-                list = input.getListVector(*it);
-                string lastLabel = list->getLabel();
+                ListVector* list = input.getListVector(*it);
+                if (list != NULL) {
+                    string lastLabel = list->getLabel();
                 
-                process(list);
-                delete list;
+                    process(list, groupMap); delete list;
+                }
             }
         }
         
         //handles multiple labels
         if (fastafile != "") {
             //read fastafile
-            FastaMap* fasta = new FastaMap();
-            fasta->readFastaFile(fastafile);
+            FastaMap fasta;
+            fasta.readFastaFile(fastafile);
             
             //if user gave a namesfile then use it
             if (namefile != "") {	readNamesFile(fasta);	}
@@ -357,9 +356,8 @@ int GetOTURepCommand::execute(){
             //output create and output the .rep.fasta files
             map<string, string>::iterator itNameFile;
             for (itNameFile = outputNameFiles.begin(); itNameFile != outputNameFiles.end(); itNameFile++) {
-                processFastaNames(itNameFile->first, itNameFile->second, fasta);
+                processFastaNames(itNameFile->first, itNameFile->second, fasta, groupMap);
             }
-            delete fasta;
         }else {
             //output create and output the .rep.fasta files
             map<string, string>::iterator itNameFile;
@@ -368,9 +366,6 @@ int GetOTURepCommand::execute(){
             }
         }
         
-        
-        if (groupfile != "") { delete groupMap; }
-		
 		if (m->getControl_pressed()) {  return 0; }
 		
 		//set fasta file as new current fastafile - use first one??
@@ -467,7 +462,7 @@ void GetOTURepCommand::createCount() {
     }
 }
 //**********************************************************************************************************************
-void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
+void GetOTURepCommand::readNamesFile(FastaMap& fasta) {
 	try {
 		ifstream in;
 		vector<string> dupNames;
@@ -485,9 +480,9 @@ void GetOTURepCommand::readNamesFile(FastaMap*& fasta) {
 			util.splitAtComma(names, dupNames);
 			
 			//store names in fasta map
-			sequence = fasta->getSequence(name);
+            sequence = fasta.getSequence(name);
 			for (int i = 0; i < dupNames.size(); i++) {
-				fasta->push_back(dupNames[i], sequence);
+                fasta.push_back(dupNames[i], sequence);
 			}
 		
 			util.gobble(in);
@@ -666,10 +661,10 @@ string GetOTURepCommand::findRep(vector<string> names, map<string, long long>& m
 }
 
 //**********************************************************************************************************************
-int GetOTURepCommand::process(ListVector* processList) {
+int GetOTURepCommand::process(ListVector* processList, GroupMap& groupMap) {
 	try{
         
-        m->mothurOut(processList->getLabel() + "\t" + toString(list->getNumBins()) + "\n");
+        m->mothurOut(processList->getLabel() + "\t" + toString(processList->getNumBins()) + "\n");
         
 		string name, sequence;
 		string nameRep;
@@ -721,7 +716,7 @@ int GetOTURepCommand::process(ListVector* processList) {
         
 		//for each bin in the list vector
         vector<string> binLabels = processList->getLabels();
-		for (int i = 0; i < processList->size(); i++) {
+		for (int i = 0; i < processList->getNumBins(); i++) {
         
             
 			if (m->getControl_pressed()) { out.close(); if (Groups.size() == 0) { newNamesOutput.close(); } return 0; }
@@ -755,7 +750,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				
 				for (int j=0; j<namesInBin.size(); j++) {
                     if (groupfile != "") {
-                        string thisgroup = groupMap->getGroup(namesInBin[j]);
+                        string thisgroup = groupMap.getGroup(namesInBin[j]);
                         if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct.\n");  m->setControl_pressed(true); }
                         
                         //add this name to correct group
@@ -809,7 +804,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 	}
 }
 //**********************************************************************************************************************
-int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*& fasta) {
+int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap& fasta, GroupMap& groupMap) {
 	try{
 
 		//create output file
@@ -873,7 +868,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 			if (groupfile != "") {
 				//find the groups that are in this bin
 				for (int i = 0; i < names.size(); i++) {
-					string groupName = groupMap->getGroup(names[i]);
+                    string groupName = groupMap.getGroup(names[i]);
 					if (groupName == "not found") {  
 						m->mothurOut(names[i] + " is missing from your group file. Please correct.\n");
 						groupError = true;
@@ -905,7 +900,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap*
 
 			
 			//print out name and sequence for that bin
-			string sequence = fasta->getSequence(rep);
+            string sequence = fasta.getSequence(rep);
 
 			if (sequence != "not found") {
 				if (sorted == "") { //print them out

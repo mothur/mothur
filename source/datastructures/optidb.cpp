@@ -7,19 +7,59 @@
 //
 
 #include "optidb.hpp"
-#include "onegapdist.h"
 
 /**************************************************************************************************/
-OptiDB::OptiDB(double c) : Database(), cutoff(c), isAligned(true), alignedLength(0) {
-    calc = new oneGapDist(cutoff);
+
+OptiDB::OptiDB(string referenceFileName, string v) : Database() {
+    alignedLength = 0;
+    baseMap['A'] = 0;
+    baseMap['T'] = 1;
+    baseMap['G'] = 2;
+    baseMap['C'] = 3;
+    baseMap['-'] = 4;
+    
+    version = v;
+    optiDBName = referenceFileName.substr(0,referenceFileName.find_last_of(".")+1) + "optidb";
+
+}
+/**************************************************************************************************/
+vector< vector<int> > OptiDB::get(int i, char& allSame)  {
+    try {
+        vector< vector<int> > thisDistribution;
+        allSame = 'x';
+    
+        vector<char> thisColumn;
+        if (alignedLength < i) {
+            m->mothurOut("[ERROR]: The reference alignment length is " + toString(alignedLength) + ", but you are requesting column " + toString(i) + ", please correct.\n"); m->setControl_pressed(true);
+        }else {
+            thisColumn = reference.otuData[i];
+        }
+        
+        if (m->getControl_pressed()) { } //error in get column
+        else {
+            if (thisColumn.size() == 1) { //all sequences are the same in this column
+                allSame = thisColumn[0];
+            }else {
+                thisDistribution.resize(5);
+                for (int i = 0; i < thisColumn.size(); i++) {
+                    thisDistribution[baseMap[thisColumn[i]]].push_back(i);
+                }
+            }
+        }
+        
+        return thisDistribution;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiDB", "get");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 //adds otu with seq as only reference included
 void OptiDB::addSequence(Sequence seq)  {
     try {
-        
-        vector<Sequence> seqs; seqs.push_back(seq);
-        addSequences(seqs);
+        lengths.insert(seq.getAligned().length());
+        refs.push_back(seq);
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "addSequence");
@@ -27,71 +67,68 @@ void OptiDB::addSequence(Sequence seq)  {
     }
 }
 /**************************************************************************************************/
-//adds otu with seqs in it
-void OptiDB::addSequences(vector<Sequence> seqs)  {
+void OptiDB::convertSequences()  {
     try {
         
-        if (seqs.size() == 0) { return; } //sanity check
+        if (refs.size() == 0) { return; } //sanity check
         else {
-            if (alignedLength == 0) { //first otu, lets set it
-                alignedLength = seqs[0].getAligned().length();
+
+            vector<string> seqs;
+            for (int i = 0; i < refs.size(); i++) {
+                lengths.insert(refs[i].getAligned().length());
+                
+                //convert '.' gaps to '-'
+                string aligned = refs[i].getAligned();
+                for (int i = 0; i < aligned.length(); i++) { if (aligned[i] == '.') { aligned[i] = '-'; } }
+                
+                seqs.push_back(aligned);
+                numSeqs++;
             }
+            
+            refs.clear();
+            reference.readSeqs(seqs);
+            
+            if (reference.numSeqs == 0) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); alignedLength = 0; }
         }
-        
-        vector<vector<char> > otuData;
-        
-        if (seqs.size() == 1) {
-            string aligned = seqs[0].getAligned();
-            
-            if (alignedLength != aligned.length()) { isAligned = false; }
-            
-            for (int i = 0; i < aligned.length(); i++) {
-                vector<char> thisSpot;
-                thisSpot.push_back(aligned[i]);
-                
-                otuData.push_back(thisSpot);
-            }
-        }else {
-            otuData.resize(alignedLength);
-            
-            for (int i = 0; i < seqs.size(); i++) {
-                string aligned = seqs[i].getAligned();
-                
-                if (alignedLength != aligned.length()) { isAligned = false; break; }
-                
-                for (int j = 0; j < alignedLength; j++) { otuData[j].push_back(aligned[j]); }
-            }
-            
-            //check for identical columns
-            for (int i = 0; i < otuData.size(); i++) { //for each alignment column
-                bool identical = true;
-                char thisChar = otuData[i][0]; //set it first seq in otu
-                
-                for (int j = 1; j < otuData[i].size(); j++) { //for each seq in the otu
-                    if (otuData[i][j] != thisChar) { identical = false; j += otuData[i].size(); }
-                }
-                
-                //if all seqs are identical in this column, reduce to 1 to save space
-                if (identical) { otuData[i].clear(); otuData[i].push_back(thisChar); }
-            }
-        }
-        
-        if (!isAligned) { m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); }
-        
-        classifierOTU thisOtu(otuData, seqs.size());
-        reference.push_back(thisOtu);
-        
-        numSeqs++; //this is the number of otus
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiDB", "addSequences");
+        m->errorOut(e, "OptiDB", "convertSequences");
         exit(1);
     }
 }
 /**************************************************************************************************/
 void OptiDB::generateDB()  {
     try {
+        //check to make sure actually aligned
+        if (lengths.size() == 1) {  alignedLength = *lengths.begin(); longest = alignedLength-1;  } //database stores longest for aligner (longest = longest+1) so remove one.
+        else {
+            m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true);
+        }
         
+        //creates reference
+        convertSequences();
+        
+        //create shortcut file for reading next time
+        ofstream out; util.openOutputFile(optiDBName, out);
+        
+        //output version
+        out << "#" << version << endl;
+        
+        //output reference aligned length
+        out << alignedLength << endl;
+        
+        //output number of seqs in reference
+        out << reference.numSeqs << endl;
+        
+        for (int i = 0; i < reference.otuData.size(); i++) { //for each alignment location
+            out << i << '\t' << reference.otuData[i].size() << '\t';
+            
+            for (int j = 0; j < reference.otuData[i].size(); i++) { //for each reference, if all bases are the same in this location, size = 1; saves space
+                out << reference.otuData[i][j];
+            }
+            out << endl;
+        }
+        out.close();
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "generateDB");
@@ -99,12 +136,40 @@ void OptiDB::generateDB()  {
     }
 }
 /**************************************************************************************************/
-OptiData* OptiDB::findClosestSequences(Sequence*, int n) const  {
+
+void OptiDB::readDB(ifstream& optiDBFile){
     try {
+        optiDBFile.seekg(0);
+        
+        //read version
+        string line = util.getline(optiDBFile); util.gobble(optiDBFile);
+        
+        //read alignedLength
+        optiDBFile >> alignedLength; util.gobble(optiDBFile);
+        
+        //read numSeqs in reference
+        int numSeqs = 0;
+        optiDBFile >> numSeqs; util.gobble(optiDBFile);
+        
+        vector<vector<char> > refDistrib; refDistrib.resize(alignedLength);
+        int location, size; string bases;
+        for (int i = 0; i < alignedLength; i++) { //for each alignment location
+            
+            optiDBFile >> location >> size >> bases; util.gobble(optiDBFile);
+            
+            char base;
+            for (int j = 0; j < size; i++) { //for each reference, if all bases are the same in this location, size = 1; saves space
+                
+                refDistrib[location].push_back(bases[j]);
+            }
+        }
+        optiDBFile.close();
+        
+        reference.readSeqs(refDistrib, numSeqs);
         
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiDB", "findClosestSequences");
+        m->errorOut(e, "OptiDB", "readDB");
         exit(1);
     }
 }

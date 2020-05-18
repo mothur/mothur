@@ -183,7 +183,7 @@ void KmerDB::addSequence(Sequence seq) {
 }
 /**************************************************************************************************/
 
-void KmerDB::readKmerDB(ifstream& kmerDBFile){
+void KmerDB::readDB(ifstream& kmerDBFile){
 	try {
 					
 		kmerDBFile.seekg(0);									//	start at the beginning of the file
@@ -207,7 +207,7 @@ void KmerDB::readKmerDB(ifstream& kmerDBFile){
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "KmerDB", "readKmerDB");
+		m->errorOut(e, "KmerDB", "readDB");
 		exit(1);
 	}	
 }

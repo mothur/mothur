@@ -13,43 +13,38 @@
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
 #include "distancedb.hpp"
+#include "optidb.hpp"
+
 
 /**************************************************************************************************/
 void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, string version)  {
 	try {
-        m = MothurOut::getInstance();
         Utils util;
         
-        maxLevel = 0;
+        int numSeqs = 0; maxLevel = 0;
 		taxFile = tfile;
-		
-		int numSeqs = 0;
-
         templateFile = tempFile;
-        
-        long start = time(NULL);
-        
-        m->mothurOut("Generating search database...    "); cout.flush();
+
+        long start = time(NULL); m->mothurOut("Generating search database...    "); cout.flush();
         
         //need to know number of template seqs for suffixdb
         if (method == "suffix") {
-            ifstream inFASTA;
-            util.openInputFile(tempFile, inFASTA);
+            ifstream inFASTA; util.openInputFile(tempFile, inFASTA);
             util.getNumSeqs(inFASTA, numSeqs);
             inFASTA.close();
         }
         
         bool needToGenerate = true;
-        string kmerDBName;
+        string dBName;
         if(method == "kmer")			{
             database = new KmerDB(tempFile, kmerSize);
             
-            kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-            ifstream kmerFileTest(kmerDBName.c_str());
+            dBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+            ifstream kmerFileTest(dBName.c_str());
             if(kmerFileTest){
                 string line = util.getline(kmerFileTest);
                 bool GoodFile = util.checkReleaseVersion(line, version); kmerFileTest.close();
-                int shortcutTimeStamp = util.getTimeStamp(kmerDBName);
+                int shortcutTimeStamp = util.getTimeStamp(dBName);
                 int referenceTimeStamp = util.getTimeStamp(tempFile);
                 
                 //if the shortcut file is older then the reference file, remake shortcut file
@@ -61,6 +56,23 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
         else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
         else if(method == "distance")	{	database = new DistanceDB();	}
+        else if(method == "opti")       {
+            database = new OptiDB(tempFile, version);
+            
+            dBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + "optidb";
+            ifstream optiFileTest(dBName.c_str());
+            if(optiFileTest){
+                string line = util.getline(optiFileTest);
+                bool GoodFile = util.checkReleaseVersion(line, version); optiFileTest.close();
+                int shortcutTimeStamp = util.getTimeStamp(dBName);
+                int referenceTimeStamp = util.getTimeStamp(tempFile);
+                
+                //if the shortcut file is older then the reference file, remake shortcut file
+                if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
+
+                if (GoodFile) {  needToGenerate = false;    }
+            }
+        }
         else {
             m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.\n");
             database = new KmerDB(tempFile, 8);
@@ -68,12 +80,10 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         
         if (!m->getControl_pressed()) {
             if (needToGenerate) {
-                ifstream fastaFile;
-                util.openInputFile(tempFile, fastaFile);
+                ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile);
-                    util.gobble(fastaFile);
+                    Sequence temp(fastaFile); util.gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                     
@@ -81,29 +91,25 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 }
                 fastaFile.close();
                 
-                if ((method == "kmer") && (!shortcuts)) {;} //don't print
+                if (((method == "kmer") || (method == "opti")) && (!shortcuts)) {;} //don't print
                 else {database->generateDB(); }
                 
-            }else if ((method == "kmer") && (!needToGenerate)) {
-                ifstream kmerFileTest(kmerDBName.c_str());
-                database->readKmerDB(kmerFileTest);
+            }else if (((method == "kmer") || (method == "opti")) && (!needToGenerate)) {
+                ifstream FileTest(dBName.c_str());
+                database->readDB(FileTest);
                 
-                ifstream fastaFile;
-                util.openInputFile(tempFile, fastaFile);
+                ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile);
-                    util.gobble(fastaFile);
+                    Sequence temp(fastaFile); util.gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                 }
                 fastaFile.close();
             }
-            
             database->setNumSeqs(names.size());
             
-            m->mothurOut("DONE.\n");
-            m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database.\n");
+            m->mothurOut("DONE.\nIt took " + toString(time(NULL) - start) + " seconds generate search database.\n");
             
             readTaxonomy(taxFile);
             

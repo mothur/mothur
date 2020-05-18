@@ -15,6 +15,7 @@
 #include "classify.h"
 #include "sequence.hpp"
 #include "bayesian.h"
+#include "opticlassifier.hpp"
 #include "phylotree.h"
 #include "phylosummary.h"
 #include "knn.h"
