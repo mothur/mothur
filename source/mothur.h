@@ -191,6 +191,8 @@ struct classifierOTU {
     classifierOTU(vector<string> otu) { readSeqs(otu); }
     classifierOTU(vector<vector<char> > otu, int num) : otuData(otu), numSeqs(num) {}
     
+    void readSeqs(vector<vector<char> > otu, int num) { otuData = otu; numSeqs = num; } //for shortcut files
+    
     void readSeqs(vector<string> otu) {
         int alignedLength = 0;
         bool error = false;
