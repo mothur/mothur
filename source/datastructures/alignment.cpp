@@ -48,6 +48,7 @@ Alignment::Alignment(int A, int nk) : nCols(A), nRows(A) {
     }
 }
 /**************************************************************************************************/
+//only gets bigger
 void Alignment::resize(int A) {
 	try {
 		nCols = A;
@@ -55,8 +56,8 @@ void Alignment::resize(int A) {
 
 		alignment.resize(nRows);			
 		for(int i=0;i<nRows;i++){			
-			alignment[i].resize(nCols);		
-		}	
+			alignment[i].resize(nCols);
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Alignment", "resize");
