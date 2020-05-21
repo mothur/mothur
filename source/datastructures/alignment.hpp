@@ -39,7 +39,7 @@ public:
 	int getTemplateEndPos();
 	
 	int getPairwiseLength();
-	void resize(int);
+	virtual void resize(int);
 	int getnRows() { return nRows; }
 
 protected:

@@ -6111,6 +6111,7 @@ bool Utils::isContainingOnlyDigits(string input) {
 
 bool Utils::findTaxon(vector<Taxon> tax, vector<Taxon> stax) {
     try {
+        removeQuotes(tax); removeQuotes(stax);
         
         //looking to find something like "unknown" or "Proteobacteria"
         if (stax.size() == 1) {

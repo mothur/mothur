@@ -308,7 +308,7 @@ int ClassifySeqsCommand::execute(){
         
         string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());	}
-		//else if(method == "opti"){    classify = new OptiClassifier(taxonomyFileName, templateFileName, cutoff, iters, writeShortcuts, current->getVersion());    }
+		else if(method == "opti"){    classify = new OptiClassifier(taxonomyFileName, templateFileName, cutoff, iters, writeShortcuts, current->getVersion());    }
         else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber(), current->getVersion());				}
         else if(method == "zap"){	
             outputMethodTag = search + "_" + outputMethodTag;
