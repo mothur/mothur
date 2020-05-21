@@ -237,15 +237,12 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
             thisTax = taxonomyTemp.name + ";" + thisTax;
             taxonomyTemp = phyloTree->get(taxonomyTemp.parent);
         }
-        cout << "original: " << thisTax << endl;
         if (m->getControl_pressed()) { return tax; }
-                    
-        //bootstrap - to set confidenceScore
-        int numToSelect = numAlignedColumns;
     
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
-        tax = bootstrapResults(aligned, index, numToSelect, simpleTax);
+        //bootstrap - to set confidenceScore
+        tax = bootstrapResults(aligned, index, numAlignedColumns, simpleTax);
         
         if (m->getDebug()) {  m->mothurOut("\n"); }
         
@@ -283,7 +280,7 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, int numToSelect
             
             vector<int> sampledCols;
             for (int j = 0; j < numToSelect; j++) {
-                int index = util.getRandomIndex(numAlignedColumns);
+                int index = util.getRandomIndex(numAlignedColumns-1);
             
                 sampledCols.push_back(index);
             }
@@ -306,7 +303,6 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, int numToSelect
                 newTax = taxonomyTemp.parent;
                 taxonomyTemp = phyloTree->get(newTax);
             }
-            cout << i << '\t' << thisTax << endl;
         }
         
         string confidenceTax = "";
@@ -314,7 +310,6 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, int numToSelect
         
         int seqTaxIndex = tax;
         TaxNode seqTax = phyloTree->get(tax);
-        
         
         while (seqTax.level != 0) { //while you are not at the root
                     
@@ -361,7 +356,7 @@ int OptiClassifier::getMostProbableTaxonomy(string aligned, vector<int> cols) {
             double prob = 0.0000;
             for (int i = 0; i < cols.size(); i++) {
                 int indexOfBaseInColsI = baseMap[aligned[cols[i]]]; //0 -> A, 1 -> T, 2 -> C, 3 -> G, 4 -> -
-                if (indexOfBaseInColsI != 4) { prob += charGenusProb[i][indexOfBaseInColsI][k]; } //[location][base][prob] - ignore gaps
+                prob += charGenusProb[cols[i]][indexOfBaseInColsI][k];
             }
 
             //is this the taxonomy with the greatest probability?

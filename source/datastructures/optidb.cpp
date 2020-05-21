@@ -102,7 +102,7 @@ void OptiDB::generateDB()  {
         //check to make sure actually aligned
         if (lengths.size() == 1) {  alignedLength = *lengths.begin(); longest = alignedLength-1;  } //database stores longest for aligner (longest = longest+1) so remove one.
         else {
-            m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true);
+            m->mothurOut("[ERROR]: mothur expects the reference for opti_classifier to be aligned, please correct.\n"); m->setControl_pressed(true); return;
         }
         
         //creates reference
@@ -123,7 +123,7 @@ void OptiDB::generateDB()  {
         for (int i = 0; i < reference.otuData.size(); i++) { //for each alignment location
             out << i << '\t' << reference.otuData[i].size() << '\t';
             
-            for (int j = 0; j < reference.otuData[i].size(); i++) { //for each reference, if all bases are the same in this location, size = 1; saves space
+            for (int j = 0; j < reference.otuData[i].size(); j++) { //for each reference, if all bases are the same in this location, size = 1; saves space
                 out << reference.otuData[i][j];
             }
             out << endl;
