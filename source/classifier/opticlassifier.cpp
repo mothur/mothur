@@ -415,8 +415,8 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         int numGenus = genusNodes.size();
         charGenusProb.resize(numAlignedColumns);
         for (int i = 0; i < charGenusProb.size(); i++) {
-            charGenusProb[i].resize(5);
-            for (int j = 0; j < 5; j++) {
+            charGenusProb[i].resize(numBases);
+            for (int j = 0; j < numBases; j++) {
                 charGenusProb[i][j].resize(numGenus);
             }
         }
