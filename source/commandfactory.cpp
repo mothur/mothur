@@ -105,7 +105,7 @@
 #include "anosimcommand.h"
 #include "getcurrentcommand.h"
 #include "setcurrentcommand.h"
-#include "sharedcommand.h"
+#include "makesharedcommand.h"
 #include "deuniquetreecommand.h"
 #include "countseqscommand.h"
 #include "countgroupscommand.h"

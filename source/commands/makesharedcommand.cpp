@@ -7,8 +7,7 @@
  *
  */
 
-#include "sharedcommand.h"
-
+#include "makesharedcommand.h"
 #include "counttable.h"
 
 //********************************************************************************************************************
@@ -19,6 +18,7 @@ inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* r
 //**********************************************************************************************************************
 vector<string> SharedCommand::setParameters(){
 	try {
+        CommandParameter pshared("shared", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "none","shared",false,false); parameters.push_back(pshared);
         CommandParameter pbiom("biom", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "none","shared",false,false); parameters.push_back(pbiom);
 		CommandParameter plist("list", "InputTypes", "", "", "BiomListGroup", "BiomListGroup", "ListGroup","shared",false,false,true); parameters.push_back(plist);
         CommandParameter pcount("count", "InputTypes", "", "", "none", "GroupCount", "none","",false,false); parameters.push_back(pcount);
@@ -37,7 +37,6 @@ vector<string> SharedCommand::setParameters(){
         
         abort = false; calledHelp = false; pickedGroups=false;
         allLines = true;
-
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -69,7 +68,7 @@ string SharedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
 
-        if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
+        if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared-[filename],[tag],shared"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
         else if (type == "list") {  pattern = "[filename],[distance],list"; }
         else if (type == "map") {  pattern = "[filename],map"; }
@@ -94,7 +93,6 @@ SharedCommand::SharedCommand(string option)  {
 			 map<string, string> parameters = parser.getParameters();
 
 			 ValidParameters validParameter;
-			 
 
 			 //check for required parameters
 			 listfile = validParameter.validFile(parameters, "list");
@@ -106,6 +104,11 @@ SharedCommand::SharedCommand(string option)  {
              if (biomfile == "not open") { biomfile = ""; abort = true; }
              else if (biomfile == "not found") { biomfile = "";  }
              else { current->setBiomFile(biomfile); }
+            
+             sharedfile = validParameter.validFile(parameters, "shared");
+             if (sharedfile == "not open") { sharedfile = ""; abort = true; }
+             else if (sharedfile == "not found") { sharedfile = "";  }
+             else { current->setSharedFile(sharedfile); }
 
 			 ordergroupfile = validParameter.validFile(parameters, "ordergroup");
 			 if (ordergroupfile == "not open") { abort = true; }
@@ -145,7 +148,7 @@ SharedCommand::SharedCommand(string option)  {
                  }
              }
 
-            if ((biomfile == "") && (listfile == "") && (countfile == "")) { //you must provide at least one of the following
+            if ((biomfile == "") && (listfile == "") && (countfile == "") && (sharedfile == "")) { //you must provide at least one of the following
 				//is there are current file available for either of these?
 				//give priority to list, then biom, then count
 				listfile = current->getListFile();
@@ -157,7 +160,11 @@ SharedCommand::SharedCommand(string option)  {
                         countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
                         else {
-                            m->mothurOut("[ERROR]: No valid current files. You must provide a list or biom or count file before you can use the make.shared command.\n");  abort = true;
+                            sharedfile = current->getSharedFile();
+                            if (sharedfile != "") {  m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
+                            else {
+                                m->mothurOut("[ERROR]: No valid current files. You must provide a list, biom, shared or count file before you can use the make.shared command.\n");  abort = true;
+                            }
                         }
 
 					}
@@ -210,21 +217,16 @@ SharedCommand::SharedCommand(string option)  {
 
 int SharedCommand::execute(){
 	try {
-
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
-        if (listfile != "")                                                 {  createSharedFromListGroup();  }
-        else if (biomfile != "")                                            {  createSharedFromBiom();       }
-        else if ((listfile == "") && (countfile != ""))                     {  createSharedFromCount();      }
-
-        if (m->getControl_pressed()) {
-			for (int i = 0; i < outputNames.size(); i++) {
-				util.mothurRemove(outputNames[i]);
-			}
-		}
+        if (listfile != "")         {  createSharedFromListGroup();     }
+        else if (biomfile != "")    {  createSharedFromBiom();          }
+        else if (sharedfile != "")  {  convertSharedFormat();           }
+        else if ((listfile == "") && (countfile != "")) {  createSharedFromCount();      }
+        
+        if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } }
 
 		string currentName = "";
-
 		itTypes = outputTypes.find("shared");
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setSharedFile(currentName); }
@@ -240,7 +242,7 @@ int SharedCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setGroupFile(currentName); }
 		}
 
-		m->mothurOut("\nOutput File Names: \n"); 
+		m->mothurOut("\nOutput File Names:\n");
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
 		return 0;
@@ -249,6 +251,38 @@ int SharedCommand::execute(){
 		m->errorOut(e, "SharedCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+int SharedCommand::convertSharedFormat() {
+    try {
+        /*
+        string tag = findFormat(sharedfile);
+        
+        //getting output filename
+        map<string, string> variables;
+        if (outputdir == "") { outputdir += util.hasPath(sharedfile); }
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
+        variables["[tag]"] = tag;
+        string sharedFilename = getOutputFileName("shared",variables);
+        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+        
+        ofstream out; bool printHeaders = true;
+        util.openOutputFile(sharedFilename, out);
+        
+        
+        map<string, string> seqNameToOtuName;
+        SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
+        lookup->setLabels(label);
+        lookup->print(out, printHeaders);
+        out.close();
+        delete lookup;
+        */
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedCommand", "convertSharedFormat");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 int SharedCommand::createSharedFromCount() {

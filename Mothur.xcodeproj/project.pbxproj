@@ -268,7 +268,7 @@
 		481FB6091AC1B7970076CFF3 /* setlogfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7E112D37EC400DA6239 /* setlogfilecommand.cpp */; };
 		481FB60A1AC1B7970076CFF3 /* sffinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7E312D37EC400DA6239 /* sffinfocommand.cpp */; };
 		481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */; };
-		481FB60C1AC1B7AC0076CFF3 /* sharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */; };
+		481FB60C1AC1B7AC0076CFF3 /* makesharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F212D37EC400DA6239 /* makesharedcommand.cpp */; };
 		481FB60D1AC1B7AC0076CFF3 /* shhhercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */; };
 		481FB60E1AC1B7AC0076CFF3 /* shhhseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774101314695AF60098E6AC /* shhhseqscommand.cpp */; };
 		481FB60F1AC1B7AC0076CFF3 /* sortseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A32DA914DC43B00001D2E5 /* sortseqscommand.cpp */; };
@@ -770,7 +770,7 @@
 		A7E9B94612D37EC400DA6239 /* sharedanderbergs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7EC12D37EC400DA6239 /* sharedanderbergs.cpp */; };
 		A7E9B94712D37EC400DA6239 /* sharedbraycurtis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7EE12D37EC400DA6239 /* sharedbraycurtis.cpp */; };
 		A7E9B94812D37EC400DA6239 /* sharedchao1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F012D37EC400DA6239 /* sharedchao1.cpp */; };
-		A7E9B94912D37EC400DA6239 /* sharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */; };
+		A7E9B94912D37EC400DA6239 /* makesharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F212D37EC400DA6239 /* makesharedcommand.cpp */; };
 		A7E9B94A12D37EC400DA6239 /* sharedjabund.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F412D37EC400DA6239 /* sharedjabund.cpp */; };
 		A7E9B94B12D37EC400DA6239 /* sharedjackknife.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F612D37EC400DA6239 /* sharedjackknife.cpp */; };
 		A7E9B94C12D37EC400DA6239 /* sharedjclass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7F812D37EC400DA6239 /* sharedjclass.cpp */; };
@@ -1656,8 +1656,8 @@
 		A7E9B7EF12D37EC400DA6239 /* sharedbraycurtis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedbraycurtis.h; path = source/calculators/sharedbraycurtis.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7F012D37EC400DA6239 /* sharedchao1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedchao1.cpp; path = source/calculators/sharedchao1.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B7F112D37EC400DA6239 /* sharedchao1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedchao1.h; path = source/calculators/sharedchao1.h; sourceTree = SOURCE_ROOT; };
-		A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedcommand.cpp; path = source/commands/sharedcommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B7F312D37EC400DA6239 /* sharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedcommand.h; path = source/commands/sharedcommand.h; sourceTree = SOURCE_ROOT; };
+		A7E9B7F212D37EC400DA6239 /* makesharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makesharedcommand.cpp; path = source/commands/makesharedcommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7E9B7F312D37EC400DA6239 /* makesharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makesharedcommand.h; path = source/commands/makesharedcommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7F412D37EC400DA6239 /* sharedjabund.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedjabund.cpp; path = source/calculators/sharedjabund.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B7F512D37EC400DA6239 /* sharedjabund.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedjabund.h; path = source/calculators/sharedjabund.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7F612D37EC400DA6239 /* sharedjackknife.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedjackknife.cpp; path = source/calculators/sharedjackknife.cpp; sourceTree = SOURCE_ROOT; };
@@ -2590,6 +2590,8 @@
 				A741744A175CD9B1007DF49B /* makelefsecommand.cpp */,
 				A7E6F69C17427CF2006775E2 /* makelookupcommand.h */,
 				A7E6F69D17427D06006775E2 /* makelookupcommand.cpp */,
+				A7E9B7F312D37EC400DA6239 /* makesharedcommand.h */,
+				A7E9B7F212D37EC400DA6239 /* makesharedcommand.cpp */,
 				48910D411D5243E500F60EDB /* mergecountcommand.cpp */,
 				48910D421D5243E500F60EDB /* mergecountcommand.hpp */,
 				A7E9B75412D37EC400DA6239 /* mergefilecommand.h */,
@@ -2682,8 +2684,6 @@
 				A7E9B7E312D37EC400DA6239 /* sffinfocommand.cpp */,
 				A7C7DAB615DA75760059B0CF /* sffmultiplecommand.h */,
 				A7C7DAB815DA758B0059B0CF /* sffmultiplecommand.cpp */,
-				A7E9B7F312D37EC400DA6239 /* sharedcommand.h */,
-				A7E9B7F212D37EC400DA6239 /* sharedcommand.cpp */,
 				A7E9B82812D37EC400DA6239 /* shhhercommand.h */,
 				A7E9B82712D37EC400DA6239 /* shhhercommand.cpp */,
 				A774101214695AF60098E6AC /* shhhseqscommand.h */,
@@ -3305,7 +3305,7 @@
 				481FB5991AC1B71B0076CFF3 /* chimeraperseuscommand.cpp in Sources */,
 				481FB68F1AC1BA9E0076CFF3 /* kmertree.cpp in Sources */,
 				481FB5CB1AC1B74F0076CFF3 /* heatmapcommand.cpp in Sources */,
-				481FB60C1AC1B7AC0076CFF3 /* sharedcommand.cpp in Sources */,
+				481FB60C1AC1B7AC0076CFF3 /* makesharedcommand.cpp in Sources */,
 				481FB5701AC1B6CA0076CFF3 /* sharedthetayc.cpp in Sources */,
 				481FB62D1AC1B7EA0076CFF3 /* distancedb.cpp in Sources */,
 				481FB5AA1AC1B7300076CFF3 /* consensusseqscommand.cpp in Sources */,
@@ -3716,7 +3716,7 @@
 				48B01D2C2016470F006BE140 /* sensspeccalc.cpp in Sources */,
 				A7E9B94712D37EC400DA6239 /* sharedbraycurtis.cpp in Sources */,
 				A7E9B94812D37EC400DA6239 /* sharedchao1.cpp in Sources */,
-				A7E9B94912D37EC400DA6239 /* sharedcommand.cpp in Sources */,
+				A7E9B94912D37EC400DA6239 /* makesharedcommand.cpp in Sources */,
 				A7E9B94A12D37EC400DA6239 /* sharedjabund.cpp in Sources */,
 				A7E9B94B12D37EC400DA6239 /* sharedjackknife.cpp in Sources */,
 				4815BEC52296F19500677EE2 /* sirarefaction.cpp in Sources */,
