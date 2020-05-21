@@ -17,6 +17,8 @@ OptiDB::OptiDB(string referenceFileName, string v) : Database() {
     baseMap['G'] = 2;
     baseMap['C'] = 3;
     baseMap['-'] = 4;
+    baseMap['N'] = 5;
+    numBases = 6; //A,T,G,C,-,N
     
     version = v;
     optiDBName = referenceFileName.substr(0,referenceFileName.find_last_of(".")+1) + "optidb";
@@ -40,7 +42,7 @@ vector< vector<int> > OptiDB::get(int i, char& allSame)  {
             if (thisColumn.size() == 1) { //all sequences are the same in this column
                 allSame = thisColumn[0];
             }else {
-                thisDistribution.resize(5);
+                thisDistribution.resize(numBases);
                 for (int i = 0; i < thisColumn.size(); i++) {
                     thisDistribution[baseMap[thisColumn[i]]].push_back(i);
                 }

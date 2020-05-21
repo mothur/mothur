@@ -17,6 +17,8 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
         reverse['C'] = 'G';
         reverse['G'] = 'C';
         reverse['-'] = '-';
+        reverse['N'] = 'N';
+        numBases = 6;
         shortcuts = sh;
         
         string baseName = reftaxonomy;
@@ -80,20 +82,22 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                 baseMap['G'] = 2; mapBase[2] = 'G';
                 baseMap['C'] = 3; mapBase[3] = 'C';
                 baseMap['-'] = 4; mapBase[4] = '-';
+                baseMap['N'] = 5; mapBase[5] = 'N';
                 
                 baseProbs['A'] = 0.0;
                 baseProbs['T'] = 0.0;
                 baseProbs['G'] = 0.0;
                 baseProbs['C'] = 0.0;
                 baseProbs['-'] = 0.0;
+                baseProbs['N'] = 0.0;
                 
-                //initailize charGenusProb[alignmentLength][5][numberOfGenus]
+                //initailize charGenusProb[alignmentLength][numBases][numberOfGenus]
                 charGenusProb.resize(numAlignedColumns);
                 reversedProbs.resize(numAlignedColumns, baseProbs);
                 
                 for (int i = 0; i < numAlignedColumns; i++) {
-                    charGenusProb[i].resize(5);
-                    for (int j = 0; j < 5; j++) { charGenusProb[i][j].resize(genusNodes.size(), 0.0); }
+                    charGenusProb[i].resize(numBases);
+                    for (int j = 0; j < numBases; j++) { charGenusProb[i][j].resize(genusNodes.size(), 0.0); }
                 }
 
                 if (shortcuts) {
@@ -242,7 +246,7 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
         //bootstrap - to set confidenceScore
-        tax = bootstrapResults(aligned, index, numAlignedColumns, simpleTax);
+        tax = bootstrapResults(aligned, index, simpleTax);
         
         if (m->getDebug()) {  m->mothurOut("\n"); }
         
@@ -254,7 +258,7 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
     }
 }
 /**************************************************************************************************/
-string OptiClassifier::bootstrapResults(string aligned, int tax, int numToSelect, string& simpleTax) {
+string OptiClassifier::bootstrapResults(string aligned, int tax, string& simpleTax) {
     try {
                 
         map<int, int> confidenceScores;
@@ -279,7 +283,7 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, int numToSelect
             if (m->getControl_pressed()) { return "control"; }
             
             vector<int> sampledCols;
-            for (int j = 0; j < numToSelect; j++) {
+            for (int j = 0; j < numAlignedColumns; j++) {
                 int index = util.getRandomIndex(numAlignedColumns-1);
             
                 sampledCols.push_back(index);
@@ -355,7 +359,7 @@ int OptiClassifier::getMostProbableTaxonomy(string aligned, vector<int> cols) {
             
             double prob = 0.0000;
             for (int i = 0; i < cols.size(); i++) {
-                int indexOfBaseInColsI = baseMap[aligned[cols[i]]]; //0 -> A, 1 -> T, 2 -> C, 3 -> G, 4 -> -
+                int indexOfBaseInColsI = baseMap[aligned[cols[i]]]; //0 -> A, 1 -> T, 2 -> C, 3 -> G, 4 -> -, 5 -> N
                 prob += charGenusProb[cols[i]][indexOfBaseInColsI][k];
             }
 
@@ -422,26 +426,28 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         baseProbs['G'] = 0.0;
         baseProbs['C'] = 0.0;
         baseProbs['-'] = 0.0;
+        baseProbs['N'] = 0.0;
         
         baseMap['A'] = 0; mapBase[0] = 'A';
         baseMap['T'] = 1; mapBase[1] = 'T';
         baseMap['G'] = 2; mapBase[2] = 'G';
         baseMap['C'] = 3; mapBase[3] = 'C';
         baseMap['-'] = 4; mapBase[4] = '-';
+        baseMap['N'] = 5; mapBase[5] = 'N';
         
         reversedProbs.resize(numAlignedColumns, baseProbs);
         
         int base, alignmentLocation;  alignmentLocation = 0;
         vector<int> num; num.resize(numAlignedColumns); //num nonzero probs for this alignment location
         vector< vector<float> > probabilityInTemplate; probabilityInTemplate.resize(numAlignedColumns);
-        for (int i = 0; i < numAlignedColumns; i++) { probabilityInTemplate[i].resize(5, 0); }
+        for (int i = 0; i < numAlignedColumns; i++) { probabilityInTemplate[i].resize(numBases, 0); }
         
         //read version
         string line2 = util.getline(inNum); util.gobble(inNum);
         
         while (!inNum.eof()) {
             
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < numBases; i++) {
                 inNum >> base; util.gobble(inNum);
                 inNum >> probabilityInTemplate[alignmentLocation][base]; util.gobble(inNum);
                 
@@ -460,8 +466,7 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         while(!in.eof()) {
             in >> alignmentLocation;
             
-            
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < numBases; j++) {
                 
                 //set them all to zero value
                 for (int k = 0; k < genusNodes.size(); k++) {
