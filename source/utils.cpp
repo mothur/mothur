@@ -1479,6 +1479,17 @@ string Utils::getline(istringstream& fileHandle) {
     }
 }
 /***********************************************************************/
+void Utils::getline(ifstream& fileHandle, vector<string>& headers) {
+    try {
+        string line = getline(fileHandle);
+        headers = splitWhiteSpace(line);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getline");
+        exit(1);
+    }
+}
+/***********************************************************************/
 string Utils::getline(ifstream& fileHandle) {
     try {
         string line = "";

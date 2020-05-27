@@ -25,12 +25,14 @@ vector<string> SharedCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "none", "GroupCount", "ListGroup","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","group",false,false); parameters.push_back(pgroups);
+        CommandParameter pzero("keepzeroes", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pzero);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
         vector<string> tempOutNames;
         outputTypes["shared"] = tempOutNames;
+        outputTypes["tshared"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
         outputTypes["map"] = tempOutNames;
         outputTypes["list"] = tempOutNames;
@@ -51,8 +53,8 @@ vector<string> SharedCommand::setParameters(){
 string SharedCommand::getHelpString(){
 	try {
 		string helpString = "";
-		helpString += "The make.shared command reads a list and group / count file or a biom file, or simply a count file and creates a shared file.\n";
-		helpString += "The make.shared command parameters are list, group, biom, groups, count and label. list and group or count are required unless a current file is available or you provide a biom file.\n";
+		helpString += "The make.shared command reads a list and group / count file or a biom file, or a shared file to convert or simply a count file and creates a shared file.\n";
+		helpString += "The make.shared command parameters are list, group, biom, groups, count, shared and label. list and group or count are required unless a current file is available or you provide a biom file or you are converting a shared file.\n";
         helpString += "The count parameter allows you to provide a count file containing the group info for the list file. When the count file is provided without the list file, mothur will create a list and shared file for you.\n";
 		helpString += "The groups parameter allows you to indicate which groups you want to include, group names should be separated by dashes. ex. groups=A-B-C. Default is all groups in your groupfile.\n";
 		helpString += "The label parameter is only valid with the list and group option and allows you to indicate which labels you want to include, label names should be separated by dashes. Default is all labels in your list file.\n";
@@ -68,7 +70,8 @@ string SharedCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
 
-        if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared-[filename],[tag],shared"; }
+        if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
+        if (type == "tshared") {  pattern = "[filename],tshared-[filename],[distance],tshared"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
         else if (type == "list") {  pattern = "[filename],[distance],list"; }
         else if (type == "map") {  pattern = "[filename],map"; }
@@ -202,6 +205,9 @@ SharedCommand::SharedCommand(string option)  {
 				 else { allLines = true;  }
 			 }
             
+            string temp = validParameter.valid(parameters, "keepzeroes");   if (temp == "not found"){    temp = "f";                }
+            keepZeroes = util.isTrue(temp);
+            
             if ((listfile == "") && (biomfile == "") && (countfile != "")) { //building a shared file from a count file, require label
                 if (labels.size() == 0) { labels.insert("asv"); }
             }
@@ -253,31 +259,57 @@ int SharedCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int SharedCommand::convertSharedFormat() {
+string SharedCommand::findFormat() {
     try {
-        /*
-        string tag = findFormat(sharedfile);
+        ifstream in; util.openInputFile(sharedfile, in);
+        vector<string> headers; util.getline(in, headers);
         
+        if (headers.size() > 4) { return "shared"; }
+        else {
+            if (headers.size() == 4) { //check to make sure this isn't a shared file with 1 OTU
+                if (headers[3] == "abundance") { return "tshared"; }
+            }else { m->mothurOut("[ERROR]: cannot determine format of shared file. Expected 4 or more columns, found " + toString(headers.size()) + "columns, please correct.\n"); m->setControl_pressed(true);  }
+        }
+        
+        return "shared";
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedCommand", "findFormat");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void SharedCommand::convertSharedFormat() {
+    try {
         //getting output filename
         map<string, string> variables;
         if (outputdir == "") { outputdir += util.hasPath(sharedfile); }
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
-        variables["[tag]"] = tag;
-        string sharedFilename = getOutputFileName("shared",variables);
-        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+        
+        string tag = findFormat();
+        
+        if (m->getControl_pressed()) { return; }
+        
+        string sharedFilename = getOutputFileName(tag,variables);
+        outputNames.push_back(sharedFilename); outputTypes[tag].push_back(sharedFilename);
+        if (tag == "shared") { //converting shared to tshared
+            
+        }else { //tshared - converting tshared to shared
+            
+        }
         
         ofstream out; bool printHeaders = true;
         util.openOutputFile(sharedFilename, out);
         
         
-        map<string, string> seqNameToOtuName;
-        SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
-        lookup->setLabels(label);
-        lookup->print(out, printHeaders);
-        out.close();
-        delete lookup;
-        */
-        return 0;
+        //map<string, string> seqNameToOtuName;
+        //SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
+        //lookup->setLabels(label);
+        //lookup->print(out, printHeaders);
+        //out.close();
+        //delete lookup;
+        
+        
     }
     catch(exception& e) {
         m->errorOut(e, "SharedCommand", "convertSharedFormat");

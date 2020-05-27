@@ -135,6 +135,7 @@ public:
     bool checkReleaseVersion(string, string);
     string getline(ifstream&);
     string getline(istringstream&);
+    void getline(ifstream&, vector<string>&);
     void getNumSeqs(ifstream&, int&);
     int getNumSeqs(ifstream&);
     void gobble(istream&);

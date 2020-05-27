@@ -46,7 +46,8 @@ private:
     int createSharedFromListGroup();
     int createSharedFromBiom();
     int createSharedFromCount();
-    int convertSharedFormat();
+    void convertSharedFormat();
+    string findFormat();
     string getTag(string&);
     vector<string> readRows(string, int&);
     int getDims(string, int&, int&);
@@ -55,7 +56,7 @@ private:
 	vector<string> Groups, outputNames, order;
 	set<string> labels;
 	string fileroot,  listfile, groupfile, biomfile, ordergroupfile, countfile, sharedfile;
-	bool firsttime, pickedGroups, abort, allLines;
+	bool firsttime, pickedGroups, abort, allLines, keepZeroes;
 
 };
 

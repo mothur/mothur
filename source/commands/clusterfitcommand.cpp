@@ -140,7 +140,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             
             ValidParameters validParameter;
             
-            
             selfReference = true; refdistfile = ""; distfile = "";
             
             //check for required parameters
