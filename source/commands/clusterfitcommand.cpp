@@ -365,7 +365,7 @@ int ClusterFitCommand::execute(){
                 
                 delete matrix;
                 
-            }else { //reference with accnos file assigning references
+            }else { //reference with accnos file or reference list file assigning references
                 
                 set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
                 
