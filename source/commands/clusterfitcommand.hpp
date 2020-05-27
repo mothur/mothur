@@ -43,7 +43,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, sim, print_start, selfReference, printref;
+    bool abort, sim, print_start, selfReference, printref, createAccnos;
     string refdistfile, reffastafile, refnamefile, refcountfile, reflistfile, refNameOrCount;
     string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount, accnosfile;
     string comboDistFile;
@@ -55,7 +55,7 @@ private:
     vector<string> outputNames, listFiles;
     unsigned long loops;
     
-    ListVector* runUserRefOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string);
+    ListVector* runUserRefOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string, vector<string>, vector<vector<string> > );
     string runRefOptiCluster(OptiData*&, ClusterMetric*&, ListVector*&, map<string, int>&, string);
     string runDenovoOptiCluster(OptiData*&, ClusterMetric*&, map<string, int>&, string);
     ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);

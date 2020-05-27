@@ -1616,6 +1616,31 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
     }
 }
 //**********************************************************************************************************************
+set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
+    try {
+        set<string> results; otus.clear();
+
+        if (list->getNumSeqs() == 0) { return results; }
+
+        for (int i = 0; i < list->getNumBins(); i++) {
+            if (m->getControl_pressed()) { break;  }
+            
+            string thisBin = list->get(i);
+            vector<string> binNames; splitAtComma(thisBin, binNames);
+            
+            otus.push_back(binNames);
+            
+            for (int j = 0; j < binNames.size(); j++) { results.insert(binNames[j]); }
+        }
+
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getSetFromList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 string Utils::getStringFromVector(vector<double>& list, string delim){
     try {
         string result = "";

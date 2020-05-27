@@ -32,7 +32,7 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     readFiles(distFile, distFormat, dupsFile, dupsFormat, noRefNamesSet);
 }
 /***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, string accnosfile) : OptiData(c) {
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, set<string> accnosRefFileNames) : OptiData(c) {
     
     numFitSingletons = 0;
     numRefSingletons = 0;
@@ -42,9 +42,7 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     numRefDists = 0;
     numFitSeqs = 0;
     refWeightMethod = "accnos";
-    
-    set<string> accnosRefFileNames = util.readAccnos(accnosfile);
-    
+        
     square = false;
     
     readFiles(distFile, distFormat, dupsFile, dupsFormat, accnosRefFileNames);
