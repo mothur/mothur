@@ -367,14 +367,11 @@ int ClusterFitCommand::execute(){
                 
             }else { //reference with accnos file assigning references
                 
-                OptiData* matrix = NULL; vector<string> refLabels; vector< vector<string> > otus;
+                set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
                 
                 if (accnosfile != "") { //use accnos file to assign references
                     
-                    set<string> refNames = util.readAccnos(accnosfile);
-                    
-                    //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
-                    matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, refNames);
+                    refNames = util.readAccnos(accnosfile);
                     
                 }else if (createAccnos) { //assign references based on reflist parameter
                     InputData input(reflistfile, "list", nullVector);
@@ -386,11 +383,11 @@ int ClusterFitCommand::execute(){
                     refLabels = reflist->getLabels();
                     for (int i = 0; i < refLabels.size(); i++) { refLabels[i] = "Ref_" + refLabels[i];  }
                     
-                    set<string> refNames = util.getSetFromList(reflist, otus); delete reflist;
-                    
-                    //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
-                    matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, refNames);
+                    refNames = util.getSetFromList(reflist, otus); delete reflist;
                 }
+                
+                //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
+                OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, refNames);
                 
                 //fit seqs
                 ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName, refLabels, otus);
