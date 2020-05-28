@@ -355,6 +355,8 @@ int ClusterFitCommand::execute(){
             
             if ((accnosfile == "") && (!createAccnos)) { //denovo with mothur randomly assigning references
                 
+                m->mothurOut("\nRandomly assigning reads from " + distfile + " as reference sequences\n");
+                
                 //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
                 OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, fitPercent, refWeight);
                 
@@ -371,9 +373,14 @@ int ClusterFitCommand::execute(){
                 
                 if (accnosfile != "") { //use accnos file to assign references
                     
+                    m->mothurOut("\nUsing sequences from " + accnosfile + " as reference sequences\n");
+                    
                     refNames = util.readAccnos(accnosfile);
                     
                 }else if (createAccnos) { //assign references based on reflist parameter
+                    
+                    m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
+                    
                     InputData input(reflistfile, "list", nullVector);
                     set<string> processedLabels, userLabels;
                     string lastLabel = "";
@@ -413,6 +420,8 @@ int ClusterFitCommand::execute(){
             createReferenceNameCount(); //creates reference name or count file if needed
             
             calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            
+            m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
             
             //calc sens.spec values for reference
             InputData input(reflistfile, "list", nullVector);
@@ -592,7 +601,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
 //**********************************************************************************************************************
 ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, map<string, int>& counts, string outStepFile, vector<string> refListLabels, vector<vector<string> > otus){
     try {
-        m->mothurOut("\nClustering " + distfile + "\n");
+        
         bool printStepsHeader = true;
 
         OptiFitCluster cluster(matrix, metric, 0, criteria);
@@ -603,6 +612,9 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         double delta = 1;
         
         if (!createAccnos) {
+            
+            m->mothurOut("\nClustering references from " + distfile + "\n");
+            
             //get "ref" seqs for initialize inputs
             OptiData* refMatrix = matrix->extractRefMatrix();
             ListVector* refList = clusterRefs(refMatrix, metric); delete refMatrix;
