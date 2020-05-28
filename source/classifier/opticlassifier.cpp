@@ -75,6 +75,8 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                 m->mothurOut("DONE.\n");
                 
                 numAlignedColumns = database->getLongestBase();
+                allCols = database->getIndicatorColumns();
+                
                 int numReferences = names.size();
                 
                 baseMap['A'] = 0; mapBase[0] = 'A';
@@ -112,6 +114,10 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                 
                     //output mothur version
                     out2 << "#" << version << endl;
+                    
+                    //output indicator columns
+                    out2 << util.getStringFromVector(allCols, ",") << endl;
+                    
                 }
                 
                 //for each column in the alignment
@@ -190,7 +196,9 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                     }
                     
                 }
-                if (shortcuts) { out.close(); out2.close();  }
+                if (shortcuts) {
+                    out.close(); out2.close();
+                }
                 
                 //read in new phylotree with less info. - its faster
                 ifstream phyloTreeTest(phyloTreeName.c_str());
@@ -202,9 +210,8 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
         }
         
         for (int i = 0; i < files.size(); i++) { delete files[i]; }
+        cout << "num indicator cols in reference " << allCols.size() << endl;;
 
-        for (int i = 0; i < numAlignedColumns; i++) { allCols.push_back(i); }
-        
         m->mothurOut("DONE.\nIt took " + toString(time(NULL) - start) + " seconds get probabilities.\n");
     }
     catch(exception& e) {
@@ -279,14 +286,15 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, string& simpleT
         map<int, int>::iterator itConvert;
         
         Utils util;
+        int numActiveCols = allCols.size();
         for (int i = 0; i < iters; i++) {
             if (m->getControl_pressed()) { return "control"; }
             
             vector<int> sampledCols;
-            for (int j = 0; j < numAlignedColumns; j++) {
-                int index = util.getRandomIndex(numAlignedColumns-1);
+            for (int j = 0; j < numActiveCols; j++) {
+                int index = util.getRandomIndex(numActiveCols-1);
             
-                sampledCols.push_back(index);
+                sampledCols.push_back(allCols[index]);
             }
             
             //get taxonomy
@@ -444,6 +452,14 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         
         //read version
         string line2 = util.getline(inNum); util.gobble(inNum);
+        
+        //read indicator columns
+        line2 = util.getline(inNum); util.gobble(inNum);
+        vector<string> iCols; util.splitAtComma(line2, iCols);
+        for (int i = 0; i < iCols.size(); i++) {
+            int temp; util.mothurConvert(iCols[i], temp);
+            allCols.push_back(temp);
+        }
         
         while (!inNum.eof()) {
             

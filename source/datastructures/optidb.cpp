@@ -18,7 +18,7 @@ OptiDB::OptiDB(string referenceFileName, string v) : Database() {
     baseMap['C'] = 3;
     baseMap['-'] = 4;
     baseMap['N'] = 5;
-    numBases = 6; //A,T,G,C,-,N
+    numBases = baseMap.size(); //A,T,G,C,-,N
     
     version = v;
     optiDBName = referenceFileName.substr(0,referenceFileName.find_last_of(".")+1) + "optidb";
@@ -160,7 +160,7 @@ void OptiDB::readDB(ifstream& optiDBFile){
             optiDBFile >> location >> size >> bases; util.gobble(optiDBFile);
             
             char base;
-            for (int j = 0; j < size; i++) { //for each reference, if all bases are the same in this location, size = 1; saves space
+            for (int j = 0; j < size; j++) { //for each reference, if all bases are the same in this location, size = 1; saves space
                 
                 refDistrib[location].push_back(bases[j]);
             }
@@ -172,6 +172,45 @@ void OptiDB::readDB(ifstream& optiDBFile){
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "readDB");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+//an indicator column must have at least 50% of the bases the same
+vector<int> OptiDB::getIndicatorColumns(){
+    try {
+        
+        vector<int> indicatorCols;
+        
+        for (int i = 0; i < reference.otuData.size(); i++) { //for each alignment location
+            
+            vector<char> thisColumn = reference.otuData[i];
+            
+            if (thisColumn.size() == 1) { } //all sequences are the same in this column, ignore
+            else {
+                vector<double> counts;
+                counts.resize(numBases, 0.0);
+                
+                //find occurances of each base
+                for (int j = 0; j < thisColumn.size(); j++) { counts[baseMap[thisColumn[j]]]++; }
+                
+                //find percentages
+                for (int j = 0; j < counts.size(); j++) {
+                    
+                    counts[j] /= numSeqs;
+                    
+                    if ((counts[j] >= 0.50) && (counts[j] < 0.95)) {
+                        indicatorCols.push_back(i);
+                        j+=counts.size(); //break
+                    }
+                }
+            }
+        }
+        return indicatorCols;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiDB", "getIndicatorColumns");
         exit(1);
     }
 }
