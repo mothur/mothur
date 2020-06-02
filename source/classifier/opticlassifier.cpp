@@ -9,17 +9,26 @@
 #include "opticlassifier.hpp"
 
 /**************************************************************************************************/
-OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, int i, bool sh, string version) : Classify(), confidenceThreshold(cutoff), iters(i) {
+OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, int i, bool sh, string version, string f) : Classify(), confidenceThreshold(cutoff), iters(i), filter(f) {
     try {
         Utils util;
-        reverse['A'] = 'T';
-        reverse['T'] = 'A';
-        reverse['C'] = 'G';
-        reverse['G'] = 'C';
-        reverse['-'] = '-';
-        reverse['N'] = 'N';
+
         numBases = 6;
         shortcuts = sh;
+        
+        baseMap['A'] = 0; baseProbs[0] = 0.0; reverse[0] = 1;
+        baseMap['T'] = 1; baseProbs[1] = 0.0; reverse[1] = 0;
+        baseMap['G'] = 2; baseProbs[2] = 0.0; reverse[2] = 3;
+        baseMap['C'] = 3; baseProbs[3] = 0.0; reverse[3] = 2;
+        baseMap['-'] = 4; baseProbs[4] = 0.0; reverse[4] = 4;
+        baseMap['N'] = 5; baseProbs[5] = 0.0; reverse[5] = 5;
+
+        numFilteredColumns = 0;
+        for (int i = 0; i < filter.length(); i++) {
+            if (filter[i] == '1') { //cols to keep
+                numFilteredColumns++;
+            }
+        }
         
         string baseName = reftaxonomy;
         string baseTName = reffasta;
@@ -74,34 +83,13 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                             
                 m->mothurOut("DONE.\n");
                 
-                numAlignedColumns = database->getLongestBase();
-                allCols = database->getIndicatorColumns();
+                int numAlignedColumns = database->getLongestBase();
                 
                 int numReferences = names.size();
                 
-                baseMap['A'] = 0; mapBase[0] = 'A';
-                baseMap['T'] = 1; mapBase[1] = 'T';
-                baseMap['G'] = 2; mapBase[2] = 'G';
-                baseMap['C'] = 3; mapBase[3] = 'C';
-                baseMap['-'] = 4; mapBase[4] = '-';
-                baseMap['N'] = 5; mapBase[5] = 'N';
+                //set allCols to all indicator cols in template for shortcuts files
+                allCols = database->getIndicatorColumns();
                 
-                baseProbs['A'] = 0.0;
-                baseProbs['T'] = 0.0;
-                baseProbs['G'] = 0.0;
-                baseProbs['C'] = 0.0;
-                baseProbs['-'] = 0.0;
-                baseProbs['N'] = 0.0;
-                
-                //initailize charGenusProb[alignmentLength][numBases][numberOfGenus]
-                charGenusProb.resize(numAlignedColumns);
-                reversedProbs.resize(numAlignedColumns, baseProbs);
-                
-                for (int i = 0; i < numAlignedColumns; i++) {
-                    charGenusProb[i].resize(numBases);
-                    for (int j = 0; j < numBases; j++) { charGenusProb[i][j].resize(genusNodes.size(), 0.0); }
-                }
-
                 if (shortcuts) {
                     util.openOutputFile(probFileName, out);
                 
@@ -115,15 +103,29 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                     //output mothur version
                     out2 << "#" << version << endl;
                     
-                    //output indicator columns
                     out2 << util.getStringFromVector(allCols, ",") << endl;
-                    
+                }
+                
+                //apply query filter to indicator cols in db
+                map<int, int> colIndex = database->getFilteredIndicatorColumns(filter, allCols);
+                
+                //initailize charGenusProb[alignmentLength][numBases][numberOfGenus]
+                charGenusProb.resize(numFilteredColumns);
+                reversedProbs.resize(numFilteredColumns, baseProbs);
+                
+                for (int i = 0; i < numFilteredColumns; i++) {
+                    charGenusProb[i].resize(numBases);
+                    for (int j = 0; j < numBases; j++) { charGenusProb[i][j].resize(genusNodes.size(), 0.0); }
                 }
                 
                 //for each column in the alignment
                 for (int i = 0; i < numAlignedColumns; i++) {
                     
                     if (shortcuts) {  out << i << '\t'; }
+                    
+                    bool keepCol = true;
+                    int thisCol = colIndex[i];
+                    if (thisCol == -1.0) { keepCol = false; }
                     
                     if (m->getControl_pressed()) {  break; }
                     
@@ -141,21 +143,25 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                             float probabilityInTemplate = 0;
                             for (int k = 0; k < genusNodes.size(); k++) {
                                 
+                                float thisResult = 0.0;
                                 if (itBase->first == allSame) {
                                     probabilityInTemplate = (numReferences + 0.50) / (float) (numReferences + 1);
-                                    charGenusProb[i][baseMap[allSame]][k] = log((genusTotals[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));
+                                    thisResult = log((genusTotals[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));
                                     
-                                    if (shortcuts) { out << baseMap[allSame] << '\t' << k << '\t' << charGenusProb[i][baseMap[allSame]][k] << '\t' ; }
+                                    if (shortcuts) { out << baseMap[allSame] << '\t' << k << '\t' << thisResult << '\t' ; }
                                     
                                     numNotZero++;
                                 }else { //zero count prob
                                     probabilityInTemplate = (0 + 0.50) / (float) (numReferences + 1);
-                                    charGenusProb[i][itBase->second][k] = log((0 + probabilityInTemplate) / (float) (genusTotals[k] + 1));
+                                    thisResult = log((0 + probabilityInTemplate) / (float) (genusTotals[k] + 1));
                                 }
+                                
+                                if (keepCol) { charGenusProb[thisCol][itBase->second][k] = thisResult; }
                             }
                             
+                            
                             //save to determine if sequence is reversed
-                            reversedProbs[i][itBase->second] = probabilityInTemplate;
+                            if (keepCol) { reversedProbs[thisCol][itBase->second] = probabilityInTemplate; }
                             
                             if (shortcuts) {
                                 out2 << itBase->second << '\t' << probabilityInTemplate << '\t';
@@ -163,7 +169,7 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                         }
                     }else {
                         
-                        for (int j = 0; j < thisColumnDistribution.size(); j++) { //should be 5, A,T,G,C,-
+                        for (int j = 0; j < thisColumnDistribution.size(); j++) { //should be 6, A,T,G,C,-,N
                             //probabilityInTemplate = (# of seqs with that char at this location in template + 0.50) / (total number of seqs in template + 1);
                             float probabilityInTemplate = (thisColumnDistribution[j].size() + 0.50) / (float) (numReferences + 1);
                             
@@ -174,16 +180,18 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                             }
                             
                             for (int k = 0; k < genusNodes.size(); k++) {
-                                charGenusProb[i][j][k] = log((count[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));
+                                 float thisResult = log((count[k] + probabilityInTemplate) / (float) (genusTotals[k] + 1));
                                 
                                 if (count[k] != 0) {
-                                    if (shortcuts) { out << j << '\t' << k << '\t' << charGenusProb[i][j][k] << '\t' ; }
+                                    if (shortcuts) { out << j << '\t' << k << '\t' << thisResult << '\t' ; }
                                     numNotZero++;
                                 }
+                                
+                                if (keepCol) { charGenusProb[thisCol][j][k] = thisResult; }
                             }
                             
                             //save to determine if sequence is reversed
-                            reversedProbs[i][mapBase[j]] = probabilityInTemplate;
+                            if (keepCol) { reversedProbs[thisCol][j] = probabilityInTemplate; }
                             
                             if (shortcuts) {
                                 out2 << j << '\t' << probabilityInTemplate << '\t';
@@ -210,7 +218,6 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
         }
         
         for (int i = 0; i < files.size(); i++) { delete files[i]; }
-        cout << "num indicator cols in reference " << allCols.size() << endl;;
 
         m->mothurOut("DONE.\nIt took " + toString(time(NULL) - start) + " seconds get probabilities.\n");
     }
@@ -228,18 +235,28 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
         
         string aligned = seq->getAligned();
         
-        if (aligned.length() != numAlignedColumns) {  m->mothurOut("[ERROR]: Alignment mismatch, cannot classify "  + seq->getName() + ". The reference sequences have an aligned length of " + toString(numAlignedColumns) + " but the length of this sequence is " + toString(aligned.length()) + ".\n");  simpleTax = "unknown;";  return "unknown;"; }
+        if (aligned.length() != numFilteredColumns) {  m->mothurOut("[ERROR]: Alignment mismatch, cannot classify "  + seq->getName() + ".\n");  simpleTax = "unknown;";  return "unknown;"; }
         
-        //convert '.' gaps to '-'
-        for (int i = 0; i < numAlignedColumns; i++) { if (aligned[i] == '.') { aligned[i] = '-'; } }
+        //convert '.' gaps to '-' and bases to ints
+        //0 -> A, 1 -> T, 2 -> C, 3 -> G, 4 -> -, N -> 5
+        vector<int> convertedAligned; convertedAligned.resize(numFilteredColumns, 0);
+        for (int i = 0; i < aligned.length(); i++) {
+            if (aligned[i] == '.') { aligned[i] = '-'; }
+            convertedAligned[i] = baseMap[aligned[i]];
+        }
         
-        if (isReversed(aligned)) {
+        if (isReversed(convertedAligned)) {
             flipped = true;
             seq->reverseComplement();
             aligned = seq->getAligned();
+            
+            for (int i = 0; i < aligned.length(); i++) {
+                if (aligned[i] == '.') { aligned[i] = '-'; }
+                convertedAligned[i] = baseMap[aligned[i]];
+            }
         }
 
-        int index = getMostProbableTaxonomy(aligned, allCols);
+        int index = getMostProbableTaxonomy(convertedAligned, allCols);
         
         TaxNode taxonomyTemp = phyloTree->get(index);
         
@@ -253,7 +270,7 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         
         //bootstrap - to set confidenceScore
-        tax = bootstrapResults(aligned, index, simpleTax);
+        tax = bootstrapResults(convertedAligned, index, simpleTax);
         
         if (m->getDebug()) {  m->mothurOut("\n"); }
         
@@ -265,7 +282,7 @@ string OptiClassifier::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipp
     }
 }
 /**************************************************************************************************/
-string OptiClassifier::bootstrapResults(string aligned, int tax, string& simpleTax) {
+string OptiClassifier::bootstrapResults(vector<int>& aligned, int tax, string& simpleTax) {
     try {
                 
         map<int, int> confidenceScores;
@@ -355,7 +372,7 @@ string OptiClassifier::bootstrapResults(string aligned, int tax, string& simpleT
     }
 }
 /**************************************************************************************************/
-int OptiClassifier::getMostProbableTaxonomy(string aligned, vector<int> cols) {
+int OptiClassifier::getMostProbableTaxonomy(vector<int>& aligned, vector<int>& cols) {
     try {
         int indexofGenus = 0;
         
@@ -367,8 +384,7 @@ int OptiClassifier::getMostProbableTaxonomy(string aligned, vector<int> cols) {
             
             double prob = 0.0000;
             for (int i = 0; i < cols.size(); i++) {
-                int indexOfBaseInColsI = baseMap[aligned[cols[i]]]; //0 -> A, 1 -> T, 2 -> C, 3 -> G, 4 -> -, 5 -> N
-                prob += charGenusProb[cols[i]][indexOfBaseInColsI][k];
+                prob += charGenusProb[cols[i]][aligned[cols[i]]][k];
             }
 
             //is this the taxonomy with the greatest probability?
@@ -388,17 +404,17 @@ int OptiClassifier::getMostProbableTaxonomy(string aligned, vector<int> cols) {
 //********************************************************************************************************************
 //if it is more probable that the reverse compliments are in the template, then we assume the sequence is reversed.
 //vector< map< char, float> > reversedProbs; //reversedProbs[0]['A'] = Probability of 'A' being at alignment location 0 in the reference. reversedProbs[0]['T'] = Probability of 'T' being at alignment location 0 in the reference.
-bool OptiClassifier::isReversed(string aligned){
+bool OptiClassifier::isReversed(vector<int>& aligned){
     try{
         bool reversed = false;
         float prob = 0;
         float reverseProb = 0;
          
-        for (int i = 0; i < numAlignedColumns; i++){
-            int base = aligned[i];
+        for (int i = 0; i < allCols.size(); i++){
+            int base = aligned[allCols[i]];
             
-            prob += reversedProbs[i][base];
-            reverseProb += reversedProbs[i][reverse[base]];
+            prob += reversedProbs[allCols[i]][base];
+            reverseProb += reversedProbs[allCols[i]][reverse[base]];
         }
         
         if (reverseProb > prob){ reversed = true; }
@@ -417,11 +433,50 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         //read version
         string line = util.getline(in); util.gobble(in);
         
+        int numAlignedColumns = 0;
         in >> numAlignedColumns; util.gobble(in);
-    
+        
+        //sanity check
+        if (filter.length() != numAlignedColumns) {  m->mothurOut("[ERROR]: Your filter indicates your alignment length is " + toString(filter.length()) + ", but your reference files indicate an alignment length of " + toString(numAlignedColumns) + ". Cannot continue.\n");  m->setControl_pressed(true); return; }
+        
+        //read version
+        string line2 = util.getline(inNum); util.gobble(inNum);
+        
+        //process filter information
+        //read indicator columns
+        set<int> indicatorColsInTemplate;
+        line2 = util.getline(inNum); util.gobble(inNum);
+        vector<string> iCols; util.splitAtComma(line2, iCols);
+        for (int i = 0; i < iCols.size(); i++) {
+            int temp; util.mothurConvert(iCols[i], temp);
+            //this column is significant and in our query reads
+            indicatorColsInTemplate.insert(temp);
+        }
+        
+        //process filter information
+        map<int, int> colsPresentInQueryFiles; map<int, int>::iterator it;
+        int filterCount = 0;
+        for (int i = 0; i < numAlignedColumns; i++) {
+            if (filter[i] == '1') { //cols to keep
+                colsPresentInQueryFiles[i] = filterCount;
+                filterCount++;
+            }
+        }
+        
+        for (int i = 0; i < numAlignedColumns; i++) {
+            
+            if (indicatorColsInTemplate.count(i) != 0) { //this is a template indicator column
+                
+                it = colsPresentInQueryFiles.find(i);
+                if (it != colsPresentInQueryFiles.end()) { //this indicator column is present in the filtered query
+                    allCols.push_back(it->second);
+                }
+            }
+        }
+        
         //initialze probabilities
         int numGenus = genusNodes.size();
-        charGenusProb.resize(numAlignedColumns);
+        charGenusProb.resize(filterCount);
         for (int i = 0; i < charGenusProb.size(); i++) {
             charGenusProb[i].resize(numBases);
             for (int j = 0; j < numBases; j++) {
@@ -429,52 +484,39 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
             }
         }
         
-        baseProbs['A'] = 0.0;
-        baseProbs['T'] = 0.0;
-        baseProbs['G'] = 0.0;
-        baseProbs['C'] = 0.0;
-        baseProbs['-'] = 0.0;
-        baseProbs['N'] = 0.0;
-        
-        baseMap['A'] = 0; mapBase[0] = 'A';
-        baseMap['T'] = 1; mapBase[1] = 'T';
-        baseMap['G'] = 2; mapBase[2] = 'G';
-        baseMap['C'] = 3; mapBase[3] = 'C';
-        baseMap['-'] = 4; mapBase[4] = '-';
-        baseMap['N'] = 5; mapBase[5] = 'N';
-        
-        reversedProbs.resize(numAlignedColumns, baseProbs);
+        reversedProbs.resize(filterCount, baseProbs);
         
         int base, alignmentLocation;  alignmentLocation = 0;
-        vector<int> num; num.resize(numAlignedColumns); //num nonzero probs for this alignment location
-        vector< vector<float> > probabilityInTemplate; probabilityInTemplate.resize(numAlignedColumns);
-        for (int i = 0; i < numAlignedColumns; i++) { probabilityInTemplate[i].resize(numBases, 0); }
+        vector<int> num; num.resize(filterCount); //num nonzero probs for this alignment location
+        vector< vector<float> > probabilityInTemplate; probabilityInTemplate.resize(filterCount);
+        for (int i = 0; i < filterCount; i++) { probabilityInTemplate[i].resize(numBases, 0); }
         
-        //read version
-        string line2 = util.getline(inNum); util.gobble(inNum);
-        
-        //read indicator columns
-        line2 = util.getline(inNum); util.gobble(inNum);
-        vector<string> iCols; util.splitAtComma(line2, iCols);
-        for (int i = 0; i < iCols.size(); i++) {
-            int temp; util.mothurConvert(iCols[i], temp);
-            allCols.push_back(temp);
-        }
         
         while (!inNum.eof()) {
             
-            for (int i = 0; i < numBases; i++) {
-                inNum >> base; util.gobble(inNum);
-                inNum >> probabilityInTemplate[alignmentLocation][base]; util.gobble(inNum);
+            //is this an alignment location we care about??
+            it = colsPresentInQueryFiles.find(alignmentLocation);
+            
+            if (it != colsPresentInQueryFiles.end()) {
+                int index = it->second;
                 
-                reversedProbs[alignmentLocation][mapBase[base]] = probabilityInTemplate[alignmentLocation][base];
+                for (int i = 0; i < numBases; i++) {
+                    inNum >> base; util.gobble(inNum);
+                    inNum >> probabilityInTemplate[index][base]; util.gobble(inNum);
+                    
+                    reversedProbs[index][base] = probabilityInTemplate[index][base];
+                    
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(base) + '\t' + toString(probabilityInTemplate[index][base]) + '\t'); }
+                }
+                inNum >> num[index]; util.gobble(inNum);
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(base) + '\t' + toString(probabilityInTemplate[alignmentLocation][base]) + '\t'); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: saving column " + toString(alignmentLocation) + '\t' + toString(num[index])  + "\n"); }
+           
+            }else { //read line, don't save
+                string line = util.getline(inNum); util.gobble(inNum);
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: ignoring column " + toString(alignmentLocation) + '\t' + line  + ", not an indicator column present in the query reads.\n"); }
+
             }
-            inNum >> num[alignmentLocation]; util.gobble(inNum);
-            
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(num[alignmentLocation])  + "\n"); }
-            
             alignmentLocation++;
         }
         inNum.close();
@@ -482,22 +524,31 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         while(!in.eof()) {
             in >> alignmentLocation;
             
-            for (int j = 0; j < numBases; j++) {
-                
-                //set them all to zero value
-                for (int k = 0; k < genusNodes.size(); k++) {
-                    charGenusProb[alignmentLocation][j][k] = log(probabilityInTemplate[alignmentLocation][j] / (float) (genusTotals[k]+1));
-                }
-            }
+            //is this an alignment location we care about??
+            it = colsPresentInQueryFiles.find(alignmentLocation);
             
-            //update non zero values
-            int genus = 0; double prob = 0.0;
-            for (int i = 0; i < num[alignmentLocation]; i++) {
-                in >> base >> genus >> prob;
-                charGenusProb[alignmentLocation][base][genus] = prob;
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(alignmentLocation) + '\t' + toString(base) + '\t' + toString(genus) + '\t' + toString(prob) + "\n"); }
+            if (it != colsPresentInQueryFiles.end()) {
+                int index = it->second;
+                for (int j = 0; j < numBases; j++) {
+                    
+                    //set them all to zero value
+                    for (int k = 0; k < genusNodes.size(); k++) {
+                        charGenusProb[index][j][k] = log(probabilityInTemplate[index][j] / (float) (genusTotals[k]+1));
+                    }
+                }
+                
+                //update non zero values
+                int genus = 0; double prob = 0.0;
+                for (int i = 0; i < num[index]; i++) {
+                    in >> base >> genus >> prob;
+                    charGenusProb[index][base][genus] = prob;
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(index) + '\t' + toString(base) + '\t' + toString(genus) + '\t' + toString(prob) + "\n"); }
+                }
+            }else { //read, don't save
+                string line = util.getline(in);
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: ignoring " + line  + "\n"); }
             }
-             util.gobble(in);
+            util.gobble(in);
         }
         in.close();
     }

@@ -109,6 +109,9 @@ void OptiDB::generateDB()  {
         
         //creates reference
         convertSequences();
+         
+        //finds columns in alignment with little noise that are included in query filter
+        calcIndicatorColumns();
         
         //create shortcut file for reading next time
         ofstream out; util.openOutputFile(optiDBName, out);
@@ -121,6 +124,8 @@ void OptiDB::generateDB()  {
         
         //output number of seqs in reference
         out << reference.numSeqs << endl;
+        
+        out << util.getStringFromVector(indicatorColumns, ",") << endl;
         
         for (int i = 0; i < reference.otuData.size(); i++) { //for each alignment location
             out << i << '\t' << reference.otuData[i].size() << '\t';
@@ -149,9 +154,19 @@ void OptiDB::readDB(ifstream& optiDBFile){
         //read alignedLength
         optiDBFile >> alignedLength; util.gobble(optiDBFile);
         
+        longest = alignedLength-1;
+        
         //read numSeqs in reference
         int numSeqs = 0;
         optiDBFile >> numSeqs; util.gobble(optiDBFile);
+        
+        line = util.getline(optiDBFile); util.gobble(optiDBFile);
+        vector<string> iCols; util.splitAtComma(line, iCols);
+        for (int i = 0; i < iCols.size(); i++) {
+            int temp; util.mothurConvert(iCols[i], temp);
+            //this column is significant
+            indicatorColumns.push_back(temp);
+        }
         
         vector<vector<char> > refDistrib; refDistrib.resize(alignedLength);
         int location, size; string bases;
@@ -168,7 +183,6 @@ void OptiDB::readDB(ifstream& optiDBFile){
         optiDBFile.close();
         
         reference.readSeqs(refDistrib, numSeqs);
-        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "readDB");
@@ -176,11 +190,57 @@ void OptiDB::readDB(ifstream& optiDBFile){
     }
 }
 /**************************************************************************************************/
-//an indicator column must have at least 50% of the bases the same
-vector<int> OptiDB::getIndicatorColumns(){
+//remove columns from list to process if they are not present in the query filter
+map<int, int> OptiDB::filterIndicatorColumns(string filter, vector<int>& filteredICols){
     try {
+        map<int, int> colsMap;
         
-        vector<int> indicatorCols;
+        filteredICols.clear();
+        
+        //sanity check
+        if (filter.length() != alignedLength) {  m->mothurOut("[ERROR]: Your filter indicates your alignment length is " + toString(filter.length()) + ", but your reference files indicate an alignment length of " + toString(alignedLength) + ". Cannot continue.\n");  m->setControl_pressed(true); return colsMap; }
+        
+        //process filter information
+        map<int, int> colsPresentInQueryFiles; map<int, int>::iterator it;
+        int filterCount = 0;
+        for (int i = 0; i < alignedLength; i++) {
+            if (filter[i] == '1') { //cols to keep
+                colsPresentInQueryFiles[i] = filterCount;
+                filterCount++;
+            }
+        }
+        
+        set<int> indicatorColsInTemplate;
+        for (int i = 0; i < indicatorColumns.size(); i++) {
+            indicatorColsInTemplate.insert(indicatorColumns[i]);
+        }
+        
+        for (int i = 0; i < alignedLength; i++) {
+            
+            colsMap[i] = -1.0; //ignore col
+            
+            if (indicatorColsInTemplate.count(i) != 0) { //this is a template indicator column
+                
+                it = colsPresentInQueryFiles.find(i);
+                if (it != colsPresentInQueryFiles.end()) { //this indicator column is present in the filtered query
+                    filteredICols.push_back(it->second);
+                    colsMap[i] = it->second; //use col
+                }
+            }
+        }
+        
+        return colsMap;
+        
+    }
+     catch(exception& e) {
+         m->errorOut(e, "OptiDB", "filterIndicatorColumns");
+         exit(1);
+     }
+ }
+/**************************************************************************************************/
+//an indicator column must have at least 50% of the bases the same
+void OptiDB::calcIndicatorColumns(){
+    try {
         
         for (int i = 0; i < reference.otuData.size(); i++) { //for each alignment location
             
@@ -195,22 +255,21 @@ vector<int> OptiDB::getIndicatorColumns(){
                 for (int j = 0; j < thisColumn.size(); j++) { counts[baseMap[thisColumn[j]]]++; }
                 
                 //find percentages
-                for (int j = 0; j < counts.size(); j++) {
+                for (int k = 0; k < counts.size(); k++) {
                     
-                    counts[j] /= numSeqs;
+                    counts[k] /= numSeqs;
                     
-                    if ((counts[j] >= 0.50) && (counts[j] < 0.95)) {
-                        indicatorCols.push_back(i);
-                        j+=counts.size(); //break
+                    if ((counts[k] > 0.50) && (counts[k] < 0.95)) {
+                        indicatorColumns.push_back(i);
+                        break;
                     }
                 }
             }
         }
-        return indicatorCols;
-        
+        //cout << "indicator cols = " << indicatorColumns.size() << endl;
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiDB", "getIndicatorColumns");
+        m->errorOut(e, "OptiDB", "calcIndicatorColumns");
         exit(1);
     }
 }

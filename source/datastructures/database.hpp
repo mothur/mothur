@@ -61,6 +61,7 @@ public:
 	
     virtual vector< vector<int> > get(int i, char& s) { s='x'; vector< vector<int> > blank; return blank; }
     virtual vector<int> getIndicatorColumns() { return nullIntVector; }
+    virtual map<int, int> getFilteredIndicatorColumns(string, vector<int>&) { return nullIntMap; }
     virtual int getLongestBase() {	return longest+1;		}
     virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };
 	virtual int getReversed(int) { return 0; } 

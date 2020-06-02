@@ -158,6 +158,7 @@ typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
 const vector<int> nullIntVector; //used to pass blank ints
 const vector<char> nullCharVector; //used to pass blank char
+const map<int, int> nullIntMap; //used to pass blank intMap
 /**************************************************************************************************/
 struct classifierOTU {
     vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU
