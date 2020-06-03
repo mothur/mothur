@@ -60,6 +60,8 @@ public:
 	virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) const = 0;  // returns indexes of n closest sequences to query
 	
     virtual vector< vector<int> > get(int i, char& s) { s='x'; vector< vector<int> > blank; return blank; }
+    virtual vector<int> getIndicatorColumns() { return nullIntVector; }
+    virtual map<int, int> getFilteredIndicatorColumns(string, vector<int>&) { return nullIntMap; }
     virtual int getLongestBase() {	return longest+1;		}
     virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };
 	virtual int getReversed(int) { return 0; } 
