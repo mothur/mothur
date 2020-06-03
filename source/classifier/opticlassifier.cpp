@@ -12,7 +12,6 @@
 OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, int i, bool sh, string version, string f) : Classify(), confidenceThreshold(cutoff), iters(i), filter(f) {
     try {
         Utils util;
-
         numBases = 6;
         shortcuts = sh;
         
@@ -22,13 +21,6 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
         baseMap['C'] = 3; baseProbs[3] = 0.0; reverse[3] = 2;
         baseMap['-'] = 4; baseProbs[4] = 0.0; reverse[4] = 4;
         baseMap['N'] = 5; baseProbs[5] = 0.0; reverse[5] = 5;
-
-        numFilteredColumns = 0;
-        for (int i = 0; i < filter.length(); i++) {
-            if (filter[i] == '1') { //cols to keep
-                numFilteredColumns++;
-            }
-        }
         
         string baseName = reftaxonomy;
         string baseTName = reffasta;
@@ -104,6 +96,15 @@ OptiClassifier::OptiClassifier(string reftaxonomy, string reffasta, int cutoff, 
                     out2 << "#" << version << endl;
                     
                     out2 << util.getStringFromVector(allCols, ",") << endl;
+                }
+                
+                if (filter == "") { filter.resize(numAlignedColumns, '1');  }
+
+                numFilteredColumns = 0;
+                for (int i = 0; i < filter.length(); i++) {
+                    if (filter[i] == '1') { //cols to keep
+                        numFilteredColumns++;
+                    }
                 }
                 
                 //apply query filter to indicator cols in db
@@ -436,6 +437,8 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         int numAlignedColumns = 0;
         in >> numAlignedColumns; util.gobble(in);
         
+        if (filter == "") { filter.resize(numAlignedColumns, '1');  }
+        
         //sanity check
         if (filter.length() != numAlignedColumns) {  m->mothurOut("[ERROR]: Your filter indicates your alignment length is " + toString(filter.length()) + ", but your reference files indicate an alignment length of " + toString(numAlignedColumns) + ". Cannot continue.\n");  m->setControl_pressed(true); return; }
         
@@ -455,11 +458,11 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         
         //process filter information
         map<int, int> colsPresentInQueryFiles; map<int, int>::iterator it;
-        int filterCount = 0;
+        numFilteredColumns = 0;
         for (int i = 0; i < numAlignedColumns; i++) {
             if (filter[i] == '1') { //cols to keep
-                colsPresentInQueryFiles[i] = filterCount;
-                filterCount++;
+                colsPresentInQueryFiles[i] = numFilteredColumns;
+                numFilteredColumns++;
             }
         }
         
@@ -476,7 +479,7 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
         
         //initialze probabilities
         int numGenus = genusNodes.size();
-        charGenusProb.resize(filterCount);
+        charGenusProb.resize(numFilteredColumns);
         for (int i = 0; i < charGenusProb.size(); i++) {
             charGenusProb[i].resize(numBases);
             for (int j = 0; j < numBases; j++) {
@@ -484,12 +487,12 @@ void OptiClassifier::readProbFile(ifstream& in, ifstream& inNum) {
             }
         }
         
-        reversedProbs.resize(filterCount, baseProbs);
+        reversedProbs.resize(numFilteredColumns, baseProbs);
         
         int base, alignmentLocation;  alignmentLocation = 0;
-        vector<int> num; num.resize(filterCount); //num nonzero probs for this alignment location
-        vector< vector<float> > probabilityInTemplate; probabilityInTemplate.resize(filterCount);
-        for (int i = 0; i < filterCount; i++) { probabilityInTemplate[i].resize(numBases, 0); }
+        vector<int> num; num.resize(numFilteredColumns); //num nonzero probs for this alignment location
+        vector< vector<float> > probabilityInTemplate; probabilityInTemplate.resize(numFilteredColumns);
+        for (int i = 0; i < numFilteredColumns; i++) { probabilityInTemplate[i].resize(numBases, 0); }
         
         
         while (!inNum.eof()) {

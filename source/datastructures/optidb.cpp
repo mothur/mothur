@@ -197,6 +197,8 @@ map<int, int> OptiDB::filterIndicatorColumns(string filter, vector<int>& filtere
         
         filteredICols.clear();
         
+        if (filter == "") { filter.resize(alignedLength, '1');  }
+        
         //sanity check
         if (filter.length() != alignedLength) {  m->mothurOut("[ERROR]: Your filter indicates your alignment length is " + toString(filter.length()) + ", but your reference files indicate an alignment length of " + toString(alignedLength) + ". Cannot continue.\n");  m->setControl_pressed(true); return colsMap; }
         
