@@ -214,7 +214,7 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitGroupCommand", "SplitAbundCommand");
+		m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand");
 		exit(1);
 	}
 }
@@ -699,13 +699,17 @@ void SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
         else                        { driverSplitFlow(dataBundle);   }
         
         outputNames.insert(outputNames.end(), dataBundle->outputNames.begin(), dataBundle->outputNames.end());
-        outputTypes.insert(dataBundle->outputTypes.begin(), dataBundle->outputTypes.end());
+        for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+            outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+        }
 
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
 
             outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
-            outputTypes.insert(data[i]->outputTypes.begin(), data[i]->outputTypes.end());
+            for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+                outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+            }
 
             delete data[i];
             delete workerThreads[i];
