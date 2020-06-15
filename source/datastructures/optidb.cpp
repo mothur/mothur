@@ -159,7 +159,6 @@ void OptiDB::readDB(ifstream& optiDBFile){
             
             optiDBFile >> location >> size >> bases; util.gobble(optiDBFile);
             
-            char base;
             for (int j = 0; j < size; i++) { //for each reference, if all bases are the same in this location, size = 1; saves space
                 
                 refDistrib[location].push_back(bases[j]);

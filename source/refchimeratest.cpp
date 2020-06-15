@@ -226,7 +226,7 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, str
             reference = referenceSeqs[bestRefIndex];
         }
         
-        double alignLength;
+        double alignLength = 0.0;
         double finalDiffs = alignQueryToReferences(querySeq, reference, bestQueryAlignment, bestRefAlignment, alignLength);
         double finalDistance = finalDiffs / alignLength;
 

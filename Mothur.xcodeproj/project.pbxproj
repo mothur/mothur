@@ -438,6 +438,8 @@
 		489AF694210619410028155E /* optirefmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */; };
 		489AF6952106194A0028155E /* optifitcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */; };
 		489AF6962106195E0028155E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
+		48A055302490066C00D0F97F /* sffread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A0552E2490066C00D0F97F /* sffread.cpp */; };
+		48A055332491577800D0F97F /* sffheader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A055312491577800D0F97F /* sffheader.cpp */; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B01D2920163594006BE140 /* clusterfitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2720163594006BE140 /* clusterfitcommand.cpp */; };
@@ -1044,6 +1046,10 @@
 		489ECDAD215EB7660036D42C /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = ../../../../usr/local/hdf5/lib/libhdf5_hl.a; sourceTree = "<group>"; };
 		489ECDAE215EB7660036D42C /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = ../../../../usr/local/hdf5/lib/libhdf5.a; sourceTree = "<group>"; };
 		489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl_cpp.a; path = ../../../../usr/local/lib/libhdf5_hl_cpp.a; sourceTree = "<group>"; };
+		48A0552E2490066C00D0F97F /* sffread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sffread.cpp; path = source/datastructures/sffread.cpp; sourceTree = SOURCE_ROOT; };
+		48A0552F2490066C00D0F97F /* sffread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sffread.hpp; path = source/datastructures/sffread.hpp; sourceTree = SOURCE_ROOT; };
+		48A055312491577800D0F97F /* sffheader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sffheader.cpp; path = source/datastructures/sffheader.cpp; sourceTree = SOURCE_ROOT; };
+		48A055322491577800D0F97F /* sffheader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sffheader.hpp; path = source/datastructures/sffheader.hpp; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48B01D2720163594006BE140 /* clusterfitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clusterfitcommand.cpp; path = source/commands/clusterfitcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2826,6 +2832,10 @@
 				A7E9B7DE12D37EC400DA6239 /* sequencedb.h */,
 				A7F9F5CD141A5E500032F693 /* sequenceparser.h */,
 				A7F9F5CE141A5E500032F693 /* sequenceparser.cpp */,
+				48A055312491577800D0F97F /* sffheader.cpp */,
+				48A055322491577800D0F97F /* sffheader.hpp */,
+				48A0552E2490066C00D0F97F /* sffread.cpp */,
+				48A0552F2490066C00D0F97F /* sffread.hpp */,
 				48F1C16C23D78F8D0034DAAF /* sharedclrvector.cpp */,
 				48F1C16D23D78F8D0034DAAF /* sharedclrvector.hpp */,
 				48F1C16823D78D7B0034DAAF /* sharedclrvectors.cpp */,
@@ -3537,6 +3547,7 @@
 				A7E9B8A212D37EC400DA6239 /* classifyotucommand.cpp in Sources */,
 				A7E9B8A312D37EC400DA6239 /* classifyseqscommand.cpp in Sources */,
 				488C1DE6241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */,
+				48A055332491577800D0F97F /* sffheader.cpp in Sources */,
 				481E40E1244F62980059C925 /* calculator.cpp in Sources */,
 				A7E9B8A412D37EC400DA6239 /* clearcut.cpp in Sources */,
 				48ED1E79235E1ACA003E66F7 /* scriptengine.cpp in Sources */,
@@ -3591,6 +3602,7 @@
 				A7E9B8D512D37EC400DA6239 /* getrabundcommand.cpp in Sources */,
 				A7E9B8D612D37EC400DA6239 /* getrelabundcommand.cpp in Sources */,
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
+				48A055302490066C00D0F97F /* sffread.cpp in Sources */,
 				A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */,
 				4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
@@ -3929,7 +3941,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.0\\\"\"",
@@ -3980,7 +3992,7 @@
 				DSTROOT = TARGET_BUILD_DIR;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.0\\\"\"",
@@ -4046,7 +4058,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.0\\\"\"",
@@ -4132,7 +4144,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.44.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",

@@ -14,6 +14,8 @@
 #include "groupmap.h"
 #include "oligos.h"
 #include "trimoligos.h"
+#include "sffread.hpp"
+#include "sffheader.hpp"
 
 /**********************************************************/
 
@@ -24,7 +26,7 @@ public:
 	~SffInfoCommand(){}
 	
 	vector<string> setParameters();
-	string getCommandName()			{ return "sffinfo";					}
+	string getCommandName()			{ return "sff.info";				}
 	string getCommandCategory()		{ return "Sequence Processing";		}
 	
 	string getHelpString();	
@@ -49,31 +51,22 @@ private:
     Oligos* oligosObject;
     
 	//extract sff file functions
-	int extractSffInfo(string, string, string);
-	int readCommonHeader(ifstream&, CommonHeader&);
-	int readHeader(ifstream&, Header&);
-	bool readSeqData(ifstream&, seqRead&, int, Header&, TrimOligos*&, TrimOligos*&);
-	int decodeName(string&, string&, string&, string);
+	int extractSffInfo(string, string, string); //main function
+	void assignToSample(SffRead*&, TrimOligos*&, TrimOligos*&);
     bool readOligos(string oligosFile);
     bool readGroup(string oligosFile);
-	
-	int printCommonHeader(ofstream&, CommonHeader&);
-    int printCommonHeaderForDebug(CommonHeader&, ofstream&, int);
-	int printHeader(ofstream&, Header&);
-	int printSffTxtSeqData(ofstream&, seqRead&, Header&);
-	int printFlowSeqData(ofstream&, seqRead&, Header&);
-	int printFastaSeqData(ofstream&, seqRead&, Header&);
-	int printQualSeqData(ofstream&, seqRead&, Header&);
-	int readAccnosFile(string);
-	int parseSffTxt();
-	bool sanityCheck(Header&, seqRead&);
-    int adjustCommonHeader(CommonHeader);
-    int findGroup(Header header, seqRead read, int& barcode, int& primer, TrimOligos*&, TrimOligos*&);
-    int findGroup(Header header, seqRead read, int& barcode, int& primer, string);
-    string reverseOligo(string oligo);
+    
+    //assign read to sample when splitting
+    int findGroup(SffRead*& read, int& barcode, int& primer, TrimOligos*&, TrimOligos*&);
+    int findGroup(SffRead*&, int& barcode, int& primer, string);
+    
+    //common header functions
+	int adjustCommonHeader(SffCommonHeader*&);
     
 	//parsesfftxt file functions
+    int parseSffTxt();
 	int parseHeaderLineToInt(ifstream&);
+    unsigned short parseHeaderLineToShort(ifstream& file);
 	vector<unsigned short> parseHeaderLineToFloatVector(ifstream&, int);
 	vector<unsigned int> parseHeaderLineToIntVector(ifstream&, int);
 	string parseHeaderLineToString(ifstream&);
