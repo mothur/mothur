@@ -371,7 +371,7 @@ vector<int> TrimOligos::findReverse(Sequence& seq, int& primerStart, int& primer
             if (alignment != NULL) { delete alignment; }
             
             if(minDiff > rdiffs)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff;  success[1] = MOTHURMAX; return success;	}	//no good matches
-            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = minDiff; success[1] = rdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
+            else if(minCount > 1)	{	primerStart = 0; primerEnd = 0; success[0] = MOTHURMAX; success[1] = rdiffs + 10000; return success;	}	//can't tell the difference between multiple primers
             else{  success[0] = minDiff; success[1] = 0; return success; }
         }
         
@@ -491,7 +491,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, QualityScores& qual, int& gr
             }
             
             if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
+            else if(minCount > 1)	{	success[0] = MOTHURMAX; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
             else{	//use the best match
                 group = minGroup;
                 seq.setUnaligned(rawSequence.substr(minPos));
@@ -2451,7 +2451,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
             }
             
             if(minDiff > bdiffs)	{	success[0] = minDiff;  success[1] = MOTHURMAX;	}	//no good matches
-            else if(minCount > 1)	{	success[0] = minDiff; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
+            else if(minCount > 1)	{	success[0] = MOTHURMAX; success[1] = bdiffs + 10000;	}	//can't tell the difference between multiple barcodes
             else{	//use the best match
                 group = minGroup;
                 seq.setUnaligned(rawSequence.substr(minPos));
