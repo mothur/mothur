@@ -290,17 +290,59 @@ void SharedCommand::convertSharedFormat() {
         
         if (m->getControl_pressed()) { return; }
         
-        string sharedFilename = getOutputFileName(tag,variables);
-        outputNames.push_back(sharedFilename); outputTypes[tag].push_back(sharedFilename);
+        string sharedFilename = "";
+        
         if (tag == "shared") { //converting shared to tshared
+            tag = "tshared";
+            sharedFilename = getOutputFileName(tag,variables);
+            ofstream out; util.openOutputFile(sharedFilename, out);
+            
+            InputData input(sharedfile, "sharedfile", Groups);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+            SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            
+            bool printHeaders = true;
+            while (lookup != NULL) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                lookup->printTidy(out, printHeaders, keepZeroes); delete lookup;
+                
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            out.close();
             
         }else { //tshared - converting tshared to shared
+            tag = "shared";
+            sharedFilename = getOutputFileName(tag,variables);
+            ofstream out; util.openOutputFile(sharedFilename, out);
             
+            ifstream in; util.openInputFile(sharedfile, in);
+            
+            util.getline(in); //read headers
+            
+            map<string, int> groupIndexes; map<string, int>::iterator itGroup;
+            int countGroups = 0;
+            
+            map<string, int> otuNameIndexes; map<string, int>::iterator itOTU;
+            
+            string label, group, otuName;
+            int abundance;
+            while (!in.eof()) {
+                
+                if (m->getControl_pressed()) {  break; }
+                
+                
+                in >> label >> group >> otuName >> abundance; util.gobble(in);
+                
+            }
+            in.close();
         }
         
-        ofstream out; bool printHeaders = true;
-        util.openOutputFile(sharedFilename, out);
-        
+        outputNames.push_back(sharedFilename); outputTypes[tag].push_back(sharedFilename);
         
         //map<string, string> seqNameToOtuName;
         //SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);

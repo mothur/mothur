@@ -138,7 +138,7 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 /**************************************************************************************************/
 struct sharedRarefactData {
     
-    long long nIters, numGroupComb;
+    long long nIters;
     MothurOut* m;
     Utils util;
     vector<SharedRAbundVector*> lookup;
@@ -147,14 +147,14 @@ struct sharedRarefactData {
     bool jumble;
     
     sharedRarefactData(){}
-    sharedRarefactData(long long st, Utils u, vector<SharedRAbundVector*>& o, vector<Display*>& dis, string l, long long ns) {
+    sharedRarefactData(long long st, Utils u, vector<SharedRAbundVector*>& o, vector<Display*>& dis, string l, bool ns) {
         m = MothurOut::getInstance();
         nIters = st;
         util = u;
         lookup = o;
         displays = dis;
         label = l;
-        numGroupComb = ns;
+        jumble = ns;
     }
     ~sharedRarefactData(){ for(int i = 0; i < lookup.size(); i++) {  delete lookup[i]; } }
 };
@@ -195,14 +195,14 @@ int sharedDriver(sharedRarefactData* params){
             
             vector<SharedRAbundVector*> subset;
             //send each group one at a time
-            for (int k = 0; k < params->lookup.size(); k++) {
+            for (int k = 1; k < params->lookup.size(); k++) {
                 if (params->m->getControl_pressed()) {  delete merge;  return 0;  }
                 
                 subset.clear(); //clears out old pair of sharedrabunds
                 //add in new pair of sharedrabunds
                 subset.push_back(merge); subset.push_back(params->lookup[k]);
                 
-                rcd.updateSharedData(subset, k+1, params->numGroupComb);
+                rcd.updateSharedData(subset, k+1); //, params->numGroupComb
                 mergeVectors(merge, params->lookup[k], params->m);
             }
             
@@ -245,7 +245,7 @@ int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
             //make copy of lookup so we don't get access violations
             vector<SharedRAbundVector*> copyLookup = lookup->getSharedRAbundVectors();
             label = copyLookup[0]->getLabel();
-            sharedRarefactData* dataBundle = new sharedRarefactData(lines[i+1], util, copyLookup,  displays, label, numGroupComb);
+            sharedRarefactData* dataBundle = new sharedRarefactData(lines[i+1], util, copyLookup,  displays, label, jumble);
             
             data.push_back(dataBundle);
             
@@ -256,7 +256,7 @@ int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
         vector<SharedRAbundVector*> copyLookup = lookup->getSharedRAbundVectors();
         label = copyLookup[0]->getLabel();
 
-        sharedRarefactData* dataBundle = new sharedRarefactData(lines[0], util, copyLookup,  displays, label, numGroupComb);
+        sharedRarefactData* dataBundle = new sharedRarefactData(lines[0], util, copyLookup,  displays, label, jumble);
         sharedDriver(dataBundle);
         
         for (int i = 0; i < processors-1; i++) {

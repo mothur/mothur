@@ -98,8 +98,10 @@ void FileOutput::printFile(){
 /***********************************************************************/
 void SharedThreeColumnFile::setLabelName(string label){
 	try {
-        if(!firstLabel)     { fileHeader += "\t" + label + "\tlci\thci";                                }
-        else                { fileHeader = "numsampled\t" + groupLabel + "\t" + label + "\tlci\thci";   }
+        if (groupLabel != "") { groupLabel = "_" + groupLabel; }
+        
+        if(!firstLabel)     { fileHeader += "\t" + label + groupLabel + "\tlci" + groupLabel + "\thci"+ groupLabel; }
+        else                { fileHeader = "numsampled\t" + label + groupLabel + "\tlci" + groupLabel + "\thci"+ groupLabel;  }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedThreeColumnFile", "setLabelName");
@@ -120,7 +122,6 @@ void SharedThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
             nseqsToRow[nSeqs] = results.size();
             vector<double> theseResults;
             theseResults.push_back(numGroup); numGroup++;
-            theseResults.push_back(nSeqs);
             theseResults.push_back(data[0]);
             theseResults.push_back(data[1]);
             theseResults.push_back(data[2]);

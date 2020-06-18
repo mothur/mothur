@@ -5016,7 +5016,7 @@ int Utils::removeBlanks(vector<string>& tempVector) {
     }
 }
 /***********************************************************************/
-SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel, string optionOutput) {//input, allLines, userLabels, processedLabels
     try {
         
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -5030,7 +5030,7 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             
             if(allLines == 1 || userLabels.count(lookup->getLabel()) == 1){ //process all lines or this is a line we want
                 
-                m->mothurOut(lookup->getLabel()+"\n");
+                m->mothurOut(lookup->getLabel()+ " " + optionOutput +"\n");
                 
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
                 

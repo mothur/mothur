@@ -34,8 +34,8 @@ public:
 	void registerDisplay(Display* o)            {	displays.insert(o);				}
     void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ registerDisplay(o[i]); 	} }
 	
-	void updateSharedData(vector<SharedRAbundVector*> r, int numSeqs, int numGroupComb)	{
-        shared = r; NumSeqs = numSeqs; NumGroupComb = numGroupComb;
+	void updateSharedData(vector<SharedRAbundVector*> r, int numSeqs)	{
+        shared = r; NumSeqs = numSeqs; 
         
         for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){ (*pos)->update(shared, NumSeqs); }
     }
