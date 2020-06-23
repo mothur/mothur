@@ -28,6 +28,10 @@ USEBOOST ?= no
 USEHDF5 ?= no
 USEGSL ?= no
 LOGFILE_NAME ?= no
+
+//set to yes to build uchime executable
+BUILD_UCHIME ?= no
+
 BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR ?= "\"Enter_your_boost_include_path_here\""
 HDF5_LIBRARY_DIR ?= "\"Enter_your_HDF5_library_path_here\""
@@ -36,7 +40,7 @@ GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
-VERSION = "\"1.44.1\""
+VERSION = "\"1.44.2\""
 
 
 # Set a static logfile name
@@ -95,6 +99,13 @@ ifeq  ($(strip $(USEGSL)),yes)
 LDFLAGS += -L ${GSL_LIBRARY_DIR}
 LIBS += -lgsl -lgslcblas -lm
 CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
+
+endif
+
+#build uchime exe
+ifeq  ($(strip $(BUILD_UCHIME)),yes)
+
+cd source/uchime_src && ./make clean && ./make && mv uchime ../../ && cd ..
 
 endif
 
