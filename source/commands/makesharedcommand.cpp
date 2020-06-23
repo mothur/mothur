@@ -71,7 +71,7 @@ string SharedCommand::getOutputPattern(string type) {
         string pattern = "";
 
         if (type == "shared") {  pattern = "[filename],shared-[filename],[distance],shared"; }
-        if (type == "tshared") {  pattern = "[filename],tshared-[filename],[distance],tshared"; }
+        else if (type == "tshared") {  pattern = "[filename],tshared-[filename],[distance],tshared"; }
         else if (type == "group") {  pattern = "[filename],[group],groups"; }
         else if (type == "list") {  pattern = "[filename],[distance],list"; }
         else if (type == "map") {  pattern = "[filename],map"; }
@@ -320,37 +320,111 @@ void SharedCommand::convertSharedFormat() {
             sharedFilename = getOutputFileName(tag,variables);
             ofstream out; util.openOutputFile(sharedFilename, out);
             
+            ifstream inScan; util.openInputFile(sharedfile, inScan);
+            
+            util.getline(inScan); //read headers
+            
+            string label, group, otuName;
+            int abundance;
+            
+            set<string> labels; set<string> groups; set<string> otuNames;
+            
+            while (!inScan.eof()) {
+                
+                if (m->getControl_pressed()) {  break; }
+                
+                inScan >> label >> group >> otuName >> abundance; util.gobble(inScan);
+                
+                labels.insert(label); groups.insert(group); otuNames.insert(otuName);
+            }
+            inScan.close();
+            
+            vector<string> oNames = util.mothurConvert(otuNames);
+            vector<string> gNames = util.mothurConvert(groups); sort(gNames.begin(), gNames.end());
+            int numGroups = gNames.size();
+            int numOTUs = oNames.size();
+        
+            map<string, int> groupNameToIndex; //groupName -> index in otuAbunds
+            for (int i = 0; i < numGroups; i++) { groupNameToIndex[gNames[i]] = i; }
+            
+            map<string, map<string, vector<int> > > sharedVectors;
+            map<string, map<string, vector<int> > >::iterator itDistance;
+            map<string, vector<int> >::iterator itOTU;
+            map<string, int>::iterator itSample;
+            for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) { //for each distance
+                
+                map<string, vector<int> > otus; //otuName -> abunds
+                
+                for (int i = 0; i < numOTUs; i++) { //for each OTU, set all otus to 0
+                    
+                    vector<int> emptyOTU; emptyOTU.resize(numGroups, 0);
+                    otus[oNames[i]] = emptyOTU; //add empty otu
+                }
+                sharedVectors[*it] = otus; //add empty vector
+            }
+            
             ifstream in; util.openInputFile(sharedfile, in);
             
             util.getline(in); //read headers
             
-            map<string, int> groupIndexes; map<string, int>::iterator itGroup;
-            int countGroups = 0;
-            
-            map<string, int> otuNameIndexes; map<string, int>::iterator itOTU;
-            
-            string label, group, otuName;
-            int abundance;
             while (!in.eof()) {
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                
                 in >> label >> group >> otuName >> abundance; util.gobble(in);
                 
+                itDistance = sharedVectors.find(label);
+                
+                if (itDistance != sharedVectors.end()) { //we have this label before - ie 0.03 or 0.05
+                    
+                    itOTU = (itDistance->second).find(otuName);
+                    if (itOTU != (itDistance->second).end()) { //we have this otuName before - ie OTU0001 or OTU0234
+                        
+                        itSample = groupNameToIndex.find(group);
+                        
+                        if (itSample != groupNameToIndex.end()) { //we have this sample before - ie FD01 or FD03
+                            
+                            (itOTU->second)[itSample->second] = abundance;
+                            
+                        }else {
+                            m->mothurOut("[ERROR]: Cannot find sample " + group + ", skipping.\n");
+                        }
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot find otu " + otuName + ", skipping.\n");
+                    }
+                }else {
+                    m->mothurOut("[ERROR]: Cannot find label " + label + ", skipping.\n");
+                }
             }
             in.close();
+            
+            bool printHeaders = true;
+            //create sharedRabundVectors
+            for (itDistance = sharedVectors.begin(); itDistance != sharedVectors.end(); itDistance++) { //for each distance
+                
+                //create empty shared vector with samples
+                SharedRAbundVectors* shared = new SharedRAbundVectors();
+                for (itSample = groupNameToIndex.begin(); itSample != groupNameToIndex.end(); itSample++) {
+                    SharedRAbundVector* thisSample = new SharedRAbundVector();
+                    thisSample->setGroup(itSample->first);
+                    shared->push_back(thisSample);
+                }
+                
+                shared->setLabels(itDistance->first); //set distance for shared vector
+                m->mothurOut(itDistance->first+"\n");
+                
+                for (itOTU = (itDistance->second).begin(); itOTU != (itDistance->second).end(); itOTU++) { //for each OTU
+                    shared->push_back(itOTU->second, itOTU->first); //add otus abundance
+                }
+                
+                shared->eliminateZeroOTUS();
+                shared->print(out, printHeaders);
+                delete shared;
+            }
+            out.close();
         }
         
         outputNames.push_back(sharedFilename); outputTypes[tag].push_back(sharedFilename);
-        
-        //map<string, string> seqNameToOtuName;
-        //SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
-        //lookup->setLabels(label);
-        //lookup->print(out, printHeaders);
-        //out.close();
-        //delete lookup;
-        
         
     }
     catch(exception& e) {
