@@ -179,13 +179,16 @@ int MakeFileCommand::execute(){
                 variables["[filename]"] = outputdir + prefix + ".";
                 if (paired.size() != 0) { variables["[tag]"] = "single"; }
                 string filename = getOutputFileName("file",variables);
-                ofstream out;
-                util.openOutputFile(filename, out);
-                outputNames.push_back(filename); outputTypes["file"].push_back(filename);
-                current->setFileFile(filename);
                 
-                for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; }
-                out.close();
+                ofstream out; util.openOutputFile(filename, out);
+                
+                for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; } out.close();
+                
+                if (util.isBlank(filename)) {  util.mothurRemove(filename); }
+                else {
+                    outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+                    m->mothurOut("\n[WARNNG]: mothur found unpaired files in your input directory. Outputting list of filenames to " + filename + " for your review.\n\n");
+                }
             }
             
             //generates unique group names
@@ -194,18 +197,14 @@ int MakeFileCommand::execute(){
             if (paired.size() != 0) {
                 map<string, string> variables;
                 variables["[filename]"] = outputdir + prefix + ".";
-                if (singles.size() != 0) { variables["[tag]"] = "paired"; }
                 string filename = getOutputFileName("file",variables);
-                ofstream out;
-                util.openOutputFile(filename, out);
+                
+                ofstream out; util.openOutputFile(filename, out);
                 outputNames.push_back(filename); outputTypes["file"].push_back(filename);
                 current->setFileFile(filename);
                 
                 for (int i = 0; i < paired.size(); i++) {
-                    for (int j = 0; j < paired[i].size(); j++) {
-                        out << paired[i][j] << '\t';
-                    }
-                    out << endl;
+                    for (int j = 0; j < paired[i].size(); j++) { out << paired[i][j] << '\t'; } out << endl;
                 }
                 out.close();
             }

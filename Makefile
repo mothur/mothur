@@ -29,7 +29,7 @@ USEHDF5 ?= no
 USEGSL ?= no
 LOGFILE_NAME ?= no
 
-//set to yes to build uchime executable
+#set to yes to build uchime executable
 BUILD_UCHIME ?= no
 
 BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
@@ -105,7 +105,7 @@ endif
 #build uchime exe
 ifeq  ($(strip $(BUILD_UCHIME)),yes)
 
-cd source/uchime_src && ./make clean && ./make && mv uchime ../../ && cd ..
+cd source/uchime_src && export CXX=$(CXX) && ./make clean && ./make && mv uchime ../../ && cd ..
 
 endif
 
