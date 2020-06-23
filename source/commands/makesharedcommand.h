@@ -13,6 +13,18 @@
 #include "sharedlistvector.h"
 #include "inputdata.h"
 
+//**********************************************************************************************************************
+struct tidy {
+    string otu;
+    string group;
+    int abund;
+    
+    tidy() : group(""), otu(""), abund(0) {}
+    tidy(string o, string g, int a) : otu(o), group(g), abund(a) {}
+};
+//**********************************************************************************************************************
+
+
 /* The shared() command:
 	The shared command can only be executed after a successful read.shared command.  
 	The shared command parses a .list file and separates it into groups.  
@@ -46,6 +58,8 @@ private:
     int createSharedFromListGroup();
     int createSharedFromBiom();
     int createSharedFromCount();
+    void convertSharedFormat();
+    string findFormat();
     string getTag(string&);
     vector<string> readRows(string, int&);
     int getDims(string, int&, int&);
@@ -53,8 +67,8 @@ private:
 	
 	vector<string> Groups, outputNames, order;
 	set<string> labels;
-	string fileroot,  listfile, groupfile, biomfile, ordergroupfile, countfile;
-	bool firsttime, pickedGroups, abort, allLines;
+	string fileroot,  listfile, groupfile, biomfile, ordergroupfile, countfile, sharedfile;
+	bool firsttime, pickedGroups, abort, allLines, keepZeroes;
 
 };
 

@@ -93,8 +93,8 @@ public:
     void updateOutput(int, vector<double>);
 		
 private:
-	string groupLabel;
 	int numGroup;
+    string groupLabel;
 };
 
 /***********************************************************************/

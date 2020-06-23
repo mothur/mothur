@@ -135,6 +135,7 @@ public:
     bool checkReleaseVersion(string, string);
     string getline(ifstream&);
     string getline(istringstream&);
+    void getline(ifstream&, vector<string>&);
     void getNumSeqs(ifstream&, int&);
     int getNumSeqs(ifstream&);
     void gobble(istream&);
@@ -242,7 +243,7 @@ public:
     bool stringBlank (string);
     
     //file reading
-    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&, string optionalOutput = "");//input, allLines, userLabels, processedLabels, lastLabel
     SharedRAbundFloatVectors* getNextRelabund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedCLRVectors* getNextCLR(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedOrderVector* getNextSharedOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel

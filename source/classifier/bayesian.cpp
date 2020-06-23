@@ -225,7 +225,7 @@ string Bayesian::getTaxonomy(Sequence* seq, string& simpleTax, bool& flipped) {
 		if (m->getControl_pressed()) { return tax; }
 					
 		//bootstrap - to set confidenceScore
-		int numToSelect = queryKmers.size() / 8;
+        int numToSelect = queryKmers.size() / 8;
 	
         if (m->getDebug()) {  m->mothurOut(seq->getName() + "\t"); }
         

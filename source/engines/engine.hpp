@@ -71,7 +71,7 @@ public:
             unsigned long pos = nextCommand.find("$"+it->first);
             while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
                 nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
-                pos = nextCommand.find(it->first);
+                pos = nextCommand.find("$"+it->first);
             }
         }
     }
