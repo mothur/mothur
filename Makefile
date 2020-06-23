@@ -29,9 +29,6 @@ USEHDF5 ?= no
 USEGSL ?= no
 LOGFILE_NAME ?= no
 
-#set to yes to build uchime executable
-BUILD_UCHIME ?= no
-
 BOOST_LIBRARY_DIR ?= "\"Enter_your_boost_library_path_here\""
 BOOST_INCLUDE_DIR ?= "\"Enter_your_boost_include_path_here\""
 HDF5_LIBRARY_DIR ?= "\"Enter_your_HDF5_library_path_here\""
@@ -102,13 +99,6 @@ CXXFLAGS += -DUSE_GSL -I ${GSL_INCLUDE_DIR}
 
 endif
 
-#build uchime exe
-ifeq  ($(strip $(BUILD_UCHIME)),yes)
-
-cd source/uchime_src && export CXX=$(CXX) && ./make clean && ./make && mv uchime ../../ && cd ..
-
-endif
-
 #
 # INCLUDE directories for mothur
 #
@@ -130,8 +120,11 @@ endif
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
-mothur : $(OBJECTS)
+mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+
+uchime :
+	cd source/uchime_src && export CXX=$(CXX) && ./make clean && ./make && mv uchime ../../ && cd ..
 
 install : mothur
 
