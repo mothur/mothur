@@ -53,6 +53,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter prefprint("printref", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prefprint);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -294,6 +295,9 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             util.mothurConvert(temp, fitPercent);
             
             if ((fitPercent > 100) || (fitPercent < 0.01)) { abort=true; m->mothurOut("[ERROR]: fitpercent must be less than 100, and more than 0.01.\n"); }
+            
+            temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
+            processors = current->setProcessors(temp);
             
             adjust=-1.0;
             temp = validParameter.valid(parameters, "cutoff");
