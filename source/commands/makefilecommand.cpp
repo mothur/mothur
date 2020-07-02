@@ -343,16 +343,19 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         string findCommand = "";
         string tempOut = tempFile;
         tempFile = "\"" + tempFile + "\"";
+        string wrappedInput = "\"" + inputDir + "\"";
         
 #if defined NON_WINDOWS
 
-        findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
+        findCommand = "ls " + wrappedInput + "*." + typeFile + " > " + tempFile;
+        //findCommand = "find \"" + inputDir.substr(0, inputDir.length()-1) + "\" -maxdepth 1 -name \"*." + typeFile + "\" > " + tempFile;
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
         
 #else
         //use ls command
-        findCommand = "dir /B \""  + inputDir.substr(0, inputDir.length()-1) + "\\*.\"" + typeFile + " > " + tempFile + "\"";
+        findCommand = "dir /B "  + wrappedInput + "*." + typeFile + " > " + tempFile;
+        //findCommand = "dir /B \""  + inputDir.substr(0, inputDir.length()-1) + "\\*.\"" + typeFile + " > " + tempFile + "\"";
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
 
