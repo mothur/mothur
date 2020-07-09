@@ -10,14 +10,15 @@
 #define Mothur_mergesfffilecommand_h
 
 #include "command.hpp"
-
+#include "sffheader.hpp"
+#include "sffread.hpp"
 
 /**********************************************************/
 class MergeSfffilesCommand : public Command {
 	
 public:
 	MergeSfffilesCommand(string);
-	~MergeSfffilesCommand(){}
+    ~MergeSfffilesCommand();
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "merge.sfffiles";					}
@@ -37,19 +38,12 @@ private:
 	bool abort, keyTrim;
     int numTotalReads, allFilesnumFlowReads, allFileskeyLength;
     string outputFile, outputFileHeader;
-    vector<CommonHeader> commonHeaders;
+    vector<SffCommonHeader*> commonHeaders;
     
 	//extract sff file functions
 	int mergeSffInfo(string, ofstream&);
-	int readCommonHeader(ifstream&, CommonHeader&);
-	int readHeader(ifstream&, Header&);
-	bool readSeqData(ifstream&, seqRead&, int, Header&, ofstream&);
-	int decodeName(string&, string&, string&, string);
- 
-	bool sanityCheck(Header&, seqRead&);
-    int adjustCommonHeader();
-    int readFile();
-    int printCommonHeaderForDebug(CommonHeader& header, ofstream& out, int numReads);
+    void adjustCommonHeader();
+    void readFile();
 };
 
 /**********************************************************/

@@ -135,6 +135,7 @@ public:
     bool checkReleaseVersion(string, string);
     string getline(ifstream&);
     string getline(istringstream&);
+    void getline(ifstream&, vector<string>&);
     void getNumSeqs(ifstream&, int&);
     int getNumSeqs(ifstream&);
     void gobble(istream&);
@@ -222,6 +223,7 @@ public:
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
+    set<string> getSetFromList(ListVector*&, vector< vector<string> >&); 
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
     string trimString(string, int); //string, number of chars to remove from end.
     
@@ -241,7 +243,7 @@ public:
     bool stringBlank (string);
     
     //file reading
-    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
+    SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&, string optionalOutput = "");//input, allLines, userLabels, processedLabels, lastLabel
     SharedRAbundFloatVectors* getNextRelabund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedCLRVectors* getNextCLR(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     SharedOrderVector* getNextSharedOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel

@@ -47,10 +47,6 @@ bool ScriptEngine::getInput(){
             m->appendLogBuffer("\nmothur > " + input + "\n");
         
             if (m->getControl_pressed()) { input = "quit()"; }
-                
-            //allow user to omit the () on the quit command
-            if (input == "quit") { input = "quit()"; }
-            if (input == "help") { input = "help()"; }
 
             CommandOptionParser parser(input);
             commandName = parser.getCommandString();
@@ -118,6 +114,10 @@ string ScriptEngine::getNextCommand(string& commandString) {
                 if (commandString.length() == 0) {  break;  }
             }
         }
+        
+        //allow user to omit the () on the quit command
+        if (nextcommand == "quit") { nextcommand = "quit()"; }
+        if (nextcommand == "help") { nextcommand = "help()"; }
         
         string type = findType(nextcommand);
         

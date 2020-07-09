@@ -855,11 +855,9 @@ bool Utils::openInputFileBinary(string fileName, ifstream& fileHandle){
         string completeFileName = getFullPathName(fileName);
 
         fileHandle.open(completeFileName.c_str(), ios::binary);
-        if(!fileHandle) { m->mothurOut("[ERROR]: Could not open " + completeFileName+ "\n");  return false; }
+        if(!fileHandle) {
+            m->mothurOut("[ERROR]: Could not open " + completeFileName+ "\n");  return false; }
         else {
-            //check for blank file
-            zapGremlins(fileHandle);
-            gobble(fileHandle);
             if (fileHandle.eof()) { m->mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct.\n");  }
             return true;
         }
@@ -878,12 +876,7 @@ bool Utils::openInputFileBinary(string fileName, ifstream& fileHandle, string no
 
         fileHandle.open(completeFileName.c_str(), ios::binary);
         if(!fileHandle) { return false; }
-        else {
-            //check for blank file
-            zapGremlins(fileHandle);
-            gobble(fileHandle);
-            return true;
-        }
+        else { return true;  }
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "openInputFileBinary - no error");
@@ -1247,8 +1240,7 @@ bool Utils::appendBinaryFiles(string temp, string filename) {
 bool Utils::appendSFFFiles(string temp, string filename) {
     try{
         ofstream output;
-        ifstream input;
-        bool ableToOpen = 0;
+        bool ableToOpen = true;
 
         //open output file in append mode
         string fullFileName = getFullPathName(filename);
@@ -1258,8 +1250,9 @@ bool Utils::appendSFFFiles(string temp, string filename) {
         else {
             //get full path name
             string completeFileName = getFullPathName(temp);
+            ifstream input;
             openInputFileBinary(completeFileName, input);
-            //input.open(completeFileName.c_str(), ios::binary);
+            
             if(!input) { return false; }
             else {
                 char buffer[4096];
@@ -1384,7 +1377,7 @@ bool Utils::openOutputFileAppend(string fileName, ofstream& fileHandle){
         fileName = getFullPathName(fileName);
 
         fileHandle.open(fileName.c_str(), ios::app);
-        if(!fileHandle) { m->mothurOut("[ERROR]: Could not open " + fileName + "\n"); return 1; }else { return false; }
+        if(!fileHandle) { m->mothurOut("[ERROR]: Could not open " + fileName + "\n");  return false; }
         return true;
     }
     catch(exception& e) {
@@ -1398,7 +1391,8 @@ bool Utils::openOutputFileBinaryAppend(string fileName, ofstream& fileHandle){
         fileName = getFullPathName(fileName);
 
         fileHandle.open(fileName.c_str(), ios::app | ios::binary);
-        if(!fileHandle) { m->mothurOut("[ERROR]: Could not open " + fileName + "\n"); return 1; }else { return false; }
+        if(!fileHandle) { m->mothurOut("[ERROR]: Could not open " + fileName + "\n"); return false; }
+        
         return true;
     }
     catch(exception& e) {
@@ -1472,6 +1466,17 @@ string Utils::getline(istringstream& fileHandle) {
         }
 
         return line;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getline");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void Utils::getline(ifstream& fileHandle, vector<string>& headers) {
+    try {
+        string line = getline(fileHandle);
+        headers = splitWhiteSpace(line);
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getline");
@@ -1612,6 +1617,31 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getStringFromVector");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
+    try {
+        set<string> results; otus.clear();
+
+        if (list->getNumSeqs() == 0) { return results; }
+
+        for (int i = 0; i < list->getNumBins(); i++) {
+            if (m->getControl_pressed()) { break;  }
+            
+            string thisBin = list->get(i);
+            vector<string> binNames; splitAtComma(thisBin, binNames);
+            
+            otus.push_back(binNames);
+            
+            for (int j = 0; j < binNames.size(); j++) { results.insert(binNames[j]); }
+        }
+
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "getSetFromList");
         exit(1);
     }
 }
@@ -4291,7 +4321,7 @@ bool Utils::isAllAlphaNumerics(string stringToCheck){
 bool Utils::mothurConvert(string item, float& num){
     try {
         bool error = false;
-
+        
         if (isNumeric1(item)) {
             convert(item, num);
         }else {
@@ -4304,7 +4334,7 @@ bool Utils::mothurConvert(string item, float& num){
                 m->setControl_pressed(true);
             }
         }
-
+        
         return error;
     }
     catch(exception& e) {
@@ -5011,7 +5041,7 @@ int Utils::removeBlanks(vector<string>& tempVector) {
     }
 }
 /***********************************************************************/
-SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel) {//input, allLines, userLabels, processedLabels
+SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<string>& userLabels, set<string>& processedLabels, string& lastLabel, string optionOutput) {//input, allLines, userLabels, processedLabels
     try {
         
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
@@ -5025,7 +5055,7 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             
             if(allLines == 1 || userLabels.count(lookup->getLabel()) == 1){ //process all lines or this is a line we want
                 
-                m->mothurOut(lookup->getLabel()+"\n");
+                m->mothurOut(lookup->getLabel()+ " " + optionOutput +"\n");
                 
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
                 
@@ -6111,6 +6141,7 @@ bool Utils::isContainingOnlyDigits(string input) {
 
 bool Utils::findTaxon(vector<Taxon> tax, vector<Taxon> stax) {
     try {
+        removeQuotes(tax); removeQuotes(stax);
         
         //looking to find something like "unknown" or "Proteobacteria"
         if (stax.size() == 1) {

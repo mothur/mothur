@@ -215,7 +215,6 @@ string ValidParameters::valid(map<string, string>& container, string parameter) 
 vector<string> ValidParameters::validFiles(map<string, string>& container, string parameter) {
     try {
         vector<string> vFiles;
-        bool ableToOpen;
         Utils util;
         bool openedAtLeastOne = false;
 
@@ -233,7 +232,7 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
                     else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
                     
                     //check phylip file to make sure its really phylip and not column
-                    if ((it->first == "phylip") && (ableToOpen)) {
+                    if ((it->first == "phylip") && (openedAtLeastOne)) {
                         ifstream inPhylip;
                         util.openInputFile(filename, inPhylip);
                         
@@ -245,7 +244,7 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
                     }
                     
                     //check for blank file
-                    if (ableToOpen) {
+                    if (openedAtLeastOne) {
                         if (util.isBlank(container[parameter])) { m->mothurOut("[ERROR]: " + filename + " is blank, skipping.\n");  }
                     }
                 }
@@ -265,7 +264,7 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
 /******************************************************/
 string ValidParameters::validFile(map<string, string>& container, string parameter) {
     try {
-        bool ableToOpen;
+        bool ableToOpen = false;
         Utils util;
         
         map<string, string>::iterator it;
@@ -276,7 +275,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
             else {
                 it->second = util.removeQuotes(it->second);
                 string filename = it->second;
-                if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; }
+                if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; ableToOpen = true; }
                 else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
                 
                 //check phylip file to make sure its really phylip and not column

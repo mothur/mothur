@@ -53,6 +53,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter piters("iters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(piters);
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
+        CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter prefprint("printref", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prefprint);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -141,7 +142,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             ValidParameters validParameter;
             
             
-            selfReference = true; refdistfile = ""; distfile = "";
+            selfReference = true; createAccnos = false; refdistfile = ""; distfile = "";
             
             //check for required parameters
             reffastafile = validParameter.validFile(parameters, "reffasta");
@@ -154,10 +155,11 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             else if (refdistfile == "not found") { refdistfile = ""; }
             else {  refformat = "column"; selfReference = false; }
             
+            //allow ref list to be entered with denovo and accnos file
             reflistfile = validParameter.validFile(parameters, "reflist");
             if (reflistfile == "not open") { abort = true; }
             else if (reflistfile == "not found") { reflistfile = ""; }
-            else { selfReference = false; }
+            //else { selfReference = false; }
             
             refnamefile = validParameter.validFile(parameters, "refname");
             if (refnamefile == "not open") { abort = true; }
@@ -202,7 +204,12 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             accnosfile = validParameter.validFile(parameters, "accnos");
             if (accnosfile == "not open") { accnosfile = ""; abort = true; }
             else if (accnosfile == "not found") { accnosfile = ""; }
-            else {   current->setAccnosFile(accnosfile);	}
+            else {   current->setAccnosFile(accnosfile); createAccnos = false;	}
+            
+            //extract reference names from reflist instead of accnos fil
+            if (selfReference) {
+                if ((reflistfile != "") && (accnosfile == "")) { createAccnos = true; }
+            }
             
             method = validParameter.valid(parameters, "method");
             if (method == "not found") {  method = "open";}
@@ -289,6 +296,9 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             
             if ((fitPercent > 100) || (fitPercent < 0.01)) { abort=true; m->mothurOut("[ERROR]: fitpercent must be less than 100, and more than 0.01.\n"); }
             
+            temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
+            processors = current->setProcessors(temp);
+            
             adjust=-1.0;
             temp = validParameter.valid(parameters, "cutoff");
             if (temp == "not found") { temp = "0.03"; }
@@ -345,45 +355,77 @@ int ClusterFitCommand::execute(){
         string listFile = "";
         string bestListFileName = "";
         
-        if ((selfReference) && (accnosfile == "")) { //denovo with mothur randomly assigning references
-        
-            //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
-            OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, fitPercent, refWeight);
+        if (selfReference) { //de novo
             
-            listFile = runDenovoOptiCluster(matrix, metric, counts, outputName);
-            
-            //evaluate results
-            bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
-            
-            delete matrix;
-        }else if ((selfReference) && (accnosfile != "")) { //reference with accnos file assigning references
-            
-            //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
-            OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, accnosfile);
-            
-            ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName);
-            
-            if ((method == "open") && (printref)) { bestListFileName = runSensSpec(matrix, metric, list, counts); }
-            else {
-                ofstream listFile;
-                string listFileName = fileroot+ tag + ".list";
-                util.openOutputFile(listFileName,	listFile);
+            if ((accnosfile == "") && (!createAccnos)) { //denovo with mothur randomly assigning references
                 
-                if(countfile != "") { list->print(listFile, counts); }
-                else { list->print(listFile); }
-                listFile.close();
+                m->mothurOut("\nRandomly assigning reads from " + distfile + " as reference sequences\n");
                 
-                listFiles.push_back(listFileName);
+                //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
+                OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, fitPercent, refWeight);
                 
-                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
+                listFile = runDenovoOptiCluster(matrix, metric, counts, outputName);
+                
+                //evaluate results
+                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
+                
+                delete matrix;
+                
+            }else { //reference with accnos file or reference list file assigning references
+                
+                set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
+                
+                if (accnosfile != "") { //use accnos file to assign references
+                    
+                    m->mothurOut("\nUsing sequences from " + accnosfile + " as reference sequences\n");
+                    
+                    refNames = util.readAccnos(accnosfile);
+                    
+                }else if (createAccnos) { //assign references based on reflist parameter
+                    
+                    m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
+                    
+                    InputData input(reflistfile, "list", nullVector);
+                    set<string> processedLabels, userLabels;
+                    string lastLabel = "";
+                    
+                    ListVector* reflist = util.getNextList(input, true, userLabels, processedLabels, lastLabel);
+                    
+                    refLabels = reflist->getLabels();
+                    for (int i = 0; i < refLabels.size(); i++) { refLabels[i] = "Ref_" + refLabels[i];  }
+                    
+                    refNames = util.getSetFromList(reflist, otus); delete reflist;
+                }
+                
+                //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnos containing refseq name
+                OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, refNames);
+                
+                //fit seqs
+                ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName, refLabels, otus);
+                
+                if ((method == "open") && (printref)) { bestListFileName = runSensSpec(matrix, metric, list, counts); }
+                else {
+                    ofstream listFile;
+                    string listFileName = fileroot+ tag + ".list";
+                    util.openOutputFile(listFileName,    listFile);
+                    
+                    if(countfile != "") { list->print(listFile, counts); }
+                    else { list->print(listFile); }
+                    listFile.close();
+                    
+                    listFiles.push_back(listFileName);
+                    
+                    bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
+                }
+                delete list; delete matrix;
             }
-            delete list; delete matrix;
-            
-        }else if (!selfReference) { //reference with files containing reference seqs
+        }else { //reference with files containing reference seqs
             
             createReferenceNameCount(); //creates reference name or count file if needed
             
             calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            
+            m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
             
             //calc sens.spec values for reference
             InputData input(reflistfile, "list", nullVector);
@@ -561,9 +603,9 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
     
 }
 //**********************************************************************************************************************
-ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, map<string, int>& counts, string outStepFile){
+ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterMetric*& metric, map<string, int>& counts, string outStepFile, vector<string> refListLabels, vector<vector<string> > otus){
     try {
-        m->mothurOut("\nClustering " + distfile + "\n");
+        
         bool printStepsHeader = true;
 
         OptiFitCluster cluster(matrix, metric, 0, criteria);
@@ -573,27 +615,31 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         double listVectorMetric = 0; //worst state
         double delta = 1;
         
-        //get "ref" seqs for initialize inputs
-        OptiData* refMatrix = matrix->extractRefMatrix();
-        ListVector* refList = clusterRefs(refMatrix, metric); delete refMatrix;
-        
-        vector<vector<string> > otus;
-        for (int i = 0; i < refList->getNumBins(); i++) {
-            vector<string> binNames;
-            string bin = refList->get(i);
-            if (bin != "") {
-                util.splitAtComma(bin, binNames);
-                otus.push_back(binNames);
+        if (!createAccnos) {
+            
+            m->mothurOut("\nClustering references from " + distfile + "\n");
+            
+            //get "ref" seqs for initialize inputs
+            OptiData* refMatrix = matrix->extractRefMatrix();
+            ListVector* refList = clusterRefs(refMatrix, metric); delete refMatrix;
+            
+            for (int i = 0; i < refList->getNumBins(); i++) {
+                vector<string> binNames;
+                string bin = refList->get(i);
+                if (bin != "") {
+                    util.splitAtComma(bin, binNames);
+                    otus.push_back(binNames);
+                }
             }
+            
+            //add tag to OTULabels to indicate the reference
+            refListLabels = refList->getLabels();
+            for (int i = 0; i < refListLabels.size(); i++) { refListLabels[i] = "Ref_" + refListLabels[i];  }
+            refList->setLabels(refListLabels);
+            delete refList;
         }
         
-        //add tag to OTULabels to indicate the reference
-        vector<string> refListLabels = refList->getLabels();
-        for (int i = 0; i < refListLabels.size(); i++) { refListLabels[i] = "Ref_" + refListLabels[i];  }
-        refList->setLabels(refListLabels);
-        
-        cluster.initialize(listVectorMetric, true, otus, refList->getLabels(), method, true);
-        delete refList;
+        cluster.initialize(listVectorMetric, true, otus, refListLabels, method, true);
         
         long long numBins = cluster.getNumBins();
         double tp, tn, fp, fn;

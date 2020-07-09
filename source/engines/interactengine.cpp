@@ -111,6 +111,11 @@ string InteractEngine::getCommand()  {
                 m->mothurOutJustToLog(toString(returnCommand) + "\n");
         #endif
     
+        //allow user to omit the () on the help and quit commands
+        if (returnCommand == "quit") { returnCommand = "quit()"; }
+        if (returnCommand == "help") { returnCommand = "help()"; }
+        if (returnCommand == "")     { return returnCommand; }
+        
         string type = findType(returnCommand);
         
         if (type == "environment") {

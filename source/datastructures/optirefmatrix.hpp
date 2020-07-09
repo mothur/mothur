@@ -24,7 +24,7 @@ public:
 #endif
     
     OptiRefMatrix(string, string, string, string, double, float, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs, refWeightMethod (options: abundance, none, connectivity)
-    OptiRefMatrix(string, string, string, string, double, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnosfile containing refNames
+    OptiRefMatrix(string, string, string, string, double, set<string>); //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnosfile refNames
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
     ~OptiRefMatrix(){ }
     

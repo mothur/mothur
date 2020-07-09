@@ -278,10 +278,10 @@ int IndicatorCommand::execute(){
 }
 //**********************************************************************************************************************
 //indicatorValues = getValues(groupings, groupingNames, indicatorGroups, randomGroupingsMap, m);
-vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map<sharedIndexes, sharedIndexes> groupingsMap, MothurOut* m){
+vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map<sharedIndexes, vector<int> > groupingsMap, MothurOut* m){
     try {
         vector<float> values;
-        map<sharedIndexes, sharedIndexes>::iterator it;
+        map<sharedIndexes, vector<int> >::iterator it;
         
         indicatorGroupings.clear();
         
@@ -318,7 +318,8 @@ vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, v
                         totalAbund += groupings[j][k]->get(i);
                         if (!util.isEqual(groupings[j][k]->get(i), 0)) { numNotZero++; }
                     }else {
-                        float thisAbund = groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i);
+                        
+                        float thisAbund = groupings[(it->second)[0]][(it->second)[1]]->get(i);
                         totalAbund += thisAbund;
                         if (!util.isEqual(thisAbund, 0)) { numNotZero++; }
                     }
@@ -359,10 +360,10 @@ vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >& groupings, v
 //**********************************************************************************************************************
 //same as above, just data type difference
 //indicatorValues = getValues(groupings, groupingNames, indicatorGroups, randomGroupingsMap, m);
-vector<float> getValues(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map<sharedIndexes, sharedIndexes> groupingsMap, MothurOut* m){
+vector<float> getValues(vector< vector<SharedRAbundVector*> >& groupings, vector< vector<string> >& groupingNames, vector<string>& indicatorGroupings, map<sharedIndexes, vector<int> > groupingsMap, MothurOut* m){
     try {
         vector<float> values;
-        map<sharedIndexes, sharedIndexes>::iterator it;
+        map<sharedIndexes, vector<int> >::iterator it;
         
         indicatorGroupings.clear();
         
@@ -396,8 +397,10 @@ vector<float> getValues(vector< vector<SharedRAbundVector*> >& groupings, vector
                         totalAbund += groupings[j][k]->get(i);
                         if (groupings[j][k]->get(i) != 0) { numNotZero++; }
                     }else {
-                        totalAbund += groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i);
-                        if (groupings[(it->second).groupIndex][(it->second).otuIndex]->get(i) != 0) { numNotZero++; }
+                        //cout << j << "," << k << '\t' << (it->second).treatmentIndex << "," << (it->second).sampleIndex << endl;
+                        int thisAbund = groupings[(it->second)[0]][(it->second)[1]]->get(i);
+                        totalAbund += thisAbund;
+                        if (thisAbund != 0) { numNotZero++; }
                     }
                 }
                 
@@ -460,6 +463,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		m->mothurOut("\nSpecies\tIndicator_Groups\tIndicatorValue\tpValue\n");
 		
 		int numBins = 0;
@@ -477,11 +481,35 @@ int IndicatorCommand::GetIndicatorSpecies(){
 		vector<float> indicatorValues; //size of numBins
 		vector<float> pValues;
         vector<string> indicatorGroups;
-		map<sharedIndexes, sharedIndexes> randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
+		map<sharedIndexes, vector<int> > randomGroupingsMap; //maps location in groupings to location in groupings, ie, [0][0] -> [1][2]. This is so we don't have to actually move the sharedRabundVectors.
 			
 		if (sharedfile != "") {
-			vector< vector<SharedRAbundVector*> > groupings;
+            
+            vector< vector<SharedRAbundVector*> > groupings;
             vector< vector<string> > groupingNames;
+            /*
+             Consider design file:
+             
+             C10    Y
+             C11    Y
+             C12    Y
+             C13    O
+             C14    O
+             C15    O
+             C19    N
+             C20    N
+             C21    N
+             
+             groupings[0] = sharedRabundvectors for treatment Y -> C10,C11,C12
+             groupings[1] = sharedRabundvectors for treatment O -> C13,C15,C15
+             groupings[2] = sharedRabundvectors for treatment N -> C13,C15,C15
+             
+             groupingNames[0] = vector of sample names in treatment Y {C10,C11,C12}
+             groupingNames[1] = vector of sample names in treatment 0 {C13,C15,C15}
+             groupingNames[2] = vector of sample names in treatment N {C13,C15,C15}
+             
+             */
+            
 			set<string> groupsAlreadyAdded;
 			vector<SharedRAbundVector*> subset;
             vector<string> subsetNames;
@@ -489,7 +517,7 @@ int IndicatorCommand::GetIndicatorSpecies(){
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             vector<string> dataGroupNames = lookup->getNamesGroups();
 			
-			//for each grouping
+			//for each grouping, clustering together
 			for (int i = 0; i < (designMap->getCategory()).size(); i++) {
 				
 				for (int k = 0; k < data.size(); k++) {
@@ -698,7 +726,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != data.size()) {  m->mothurOut("[ERROR]: could not make proper groupings.\n"); }
 							
-                map<sharedIndexes, sharedIndexes> placeHolder; //don't need randomization for initial calc
+                map<sharedIndexes, vector<int> > placeHolder; //don't need randomization for initial calc
 				indicatorValues = getValues(groupings, groupingNames, indicatorGroups, placeHolder, m);
 				
 				pValues = getPValues(groupings, groupingNames, lookup->getNumGroups(), indicatorValues);
@@ -757,7 +785,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				if (groupsAlreadyAdded.size() != data.size()) { m->mothurOut("[ERROR]: could not make proper groupings.\n");  }
 				
-                map<sharedIndexes, sharedIndexes> placeHolder; //don't need randomization for initial calc
+                map<sharedIndexes, vector<int> > placeHolder; //don't need randomization for initial calc
 				indicatorValues = getValues(groupings, groupingNames, indicatorGroups, placeHolder, m);
 				
 				pValues = getPValues(groupings, groupingNames, lookupFloat->getNumGroups(),  indicatorValues);
@@ -814,13 +842,13 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 struct indicatorFloatData {
     vector< vector<SharedRAbundFloatVector*> > groupings;
     vector< vector<string> > groupingNames;
-    vector< map<sharedIndexes, sharedIndexes> > randomGroupings;
+    vector< map<sharedIndexes, vector<int> > > randomGroupings;
    	MothurOut* m;
     int iters, numGroups;
     vector<float> indicatorValues, pvalues;
     
     indicatorFloatData(){}
-    indicatorFloatData(int it, vector< map<sharedIndexes, sharedIndexes> > ran, vector< vector<SharedRAbundFloatVector*> > ng, vector< vector<string> > gn, int n, vector<float> iv) {
+    indicatorFloatData(int it, vector< map<sharedIndexes, vector<int> > > ran, vector< vector<SharedRAbundFloatVector*> > ng, vector< vector<string> > gn, int n, vector<float> iv) {
         m = MothurOut::getInstance();
         iters = it;
         groupings = ng;
@@ -835,13 +863,13 @@ struct indicatorFloatData {
 struct indicatorData {
     vector< vector<SharedRAbundVector*> > groupings;
     vector< vector<string> > groupingNames;
-    vector< map<sharedIndexes, sharedIndexes> > randomGroupings;
+    vector< map<sharedIndexes, vector<int> > > randomGroupings;
    	MothurOut* m;
     int iters, numGroups;
     vector<float> indicatorValues, pvalues;
     
     indicatorData(){}
-    indicatorData(int it, vector< map<sharedIndexes, sharedIndexes> > ran, vector< vector<SharedRAbundVector*> > ng, vector< vector<string> > gn, int n, vector<float> iv) {
+    indicatorData(int it, vector< map<sharedIndexes, vector<int> > > ran, vector< vector<SharedRAbundVector*> > ng, vector< vector<string> > gn, int n, vector<float> iv) {
         m = MothurOut::getInstance();
         iters = it;
         groupings = ng;
@@ -859,7 +887,7 @@ void driverValues(indicatorData* params){
         
         for(int i=0;i<params->iters;i++){
             if (params->m->getControl_pressed()) { break; }
-            map<sharedIndexes, sharedIndexes> groupingsMap = params->randomGroupings[i];
+            map<sharedIndexes, vector<int> > groupingsMap = params->randomGroupings[i];
             
             vector<float> randomIndicatorValues = getValues(params->groupings, params->groupingNames, notUsedGroupings, groupingsMap, params->m);
             
@@ -878,7 +906,7 @@ void driverValuesFloat(indicatorFloatData* params){
 		
 		for(int i=0;i<params->iters;i++){
 			if (params->m->getControl_pressed()) { break; }
-			map<sharedIndexes, sharedIndexes> groupingsMap = params->randomGroupings[i];
+			map<sharedIndexes, vector<int> > groupingsMap = params->randomGroupings[i];
 			vector<float> randomIndicatorValues = getValues(params->groupings, params->groupingNames, notUsedGroupings, groupingsMap, params->m);
 			
 			for (int j = 0; j < params->indicatorValues.size(); j++) {
@@ -897,7 +925,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
         vector<float> pvalues;
         vector<int> groupingsSize;
         for (int i = 0; i < groupings.size(); i++) {  groupingsSize.push_back(groupings[i].size());  }
-        vector< map<sharedIndexes, sharedIndexes> > randomize = randomizeGroupings(groupingsSize, groupings.size());
+        vector< map<sharedIndexes, vector<int> > > randomize = randomizeGroupings(groupingsSize, groupings.size());
         
         //create array of worker threads
         vector<std::thread*> workerThreads;
@@ -928,7 +956,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
                 newGroupings.push_back(newLookup);
             }
             
-            vector< map<sharedIndexes, sharedIndexes> > thisProcessorsRandom;
+            vector< map<sharedIndexes, vector<int> > > thisProcessorsRandom;
             thisProcessorsRandom.insert(thisProcessorsRandom.begin(), randomize.begin()+start, randomize.begin()+start+procIters[i]); start += procIters[i];
             indicatorFloatData* dataBundle = new indicatorFloatData(procIters[i], thisProcessorsRandom, newGroupings, groupingNames, num, indicatorValues);
             
@@ -948,7 +976,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundFloatVecto
             newGroupings.push_back(newLookup);
         }
         
-        vector< map<sharedIndexes, sharedIndexes> > thisProcessorsRandom;
+        vector< map<sharedIndexes, vector<int> > > thisProcessorsRandom;
         thisProcessorsRandom.insert(thisProcessorsRandom.begin(), randomize.begin()+start, randomize.begin()+start+procIters[processors-1]);
         indicatorFloatData* dataBundle = new indicatorFloatData(procIters[processors-1], thisProcessorsRandom, newGroupings, groupingNames, num, indicatorValues);
         
@@ -984,7 +1012,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 		vector<float> pvalues;
         vector<int> groupingsSize;
         for (int i = 0; i < groupings.size(); i++) {  groupingsSize.push_back(groupings[i].size());  }
-        vector< map<sharedIndexes, sharedIndexes> > randomize = randomizeGroupings(groupingsSize, groupings.size());
+        vector< map<sharedIndexes, vector<int> > > randomize = randomizeGroupings(groupingsSize, groupings.size());
         
         //create array of worker threads
         vector<std::thread*> workerThreads;
@@ -1015,7 +1043,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
                 newGroupings.push_back(newLookup);
             }
 
-            vector< map<sharedIndexes, sharedIndexes> > thisProcessorsRandom;
+            vector< map<sharedIndexes, vector<int> > > thisProcessorsRandom;
             thisProcessorsRandom.insert(thisProcessorsRandom.begin(), randomize.begin()+start, randomize.begin()+start+procIters[i]); start += procIters[i];
             indicatorData* dataBundle = new indicatorData(procIters[i], thisProcessorsRandom, newGroupings, groupingNames, num, indicatorValues);
            
@@ -1035,7 +1063,7 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
             newGroupings.push_back(newLookup);
         }
 
-        vector< map<sharedIndexes, sharedIndexes> > thisProcessorsRandom;
+        vector< map<sharedIndexes, vector<int> > > thisProcessorsRandom;
         thisProcessorsRandom.insert(thisProcessorsRandom.begin(), randomize.begin()+start, randomize.begin()+start+procIters[processors-1]);
         indicatorData* dataBundle = new indicatorData(procIters[processors-1], thisProcessorsRandom, newGroupings, groupingNames, num, indicatorValues);
 
@@ -1066,31 +1094,43 @@ vector<float> IndicatorCommand::getPValues(vector< vector<SharedRAbundVector*> >
 }
 
 //**********************************************************************************************************************
-//swap groups between groupings, in essence randomizing the second column of the design file
-vector< map<sharedIndexes, sharedIndexes> > IndicatorCommand::randomizeGroupings(vector<int> sizesOfEachGrouping, int numLookupGroups){
+//swap samples between treatments, in essence randomizing the second column of the design file
+vector< map<sharedIndexes, vector<int> > > IndicatorCommand::randomizeGroupings(vector<int> sizesOfEachTreatment, int numTreatments){
 	try {
-		
-		vector< map<sharedIndexes, sharedIndexes> > randomGroupings;
+        int numSamplesToSwap = 0;
+        for (int i = 0; i < sizesOfEachTreatment.size(); i++) {
+            numSamplesToSwap += sizesOfEachTreatment[i];
+        }
         
-        for (int j = 0; j < iters; j++) {
+		vector< map<sharedIndexes, vector<int> > > randomGroupings; //map for each iter randomGroupings[0] ->
+        
+        for (int k = 0; k < iters; k++) {
             
             if (m->getControl_pressed()) {break;}
-            map<sharedIndexes, sharedIndexes> thisRandomization;
             
-            for (int i = 0; i < numLookupGroups; i++) {
+            map<sharedIndexes, vector<int> > thisRandomization;
+            
+            for (int i = 0; i < numSamplesToSwap; i++) {
                 
-                //select random group and random OTU to swap
-                int z = util.getRandomIndex(numLookupGroups-1);
-                int x = util.getRandomIndex(numLookupGroups-1);
-                int a = util.getRandomIndex(sizesOfEachGrouping[z]-1);
-                int b = util.getRandomIndex(sizesOfEachGrouping[x]-1);
+                //select random treatment and random sample to swap
+                int z = util.getRandomIndex(numTreatments-1);
+                int a = util.getRandomIndex(sizesOfEachTreatment[z]-1);
+                
+                int x = util.getRandomIndex(numTreatments-1);
+                int b = util.getRandomIndex(sizesOfEachTreatment[x]-1);
                 
                 sharedIndexes from(z, a);
-                sharedIndexes to(x, b);
+                vector<int> to; to.push_back(x); to.push_back(b);
                 thisRandomization[from] = to;
+                
+                //cout << k << " : " << z << "," << a << '\t' << x << "," << b << endl;
+                
+                //cout << from.treatmentIndex << "," << from.sampleIndex << '\t' << to[0] << "," << to[1] << endl;
             }
+            
             randomGroupings.push_back(thisRandomization);
         }
+        
 		return randomGroupings;
 	}
 	catch(exception& e) {
@@ -1102,63 +1142,16 @@ vector< map<sharedIndexes, sharedIndexes> > IndicatorCommand::randomizeGroupings
 SharedRAbundVectors* IndicatorCommand::getShared(){
     try {
         InputData input(sharedfile, "sharedfile", namesSeqs);
-        SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
-        Groups = lookup->getNamesGroups();
-        string lastLabel = lookup->getLabel();
-        
-        if (label == "") { label = lastLabel;  return lookup; }
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> labels; labels.insert(label);
         set<string> processedLabels;
-        set<string> userLabels = labels;
+        set<string> userLabels;
+        string lastLabel = "";
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && (userLabels.size() != 0)) {
-            if (m->getControl_pressed()) {  return lookup;  }
-            
-            if(labels.count(lookup->getLabel()) == 1){
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-                break;
-            }
-            
-            if ((util.anyLabelsToProcess(lookup->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookup->getLabel();
-                
-                delete lookup;
-                lookup = input.getSharedRAbundVectors(lastLabel);
-                
-                processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
-                
-                //restore real lastlabel to save below
-                lookup->setLabels(saveLabel);
-                break;
-            }
-            
-            lastLabel = lookup->getLabel();
-            
-            //get next line to process
-            //prevent memory leak
-            delete lookup;
-            lookup = input.getSharedRAbundVectors();
-        }
+        if (label != "") { userLabels.insert(label);  }
         
+        SharedRAbundVectors* lookup = util.getNextShared(input, true, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
-        if (m->getControl_pressed()) {  return 0;  }
-        
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it);
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookup;
-            lookup = input.getSharedRAbundVectors(lastLabel);
-        }
+        if (label == "") { label = lastLabel;  }
         
         return lookup;
     }
@@ -1171,71 +1164,21 @@ SharedRAbundVectors* IndicatorCommand::getShared(){
 SharedRAbundFloatVectors* IndicatorCommand::getSharedFloat(){
     try {
         InputData input(relabundfile, "relabund", namesSeqs);
-        SharedRAbundFloatVectors* lookupFloat = input.getSharedRAbundFloatVectors();
-        Groups = lookupFloat->getNamesGroups();
-        string lastLabel = lookupFloat->getLabel();
-        
-        if (label == "") { label = lastLabel;  return lookupFloat; }
-        
-        //if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-        set<string> labels; labels.insert(label);
         set<string> processedLabels;
-        set<string> userLabels = labels;
+        set<string> userLabels;
+        string lastLabel = "";
         
-        //as long as you are not at the end of the file or done wih the lines you want
-        while((lookupFloat != NULL) && (userLabels.size() != 0)) {
-            
-            if (m->getControl_pressed()) {   return lookupFloat;  }
-            
-            if(labels.count(lookupFloat->getLabel()) == 1){
-                processedLabels.insert(lookupFloat->getLabel());
-                userLabels.erase(lookupFloat->getLabel());
-                break;
-            }
-            
-            if ((util.anyLabelsToProcess(lookupFloat->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-                string saveLabel = lookupFloat->getLabel();
-                
-                delete lookupFloat;
-                lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
-                
-                processedLabels.insert(lookupFloat->getLabel());
-                userLabels.erase(lookupFloat->getLabel());
-                
-                //restore real lastlabel to save below
-                lookupFloat->setLabels(saveLabel);
-                break;
-            }
-            
-            lastLabel = lookupFloat->getLabel();
-            
-            //get next line to process
-            //prevent memory leak
-            delete lookupFloat;
-            lookupFloat = input.getSharedRAbundFloatVectors();
-        }
+        if (label != "") { userLabels.insert(label);  }
         
+        SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, true, userLabels, processedLabels, lastLabel);
+        Groups = lookup->getNamesGroups();
         
-        if (m->getControl_pressed()) {  return 0;  }
+        if (label == "") { label = lastLabel;  }
         
-        //output error messages about any remaining user labels
-        bool needToRun = false;
-        for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {
-            m->mothurOut("Your file does not include the label " + *it); 
-            if (processedLabels.count(lastLabel) != 1)  { m->mothurOut(". I will use " + lastLabel + ".\n"); needToRun = true;  }
-            else                                        { m->mothurOut(". Please refer to " + lastLabel + ".\n");               }
-        }
-        
-        //run last label if you need to
-        if (needToRun )  {
-            delete lookupFloat;
-            lookupFloat = input.getSharedRAbundFloatVectors(lastLabel);
-        }	
-        
-        return lookupFloat;
+        return lookup;
     }
     catch(exception& e) {
-        m->errorOut(e, "IndicatorCommand", "getShared");	
+        m->errorOut(e, "IndicatorCommand", "getSharedFloat");
         exit(1);
     }
 }

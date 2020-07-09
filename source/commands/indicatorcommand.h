@@ -20,22 +20,23 @@
 
 //**********************************************************************************************************************
 struct sharedIndexes {
-    int groupIndex;
-    int otuIndex;
+    int treatmentIndex;
+    int sampleIndex;
     
-    sharedIndexes() : groupIndex(0), otuIndex(0) {}
-    sharedIndexes(int g, int o) : groupIndex(g), otuIndex(o) {}
+    sharedIndexes() : treatmentIndex(0), sampleIndex(0) {}
+    sharedIndexes(int g, int o) : treatmentIndex(g), sampleIndex(o) {}
+    
     
     bool operator<(const sharedIndexes& rhs) const {
-        return rhs.groupIndex < this->groupIndex || (rhs.groupIndex == this->groupIndex && rhs.otuIndex < this->otuIndex);
+        return rhs.treatmentIndex < this->treatmentIndex || (rhs.treatmentIndex == this->treatmentIndex && rhs.sampleIndex < this->sampleIndex);
     }
     
     bool operator>(const sharedIndexes& rhs) const {
-        return rhs.groupIndex > this->groupIndex || (rhs.groupIndex == this->groupIndex && rhs.otuIndex > this->otuIndex);
+        return rhs.treatmentIndex > this->treatmentIndex || (rhs.treatmentIndex == this->treatmentIndex && rhs.sampleIndex > this->sampleIndex);
     }
     
     bool operator=(const sharedIndexes& rhs) const {
-        return ((rhs.groupIndex == this->groupIndex) && (rhs.otuIndex == this->otuIndex));
+        return ((rhs.treatmentIndex == this->treatmentIndex) && (rhs.sampleIndex == this->sampleIndex));
     }
 };
 //**********************************************************************************************************************
@@ -66,7 +67,7 @@ private:
     	
 	set<string> getDescendantList(Tree*&, int, map<int, set<string> >, map<int, set<int> >&);
 	map<int, float> getDistToRoot(Tree*&);
-	vector< map<sharedIndexes, sharedIndexes> > randomizeGroupings(vector<int>, int);
+	vector< map<sharedIndexes, vector<int> > > randomizeGroupings(vector<int>, int);
     
     SharedRAbundVectors* getShared();
     SharedRAbundFloatVectors* getSharedFloat();

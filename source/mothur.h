@@ -1,8 +1,6 @@
 #ifndef MOTHUR_H
 #define MOTHUR_H
 
-
-
 /*
  *  mothur.h
  *  Mothur
@@ -33,12 +31,10 @@
 #include <sstream>
 #include <signal.h>
 
-
 //exception
 #include <stdexcept>
 #include <exception>
 #include <cstdlib> 
-
 
 //containers
 #include <vector>
@@ -150,14 +146,13 @@ using namespace std;
 
 #define MOTHURMAX 1e6
 
-
-
-
 typedef unsigned long ull;
 typedef unsigned short intDist;
 const vector<string> nullVector; //used to pass blank vector
 const vector<int> nullIntVector; //used to pass blank ints
 const vector<char> nullCharVector; //used to pass blank char
+const map<int, int> nullIntMap;
+
 /**************************************************************************************************/
 struct classifierOTU {
     vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU
@@ -213,9 +208,7 @@ struct classifierOTU {
             numSeqs = otu.size();
         }else {  numSeqs = 0; }
     }
-    
 };
-
 //******************************************************
 struct mcmcSample {
     double alpha, beta; //dmDash, dV
@@ -311,8 +304,7 @@ typedef struct s_MetroInit
 
 #endif
 
-//******************************************************
-
+//***********************************************************************
 struct IntNode {
 	int lvalue;
 	int rvalue;
@@ -387,7 +379,7 @@ struct PCell{
 struct PDistCellMin{
     ull row;
     ull col;
-    //PDistCell* cell;
+    
     PDistCellMin(ull r, ull c) :  col(c), row(r) {}
 };
 /***********************************************************************/
@@ -410,50 +402,7 @@ struct seqPNode {
     seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
     ~seqPNode() {}
 };
-/**********************************************************/
-struct CommonHeader {
-	unsigned int magicNumber;
-	string version;
-	unsigned long long indexOffset;
-	unsigned int indexLength;
-	unsigned int numReads;
-	unsigned short headerLength;
-	unsigned short keyLength;
-	unsigned short numFlowsPerRead;
-	int flogramFormatCode;
-	string flowChars; //length depends on number flow reads
-	string keySequence; //length depends on key length
-	
-	CommonHeader(){ magicNumber=0; indexOffset=0; indexLength=0; numReads=0; headerLength=0; keyLength=0; numFlowsPerRead=0; flogramFormatCode='s'; }
-	~CommonHeader() { }
-};
-/**********************************************************/
-struct Header {
-	unsigned short headerLength;
-	unsigned short nameLength;
-	unsigned int numBases;
-	unsigned short clipQualLeft;
-	unsigned short clipQualRight;
-	unsigned short clipAdapterLeft;
-	unsigned short clipAdapterRight;
-	string name; //length depends on nameLength
-	string timestamp;
-	string region;
-	string xy;
-	
-	Header() { headerLength=0; nameLength=0; numBases=0; clipQualLeft=0; clipQualRight=0; clipAdapterLeft=0; clipAdapterRight=0; }
-	~Header() { }
-};
-/**********************************************************/
-struct seqRead {
-	vector<unsigned short> flowgram;
-	vector<unsigned int> flowIndex;
-	string bases;
-	vector<unsigned int> qualScores;
-	
-	seqRead() { }
-	~seqRead() { }
-};
+
 /**********************************************************/
 struct linePair {
     double start;
@@ -487,9 +436,9 @@ struct listCt{
 };
 /***********************************************************************/
 struct consTax2{
+    string otuName;
     string taxonomy;
     int abundance;
-    string otuName;
 	consTax2() :  otuName("OTUxxx"), taxonomy("unknown"), abundance(0) {};
 	consTax2(string n, string t, int a) :  otuName(n), taxonomy(t), abundance(a) {}
 };
@@ -502,13 +451,6 @@ struct Taxon {
     ~Taxon(){}
 };
 /************************************************************/
-struct clusterNode {
-	int numSeq;
-	int parent;
-	int smallChild; //used to make linkTable work with list and rabund. represents bin number of this cluster node
-	clusterNode(int num, int par, int kid) : numSeq(num), parent(par), smallChild(kid) {};
-};
-/************************************************************/
 struct seqDist {
 	int seq1;
 	int seq2;
@@ -516,12 +458,6 @@ struct seqDist {
 	seqDist() {}
 	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
-};
-/************************************************************/
-struct distlinePair {
-	int start;
-	int end;
-	
 };
 /************************************************************/
 struct oligosPair {
@@ -597,14 +533,8 @@ inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right)
         else { return false; }
     }
     return false;	
-} 
- 
-/************************************************************/
-//sorts lowest to highest
-inline bool compareDistLinePairs(distlinePair left, distlinePair right){
-	return (left.end < right.end);	
-} 
-//********************************************************************************************************************
+}
+/********************************************************************************************************************/
 //sorts lowest to highest
 inline bool compareSequenceDistance(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
@@ -636,10 +566,9 @@ void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 			throw BadConversion(s);
 	
 }
-//**********************************************************************************************************************
+//*******************************************************************************
 template <typename T> int sgn(T val){ return (val > T(0)) - (val < T(0)); }
-//**********************************************************************************************************************
-
+//*******************************************************************************
 template<typename T>
 bool convertTestFloat(const string& s, T& x, bool failIfLeftoverChars = true){
 	
@@ -652,9 +581,7 @@ bool convertTestFloat(const string& s, T& x, bool failIfLeftoverChars = true){
 		return true;
 	
 }
-
-//**********************************************************************************************************************
-
+//***********************************************************************
 template<typename T>
 bool convertTest(const string& s, T& x, bool failIfLeftoverChars = true){
 	
@@ -667,7 +594,7 @@ bool convertTest(const string& s, T& x, bool failIfLeftoverChars = true){
 		return true;
 	
 }
-//**********************************************************************************************************************
+//**********************************************************************
 template<typename T>
 string toString(const T&x){
 	
@@ -676,15 +603,14 @@ string toString(const T&x){
 		return output.str();
 	
 }
-//**********************************************************************************************************************
+//***********************************************************************
 template<typename T>
 void mothurSwap(T&x, T&y){
     T temp = y;
     y = x;
     x = temp;
 }
-//**********************************************************************************************************************
-
+//*************************************************************************
 template<typename T>
 string toHex(const T&x){
 	
@@ -695,8 +621,7 @@ string toHex(const T&x){
 		return output.str();
 	
 }
-//**********************************************************************************************************************
-
+//*********************************************************************
 template<typename T>
 string toString(const T&x, int i){
 	
@@ -706,10 +631,8 @@ string toString(const T&x, int i){
 		output << fixed << x;
 		
 		return output.str();
-	
 }
-//**********************************************************************************************************************
-
+//***********************************************************************
 template<class T>
 T fromString(const string& s){
 	istringstream stream (s);
@@ -717,8 +640,6 @@ T fromString(const string& s){
 	stream >> t;
 	return t;
 }
-
-//**********************************************************************************************************************
+//****************************************************************************
 
 #endif
-

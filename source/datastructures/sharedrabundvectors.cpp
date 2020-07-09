@@ -161,6 +161,34 @@ void SharedRAbundVectors::print(ostream& output, bool& printOTUHeaders){
     }
 }
 /***********************************************************************/
+void SharedRAbundVectors::printTidy(ostream& output, bool& printOTUHeaders, bool keepZero){
+    try {
+        vector<string> otuLabels = getOTUNames();
+        
+        if (printOTUHeaders) {  output << "label\tsample\tOTU\tabundance\n"; printOTUHeaders = false;  }
+        
+        sort(lookup.begin(), lookup.end(), compareRAbunds);
+        
+        for (int i = 0; i < lookup.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            vector<int> data = lookup[i]->get();
+            string thisGroup = lookup[i]->getGroup();
+            
+            //if keepzero=false, zeroed otus are not outputted
+            for (int j = 0; j < data.size(); j++) {
+                if ((data[j] != 0) || (keepZero)) {
+                    output << label << '\t' << thisGroup << '\t' << otuLabels[j] << '\t' << data[j] << endl;
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SharedRAbundVectors", "printTidy");
+        exit(1);
+    }
+}
+/***********************************************************************/
 void SharedRAbundVectors::setOTUNames(vector<string> names){
     try {
         currentLabels.clear();

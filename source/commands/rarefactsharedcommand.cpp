@@ -244,7 +244,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
         set<string> userLabels = labels;
         string lastLabel = "";
         
-		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+		SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel, thisSet);
         Groups = lookup->getNamesGroups();
         if (lookup->size() < 2) { m->mothurOut("[ERROR]: I cannot run the command without at least 2 valid groups.");  delete lookup; return 0; }
         
@@ -287,10 +287,10 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 		for (int i=0; i<Estimators.size(); i++) {
 			if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) ) { 
 				if (Estimators[i] == "sharedobserved") { 
-					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), thisSet)));
 					outputNames.push_back(getOutputFileName("sharedrarefaction",variables)); outputTypes["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));
 				}else if (Estimators[i] == "sharednseqs") { 
-					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(getOutputFileName("sharedr_nseqs",variables), "")));
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(getOutputFileName("sharedr_nseqs",variables), thisSet)));
 					outputNames.push_back(getOutputFileName("sharedr_nseqs",variables)); outputTypes["sharedr_nseqs"].push_back(getOutputFileName("sharedr_nseqs",variables));
 				}
 			}
@@ -317,7 +317,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
             if (subsample) { subsampleLookup(subset, fileNameRoot);  }
             
            delete lookup; delete subset;
-           lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+           lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel, thisSet);
            
            if (lookup != NULL) {
                subset = new SharedRAbundVectors();
@@ -362,10 +362,10 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             for (int i=0; i<Estimators.size(); i++) {
                 if (validCalculator.isValidCalculator("sharedrarefaction", Estimators[i]) ) { 
                     if (Estimators[i] == "sharedobserved") { 
-                        rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(getOutputFileName("sharedrarefaction",variables), "")));
+                        rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedOneColumnFile(getOutputFileName("sharedrarefaction",variables))));
                         filenames["sharedrarefaction"].push_back(getOutputFileName("sharedrarefaction",variables));
                     }else if (Estimators[i] == "sharednseqs") { 
-                        rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(getOutputFileName("sharedr_nseqs",variables), "")));
+                        rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedOneColumnFile(getOutputFileName("sharedr_nseqs",variables))));
                         filenames["sharedr_nseqs"].push_back(getOutputFileName("sharedr_nseqs",variables));
                     }
                 }
@@ -500,14 +500,11 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
             vector< vector<string> > allLabels;
             vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
             for (int j = 1; j < theseLabels.size()-1; j++) {
-                if (theseLabels[j+1] == "lci") {
-                    thisSet.push_back(theseLabels[j]); 
-                    thisSet.push_back(theseLabels[j+1]); 
-                    thisSet.push_back(theseLabels[j+2]);
-                    j++; j++;
-                }else{ //no lci or hci for this calc.
-                    thisSet.push_back(theseLabels[j]); 
-                }
+                
+                thisSet.push_back(theseLabels[j]);  j++; //j+1
+                thisSet.push_back(theseLabels[j]);  j++; //j+2
+                thisSet.push_back(theseLabels[j]);
+                
                 allLabels.push_back(thisSet); 
                 thisSet.clear();
             }
@@ -525,7 +522,6 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 		}
 		
 		//for each type create a combo file
-		
 		for (map<string, map<string, string> >::iterator it = typesFiles.begin(); it != typesFiles.end(); it++) {
 			
 			ofstream out;
@@ -594,7 +590,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
             for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                 for (int n = 0; n < groupNames.size(); n++) { // for each group
                     for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                        out  << '\t' << fileLabels[combineFileName][k][l] << '-' << groupNames[n];
+                        out  << '\t' << fileLabels[combineFileName][k][l]; // << '-' << groupNames[n];
                     }
                 }
             }

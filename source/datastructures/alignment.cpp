@@ -48,6 +48,7 @@ Alignment::Alignment(int A, int nk) : nCols(A), nRows(A) {
     }
 }
 /**************************************************************************************************/
+//only gets bigger
 void Alignment::resize(int A) {
 	try {
 		nCols = A;
@@ -55,8 +56,8 @@ void Alignment::resize(int A) {
 
 		alignment.resize(nRows);			
 		for(int i=0;i<nRows;i++){			
-			alignment[i].resize(nCols);		
-		}	
+			alignment[i].resize(nCols);
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Alignment", "resize");
@@ -88,13 +89,15 @@ void Alignment::traceBack(bool createBaseMap){			//	This traceback routine is us
 					seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
 					seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
                     if (createBaseMap) { BBaseMap[row] = count; }
-					currentCell = alignment[--row][column];
+					//currentCell = alignment[--row][column];
+                    --row;
 				}
 				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
 					seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
 					seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
                     if (createBaseMap) { ABaseMap[column] = count; }
-					currentCell = alignment[row][--column];
+					//currentCell = alignment[row][--column];
+                    --column;
 				}
 				else{
 					seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
@@ -103,8 +106,11 @@ void Alignment::traceBack(bool createBaseMap){			//	This traceback routine is us
                         BBaseMap[row] = count;
                         ABaseMap[column] = count;
                     }
-					currentCell = alignment[--row][--column];
+					//currentCell = alignment[--row][--column];
+                    --row; --column;
 				}
+                if ((row >= 0) && (column >= 0)) { currentCell = alignment[row][column]; }
+                else { break; }
                 count++;
 			}
 		}
