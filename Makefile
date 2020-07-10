@@ -105,7 +105,7 @@ endif
 #
 	VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm:source/
     skipUchime := source/uchime_src/
-    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), source/, $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
     CXXFLAGS += -I. $(subDirIncludes)
