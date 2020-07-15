@@ -9,42 +9,17 @@
 
 #include "mothur.h"
 #include "mothurout.h"
-#include "reportfile.h"
+#include "seqerrorreportfile.h"
 
 /**************************************************************************************************/
 
-ReportFile::ReportFile(){
-	try {
-		m = MothurOut::getInstance();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReportFile", "ReportFile");
-		exit(1);
-	}							
-}
+SeqErrorReportFile::SeqErrorReportFile() : Report() {}
 
 /**************************************************************************************************/
 
-int ReportFile::readHeaders(ifstream& repFile, string repFileName){
+int SeqErrorReportFile::read(ifstream& repFile){
 	try {
-		util.openInputFile(repFileName, repFile);
-		util.getline(repFile);
-        return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ReportFile", "ReportFile");
-		exit(1);
-	}							
-}
-
-
-/**************************************************************************************************/
-
-int ReportFile::read(ifstream& repFile){
-	try {
-		
-		m = MothurOut::getInstance();
-		
+        
 		repFile >> queryName;
 		repFile >> queryLength;
 		repFile >> templateName;
@@ -71,10 +46,11 @@ int ReportFile::read(ifstream& repFile){
 		}
 		
 		util.gobble(repFile);
+        
         return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ReportFile", "ReportFile");
+		m->errorOut(e, "SeqErrorReportFile", "read");
 		exit(1);
 	}							
 	

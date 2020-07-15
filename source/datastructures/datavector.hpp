@@ -44,7 +44,7 @@ public:
     virtual void print(ostream&) {}
     
     void setLabel(string l)		{	label = l;			}
-    string getLabel()			{	return label;		}
+    string getLabel()			    {	return label;		}
     
 	
 protected:

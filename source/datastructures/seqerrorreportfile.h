@@ -12,15 +12,17 @@
 
 
 #include "utils.hpp"
+#include "report.hpp"
 
 /**************************************************************************************************/
 
-class ReportFile {
+class SeqErrorReportFile : public Report {
+    
 public:
-	ReportFile();
-    ~ReportFile() {}
+    SeqErrorReportFile();
+    ~SeqErrorReportFile() {}
+    
 	int read(ifstream&);
-	int readHeaders(ifstream&, string);
 	
 	string getQueryName()				{	return queryName;				}
 	string getTemplateName()			{	return templateName;			}
@@ -43,10 +45,7 @@ public:
 	
 
 private:
-	
-	MothurOut* m;
-    Utils util;
-		
+    
 	string queryName, templateName, searchMethod, alignmentMethod, dummySearchScore;
 	int queryLength, templateLength, queryStart, queryEnd, templateStart, templateEnd, pairwiseAlignmentLength, gapsInQuery, gapsInTemplate, longestInsert;
 	float searchScore, simBtwnQueryAndTemplate;

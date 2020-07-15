@@ -8,7 +8,7 @@
  */
 
 #include "seqerrorcommand.h"
-#include "reportfile.h"
+#include "seqerrorreportfile.h"
 #include "qualityscores.h"
 #include "refchimeratest.h"
 
@@ -452,7 +452,7 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
         
         int maxMismatch = 0;
         
-        ReportFile report;
+        SeqErrorReportFile report;
         QualityScores quality;
         
         misMatchCounts.resize(11, 0);
