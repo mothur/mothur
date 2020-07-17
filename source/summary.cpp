@@ -7,7 +7,8 @@
 //
 
 #include "summary.hpp"
-
+#include "contigsreport.hpp"
+#include "alignreport.hpp"
 
 //**********************************************************************************************************************
 void Summary::processNameCount(string n) { //name or count file to include in counts
@@ -662,21 +663,19 @@ void driverContigsSummarySummarize(seqSumData* params) {
         in.seekg(params->start);
 
         //print header if you are process 0
-        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
+        ContigsReport report;
+        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); params->util.gobble(in); params->count++; }
 
         bool done = false;
-        string name;
-        int length, OLength, thisOStart, thisOEnd, numMisMatches, numns; //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
-        double expectedErrors;
-
         while (!done) {
 
             if (params->m->getControl_pressed()) { break; }
 
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numns >> expectedErrors; params->util.gobble(in);
-
-            if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(thisOStart) + "\t" + toString(thisOEnd) + "\t" + toString(length) + "\n"); }
+            report.read(in); params->util.gobble(in);
+            
+            string name = report.getName();
+            
+            if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(report.getOverlapStart()) + "\t" + toString(report.getOverlapEnd()) + "\t" + toString(report.getLength()) + "\n"); }
 
             if (name != "") {
                 long long numReps = 1;
@@ -687,29 +686,35 @@ void driverContigsSummarySummarize(seqSumData* params) {
                     if (itFindName == params->nameMap.end()) { params->m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); params->m->mothurOutEndLine(); params->m->setControl_pressed(true); }
                     else { numReps = itFindName->second; }
                 }
-
-                map<int, long long>::iterator it = params->ostartPosition.find(thisOStart);
-                if (it == params->ostartPosition.end()) { params->ostartPosition[thisOStart] = numReps; } //first finding of this start position, set count.
+                
+                int overlapStart = report.getOverlapStart();
+                map<int, long long>::iterator it = params->ostartPosition.find(overlapStart);
+                if (it == params->ostartPosition.end()) { params->ostartPosition[overlapStart] = numReps; } //first finding of this start position, set count.
                 else { it->second += numReps; } //add counts
 
-                it = params->oendPosition.find(thisOEnd);
-                if (it == params->oendPosition.end()) { params->oendPosition[thisOEnd] = numReps; } //first finding of this end position, set count.
+                int overlapEnd = report.getOverlapEnd();
+                it = params->oendPosition.find(overlapEnd);
+                if (it == params->oendPosition.end()) { params->oendPosition[overlapEnd] = numReps; } //first finding of this end position, set count.
                 else { it->second += numReps; } //add counts
-
-                it = params->oseqLength.find(OLength);
-                if (it == params->oseqLength.end()) { params->oseqLength[OLength] = numReps; } //first finding of this length, set count.
+                
+                int overlapLength = report.getOverlapLength();
+                it = params->oseqLength.find(overlapLength);
+                if (it == params->oseqLength.end()) { params->oseqLength[overlapLength] = numReps; } //first finding of this length, set count.
                 else { it->second += numReps; } //add counts
-
+                
+                int length = report.getLength();
                 it = params->seqLength.find(length);
                 if (it == params->seqLength.end()) { params->seqLength[length] = numReps; } //first finding of this length, set count.
                 else { it->second += numReps; } //add counts
-
+                
+                int numMisMatches = report.getMisMatches();
                 it = params->misMatches.find(numMisMatches);
                 if (it == params->misMatches.end()) { params->misMatches[numMisMatches] = numReps; } //first finding of this ambig, set count.
                 else { it->second += numReps; } //add counts
-
-                it = params->numNs.find(numns);
-                if (it == params->numNs.end()) { params->numNs[numns] = numReps; } //first finding of this homop, set count.
+                
+                int numNs = report.getNumNs();
+                it = params->numNs.find(numNs);
+                if (it == params->numNs.end()) { params->numNs[numNs] = numReps; } //first finding of this homop, set count.
                 else { it->second += numReps; } //add counts
 
                 params->count++;
@@ -723,7 +728,6 @@ void driverContigsSummarySummarize(seqSumData* params) {
             if (params->end == params->count) { break; }
 #endif
         }
-
         in.close();
     }
     catch(exception& e) {
@@ -863,22 +867,20 @@ void driverAlignSummarySummarize(seqSumData* params) {
 
         in.seekg(params->start);
 
+        AlignReport report;
         //print header if you are process 0
-        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); params->util.gobble(in); params->count++; }
 
         bool done = false;
-        string name, TemplateName, SearchMethod, AlignmentMethod;
-        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
-        float SearchScore, SimBtwnQueryTemplate;
-
+    
         while (!done) {
 
             if (params->m->getControl_pressed()) {  break; }
 
-            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; params->util.gobble(in);
-
-
-            if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(TemplateName) + "\t" + toString(SearchScore) + "\t" + toString(length) + "\n"); }
+            report.read(in); params->util.gobble(in);
+            
+            string name = report.getQueryName();
+            if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(report.getTemplateName()) + "\t" + toString(report.getSearchScore()) + "\t" + toString(report.getQueryLength()) + "\n"); }
 
             if (name != "") {
                 //string seqInfo = addSeq(name, length, SimBtwnQueryTemplate, SearchScore, LongestInsert);
@@ -890,19 +892,23 @@ void driverAlignSummarySummarize(seqSumData* params) {
                     if (itFindName == params->nameMap.end()) { params->m->mothurOut("[ERROR]: '" + name + "' is not in your name or count file, please correct."); params->m->mothurOutEndLine(); params->m->setControl_pressed(true); }
                     else { numReps = itFindName->second; }
                 }
-
+                
+                float SimBtwnQueryTemplate = report.getSimBtwnQueryAndTemplate();
                 map<float, long long>:: iterator itFloat = params->sims.find(SimBtwnQueryTemplate);
                 if (itFloat == params->sims.end()) { params->sims[SimBtwnQueryTemplate] = numReps; } //first finding of this similarity score, set count.
                 else { itFloat->second += numReps; } //add counts
 
+                float SearchScore = report.getSearchScore();
                 itFloat = params->scores.find(SearchScore);
                 if (itFloat == params->scores.end()) { params->scores[SearchScore] = numReps; } //first finding of this end position, set count.
                 else { itFloat->second += numReps; } //add counts
-
-                map<int, long long>::iterator it = params->inserts.find(LongestInsert);
-                if (it == params->inserts.end()) { params->inserts[LongestInsert] = numReps; } //first finding of this length, set count.
+                
+                int longestInsert = report.getLongestInsert();
+                map<int, long long>::iterator it = params->inserts.find(longestInsert);
+                if (it == params->inserts.end()) { params->inserts[longestInsert] = numReps; } //first finding of this length, set count.
                 else { it->second += numReps; } //add counts
 
+                int length = report.getQueryLength();
                 it = params->seqLength.find(length);
                 if (it == params->seqLength.end()) { params->seqLength[length] = numReps; } //first finding of this length, set count.
                 else { it->second += numReps; } //add counts
