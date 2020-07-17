@@ -10,6 +10,7 @@
 #define report_hpp
 
 #include "utils.hpp"
+#include "mothurout.h"
 
 /**************************************************************************************************/
 
@@ -20,20 +21,22 @@ public:
     Report() { m = MothurOut::getInstance(); }
     virtual ~Report() {}
     
-    virtual int read(ifstream&) = 0;
+    virtual void read(ifstream&) = 0;
     
-    vector<string> readHeaders(ifstream& repFile, string repFileName) {
-        util.openInputFile(repFileName, repFile);
-        string headers = util.getline(repFile);
-        
-        return (util.splitWhiteSpace(headers));
-    }
+    vector<string> getHeaders() { return reportHeaders; }
+    vector<string> readHeaders(ifstream&);
+    void printHeaders(ofstream&);
 
     
 protected:
+    
+    virtual void fillHeaders() = 0;
         
     MothurOut* m;
     Utils util;
+
+    string reportFileName;
+    vector<string> reportHeaders;
     
 };
 

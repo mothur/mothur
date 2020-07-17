@@ -8,22 +8,40 @@
 
 #include "report.hpp"
 
-/**************************************************************************************************
+/**************************************************************************************************/
 
-vector<string> Report::readHeaders(ifstream& repFile, string repFileName){
+vector<string> Report::readHeaders(ifstream& repFile){
     try {
         
-        util.openInputFile(repFileName, repFile);
+        util.openInputFile(reportFileName, repFile);
         string headers = util.getline(repFile);
         
-        vector<string> sHeaders = util.splitWhiteSpace(headers);
+        reportHeaders = util.splitWhiteSpace(headers);
         
-        return sHeaders;
+        return reportHeaders;
     }
     catch(exception& e) {
         m->errorOut(e, "Report", "readHeaders");
         exit(1);
     }
 }
+/**************************************************************************************************/
+
+void Report::printHeaders(ofstream& repFile){
+    try {
+        for (int i = 0; i < reportHeaders.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            repFile << reportHeaders[i] << '\t';
+        }
+        repFile << endl;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Report", "printHeaders");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+
 /**************************************************************************************************/
 
