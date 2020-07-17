@@ -14,6 +14,7 @@
 #include "fastqread.h"
 #include "inputdata.h"
 #include "contigsreport.hpp"
+#include "alignreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
@@ -827,25 +828,22 @@ void RemoveSeqsCommand::readAlign(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
 		string outputFileName = getOutputFileName("alignreport", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-
-		ifstream in;
-		util.openInputFile(alignfile, in);
-		string name, junk;
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(alignfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
-        //read and write headers
-		out << util.getline(in) << endl;  util.gobble(in);
+        AlignReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;   util.gobble(in);              //read from first column
-            junk = util.getline(in); util.gobble(in);
+			report.read(in); util.gobble(in);
+            string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -858,15 +856,14 @@ void RemoveSeqsCommand::readAlign(){
                     uniqueNames.insert(name);
                     wroteSomething = true;
                     
-                    out << name << '\t' << junk << endl;
+                    report.print(out);
                     
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
 			}else { removedCount++;   }
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); }
 		outputTypes["alignreport"].push_back(outputFileName); outputNames.push_back(outputFileName);

@@ -225,9 +225,7 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
                     if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
-			
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");

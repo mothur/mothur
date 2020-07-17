@@ -14,6 +14,7 @@
 #include "fastqread.h"
 #include "inputdata.h"
 #include "contigsreport.hpp"
+#include "alignreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -877,27 +878,23 @@ void GetSeqsCommand::readAlign(){
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
 		string outputFileName = getOutputFileName("alignreport", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-
-		ifstream in;
-		util.openInputFile(alignfile, in);
-		string name, junk;
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(alignfile, in);
 		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+        AlignReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
 		
-		//read and write headers
-        out << util.getline(in) << endl;  util.gobble(in);
+        bool wroteSomething = false; int selectedCount = 0;
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 		
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			in >> name;   util.gobble(in);              //read from first column
-            junk = util.getline(in); util.gobble(in);
+			report.read(in); util.gobble(in);
+            string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -911,15 +908,13 @@ void GetSeqsCommand::readAlign(){
                     wroteSomething = true;
                     selectedCount++;
                     
-                    out << name << '\t' << junk << endl;
+                    report.print(out);
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
-				
 			}
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["alignreport"].push_back(outputFileName);
@@ -927,7 +922,6 @@ void GetSeqsCommand::readAlign(){
 		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your alignreport file.\n");
 		
 		return;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "readAlign");
