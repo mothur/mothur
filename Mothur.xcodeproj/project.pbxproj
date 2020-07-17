@@ -469,6 +469,7 @@
 		48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
 		48CF76F021BEBDD300B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
 		48CF76F121BEBDE000B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
+		48D36FC924C1EAB0001A0FDC /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */; };
 		48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */; };
 		48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9691CA4262A008DF76B /* dataset.cpp */; };
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
@@ -1085,6 +1086,8 @@
 		48CC010E1EB79E49009D61E6 /* fakeoligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fakeoligos.h; path = fakes/fakeoligos.h; sourceTree = "<group>"; };
 		48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergeotuscommand.cpp; path = source/commands/mergeotuscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergeotuscommand.hpp; path = source/commands/mergeotuscommand.hpp; sourceTree = "<group>"; };
+		48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = contigsreport.cpp; path = source/datastructures/contigsreport.cpp; sourceTree = SOURCE_ROOT; };
+		48D36FC824C1EAAF001A0FDC /* contigsreport.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = contigsreport.hpp; path = source/datastructures/contigsreport.hpp; sourceTree = SOURCE_ROOT; };
 		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testvsearchfileparser.cpp; path = TestMothur/testvsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testvsearchfileparser.h; path = TestMothur/testvsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataset.cpp; path = TestMothur/dataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -2760,15 +2763,17 @@
 				A7E9B65612D37EC300DA6239 /* alignmentcell.hpp */,
 				A7E9B65712D37EC300DA6239 /* alignmentdb.cpp */,
 				A7E9B65812D37EC300DA6239 /* alignmentdb.h */,
+				A7E9B76312D37EC400DA6239 /* alignreport.cpp */,
+				A7E9B76412D37EC400DA6239 /* alignreport.hpp */,
 				A7E9B66212D37EC300DA6239 /* blastalign.cpp */,
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
 				48883FFB20C6D6C000CAF112 /* compare.h */,
+				48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */,
+				48D36FC824C1EAAF001A0FDC /* contigsreport.hpp */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				488563D023CD00C4007B5659 /* taxonomy.hpp */,
-				488563CF23CD00C4007B5659 /* taxonomy.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
@@ -2797,8 +2802,6 @@
 				A7E9B74012D37EC400DA6239 /* listvector.hpp */,
 				A7E9B75F12D37EC400DA6239 /* nameassignment.cpp */,
 				A7E9B76012D37EC400DA6239 /* nameassignment.hpp */,
-				A7E9B76312D37EC400DA6239 /* alignreport.cpp */,
-				A7E9B76412D37EC400DA6239 /* alignreport.hpp */,
 				48705ABE19BE32C50075E977 /* oligos.h */,
 				48705ABD19BE32C50075E977 /* oligos.cpp */,
 				48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */,
@@ -2861,6 +2864,8 @@
 				A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */,
 				A7E9B85512D37EC400DA6239 /* suffixtree.cpp */,
 				A7E9B85612D37EC400DA6239 /* suffixtree.hpp */,
+				488563D023CD00C4007B5659 /* taxonomy.hpp */,
+				488563CF23CD00C4007B5659 /* taxonomy.cpp */,
 				A7E9B85F12D37EC400DA6239 /* tree.cpp */,
 				A7E9B86012D37EC400DA6239 /* tree.h */,
 				A7E9B86412D37EC400DA6239 /* treemap.cpp */,
@@ -3786,6 +3791,7 @@
 				A7E9B97A12D37EC400DA6239 /* suffixtree.cpp in Sources */,
 				A7E9B97B12D37EC400DA6239 /* summarycommand.cpp in Sources */,
 				48E544511E9C2CFD00FF6AB8 /* tp.cpp in Sources */,
+				48D36FC924C1EAB0001A0FDC /* contigsreport.cpp in Sources */,
 				A7E9B97C12D37EC400DA6239 /* summarysharedcommand.cpp in Sources */,
 				A7E9B97D12D37EC400DA6239 /* systemcommand.cpp in Sources */,
 				48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */,

@@ -13,6 +13,7 @@
 #include "counttable.h"
 #include "fastqread.h"
 #include "inputdata.h"
+#include "contigsreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::setParameters(){	
@@ -117,7 +118,6 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }
@@ -153,6 +153,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             contigsreportfile = validParameter.validFile(parameters, "contigsreport");
             if (contigsreportfile == "not open") { abort = true; }
             else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
+            else { current->setContigsReportFile(contigsreportfile); }
 			
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
@@ -948,18 +949,18 @@ void GetSeqsCommand::readContigs(){
         int selectedCount = 0;
         
         set<string> uniqueNames;
-        ifstream in;
-        util.openInputFile(contigsreportfile, in);
-        string name, junk;
+        ifstream in; util.openInputFile(contigsreportfile, in);
         
-        out << util.getline(in) << endl;  util.gobble(in);
+        ContigsReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
-
-            in >> name;   util.gobble(in);              //read from first column
-            junk = util.getline(in); util.gobble(in);
+            
+            report.read(in); util.gobble(in);
+            string name = report.getName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -971,7 +972,7 @@ void GetSeqsCommand::readContigs(){
                     uniqueNames.insert(name);
                     wroteSomething = true;  selectedCount++;
                 
-                    out << name << '\t' << junk << endl;
+                    report.print(out);
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your contigsreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }

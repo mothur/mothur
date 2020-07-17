@@ -8,6 +8,7 @@
 
 #include "makecontigscommand.h"
 #include "renameseqscommand.h"
+#include "contigsreport.hpp"
 
 //**************************************************************************************************
 
@@ -389,9 +390,8 @@ int MakeContigsCommand::execute(){
         }
 
         //add headers to mismatch file
-        ofstream out;
-        util.openOutputFile(outMisMatchFile+".temp", out);
-        out << "Name\tLength\tOverlap_Length\tOverlap_Start\tOverlap_End\tMisMatches\tNum_Ns\tExpected_Errors\n"; out.close();//print Headers
+        ofstream out; util.openOutputFile(outMisMatchFile+".temp", out);
+        ContigsReport report; report.printHeaders(out); out.close();//print Headers
         util.appendFilesFront(outMisMatchFile+".temp", outMisMatchFile); //removes temp
 
         if (m->getControl_pressed()) {	for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0;	}

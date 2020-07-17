@@ -34,8 +34,7 @@ protected:
         
     MothurOut* m;
     Utils util;
-
-    string reportFileName;
+    
     vector<string> reportHeaders;
     
 };

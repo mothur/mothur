@@ -13,7 +13,6 @@
 vector<string> Report::readHeaders(ifstream& repFile){
     try {
         
-        util.openInputFile(reportFileName, repFile);
         string headers = util.getline(repFile);
         
         reportHeaders = util.splitWhiteSpace(headers);
