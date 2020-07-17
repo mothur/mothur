@@ -11,6 +11,7 @@
 #include "groupmap.h"
 #include "counttable.h"
 #include "qualityscores.h"
+#include "contigsreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> RenameSeqsCommand::setParameters(){
@@ -508,35 +509,28 @@ int RenameSeqsCommand::readContigs(map<string, string>& oldMap){
         util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["contigsreport"].push_back(outputFileName);
 
-        ifstream in;
-        util.openInputFile(contigsfile, in);
-        out << (util.getline(in)) << endl;   //skip headers
+        ifstream in; util.openInputFile(contigsfile, in);
+        ContigsReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
         
         map<string, string>::iterator it;
-        int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
-        double expectedErrors;
-        string name;
+        
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors; util.gobble(in);
+            report.read(in); util.gobble(in);
             
-            it = oldMap.find(name);
-            if (it == oldMap.end()) {
-                m->mothurOut("[ERROR]: " + name + " is not in your contigs report file, please correct.\n"); m->setControl_pressed(true);
-            }else {
-                name = it->second;
-            }
+            it = oldMap.find(report.getName());
+            
+            if (it != oldMap.end()) { report.setName(it->second); }
+            else { m->mothurOut("[ERROR]: " + report.getName() + " is not in your contigs report file, please correct.\n"); m->setControl_pressed(true);  break; }
 
-            out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
-
+            report.print(out);
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
 
-        
         return 0;
     }
     catch(exception& e) {
