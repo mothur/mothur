@@ -30,6 +30,8 @@ vector<string> PairwiseSeqsCommand::setParameters(){
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
+		CommandParameter pstartsequence("startsequence", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pstartsequence);
+		CommandParameter psequencecount("sequencecount", "Number", "", "0", "", "", "","",false,false); parameters.push_back(psequencecount);
         
         abort = false; calledHelp = false;
         
@@ -51,7 +53,7 @@ string PairwiseSeqsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The pairwise.seqs command reads a fasta file and creates distance matrix.\n";
-		helpString += "The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff, oldfasta, column and processors.\n";
+		helpString += "The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff, oldfasta, column, startsequence, sequencecount and processors.\n";
 		helpString += "The fasta parameter is required.\n";
 		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
@@ -64,6 +66,7 @@ string PairwiseSeqsCommand::getHelpString(){
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n";
         helpString += "The oldfasta and column parameters allow you to append the distances calculated to the column file.\n";
 		helpString += "The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n";
+		helpString += "The sequencecount and startsequence parameter allow you to process only a slice of the fasta file ('sequencecount' sequences starting at 'startsequence'). The default is 0 and -1 respectively which means not to do this.\n";
 		helpString += "The pairwise.seqs command should be in the following format: \n";
 		helpString += "pairwise.seqs(fasta=yourfastaFile, align=yourAlignmentMethod) \n";
 		helpString += "Example pairwise.seqs(fasta=candidate.fasta, align=blast)\n";
@@ -154,6 +157,12 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 			
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
             
+			temp = validParameter.valid(parameters, "startsequence");	if(temp == "not found"){	temp = "-1"; }
+			util.mothurConvert(temp, startSequence); 
+			
+			temp = validParameter.valid(parameters, "sequencecount");	if(temp == "not found"){	temp = "0"; }
+			util.mothurConvert(temp, sequenceCount); 
+			
             if (align == "blast") {
                 string blastlocation = "";
                 vector<string> locations = current->getLocations();
@@ -664,20 +673,39 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
         vector<pairwiseData*> data;
         long long numSeqs = alignDB.getNumSeqs();
         
+        bool startAndCountSpecified = false;
+        if (startSequence != -1 && sequenceCount != 0) {
+            startAndCountSpecified = true;
+            if (startSequence >= numSeqs) {
+                //TODO: better throw an exception?
+                m->mothurOut("Startsequence ("+ toString(startSequence) +") equal to or greater than number of sequences ("+ toString(numSeqs) +"). Nothing to do!\n");
+                exit(0);
+            }
+
+            if ( (startSequence + sequenceCount) > numSeqs ) {
+                sequenceCount = numSeqs - startSequence;
+            }
+            filename += "_" + toString(startSequence);
+        }
+        else {
+            startSequence = 0;
+            sequenceCount = numSeqs;
+        }
         long long numDists = 0;
         if (output == "square") { numDists = numSeqs * numSeqs; }
-        else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
+        else { for(int i=startSequence;i<(startSequence+sequenceCount);i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
         if (numDists < processors) { processors = numDists; }
+        if (startAndCountSpecified && sequenceCount < processors) { processors = sequenceCount; }
        
         for (int i = 0; i < processors; i++) {
             linePair tempLine;
             lines.push_back(tempLine);
-            if (output != "square") {
+            if (startAndCountSpecified || output == "square") {
+                lines[i].start = int ((float(i)/float(processors)) * sequenceCount) + startSequence;
+                lines[i].end = int ((float(i+1)/float(processors)) * sequenceCount) + startSequence;
+            } else {
                 lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
                 lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
-            }else{
-                lines[i].start = int ((float(i)/float(processors)) * numSeqs);
-                lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
             }
         }
         
@@ -708,7 +736,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
         for (int i = 0; i < processors-1; i++) {
             OutputWriter* threadWriter = NULL;
             pairwiseData* dataBundle = NULL;
-            string extension = toString(i+1) + ".temp";
+            string extension = "_" + toString(i+1) + ".temp";
             if (output == "column") {
                 threadWriter = new OutputWriter(synchronizedOutputFile);
                 dataBundle = new pairwiseData(threadWriter);
@@ -751,7 +779,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             numDistsBelowCutoff += data[i]->count;
             if (output == "column") {  delete data[i]->threadWriter; }
             else {
-                string extension = toString(i+1) + ".temp";
+                string extension = "_" + toString(i+1) + ".temp";
                 util.appendFiles((filename+extension), filename);
                 util.mothurRemove(filename+extension);
             }

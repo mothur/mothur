@@ -58,6 +58,7 @@ private:
 	string fastaFileName, align, calc,  output, oldfastafile, column;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
 	int processors, longestBase, numDistsBelowCutoff;
+	int startSequence, sequenceCount;
 	vector<string> Estimators, outputNames;
 	
 	bool abort, countends, compress, fitCalc;
