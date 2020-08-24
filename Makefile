@@ -124,7 +124,7 @@ mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
 uchime :
-	cd source/uchime_src && export CXX=$(CXX) && ./make clean && ./make && mv uchime ../../ && cd ..
+	cd source/uchime_src && export CXX=$(CXX) && make clean && make && mv uchime ../../ && cd ..
 
 install : mothur
 
