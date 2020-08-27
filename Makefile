@@ -37,7 +37,7 @@ GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
-VERSION = "\"1.44.2\""
+VERSION = "\"1.44.3\""
 
 
 # Set a static logfile name
@@ -124,7 +124,7 @@ mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
 uchime :
-	cd source/uchime_src && export CXX=$(CXX) && ./make clean && ./make && mv uchime ../../ && cd ..
+	cd source/uchime_src && export CXX=$(CXX) && make clean && make && mv uchime ../../ && cd ..
 
 install : mothur
 
