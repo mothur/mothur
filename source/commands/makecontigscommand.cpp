@@ -34,7 +34,9 @@ double convertProbToQ(double prob){
 
 double convertQToProb(double Q){
 		try {
-        return pow(10,(-Q/10));
+            double value = pow(10,(-Q/10));
+            if (isnan(value) || isinf(value)) { value = 0.0; }
+            return value;
     }
     catch(exception& e) {
         MothurOut* m; m = MothurOut::getInstance();
@@ -758,7 +760,7 @@ struct contigsData {
         kmerSize = km;
         align = al;
         deltaq = delt;
-				maxee = maxe;
+        maxee = maxe;
         format = form;
         trimOverlap = to;
     }
@@ -1610,8 +1612,8 @@ vector<int> trimBarCodesAndPrimers(Sequence& fSeq, Sequence& rSeq, QualityScores
                     savedFSeq.reverseComplement();
                     savedRSeq.reverseComplement();
                 }
-                fSeq.setAligned(savedFSeq.getAligned());
-                rSeq.setAligned(savedRSeq.getAligned());
+                fSeq.setAligned(savedFSeq.getUnaligned());
+                rSeq.setAligned(savedRSeq.getUnaligned());
                 if(hasQuality){
                     if (i > 0) { //checkOrient trimOligos - reoriented and reversed
                         savedFQual->flipQScores();
