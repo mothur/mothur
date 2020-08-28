@@ -13,6 +13,8 @@
 #include "counttable.h"
 #include "fastqread.h"
 #include "inputdata.h"
+#include "contigsreport.hpp"
+#include "alignreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::setParameters(){	
@@ -147,6 +149,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
             contigsreportfile = validParameter.validFile(parameters, "contigsreport");
             if (contigsreportfile == "not open") { abort = true; }
             else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
+            else { current->setContigsReportFile(contigsreportfile); }
 			
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { abort = true; }
@@ -825,25 +828,22 @@ void RemoveSeqsCommand::readAlign(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
 		string outputFileName = getOutputFileName("alignreport", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-
-		ifstream in;
-		util.openInputFile(alignfile, in);
-		string name, junk;
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(alignfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
-        //read and write headers
-		out << util.getline(in) << endl;  util.gobble(in);
+        AlignReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
 		
         set<string> uniqueNames;
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;   util.gobble(in);              //read from first column
-            junk = util.getline(in); util.gobble(in);
+			report.read(in); util.gobble(in);
+            string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -856,15 +856,14 @@ void RemoveSeqsCommand::readAlign(){
                     uniqueNames.insert(name);
                     wroteSomething = true;
                     
-                    out << name << '\t' << junk << endl;
+                    report.print(out);
                     
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your alignreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
 			}else { removedCount++;   }
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); }
 		outputTypes["alignreport"].push_back(outputFileName); outputNames.push_back(outputFileName);
@@ -893,18 +892,18 @@ void RemoveSeqsCommand::readContigs(){
         int removedCount = 0;
         
         set<string> uniqueNames;
-        ifstream in;
-        util.openInputFile(contigsreportfile, in);
-        string name, junk;
+        ifstream in; util.openInputFile(contigsreportfile, in);
         
-        out << util.getline(in) << endl;  util.gobble(in);
+        ContigsReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
 
-            in >> name;   util.gobble(in);              //read from first column
-            junk = util.getline(in); util.gobble(in);
+            report.read(in); util.gobble(in);
+            string name = report.getName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -916,7 +915,7 @@ void RemoveSeqsCommand::readContigs(){
                     uniqueNames.insert(name);
                     wroteSomething = true;
                 
-                    out << name << '\t' << junk << endl;
+                    report.print(out);
                 }else {
                     m->mothurOut("[WARNING]: " + name + " is in your contigsreport file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
@@ -925,7 +924,7 @@ void RemoveSeqsCommand::readContigs(){
         in.close();
         out.close();
         
-        if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); } //reopening file clears header line
+        if (wroteSomething == false) { m->mothurOut("\nYour file only contains sequences from the .accnos file, everything removed.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); } //reopening file clears header line
         outputNames.push_back(outputFileName);  outputTypes["contigsreport"].push_back(outputFileName);
         
         m->mothurOut("Removed " + toString(removedCount) + " sequences from your contigsreport file.\n");

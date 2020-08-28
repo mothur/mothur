@@ -331,7 +331,7 @@ struct alignStruct {
 //**********************************************************************************************************************
 void alignDriver(alignStruct* params) {
 	try {
-        NastReport report;
+        AlignReport report;
 		
 		ifstream inFASTA;
 		params->util.openInputFile(params->inputFilename, inFASTA);
@@ -422,7 +422,7 @@ void alignDriver(alignStruct* params) {
 				report.setNastParameters(*nast);
 	
 				params->alignWriter->write('>' + candidateSeq->getName() + '\n' + candidateSeq->getAligned() + '\n');
-				params->reportWriter->write(report.getReport());
+				params->reportWriter->write(report.getSeqReport());
 				delete nast;
                 delete templateSeq;
 				if (needToDeleteCopy) {   delete copy;   }
@@ -491,8 +491,9 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         time_t start, end;
         time(&start);
         
-        NastReport nast; string nastHeaders = nast.getHeaders();
-        ofstream out; util.openOutputFile(reportFileName, out); out << nastHeaders; out.close();
+        AlignReport nast;
+        ofstream out; util.openOutputFile(reportFileName, out);
+        nast.printHeaders(out); out.close();
         
         auto synchronizedOutputAlignFile = std::make_shared<SynchronizedOutputFile>(alignFileName);
         auto synchronizedOutputReportFile = std::make_shared<SynchronizedOutputFile>(reportFileName, true);

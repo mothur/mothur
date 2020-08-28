@@ -264,7 +264,6 @@ public:
     void splitAtChar(string&, string&, char);
     void splitAtEquals(string&, string&);
     vector<string> splitWhiteSpaceWithQuotes(string);
-    int splitWhiteSpaceWithQuotes(string, vector<string>&);
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);

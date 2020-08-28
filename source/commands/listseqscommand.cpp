@@ -115,6 +115,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
             contigsreportfiles = validParameter.validFiles(parameters, "contigsreport");
             if (contigsreportfiles.size() != 0) {
                 if (contigsreportfiles[0] == "not open") { abort = true; }
+                else { current->setContigsReportFile(contigsreportfiles[0]); }
             }
 			
 			listfiles = validParameter.validFiles(parameters, "list");

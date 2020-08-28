@@ -8,7 +8,7 @@
  */
 
 #include "seqerrorcommand.h"
-#include "reportfile.h"
+#include "alignreport.hpp"
 #include "qualityscores.h"
 #include "refchimeratest.h"
 
@@ -452,7 +452,7 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
         
         int maxMismatch = 0;
         
-        ReportFile report;
+        AlignReport report;
         QualityScores quality;
         
         misMatchCounts.resize(11, 0);
@@ -484,7 +484,8 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
             util.openInputFile(qFileName, qualFile);
             
             //gobble headers
-            report.readHeaders(reportFile, rFileName);
+            util.openInputFile(reportFileName, reportFile);
+            report.readHeaders(reportFile);
             
             qualForwardMap.resize(maxLength);
             qualReverseMap.resize(maxLength);

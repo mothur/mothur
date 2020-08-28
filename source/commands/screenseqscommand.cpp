@@ -11,6 +11,8 @@
 #include "counttable.h"
 #include "summary.hpp"
 #include "removeseqscommand.h"
+#include "alignreport.hpp"
+#include "contigsreport.hpp"
 
 //**********************************************************************************************************************
 vector<string> ScreenSeqsCommand::setParameters(){	
@@ -582,19 +584,12 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         string outSummary =  getOutputFileName("alignreport",variables);
         outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
         
-        string name, TemplateName, SearchMethod, AlignmentMethod;
-        //QueryName	QueryLength	TemplateName	TemplateLength	SearchMethod	SearchScore	AlignmentMethod	QueryStart	QueryEnd	TemplateStart	TemplateEnd	PairwiseAlignmentLength	GapsInQuery	GapsInTemplate	LongestInsert	SimBtwnQuery&Template
-        //checking for minScore, maxInsert, minSim
-        int length, TemplateLength,	 QueryStart,	QueryEnd,	TemplateStart,	TemplateEnd,	PairwiseAlignmentLength,	GapsInQuery,	GapsInTemplate,	LongestInsert;
-        float SearchScore, SimBtwnQueryTemplate;
+        ofstream out; util.openOutputFile(outSummary, out);
+        ifstream in; util.openInputFile(alignreport, in);
         
-        ofstream out;
-        util.openOutputFile(outSummary, out);
-        
-        //read summary file
-        ifstream in;
-        util.openInputFile(alignreport, in);
-        out << (util.getline(in)) << endl;   //skip headers
+        AlignReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
         
         int count = 0;
         
@@ -602,23 +597,30 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; util.gobble(in);
+            report.read(in); util.gobble(in);
             
-            bool goodSeq = true;		//	innocent until proven guilty
-            string trashCode = "";
+            string trashCode = ""; bool goodSeq = true;		//	innocent until proven guilty
+            
+            //check longest insert
+            int LongestInsert = report.getLongestInsert();
             if(maxInsert != -1 && maxInsert < LongestInsert)    {	goodSeq = false; trashCode += "insert|";	}
+            
+            //check searchscore
+            float SearchScore = report.getSearchScore();
             if(!util.isEqual(minScore, -1) && minScore > SearchScore)		{	goodSeq = false; trashCode += "score|";     }
+            
+            
+            //check similarity to template
+            float SimBtwnQueryTemplate = report.getSimBtwnQueryAndTemplate();
             if(!util.isEqual(minSim, -1) && minSim > SimBtwnQueryTemplate)	{	goodSeq = false; trashCode += "sim|";       }
             
-            if(goodSeq){
-                out << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;
-            }
-            else{ badSeqNames[name] = trashCode;  }
+            //print or assign to badSeqs
+            if(goodSeq){ report.print(out); }
+            else{ badSeqNames[report.getQueryName()] = trashCode;  }
+            
             count++;
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
         
         int oldBadSeqsCount = badSeqNames.size();
         
@@ -627,37 +629,28 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         if (oldBadSeqsCount != badSeqNames.size()) { //more seqs were removed by maxns
             util.renameFile(outSummary, outSummary+".temp");
             
-            ofstream out2;
-            util.openOutputFile(outSummary, out2);
+            ofstream out2; util.openOutputFile(outSummary, out2);
+            ifstream in2;  util.openInputFile(outSummary+".temp", in2);
             
-            //read summary file
-            ifstream in2;
-            util.openInputFile(outSummary+".temp", in2);
-            out2 << (util.getline(in2)) << endl;   //skip headers
+            report.readHeaders(in2); util.gobble(in2);
+            report.printHeaders(out2);
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
-                //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> TemplateName >> TemplateLength >> SearchMethod >> SearchScore >> AlignmentMethod >> QueryStart >> QueryEnd >> TemplateStart >> TemplateEnd >> PairwiseAlignmentLength >> GapsInQuery >> GapsInTemplate >> LongestInsert >> SimBtwnQueryTemplate; util.gobble(in2);
+                report.read(in2); util.gobble(in2);
                 
-                if (badSeqNames.count(name) == 0) { //are you good?
-                    out2 << name << '\t' << length << '\t' << TemplateName  << '\t' << TemplateLength  << '\t' << SearchMethod  << '\t' << SearchScore  << '\t' << AlignmentMethod  << '\t' << QueryStart  << '\t' << QueryEnd  << '\t' << TemplateStart  << '\t' << TemplateEnd  << '\t' << PairwiseAlignmentLength  << '\t' << GapsInQuery  << '\t' << GapsInTemplate  << '\t' << LongestInsert  << '\t' << SimBtwnQueryTemplate << endl;
-                }
+                //are you good?
+                if (badSeqNames.count(report.getQueryName()) == 0) { report.print(out2); }
             }
-            in2.close();
-            out2.close();
+            in2.close(); out2.close();
             util.mothurRemove(outSummary+".temp");
         }
         
         if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your align report file, quitting.\n"); m->setControl_pressed(true); }
         
-        
         return count;
-        
-        return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "ScreenSeqsCommand", "screenAlignReport");
@@ -673,18 +666,12 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         string outSummary =  getOutputFileName("contigsreport",variables);
         outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
         
-        string name;
-        //Name	Length	Overlap_Length	Overlap_Start	Overlap_End	MisMatches	Num_Ns
-        int length, OLength, thisOStart, thisOEnd, numMisMatches, numNs;
-        double expectedErrors;
+        ofstream out; util.openOutputFile(outSummary, out);
+        ifstream in;util.openInputFile(contigsreport, in);
         
-        ofstream out;
-        util.openOutputFile(outSummary, out);
-        
-        //read summary file
-        ifstream in;
-        util.openInputFile(contigsreport, in);
-        out << (util.getline(in)) << endl;   //skip headers
+        ContigsReport report;
+        report.readHeaders(in); util.gobble(in);
+        report.printHeaders(out);
         
         int count = 0;
         
@@ -692,25 +679,22 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors; util.gobble(in);
+            report.read(in); util.gobble(in);
             
             bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
-            if(oStart != -1 && oStart < thisOStart)             {	goodSeq = false;	trashCode += "ostart|";     }
-            if(oEnd != -1 && oEnd > thisOEnd)                   {	goodSeq = false;	trashCode += "oend|";       }
-            if(maxN != -1 && maxN <	numNs)                      {	goodSeq = false;	trashCode += "n|";          }
-            if(minOverlap != -1 && minOverlap > OLength)		{	goodSeq = false;	trashCode += "olength|";    }
-            if(mismatches != -1 && mismatches < numMisMatches)	{	goodSeq = false;	trashCode += "mismatches|"; }
+            if(oStart != -1 && oStart < report.getOverlapStart())             {	goodSeq = false;	trashCode += "ostart|";     }
+            if(oEnd != -1 && oEnd > report.getOverlapEnd())                   {	goodSeq = false;	trashCode += "oend|";       }
+            if(maxN != -1 && maxN <	report.getNumNs())                      {	goodSeq = false;	trashCode += "n|";          }
+            if(minOverlap != -1 && minOverlap > report.getOverlapLength())		{	goodSeq = false;	trashCode += "olength|";    }
+            if(mismatches != -1 && mismatches < report.getMisMatches())	{	goodSeq = false;	trashCode += "mismatches|"; }
             
-            if(goodSeq){
-                out << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
-            }
-            else{ badSeqNames[name] = trashCode; }
+            if(goodSeq)     { report.print(out);             }
+            else            { badSeqNames[report.getName()] = trashCode; }
+            
             count++;
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
         
         int oldBadSeqsCount = badSeqNames.size();
         
@@ -719,35 +703,27 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         if (oldBadSeqsCount != badSeqNames.size()) { //more seqs were removed by maxns
             util.renameFile(outSummary, outSummary+".temp");
             
-            ofstream out2;
-            util.openOutputFile(outSummary, out2);
+            ofstream out2; util.openOutputFile(outSummary, out2);
+            ifstream in2; util.openInputFile(outSummary+".temp", in2);
             
-            //read summary file
-            ifstream in2;
-            util.openInputFile(outSummary+".temp", in2);
-            out2 << (util.getline(in2)) << endl;   //skip headers
+            report.readHeaders(in2); util.gobble(in2);
+            report.printHeaders(out2);
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
-                //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> length >> OLength >> thisOStart >> thisOEnd >> numMisMatches >> numNs >> expectedErrors;; util.gobble(in2);
+                report.read(in2); util.gobble(in2);
                 
-                if (badSeqNames.count(name) == 0) { //are you good?
-                    out2 << name << '\t' << length  << '\t' << OLength  << '\t' << thisOStart  << '\t' << thisOEnd  << '\t' << numMisMatches  << '\t' << numNs << '\t' << expectedErrors << endl;
-                }
+                if (badSeqNames.count(report.getName()) == 0) { report.print(out2); }
             }
-            in2.close();
-            out2.close();
+            in2.close(); out2.close();
             util.mothurRemove(outSummary+".temp");
         }
         
         if (numFastaSeqs != count) {  m->mothurOut("[ERROR]: found " + toString(numFastaSeqs) + " sequences in your fasta file, and " + toString(count) + " sequences in your contigs report file, quitting.\n"); m->setControl_pressed(true); }
         
-        
         return count;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "ScreenSeqsCommand", "screenContigs");

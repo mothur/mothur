@@ -315,7 +315,6 @@
 		481FB6391AC1B7EA0076CFF3 /* ordervector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77712D37EC400DA6239 /* ordervector.cpp */; };
 		481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */; };
 		481FB63B1AC1B7EA0076CFF3 /* rabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */; };
-		481FB63D1AC1B7EA0076CFF3 /* reportfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */; };
 		481FB63E1AC1B7EA0076CFF3 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */; };
 		481FB63F1AC1B7EA0076CFF3 /* sequencecountparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A741FAD115D1688E0067BCC5 /* sequencecountparser.cpp */; };
 		481FB6401AC1B7EA0076CFF3 /* sequencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7DD12D37EC400DA6239 /* sequencedb.cpp */; };
@@ -344,7 +343,7 @@
 		481FB65C1AC1B82C0076CFF3 /* mothurmetastats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */; };
 		481FB65F1AC1B8450076CFF3 /* myseqdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A774104614696F320098E6AC /* myseqdist.cpp */; };
 		481FB6601AC1B8450076CFF3 /* nast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76112D37EC400DA6239 /* nast.cpp */; };
-		481FB6611AC1B8450076CFF3 /* nastreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76312D37EC400DA6239 /* nastreport.cpp */; };
+		481FB6611AC1B8450076CFF3 /* alignreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76312D37EC400DA6239 /* alignreport.cpp */; };
 		481FB6621AC1B8450076CFF3 /* noalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76712D37EC400DA6239 /* noalign.cpp */; };
 		481FB6631AC1B8450076CFF3 /* needlemanoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */; };
 		481FB6641AC1B8450076CFF3 /* optionparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77512D37EC400DA6239 /* optionparser.cpp */; };
@@ -470,10 +469,12 @@
 		48C7287A1B728D6B00D40830 /* biominfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48C728771B728D6B00D40830 /* biominfocommand.cpp */; };
 		48CF76F021BEBDD300B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
 		48CF76F121BEBDE000B2FB5C /* mergeotuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */; };
+		48D36FC924C1EAB0001A0FDC /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */; };
 		48D6E9681CA42389008DF76B /* testvsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */; };
 		48D6E96B1CA4262A008DF76B /* dataset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48D6E9691CA4262A008DF76B /* dataset.cpp */; };
 		48DB37B31B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
 		48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */; };
+		48E0230324BF488D00BFEA41 /* report.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E0230124BF488D00BFEA41 /* report.cpp */; };
 		48E418561D08893A004C36AB /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48E543EB1E8F15A500FF6AB8 /* summary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4889EA201E8962D50054E0BB /* summary.cpp */; };
 		48E543EC1E8F15B800FF6AB8 /* opticluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48910D451D58CAD700F60EDB /* opticluster.cpp */; };
@@ -714,7 +715,7 @@
 		A7E9B90212D37EC400DA6239 /* mothurout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B75D12D37EC400DA6239 /* mothurout.cpp */; };
 		A7E9B90312D37EC400DA6239 /* nameassignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B75F12D37EC400DA6239 /* nameassignment.cpp */; };
 		A7E9B90412D37EC400DA6239 /* nast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76112D37EC400DA6239 /* nast.cpp */; };
-		A7E9B90512D37EC400DA6239 /* nastreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76312D37EC400DA6239 /* nastreport.cpp */; };
+		A7E9B90512D37EC400DA6239 /* alignreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76312D37EC400DA6239 /* alignreport.cpp */; };
 		A7E9B90612D37EC400DA6239 /* needlemanoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */; };
 		A7E9B90712D37EC400DA6239 /* noalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76712D37EC400DA6239 /* noalign.cpp */; };
 		A7E9B90812D37EC400DA6239 /* nocommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B76912D37EC400DA6239 /* nocommands.cpp */; };
@@ -753,7 +754,6 @@
 		A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C312D37EC400DA6239 /* removegroupscommand.cpp */; };
 		A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C512D37EC400DA6239 /* removelineagecommand.cpp */; };
 		A7E9B93512D37EC400DA6239 /* removeseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */; };
-		A7E9B93612D37EC400DA6239 /* reportfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */; };
 		A7E9B93712D37EC400DA6239 /* reversecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CD12D37EC400DA6239 /* reversecommand.cpp */; };
 		A7E9B93812D37EC400DA6239 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */; };
 		A7E9B93912D37EC400DA6239 /* screenseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B7D112D37EC400DA6239 /* screenseqscommand.cpp */; };
@@ -1086,12 +1086,16 @@
 		48CC010E1EB79E49009D61E6 /* fakeoligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fakeoligos.h; path = fakes/fakeoligos.h; sourceTree = "<group>"; };
 		48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergeotuscommand.cpp; path = source/commands/mergeotuscommand.cpp; sourceTree = SOURCE_ROOT; };
 		48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergeotuscommand.hpp; path = source/commands/mergeotuscommand.hpp; sourceTree = "<group>"; };
+		48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = contigsreport.cpp; path = source/datastructures/contigsreport.cpp; sourceTree = SOURCE_ROOT; };
+		48D36FC824C1EAAF001A0FDC /* contigsreport.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = contigsreport.hpp; path = source/datastructures/contigsreport.hpp; sourceTree = SOURCE_ROOT; };
 		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testvsearchfileparser.cpp; path = TestMothur/testvsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testvsearchfileparser.h; path = TestMothur/testvsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataset.cpp; path = TestMothur/dataset.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E96A1CA4262A008DF76B /* dataset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dataset.h; path = TestMothur/dataset.h; sourceTree = SOURCE_ROOT; };
 		48DB37B11B3B27E000C372A4 /* makefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makefilecommand.cpp; path = source/commands/makefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48DB37B21B3B27E000C372A4 /* makefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = makefilecommand.h; path = source/commands/makefilecommand.h; sourceTree = SOURCE_ROOT; };
+		48E0230124BF488D00BFEA41 /* report.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = report.cpp; path = source/datastructures/report.cpp; sourceTree = SOURCE_ROOT; };
+		48E0230224BF488D00BFEA41 /* report.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = report.hpp; path = source/datastructures/report.hpp; sourceTree = SOURCE_ROOT; };
 		48E5443F1E9C292900FF6AB8 /* mcc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mcc.cpp; path = source/calculators/mcc.cpp; sourceTree = SOURCE_ROOT; };
 		48E544401E9C292900FF6AB8 /* mcc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mcc.hpp; path = source/calculators/mcc.hpp; sourceTree = SOURCE_ROOT; };
 		48E544431E9C2B1000FF6AB8 /* sensitivity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sensitivity.cpp; path = source/calculators/sensitivity.cpp; sourceTree = SOURCE_ROOT; };
@@ -1540,8 +1544,8 @@
 		A7E9B76012D37EC400DA6239 /* nameassignment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = nameassignment.hpp; path = source/datastructures/nameassignment.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B76112D37EC400DA6239 /* nast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nast.cpp; path = source/nast.cpp; sourceTree = "<group>"; };
 		A7E9B76212D37EC400DA6239 /* nast.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = nast.hpp; path = source/nast.hpp; sourceTree = "<group>"; };
-		A7E9B76312D37EC400DA6239 /* nastreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nastreport.cpp; path = source/nastreport.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B76412D37EC400DA6239 /* nastreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = nastreport.hpp; path = source/nastreport.hpp; sourceTree = SOURCE_ROOT; };
+		A7E9B76312D37EC400DA6239 /* alignreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = alignreport.cpp; path = source/alignreport.cpp; sourceTree = SOURCE_ROOT; };
+		A7E9B76412D37EC400DA6239 /* alignreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = alignreport.hpp; path = source/alignreport.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = needlemanoverlap.cpp; path = source/needlemanoverlap.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B76612D37EC400DA6239 /* needlemanoverlap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = needlemanoverlap.hpp; path = source/needlemanoverlap.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B76712D37EC400DA6239 /* noalign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = noalign.cpp; path = source/noalign.cpp; sourceTree = SOURCE_ROOT; };
@@ -1624,8 +1628,6 @@
 		A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removelineagecommand.h; path = source/commands/removelineagecommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = removeseqscommand.cpp; path = source/commands/removeseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = removeseqscommand.h; path = source/commands/removeseqscommand.h; sourceTree = SOURCE_ROOT; };
-		A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = reportfile.cpp; path = source/datastructures/reportfile.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B7CC12D37EC400DA6239 /* reportfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = reportfile.h; path = source/datastructures/reportfile.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7CD12D37EC400DA6239 /* reversecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = reversecommand.cpp; path = source/commands/reversecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B7CE12D37EC400DA6239 /* reversecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = reversecommand.h; path = source/commands/reversecommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sabundvector.cpp; path = source/datastructures/sabundvector.cpp; sourceTree = SOURCE_ROOT; };
@@ -1916,8 +1918,6 @@
 				A774104614696F320098E6AC /* myseqdist.cpp */,
 				A7E9B76112D37EC400DA6239 /* nast.cpp */,
 				A7E9B76212D37EC400DA6239 /* nast.hpp */,
-				A7E9B76312D37EC400DA6239 /* nastreport.cpp */,
-				A7E9B76412D37EC400DA6239 /* nastreport.hpp */,
 				A7E9B76712D37EC400DA6239 /* noalign.cpp */,
 				A7E9B76812D37EC400DA6239 /* noalign.hpp */,
 				A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */,
@@ -2763,15 +2763,17 @@
 				A7E9B65612D37EC300DA6239 /* alignmentcell.hpp */,
 				A7E9B65712D37EC300DA6239 /* alignmentdb.cpp */,
 				A7E9B65812D37EC300DA6239 /* alignmentdb.h */,
+				A7E9B76312D37EC400DA6239 /* alignreport.cpp */,
+				A7E9B76412D37EC400DA6239 /* alignreport.hpp */,
 				A7E9B66212D37EC300DA6239 /* blastalign.cpp */,
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
 				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
 				48883FFB20C6D6C000CAF112 /* compare.h */,
+				48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */,
+				48D36FC824C1EAAF001A0FDC /* contigsreport.hpp */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				488563D023CD00C4007B5659 /* taxonomy.hpp */,
-				488563CF23CD00C4007B5659 /* taxonomy.cpp */,
 				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
@@ -2820,8 +2822,8 @@
 				48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */,
 				A7E9B7A312D37EC400DA6239 /* rabundvector.cpp */,
 				A7E9B7A412D37EC400DA6239 /* rabundvector.hpp */,
-				A7E9B7CB12D37EC400DA6239 /* reportfile.cpp */,
-				A7E9B7CC12D37EC400DA6239 /* reportfile.h */,
+				48E0230124BF488D00BFEA41 /* report.cpp */,
+				48E0230224BF488D00BFEA41 /* report.hpp */,
 				A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */,
 				A7E9B7D012D37EC400DA6239 /* sabundvector.hpp */,
 				A7E9B7DB12D37EC400DA6239 /* sequence.cpp */,
@@ -2862,6 +2864,8 @@
 				A7E9B85412D37EC400DA6239 /* suffixnodes.hpp */,
 				A7E9B85512D37EC400DA6239 /* suffixtree.cpp */,
 				A7E9B85612D37EC400DA6239 /* suffixtree.hpp */,
+				488563D023CD00C4007B5659 /* taxonomy.hpp */,
+				488563CF23CD00C4007B5659 /* taxonomy.cpp */,
 				A7E9B85F12D37EC400DA6239 /* tree.cpp */,
 				A7E9B86012D37EC400DA6239 /* tree.h */,
 				A7E9B86412D37EC400DA6239 /* treemap.cpp */,
@@ -3366,7 +3370,7 @@
 				481FB6231AC1B7BA0076CFF3 /* pam.cpp in Sources */,
 				481FB5BA1AC1B74F0076CFF3 /* getdistscommand.cpp in Sources */,
 				481FB6191AC1B7AC0076CFF3 /* systemcommand.cpp in Sources */,
-				481FB6611AC1B8450076CFF3 /* nastreport.cpp in Sources */,
+				481FB6611AC1B8450076CFF3 /* alignreport.cpp in Sources */,
 				48DB37B41B3B27E000C372A4 /* makefilecommand.cpp in Sources */,
 				481FB6181AC1B7AC0076CFF3 /* summarytaxcommand.cpp in Sources */,
 				481FB5CD1AC1B74F0076CFF3 /* helpcommand.cpp in Sources */,
@@ -3396,7 +3400,6 @@
 				481FB6561AC1B8100076CFF3 /* heatmapsim.cpp in Sources */,
 				489AF6932106192E0028155E /* clusterfitcommand.cpp in Sources */,
 				481FB5EA1AC1B77E0076CFF3 /* pairwiseseqscommand.cpp in Sources */,
-				481FB63D1AC1B7EA0076CFF3 /* reportfile.cpp in Sources */,
 				481FB5F11AC1B77E0076CFF3 /* phylodiversitycommand.cpp in Sources */,
 				481FB5501AC1B63D0076CFF3 /* mempearson.cpp in Sources */,
 				488C1DE7241AD20D00BDCCB4 /* opticlassifier.cpp in Sources */,
@@ -3589,6 +3592,7 @@
 				A7E9B8C612D37EC400DA6239 /* filterseqscommand.cpp in Sources */,
 				A7E9B8C812D37EC400DA6239 /* flowdata.cpp in Sources */,
 				48910D431D5243E500F60EDB /* mergecountcommand.cpp in Sources */,
+				48E0230324BF488D00BFEA41 /* report.cpp in Sources */,
 				A7E9B8CB12D37EC400DA6239 /* fullmatrix.cpp in Sources */,
 				A7E9B8CC12D37EC400DA6239 /* geom.cpp in Sources */,
 				A7E9B8CD12D37EC400DA6239 /* getgroupcommand.cpp in Sources */,
@@ -3658,7 +3662,7 @@
 				A7E9B90212D37EC400DA6239 /* mothurout.cpp in Sources */,
 				A7E9B90312D37EC400DA6239 /* nameassignment.cpp in Sources */,
 				A7E9B90412D37EC400DA6239 /* nast.cpp in Sources */,
-				A7E9B90512D37EC400DA6239 /* nastreport.cpp in Sources */,
+				A7E9B90512D37EC400DA6239 /* alignreport.cpp in Sources */,
 				A7E9B90612D37EC400DA6239 /* needlemanoverlap.cpp in Sources */,
 				A7E9B90712D37EC400DA6239 /* noalign.cpp in Sources */,
 				A7E9B90812D37EC400DA6239 /* nocommands.cpp in Sources */,
@@ -3703,7 +3707,6 @@
 				A7E9B93212D37EC400DA6239 /* removegroupscommand.cpp in Sources */,
 				A7E9B93312D37EC400DA6239 /* removelineagecommand.cpp in Sources */,
 				A7E9B93512D37EC400DA6239 /* removeseqscommand.cpp in Sources */,
-				A7E9B93612D37EC400DA6239 /* reportfile.cpp in Sources */,
 				A7E9B93712D37EC400DA6239 /* reversecommand.cpp in Sources */,
 				A7E9B93812D37EC400DA6239 /* sabundvector.cpp in Sources */,
 				A7E9B93912D37EC400DA6239 /* screenseqscommand.cpp in Sources */,
@@ -3788,6 +3791,7 @@
 				A7E9B97A12D37EC400DA6239 /* suffixtree.cpp in Sources */,
 				A7E9B97B12D37EC400DA6239 /* summarycommand.cpp in Sources */,
 				48E544511E9C2CFD00FF6AB8 /* tp.cpp in Sources */,
+				48D36FC924C1EAB0001A0FDC /* contigsreport.cpp in Sources */,
 				A7E9B97C12D37EC400DA6239 /* summarysharedcommand.cpp in Sources */,
 				A7E9B97D12D37EC400DA6239 /* systemcommand.cpp in Sources */,
 				48C51DF31A793EFE004ECDF1 /* kmeralign.cpp in Sources */,

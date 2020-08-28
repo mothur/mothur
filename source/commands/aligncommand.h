@@ -19,7 +19,7 @@
 #include "blastalign.hpp"
 #include "noalign.hpp"
 #include "nast.hpp"
-#include "nastreport.hpp"
+#include "alignreport.hpp"
 
 //test
 class AlignCommand : public Command {
