@@ -311,6 +311,7 @@ struct alignStruct {
         search = se;
         kmerSize = ks;
         flippedResults.resize(2, 0);
+        alignMethod = al;
         
         templateDB = tfn;
         
