@@ -56,23 +56,6 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
         else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
         else if(method == "blast")		{	database = new BlastDB(tempFile.substr(0,tempFile.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
         else if(method == "distance")	{	database = new DistanceDB();	}
-        else if(method == "opti")       {
-            database = new OptiDB(tempFile, version);
-            
-            dBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + "optidb";
-            ifstream optiFileTest(dBName.c_str());
-            if(optiFileTest){
-                string line = util.getline(optiFileTest);
-                bool GoodFile = util.checkReleaseVersion(line, version); optiFileTest.close();
-                int shortcutTimeStamp = util.getTimeStamp(dBName);
-                int referenceTimeStamp = util.getTimeStamp(tempFile);
-                
-                //if the shortcut file is older then the reference file, remake shortcut file
-                if (shortcutTimeStamp < referenceTimeStamp) {  GoodFile = false;  }
-
-                if (GoodFile) {  needToGenerate = false;    }
-            }
-        }
         else {
             m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.\n");
             database = new KmerDB(tempFile, 8);
@@ -91,10 +74,10 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 }
                 fastaFile.close();
                 
-                if (((method == "kmer") || (method == "opti")) && (!shortcuts)) {;} //don't print
+                if ((method == "kmer") && (!shortcuts)) {;} //don't print
                 else {database->generateDB(); }
                 
-            }else if (((method == "kmer") || (method == "opti")) && (!needToGenerate)) {
+            }else if ((method == "kmer") && (!needToGenerate)) {
                 ifstream FileTest(dBName.c_str());
                 database->readDB(FileTest);
                 

@@ -20,11 +20,10 @@ vector<string> ClassifySeqsCommand::setParameters(){
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
-        CommandParameter phard("filter", "InputTypes", "", "", "none", "none", "none","",false,false); parameters.push_back(phard);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
 		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance-align", "kmer", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
-		CommandParameter pmethod("method", "Multiple", "wang-knn-zap-opti", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
+		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
         CommandParameter pprintlevel("printlevel", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pprintlevel);
@@ -68,7 +67,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The name parameter allows you add a names file with your fasta file.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
-		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, opti, knn and zap. The default is wang.\n";
+		helpString += "The method parameter allows you to specify classification method to use.  Your options are: wang, knn and zap. The default is wang.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n";
 		helpString += "The processors parameter allows you to specify the number of processors to use. The default is all available.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
@@ -77,7 +76,6 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
 		helpString += "The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n";
 		helpString += "The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 80.\n";
-        helpString += "The filter parameter allows you to enter a file containing the filter created by filter.seqs. Aligned reads are expected when using the opti method, the filter is used to map the columns in the query reads to the columns in the template. \n";
 		helpString += "The probs parameter shuts off the bootstrapping results for the wang and zap method. The default is true, meaning you want the bootstrapping to be shown.\n";
         helpString += "The relabund parameter allows you to indicate you want the summary file values to be relative abundances rather than raw abundances. Default=F. \n";
 		helpString += "The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the wang method.  The default is 100.\n";
@@ -104,7 +102,7 @@ string ClassifySeqsCommand::getCommonQuestions(){
         vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
         
         string question = "Does the reference need to be aligned?"; questions.push_back(question);
-        string qanswer = "\tThat depends on the method. For the opti method, mothur uses the alignment to determine the probability a given base will be found in a given taxonomy at a given location in the alignment. For wang, knn and zap methods,  mothur does not require an aligned reference to assign a taxonomy. Wang use k-mers to find the probabilities of the taxonomic assignment. \n"; qanswers.push_back(qanswer);
+        string qanswer = "\tFor wang, knn and zap methods, mothur does not require an aligned reference to assign a taxonomy. Wang use k-mers to find the probabilities of the taxonomic assignment. \n"; qanswers.push_back(qanswer);
         
         question = "What reference should I use to classify?"; questions.push_back(question);
         qanswer = "\tWe provide mothur formatted references on the wiki. https://www.mothur.org/wiki/RDP_reference_files https://mothur.org/wiki/Silva_reference_files https://www.mothur.org/wiki/Greengenes-formatted_databases Alternatively, mothur allows you to create your own references as long as they are in fasta and taxonomy file format. You can find mothur's files formats here, https://www.mothur.org/wiki/File_Types. \n"; qanswers.push_back(qanswer);
@@ -209,13 +207,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy");
 			if (taxonomyFileName == "not found") {  m->mothurOut("[ERROR]: The taxonomy parameter is a required for the classify.seqs command.\n"); abort = true;
 			}else if (taxonomyFileName == "not open") { abort = true; }
-            
-            temp = validParameter.validFile(parameters, "filter");     if (temp == "not found") { filter = ""; }
-            else if (temp == "not open") { filter = ""; abort = true; }
-            else {
-                ifstream in; util.openInputFile(temp, in);
-                in >> filter; in.close();
-            }
 			
 			search = validParameter.valid(parameters, "search");		if (search == "not found"){	search = "kmer";		}
 			
@@ -314,7 +305,6 @@ int ClassifySeqsCommand::execute(){
         
         string outputMethodTag = method;
 		if(method == "wang"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters, util.getRandomNumber(), flip, writeShortcuts, current->getVersion());	}
-		else if(method == "opti"){    classify = new OptiClassifier(taxonomyFileName, templateFileName, cutoff, iters, writeShortcuts, current->getVersion(), filter);    }
         else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted, util.getRandomNumber(), current->getVersion());				}
         else if(method == "zap"){	
             outputMethodTag = search + "_" + outputMethodTag;
