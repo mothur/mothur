@@ -333,7 +333,9 @@ MakeContigsCommand::MakeContigsCommand(string option)  {
             temp = validParameter.valid(parameters, "trimoverlap");		if (temp == "not found") { temp = "F"; }
 			trimOverlap = util.isTrue(temp);
             
-            temp = validParameter.valid(parameters, "qfile");        if (temp == "not found") { temp = "F"; }
+            temp = validParameter.valid(parameters, "qfile");
+            if (temp == "not found") { temp = "F"; }
+            else { temp = util.getSimpleName(temp); }
             makeQualFile = util.isTrue(temp);
 
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
