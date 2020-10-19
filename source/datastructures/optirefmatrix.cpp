@@ -7,7 +7,6 @@
 //
 
 #include "optirefmatrix.hpp"
-
 #include "counttable.h"
 
 /***********************************************************************/
@@ -169,6 +168,7 @@ OptiData* OptiRefMatrix::extractMatrixSubset(set<long long> & seqs) {
         int count = 0;
         
         for (set<long long>::iterator it = seqs.begin(); it != seqs.end(); it++) {
+            
             long long seqNum = *it;
             thisNameMap[seqNum] = count;
             nonSingletonNameMap[count] = seqNum;
@@ -438,6 +438,7 @@ set<long long> OptiRefMatrix::getCloseRefSeqs(long long index){
     }
 }
 /***********************************************************************/
+//only used in open reference clustering
 ListVector* OptiRefMatrix::getFitListSingle() {
     try {
         ListVector* singlelist = NULL;
@@ -446,7 +447,10 @@ ListVector* OptiRefMatrix::getFitListSingle() {
         else {
             singlelist = new ListVector();
             
-            for (int i = 0; i < isSingleRef.size(); i++) { if (!isRef[i]) { singlelist->push_back(singletons[i]); } }
+            for (int i = 0; i < isSingleRef.size(); i++) {
+                if (!isSingleRef[i]) {
+                    singlelist->push_back(singletons[i]); }
+            }
         }
         
         return singlelist;
@@ -741,8 +745,7 @@ int OptiRefMatrix::readFiles(string refdistfile, string refnamefile, string refc
 map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>& nameAssignment){
     try {
         
-        ifstream fileHandle;
-        util.openInputFile(distFile, fileHandle);
+        ifstream fileHandle; util.openInputFile(distFile, fileHandle);
         
         string firstName, secondName;
         double distance;

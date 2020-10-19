@@ -433,73 +433,6 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
             }else { unFitted.insert(seqNumber); }
         }
         
-        //numFitSeqs does not include any kind of singleton
-        long long numUnFitted = (numFitSeqs + numFitSingletons - numListSeqs); //getNumFitTrueSingletons are fit reads that have no dists in the matrix. This can be confusing, think of it like this: there are true singletons, meaning we don't care if you are a ref or fit and you have no dists below the cutoff. This means you will be in your own OTU no matter what we do. There are fitSIngletons, meaning you are a fit sequence and have no dists below the cutoff that coorespond to other fit seqs ( NOTE: you may or may not have dists to ref seqs or you could be a true singleton or a just a singleton because of the references chosen).
-        
-        long long numSingletonBins = 0;
-        
-        if ((label != "") && (numUnFitted != 0)) {
-            
-            m->mothurOut("\nFitted " + toString(numListSeqs) + " sequences to " + toString(newBins.size()) + " existing OTUs.\n");
-            
-            if (!closed) { //cluster the unfitted seqs separately
-                m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, excluding singletons.\n");
-                
-                m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
-                
-                OptiData* unFittedMatrix = matrix->extractMatrixSubset(unFitted);
-                
-                ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label);
-                
-                if (unfittedList != NULL) {
-                    
-                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n"); //+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()
-                    
-                    for (int i = 0; i < unfittedList->getNumBins(); i++) {
-                        string bin = unfittedList->get(i);
-                        if (bin != "") { list->push_back(unfittedList->get(i)); }
-                    }
-                    delete unfittedList;
-                }
-                
-                m->mothurOut("\n*******************************************************************\n\n");
-                
-                //add in singletons
-                ListVector* singleton = matrix->getFitListSingle();
-                
-                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
-                    for (int i = 0; i < singleton->getNumBins(); i++) {
-                        if (m->getControl_pressed()) { break; }
-                        if (singleton->get(i) != "") {
-                            list->push_back(singleton->get(i));
-                        }
-                    }
-                    numSingletonBins += singleton->getNumBins();
-                    delete singleton;
-                }
-            
-                //add in singletons
-                ListVector* unFitsingleton = unFittedMatrix->getListSingle();
-                
-                if (unFitsingleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
-                    for (int i = 0; i < unFitsingleton->getNumBins(); i++) {
-                        if (m->getControl_pressed()) { break; }
-                        if (unFitsingleton->get(i) != "") {
-                            list->push_back(unFitsingleton->get(i));
-                        }
-                    }
-                    numSingletonBins += unFitsingleton->getNumBins();
-                    delete unFitsingleton;
-                }
-                
-                delete unFittedMatrix;
-            }else { m->mothurOut("Disregarding sequences that were unable to be fitted existing OTUs.\n");  }
-        }else {
-            if (label != "") {
-                m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
-            }
-        }
-        
         if (denovo || includerefs) { //add in refs
             vector<long long> refs = matrix->getRefSeqs();
             
@@ -517,6 +450,56 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
                 }else { //append bin
                     newBins[binNumber] += "," + matrix->getName(seqNumber);
                 }
+            }
+        }
+        
+        //numFitSeqs does not include any kind of singleton
+        long long numUnFitted = (numFitSeqs + numFitSingletons - numListSeqs); //getNumFitTrueSingletons are fit reads that have no dists in the matrix. This can be confusing, think of it like this: there are true singletons, meaning we don't care if you are a ref or fit and you have no dists below the cutoff. This means you will be in your own OTU no matter what we do. There are fitSingletons, meaning you are a fit sequence and have no dists below the cutoff that coorespond to other fit seqs ( NOTE: you may or may not have dists to ref seqs or you could be a true singleton or a just a singleton because of the references chosen).
+        
+        long long numSingletonBins = 0;
+        if ((label != "") && (numUnFitted != 0)) {
+            
+            m->mothurOut("\nFitted " + toString(numListSeqs) + " sequences to " + toString(newBins.size()) + " existing OTUs.\n");
+            
+            if (!closed) { //cluster the unfitted seqs separately
+                m->mothurOut(toString(numUnFitted) + " sequences were unable to be fitted existing OTUs, excluding singletons.\n");
+                
+                m->mothurOut("\n**************** Clustering the unfitted sequences ****************\n");
+                
+                OptiData* unFittedMatrix = matrix->extractMatrixSubset(unFitted);
+                
+                ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label); //unfittedList includes unfitted singletons
+                
+                if (unfittedList != NULL) {
+                    
+                    m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n"); //+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()
+                    
+                    for (int i = 0; i < unfittedList->getNumBins(); i++) {
+                        string bin = unfittedList->get(i);
+                        if (bin != "") { list->push_back(unfittedList->get(i)); }
+                    }
+                    delete unfittedList;
+                }
+                delete unFittedMatrix;
+                
+                m->mothurOut("\n*******************************************************************\n\n");
+                
+                //add in fit singletons 
+                ListVector* singleton = matrix->getFitListSingle();
+                
+                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                    for (int i = 0; i < singleton->getNumBins(); i++) {
+                        if (m->getControl_pressed()) { break; }
+                        if (singleton->get(i) != "") { list->push_back(singleton->get(i)); }
+                    }
+                    numSingletonBins += singleton->getNumBins();
+                    delete singleton;
+                }
+                
+            }else { m->mothurOut("Disregarding sequences that were unable to be fitted existing OTUs.\n");  }
+        }else {
+            if (label != "") {
+                m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");
             }
         }
         

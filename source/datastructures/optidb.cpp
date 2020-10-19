@@ -268,7 +268,6 @@ void OptiDB::calcIndicatorColumns(){
                 }
             }
         }
-        //cout << "indicator cols = " << indicatorColumns.size() << endl;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiDB", "calcIndicatorColumns");

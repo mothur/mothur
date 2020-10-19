@@ -1219,7 +1219,10 @@ int SharedCommand::ListGroupSameSeqs(vector<string>& groupMapsSeqs, SharedListVe
                     if (groupfile != "") {
                         m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your groupfile. Please correct.\n"); 	}
                     else{ m->mothurOut("[ERROR]: " + listNames[j] + " is in your listfile and not in your count file. Please correct.\n"); 	}
-                }else { groupNamesSeqs.erase(listNames[j]); }
+                }else {
+                    groupNamesSeqs.erase(listNames[j]);
+                    
+                }
 			}
 		}
 
