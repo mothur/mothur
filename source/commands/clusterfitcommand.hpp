@@ -61,7 +61,7 @@ private:
     ListVector* clusterRefs(OptiData*& refsMatrix, ClusterMetric*&);
     void createReferenceNameCount();
     string calcDists();
-    string runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts);
+    void runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts, string);
     string runSensSpec(string distFileName, string dupsFile, string dupsFormat, ClusterMetric*&, string);
     void outputSteps(string outputName, bool& printHeaders, double tp, double tn, double fp, double fn, vector<double> results, long long numBins, double fittp, double fittn, double fitfp, double fitfn, vector<double> fitresults, long long numFitBins, int, bool, int);
 };

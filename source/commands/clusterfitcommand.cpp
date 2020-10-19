@@ -54,6 +54,7 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
+//CommandParameter prunspenspec("runsensspec", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prunspenspec);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter prefprint("printref", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prefprint);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -140,8 +141,6 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            
-            
             selfReference = true; createAccnos = false; refdistfile = ""; distfile = "";
             
             //check for required parameters
@@ -364,7 +363,7 @@ int ClusterFitCommand::execute(){
                 //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs - will randomly assign as fit
                 OptiData* matrix = new OptiRefMatrix(distfile, "column", dupsFile, nameOrCount, cutoff, fitPercent, refWeight);
                 
-                listFile = runDenovoOptiCluster(matrix, metric, counts, outputName);
+                runDenovoOptiCluster(matrix, metric, counts, outputName);
                 
                 //evaluate results
                 bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
@@ -403,19 +402,20 @@ int ClusterFitCommand::execute(){
                 //fit seqs
                 ListVector* list = runUserRefOptiCluster(matrix, metric, counts, outputName, refLabels, otus);
                 
-                if ((method == "open") && (printref)) { bestListFileName = runSensSpec(matrix, metric, list, counts); }
-                else {
-                    ofstream listFile;
-                    string listFileName = fileroot+ tag + ".list";
-                    util.openOutputFile(listFileName,    listFile);
-                    
-                    if(countfile != "") { list->print(listFile, counts); }
-                    else { list->print(listFile); }
-                    listFile.close();
-                    
+                ofstream listFile; string listFileName = fileroot+ tag + ".list";
+                util.openOutputFile(listFileName,    listFile);
+                
+                if(countfile != "") { list->print(listFile, counts); }
+                else { list->print(listFile); }
+                listFile.close();
+                
+                if ((method == "open") && (printref)) {
+                    //if (runsensSpec) { runSensSpec(matrix, metric, list, counts, listFileName); }
+                    bestListFileName = listFileName;
+                }else {
                     listFiles.push_back(listFileName);
-                    
-                    bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
+                    bestListFileName = listFileName;
+                    //bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
                 }
                 delete list; delete matrix;
             }
@@ -445,23 +445,25 @@ int ClusterFitCommand::execute(){
             listFiles.push_back(listFile);
             
             if (!printref) {
-                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
+                bestListFileName = listFile;
+                //bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
             }else {
+                bestListFileName = listFile;
                 //create combined files needed for sensspec
-                string newDistFile, newDupsFile;
-                int randNum = util.getRandomNumber();
-                newDistFile = distfile + "." + toString(randNum) + ".temp";
-                newDupsFile = dupsFile + "." + toString(randNum) + ".temp";
-                util.appendFiles(distfile, newDistFile);
-                util.appendFiles(refdistfile, newDistFile);
-                util.appendFiles(comboDistFile, newDistFile);
-                ofstream out; util.openOutputFile(newDupsFile, out);
-                out << "Representative_Sequence\ttotal\n";
-                for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) { out << it->first << '\t' << it->second << endl;  }
-                out.close();
+               // string newDistFile, newDupsFile;
+               // int randNum = util.getRandomNumber();
+                //newDistFile = distfile + "." + toString(randNum) + ".temp";
+               // newDupsFile = dupsFile + "." + toString(randNum) + ".temp";
+               // util.appendFiles(distfile, newDistFile);
+               // util.appendFiles(refdistfile, newDistFile);
+               // util.appendFiles(comboDistFile, newDistFile);
+               // ofstream out; util.openOutputFile(newDupsFile, out);
+               // out << "Representative_Sequence\ttotal\n";
+               // for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) { out << it->first << '\t' << it->second << endl;  }
+               // out.close();
                 
-                bestListFileName = runSensSpec(newDistFile, newDupsFile, "count", metric, listFile);
-                util.mothurRemove(newDistFile); util.mothurRemove(newDupsFile);
+               // bestListFileName = runSensSpec(newDistFile, newDupsFile, "count", metric, listFile);
+                //util.mothurRemove(newDistFile); util.mothurRemove(newDupsFile);
             }
             delete matrix;
         }
@@ -639,7 +641,7 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
             delete refList;
         }
         
-        cluster.initialize(listVectorMetric, true, otus, refListLabels, method, true);
+        cluster.initialize(listVectorMetric, true, otus, refListLabels, method, false);
         
         long long numBins = cluster.getNumBins();
         double tp, tn, fp, fn;
@@ -837,6 +839,10 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
 //**********************************************************************************************************************
 string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
     try {
+        //if listfiles.size() > 1, we must run sensespec to find "best" list
+        //if listfiles.size() == 1 and we don't want to run sensspec, set listfile name and return
+        //else run sensspec analysis
+        if (listFiles.size() == 1) { return listFiles[0]; } //best list is the only list we have
         
         ofstream sensSpecFile;
         map<string, string> variables;
@@ -1005,11 +1011,8 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
     }
 }
 //**********************************************************************************************************************
-string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts) {
+void ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts, string listFileName) {
     try {
-
-        ofstream listFile;
-        string listFileName = fileroot+ tag + ".list";
 
         ofstream sensSpecFile;
         map<string, string> variables;
@@ -1058,14 +1061,8 @@ string ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMet
         }
         
         sensSpecFile.close();
-        
-        util.openOutputFile(listFileName, listFile);
-        
-        if(countfile != "") { list->print(listFile, counts); }
-        else { list->print(listFile); }
-        listFile.close();
-        
-        return listFileName;
+    
+        return;
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterFitCommand", "runSensSpec");
