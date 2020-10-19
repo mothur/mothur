@@ -2391,8 +2391,9 @@
 				48ED1E77235E1ACA003E66F7 /* scriptengine.cpp */,
 				48ED1E78235E1ACA003E66F7 /* scriptengine.hpp */,
 			);
-			path = engines;
-			sourceTree = "<group>";
+			name = engines;
+			path = source/engines;
+			sourceTree = SOURCE_ROOT;
 		};
 		48F06CCA1D74BC6F004A45DD /* testclassifier */ = {
 			isa = PBXGroup;
