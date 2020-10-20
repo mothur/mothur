@@ -29,7 +29,7 @@ vector<string> PreClusterCommand::setParameters(){
         CommandParameter palpha("alpha", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(palpha);
         CommandParameter pdelta("delta", "Number", "", "2.0", "", "", "","",false,false); parameters.push_back(pdelta);
         CommandParameter pmethod("method", "Multiple", "simple-unoise-tree-deblur", "simple", "", "", "","",false,false); parameters.push_back(pmethod);
-        
+        CommandParameter pclump("clump", "Multiple", "lessthan-lessthanequal", "lessthan", "", "", "","",false,false); parameters.push_back(pclump);
         CommandParameter perror_rate("error_rate", "Number", "", "0.005", "", "", "","",false,false); parameters.push_back(perror_rate);
         CommandParameter pindel_prob("indel_prob", "Number", "", "0.01", "", "", "","",false,false); parameters.push_back(pindel_prob);
         CommandParameter pmax_indels("max_indels", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pmax_indels);
@@ -67,6 +67,7 @@ string PreClusterCommand::getHelpString(){
     helpString += "The count parameter allows you to provide a count file so you can cluster by group. \n";
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
     helpString += "The method parameter allows you to specify the algorithm to use to complete the preclusterign step. Possible methods include simple, tree, unoise, and deblur.  Default=simple.\n";
+    helpString += "The clump parameter allows you to specify which reads can be combined. Possible options include lessthan and lessthanequal. lessthan -> merge reads with less abundance. lessthanequal -> merge reads with less than or equal abundance Default=lessthan.\n";
     helpString += "The align parameter allows you to specify the alignment align_method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
     helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
     helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
@@ -134,12 +135,12 @@ PreClusterCommand::PreClusterCommand(string option) {
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			string namefile = validParameter.validFile(parameters, "name");
+			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }
 			else {  current->setNameFile(namefile); }
 
-			string groupfile = validParameter.validFile(parameters, "group");
+			groupfile = validParameter.validFile(parameters, "group");
 			if (groupfile == "not found") { groupfile =  "";  bygroup = false; }
 			else if (groupfile == "not open") { abort = true; groupfile =  ""; }
 			else {   current->setGroupFile(groupfile); bygroup = true;  }
@@ -167,6 +168,15 @@ PreClusterCommand::PreClusterCommand(string option) {
             
             temp = validParameter.valid(parameters, "method"); if(temp == "not found"){  temp = "simple"; }
             pc_method = temp;
+            
+            if ((pc_method == "simple") || (pc_method == "tree") || (pc_method == "unoise") || (pc_method == "deblur")) { }
+            else { m->mothurOut("[ERROR]: Not a valid precluster method.  Valid preclustering algorithms include simple, tree, unoise, and deblur. Using simple.\n");  pc_method= "simple"; }
+            
+            temp = validParameter.valid(parameters, "clump"); if(temp == "not found"){  temp = "lessthan"; }
+            clump = temp;
+            
+            if ((clump == "lessthan") || (clump == "lessthanequal")) { }
+            else { m->mothurOut("[ERROR]: Not a valid clump method.  Valid clumping options are lessthan and lessthanequal. Using lessthan.\n");  clump = "lessthan"; }
             
             temp = validParameter.valid(parameters, "match"); if(temp == "not found"){	temp = "1.0";			}
             util.mothurConvert(temp, match);
@@ -204,7 +214,6 @@ PreClusterCommand::PreClusterCommand(string option) {
                 }
             }
  
-            
             temp = validParameter.valid(parameters, "error_rate");	if (temp == "not found"){	temp = "0.005";			}
             util.mothurConvert(temp, error_rate);
             if (error_rate < 0) { m->mothurOut("[ERROR]: error_rate must be positive.\n"); abort=true; }
@@ -218,8 +227,6 @@ PreClusterCommand::PreClusterCommand(string option) {
             temp = validParameter.valid(parameters, "max_indels");	if (temp == "not found"){	temp = "3";			}
             util.mothurConvert(temp, max_indels);
             if (indel_prob < 0) { m->mothurOut("[ERROR]: max_indels must be positive.\n"); abort=true; }
-            
-            
             
             align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
             if (align == "blast") {
@@ -258,68 +265,7 @@ PreClusterCommand::PreClusterCommand(string option) {
                     if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
                 }
             }
-            
-            
-            if(pc_method == "tree"){
-                
-                diffs = 1;
-                
-            } else {
-                
-                Summary summary_data(processors);
-                if(countfile != ""){
-                    summary_data.summarizeFasta(fastafile, countfile, "");
-                } else if(namefile != ""){
-                    summary_data.summarizeFasta(fastafile, namefile, "");
-                }
-                int median_length = summary_data.getLength()[3];
-                int max_abund = summary_data.getMaxAbundance();
-                
-                
-                if(pc_method == "unoise"){
-                    
-                    diffs = int((log2(max_abund)-1) / alpha + 1);
-                    
-                } else if(pc_method == "deblur"){
-                    
-                    if(util.isEqual(error_dist[0], -100)){ //construct the binomial distribution
-                        
-                        error_dist.clear();
-                        
-                        for(int i=0;i<100;i++){
-                            
-                            double choose = 1;
-                            double k = 1;
-                            
-                            for(int j=1;j<=i;j++){
-                                choose *= (median_length - j + 1);
-                                k *= j;
-                            }
-                            choose = choose/k;
-                            
-                            double a = pow(error_rate, i);
-                            double b = pow(1 - error_rate, median_length - i);
-                            
-                            if(!util.isEqual(a, 0) && !util.isEqual(b, 0)){
-                                error_dist.push_back(choose * a * b);
-                                if(error_dist[i] < 0.1 / max_abund){ break;	}
-                            } else {
-                                break;
-                            }
-                        }
-                        error_dist[0] = 1;
-                    }
-                    
-                    double mod_factor = pow((1-error_rate), median_length);
-                    
-                    for(int i=0;i<error_dist.size();i++){
-                        error_dist[i] /= (double)mod_factor;
-                    }
-                    diffs = error_dist.size();
-                }
-            }
         }
-        
     }
     catch(exception& e) {
         m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
@@ -328,17 +274,16 @@ PreClusterCommand::PreClusterCommand(string option) {
 }
 /************************************************************/
 
-inline bool comparePriorityTopDown(seqPNode* first, seqPNode* second) {
+inline bool comparePriorityAbundance(seqPNode* first, seqPNode* second) {
   if (first->numIdentical > second->numIdentical){
  		return true;
 	}
   return false;
 }
-
 //**************************************************************************************************
 
 struct preClusterData {
-  string fastafile, countfile, pc_method, align_method, align, newMName;
+  string fastafile, countfile, pc_method, align_method, align, newMName, clump;
   OutputWriter* newNName;
   MothurOut* m;
   int start, end, count, diffs, length, numGroups;
@@ -361,10 +306,11 @@ struct preClusterData {
 
   preClusterData(){}
 
-  preClusterData(map<string, vector<string> > g2f, string f, string c, string pcm, string am,  OutputWriter* nnf, string nmf, vector<string> gr) {
+  preClusterData(map<string, vector<string> > g2f, string f, string c, string pcm, string am,  string cl, OutputWriter* nnf, string nmf, vector<string> gr) {
     fastafile = f;
     pc_method = pcm;
     align_method = am;
+    clump = cl;
     newNName = nnf;
     newMName = nmf;
     groups = gr;
@@ -546,6 +492,8 @@ int process(string group, string newMapFile, preClusterData* params){
         
         for (int i = 0; i < numSeqs; i++) { originalCount[i] = params->alignSeqs[i]->numIdentical; }
         
+        bool lessThan = true;
+        if (params->clump == "lessthanequal") { lessThan = false; }
         
         if(params->pc_method == "simple"){
             for (int i = 0; i < numSeqs; i++) {
@@ -559,7 +507,13 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if ((params->alignSeqs[j]->numIdentical != 0) && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet //
+                        bool ableToMerge = false;
+                        if (lessThan) { //default
+                            if (originalCount[j] < originalCount[i]) { ableToMerge = true; }
+                        }else { //less than equal to
+                            if (originalCount[j] <= originalCount[i]) { ableToMerge = true; }
+                        }
+                        if ((params->alignSeqs[j]->numIdentical != 0) && (ableToMerge)) {  //this sequence has not been merged yet //
                             //are you within "diff" bases
                             int mismatch = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                             
@@ -580,7 +534,6 @@ int process(string group, string newMapFile, preClusterData* params){
                 beta[i] = pow(0.5, params->alpha * i + 1.0);
             }
             
-            
             for (int i = 0; i < numSeqs; i++) {
                 
                 if (params->alignSeqs[i]->numIdentical != 0) {  //this sequence has not been merged yet
@@ -592,7 +545,7 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if (params->alignSeqs[j]->numIdentical != 0 && originalCount[j] < originalCount[i]) {  //this sequence has not been merged yet
+                        if (params->alignSeqs[j]->numIdentical != 0 && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
                             
                             double skew = (double)originalCount[j]/(double)originalCount[i];
                             
@@ -724,15 +677,9 @@ int process(string group, string newMapFile, preClusterData* params){
                 }
             }
             
-        } else {
-            
-            cout << "fail!\n";
-            
-        }
+        } else { cout << "fail!\n"; }
         
-        if(params->pc_method != "deblur"){
-            out.close();
-        }
+        if(params->pc_method != "deblur"){ out.close(); }
         
         return count;
   }
@@ -741,7 +688,6 @@ int process(string group, string newMapFile, preClusterData* params){
       exit(1);
   }
 }
-
 /**************************************************************************************************/
 
 void filterSeqs(vector<seqPNode*>& alignSeqs, int length, MothurOut* m){
@@ -812,7 +758,7 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
         else if (lengths.size() == 1) {  params->align_method = "aligned"; filterSeqs(alignSeqs, params->length, params->m); }
 
         //sort seqs by number of identical seqs
-        sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityTopDown);
+        sort(alignSeqs.begin(), alignSeqs.end(), comparePriorityAbundance);
         num = alignSeqs.size();
 
         return alignSeqs;
@@ -875,6 +821,61 @@ int PreClusterCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
+        if(pc_method == "tree"){
+            diffs = 1;
+        } else {
+            Summary summary_data(processors);
+            if(countfile != ""){
+                summary_data.summarizeFasta(fastafile, countfile, "");
+            } else if(namefile != ""){
+                summary_data.summarizeFasta(fastafile, namefile, "");
+            }
+            int median_length = summary_data.getLength()[3];
+            int max_abund = summary_data.getMaxAbundance();
+            
+            if(pc_method == "unoise"){
+                
+                diffs = int((log2(max_abund)-1) / alpha + 1);
+                
+            } else if(pc_method == "deblur"){
+                
+                if(util.isEqual(error_dist[0], -100)){ //construct the binomial distribution
+                    
+                    error_dist.clear();
+                    
+                    for(int i=0;i<100;i++){
+                        
+                        double choose = 1;
+                        double k = 1;
+                        
+                        for(int j=1;j<=i;j++){
+                            choose *= (median_length - j + 1);
+                            k *= j;
+                        }
+                        choose = choose/k;
+                        
+                        double a = pow(error_rate, i);
+                        double b = pow(1 - error_rate, median_length - i);
+                        
+                        if(!util.isEqual(a, 0) && !util.isEqual(b, 0)){
+                            error_dist.push_back(choose * a * b);
+                            if(error_dist[i] < 0.1 / max_abund){ break;    }
+                        } else {
+                            break;
+                        }
+                    }
+                    error_dist[0] = 1;
+                }
+                
+                double mod_factor = pow((1-error_rate), median_length);
+                
+                for(int i=0;i<error_dist.size();i++){
+                    error_dist[i] /= (double)mod_factor;
+                }
+                diffs = error_dist.size();
+            }
+        }
+        
         long start = time(NULL);
         
         string numProcessors = current->getProcessors();
@@ -927,7 +928,7 @@ int PreClusterCommand::execute(){
             
             vector<string> groups;
             map<string, vector<string> > group2Files;
-            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, NULL, newMapFile, nullVector);
+            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, clump, NULL, newMapFile, nullVector);
             params->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
             
             //reads fasta file and return number of seqs
@@ -1147,7 +1148,7 @@ long long driverGroups(preClusterData* params){
             params->util.mothurRemove(thisGroupsFasta);
             
             //sort seqs by number of identical seqs
-            sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityTopDown);
+            sort(params->alignSeqs.begin(), params->alignSeqs.end(), comparePriorityAbundance);
             
             long long num = params->alignSeqs.size();
             numSeqs += num;
@@ -1302,7 +1303,7 @@ void PreClusterCommand::createProcessesGroups(map<string, vector<string> >& pars
             else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
         }
         
-      preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, thisGroups);
+      preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, clump, threadNameWriter, newMFile, thisGroups);
       dataBundle->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
       data.push_back(dataBundle);
 
@@ -1321,7 +1322,7 @@ void PreClusterCommand::createProcessesGroups(map<string, vector<string> >& pars
           }
           else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
       }
-    preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, threadNameWriter, newMFile, thisGroups);
+    preClusterData* dataBundle = new preClusterData(thisGroupsParsedFiles, fastafile, countfile, pc_method, align_method, clump, threadNameWriter, newMFile, thisGroups);
     dataBundle->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
 
     driverGroups(dataBundle);
