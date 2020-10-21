@@ -166,7 +166,7 @@ int SetDirectoryCommand::execute(){
                 current->setInputDir(input);
             }else {
                 input = util.removeQuotes(input);
-                if (util.dirCheck(input)) {
+                if (util.dirCheckExists(input)) {
                     m->mothurOut("inputDir=" + input+ "\n");
                     current->setInputDir(input);
                 }
@@ -212,7 +212,7 @@ int SetDirectoryCommand::execute(){
             }else if (toolsLocation == "") {  //do nothing
             }else {
                 toolsLocation = util.removeQuotes(toolsLocation);
-                if (util.dirCheck(toolsLocation)) {
+                if (util.dirCheckExists(toolsLocation)) {
                     m->mothurOut("tools=" + toolsLocation+ "\n");
                     current->setToolsPath(toolsLocation);
                 }
@@ -227,7 +227,7 @@ int SetDirectoryCommand::execute(){
                 current->setBlastPath(blastLocation);
             }else {
                 blastLocation = util.removeQuotes(blastLocation);
-                if (util.dirCheck(blastLocation)) {
+                if (util.dirCheckExists(blastLocation)) {
                     m->mothurOut("Blast Location=" + blastLocation+ "\n");
                     current->setBlastPath(blastLocation);
                 }

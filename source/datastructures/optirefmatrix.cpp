@@ -156,6 +156,19 @@ OptiData* OptiRefMatrix::extractRefMatrix() {
     }
 }
 /***********************************************************************/
+//given set of names, pull out their dists and create optimatrix
+OptiData* OptiRefMatrix::extractMatrixSubset(set<string>& seqs) {
+    try {
+        
+        set<long long> seqIndexes = getIndexes(seqs);
+        return extractMatrixSubset(seqIndexes);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiRefMatrix", "extractMatrixSubset");
+        exit(1);
+    }
+}
+/***********************************************************************/
 //given matrix indexes of seqs, pull out their dists and create optimatrix
 OptiData* OptiRefMatrix::extractMatrixSubset(set<long long> & seqs) {
     try {

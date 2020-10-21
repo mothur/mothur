@@ -87,8 +87,8 @@ public:
     bool findBlastLocation(string& toolLocation, string mothurProgramPath, vector<string> locations);
     bool checkLocations(string&, vector<string>, string silent);
     bool checkLocations(string&, vector<string>);  //filename, inputDir, outputDir. checks for file in ./, inputdir, outputdir, default and mothur's exe location, and tools location.  Returns false if cant be found. If found completes name with location
-    bool dirCheck(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
-    bool dirCheck(string&, string); //completes path, appends appropriate / or \, makes sure dir is writable. - no error
+    bool dirCheckWritable(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
+    bool dirCheckExists(string&); //completes path, appends appropriate / or \, makes sure dir is present. 
     bool fileExists(string name);
     string findProgramPath(string programName);
     string getExtension(string);
@@ -204,6 +204,8 @@ public:
     bool mothurConvert(char, string&);
     set<string> mothurConvert(vector<string>&);
     vector<string> mothurConvert(set<string>&);
+    set<long long> mothurConvert(vector<long long>&);
+    vector<long long > mothurConvert(set<long long>&);
 
     
     //string manipulation

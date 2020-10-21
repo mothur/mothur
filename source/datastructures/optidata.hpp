@@ -46,6 +46,7 @@ public:
     virtual vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&) { vector<long long> temp; return temp;  }
     virtual OptiData* extractRefMatrix() { OptiData* temp = NULL; return temp;  }
     virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = NULL; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<string>&) { OptiData* temp = NULL; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
     
     virtual long long getNumFitDists() { return 0; } //user distances under cutoff
@@ -72,6 +73,8 @@ protected:
     vector<string> singletons; //name of seqs with NO distances in matrix, if name file is given then it contains 2nd column of namefile
     vector<string> nameMap;  //name of seqs with distances in matrix, if name file is given then it contains 2nd column of namefile
     double cutoff;
+    
+    set<long long> getIndexes(set<string> seqs);
     
 };
 

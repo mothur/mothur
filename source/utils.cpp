@@ -1873,7 +1873,7 @@ void Utils::getCombos(vector<string>& groupComb, vector<string> userGroups, int&
     }
 }
 /***********************************************************************/
-bool Utils::dirCheck(string& dirName){
+bool Utils::dirCheckWritable(string& dirName){
     try {
 
         if (dirName == "") { return false; }
@@ -1893,16 +1893,15 @@ bool Utils::dirCheck(string& dirName){
         return false;
     }
     catch(exception& e) {
-        m->errorOut(e, "Utils", "dirCheck");
+        m->errorOut(e, "Utils", "dirCheckWritable");
         exit(1);
     }
-
 }
 /***********************************************************************/
 
-bool Utils::dirCheck(string& dirName, string noError){
+bool Utils::dirCheckExists(string& dirName){
     try {
-
+        
         if (dirName == "") { return false; }
 
         //add / to name if needed
@@ -1911,29 +1910,45 @@ bool Utils::dirCheck(string& dirName, string noError){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
-        string outTemp = dirName  + "temp"+ toString(time(NULL));
-        ofstream out;
-        out.open(outTemp.c_str(), ios::trunc);
-        if(out) { out.close();  mothurRemove(outTemp); return true; }
+        
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 
+        struct stat info;
+        
+        if(stat(dirName.c_str(), &info ) != 0 ) {
+            m->mothurOut("[ERROR]: cannot access " + dirName + "\n");
+        }else if( info.st_mode & S_IFDIR ) { // S_ISDIR() doesn't exist on my windows
+            return true;
+        }else {
+            m->mothurOut("[ERROR]: cannot access " + dirName + "\n");
+        }
+
+#else
+        DWORD dwAttrib = GetFileAttributes(dirName.c_str());
+
+         if (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) { return true; }
+         else { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); }
+        
+#endif
+        
         return false;
     }
     catch(exception& e) {
-        m->errorOut(e, "Utils", "dirCheck - noError");
+        m->errorOut(e, "Utils", "dirCheckExists");
         exit(1);
     }
-
 }
 /***********************************************************************/
-//returns true it exits or if we can make it
+//returns true if it exists or if we can make it
 bool Utils::mkDir(string& dirName){
     try {
-        bool dirExist = dirCheck(dirName, "noError");
+        bool dirExist = dirCheckExists(dirName);
         if (dirExist) { return true; }
 
         string makeDirectoryCommand = "mkdir -p \"" + dirName + "\"";
         system(makeDirectoryCommand.c_str());
-        if (dirCheck(dirName)) { return true; }
+        if (dirCheckWritable(dirName)) { return true; }
 
         return false;
     }
@@ -1941,7 +1956,6 @@ bool Utils::mkDir(string& dirName){
         m->errorOut(e, "Utils", "mkDir");
         exit(1);
     }
-
 }
 //***********************************************************************
 map<string, vector<string> > Utils::parseClasses(string classes){
@@ -4050,6 +4064,32 @@ bool Utils::mothurConvert(string item, intDist& num){
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurConvert-intDist");
+        exit(1);
+    }
+}
+/***********************************************************************/
+set<long long> Utils::mothurConvert(vector<long long>& input){
+    try {
+        set<long long> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
+        exit(1);
+    }
+}
+/***********************************************************************/
+vector<long long> Utils::mothurConvert(set<long long>& input){
+    try {
+        vector<long long> output(input.begin(), input.end());
+        
+        
+        return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-SetToVector");
         exit(1);
     }
 }

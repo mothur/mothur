@@ -86,7 +86,7 @@ int SetLogFileCommand::execute(){
         string directory = util.hasPath(name);
         if (directory == "") {
             m->setLogFileName(outputdir+name, append);
-        }else if (util.dirCheck(directory)) {
+        }else if (util.dirCheckWritable(directory)) {
             m->setLogFileName(name, append);
         }
 		

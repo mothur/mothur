@@ -70,7 +70,7 @@ set<long long> OptiData::getCloseSeqs(long long i){
 }
 /***********************************************************************/
 //maps unique name to index in distance matrix
-//used by sensspec to get translate the list file name to the index name for closeness shirt
+//used by sensspec to get translate the list file name to the index name for closeness 
 map<string, long long> OptiData::getNameIndexMap() {
     try {
         map<string, long long> nameIndexes;
@@ -79,6 +79,26 @@ map<string, long long> OptiData::getNameIndexMap() {
             if (i < closeness.size()) { nameIndexes[thisBinsSeqs[0]] = i;  }
         }
         return nameIndexes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiData", "getNameIndexMap");
+        exit(1);
+    }
+}
+/***********************************************************************/
+set<long long> OptiData::getIndexes(set<string> seqs) {
+    try {
+        map<string, long long> nameIndexes = getNameIndexMap();
+        map<string, long long>::iterator it;
+        
+        set<long long> indexes;
+        for (set<string>::iterator itSeqs = seqs.begin(); itSeqs != seqs.end(); itSeqs++) {
+            it = nameIndexes.find(*itSeqs);
+            if (it != nameIndexes.end()) {
+                indexes.insert(it->second);
+            }
+        }
+        return indexes;
     }
     catch(exception& e) {
         m->errorOut(e, "OptiData", "getNameIndexMap");

@@ -30,6 +30,7 @@ public:
     
     vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&);
     OptiData* extractMatrixSubset(set<long long>&);
+    OptiData* extractMatrixSubset(set<string>&);
     OptiData* extractRefMatrix();
     void randomizeRefs();
     vector<string> getRefSingletonNames();
@@ -74,6 +75,8 @@ protected:
     vector<bool> isSingleRef; ////same size as singletons, this tells us whether a seq WITHOUT distances in the matrix (singleton) is a reference
     
     void calcCounts();
+    
+
     
 };
 

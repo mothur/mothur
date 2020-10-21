@@ -54,7 +54,6 @@ vector<string> ClusterFitCommand::setParameters(){
         CommandParameter pdenovoiters("denovoiters", "Number", "", "100", "", "", "","",false,false,true); parameters.push_back(pdenovoiters);
         CommandParameter pfitpercent("fitpercent", "Number", "", "10", "", "", "","",false,false,true); parameters.push_back(pfitpercent);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-//CommandParameter prunspenspec("runsensspec", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prunspenspec);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter prefprint("printref", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(prefprint);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -365,8 +364,13 @@ int ClusterFitCommand::execute(){
                 
                 runDenovoOptiCluster(matrix, metric, counts, outputName);
                 
+                string sensspecFilename = fileroot+ tag + ".sensspec";
+                ofstream sensFile;
+                util.openOutputFile(sensspecFilename,    sensFile);
+                outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+         
                 //evaluate results
-                bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
+                bestListFileName = compareSensSpec(matrix, metric, sensFile);
                 
                 delete matrix;
                 
@@ -409,14 +413,9 @@ int ClusterFitCommand::execute(){
                 else { list->print(listFile); }
                 listFile.close();
                 
-                if ((method == "open") && (printref)) {
-                    //if (runsensSpec) { runSensSpec(matrix, metric, list, counts, listFileName); }
-                    bestListFileName = listFileName;
-                }else {
-                    listFiles.push_back(listFileName);
-                    bestListFileName = listFileName;
-                    //bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFileName);
-                }
+                listFiles.push_back(listFileName);
+                bestListFileName = listFileName;
+                
                 delete list; delete matrix;
             }
         }else { //reference with files containing reference seqs
@@ -444,27 +443,8 @@ int ClusterFitCommand::execute(){
             listFile = runRefOptiCluster(matrix, metric, list, counts, outputName);
             listFiles.push_back(listFile);
             
-            if (!printref) {
-                bestListFileName = listFile;
-                //bestListFileName = runSensSpec(columnfile, dupsFile, nameOrCount, metric, listFile);
-            }else {
-                bestListFileName = listFile;
-                //create combined files needed for sensspec
-               // string newDistFile, newDupsFile;
-               // int randNum = util.getRandomNumber();
-                //newDistFile = distfile + "." + toString(randNum) + ".temp";
-               // newDupsFile = dupsFile + "." + toString(randNum) + ".temp";
-               // util.appendFiles(distfile, newDistFile);
-               // util.appendFiles(refdistfile, newDistFile);
-               // util.appendFiles(comboDistFile, newDistFile);
-               // ofstream out; util.openOutputFile(newDupsFile, out);
-               // out << "Representative_Sequence\ttotal\n";
-               // for (map<string, int>::iterator it = counts.begin(); it != counts.end(); it++) { out << it->first << '\t' << it->second << endl;  }
-               // out.close();
-                
-               // bestListFileName = runSensSpec(newDistFile, newDupsFile, "count", metric, listFile);
-                //util.mothurRemove(newDistFile); util.mothurRemove(newDupsFile);
-            }
+            bestListFileName = listFile;
+           
             delete matrix;
         }
         delete metric;
@@ -650,12 +630,13 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         double fittp, fittn, fitfp, fitfn;
         long long numFitBins = cluster.getNumFitBins();
         vector<double> fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-        
+    
         m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()+matrix->getNumFitSingletons()+matrix->getNumFitTrueSingletons()) + " sequences to reference otus.\n");
         
         m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         
         outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0, false, 0);
+        
         
         while ((delta > stableMetric) && (iters < maxIters)) { //
             
@@ -680,6 +661,28 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         
         ListVector* list = cluster.getFittedList(toString(cutoff), printref);
         list->setLabel(toString(cutoff));
+        
+        string sensspecFilename = fileroot+ tag + ".sensspec";
+        ofstream sensFile;
+        util.openOutputFile(sensspecFilename,    sensFile);
+        outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+        
+        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        
+        if (method == "closed") {
+            if (printref) { //combo
+                results = cluster.getStats(tp, tn, fp, fn);
+                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+                for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
+            }else { //fit
+                fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
+                for (int i = 0; i < fitresults.size(); i++) {  sensFile << fitresults[i] << "\t"; } sensFile << endl;
+            }
+        }else {
+            runSensSpec(matrix, metric, list, counts, sensFile);
+        }
+        sensFile.close();
         
         return list;
     }
@@ -826,6 +829,28 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         else { list->print(listFile); }
         listFile.close();
         
+        string sensspecFilename = fileroot+ tag + ".sensspec";
+        ofstream sensFile;
+        util.openOutputFile(sensspecFilename,    sensFile);
+        outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+        
+        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+        
+        if (method == "closed") {
+            if (printref) { //combo
+                results = cluster.getStats(tp, tn, fp, fn);
+                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+                for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
+            }else { //fit
+                fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
+                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
+                for (int i = 0; i < fitresults.size(); i++) {  sensFile << fitresults[i] << "\t"; } sensFile << endl;
+            }
+        }else {
+            runSensSpec(matrix, metric, list, counts, sensFile);
+        }
+        sensFile.close();
+        
         delete list;
 
         return listFileName;
@@ -837,30 +862,15 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
     
 }
 //**********************************************************************************************************************
-string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string dupsFormat, ClusterMetric*& userMetric, string listFile) {
+string ClusterFitCommand::compareSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ofstream& sensSpecFile) {
     try {
-        //if listfiles.size() > 1, we must run sensespec to find "best" list
-        //if listfiles.size() == 1 and we don't want to run sensspec, set listfile name and return
-        //else run sensspec analysis
-        if (listFiles.size() == 1) { return listFiles[0]; } //best list is the only list we have
-        
-        ofstream sensSpecFile;
-        map<string, string> variables;
-        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
-        string sensSpecFileName = getOutputFileName("sensspec",variables);
-        util.openOutputFile(sensSpecFileName, sensSpecFile);
-        outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
-        
+           
         sensSpecFile << "iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         m->mothurOut("iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         
         double bestStat = 0; int bestResult = 0;
         
         if ((method == "open") && (printref)) {
-            
-            string thisDistFile = distFName;
-            string thisDupsFile = dupsfile;
-            OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
             
             for (int i = 0; i < listFiles.size(); i++) {
                 string thislistFileName = listFiles[i];
@@ -871,9 +881,9 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
                 string label = list->getLabel();
                 int numBins = list->getNumBins();
                 
-                SensSpecCalc senscalc(matrix, list);
+                SensSpecCalc senscalc(*matrix, list);
                 double truePositives, trueNegatives, falsePositives, falseNegatives;
-                senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                senscalc.getResults(*matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
                 
                 double tp =  truePositives;
                 double fp =  falsePositives;
@@ -904,72 +914,32 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
 
             }
         }else {
+            
             for (int i = 0; i < listFiles.size(); i++) {
-                
-                string thislistFileName = listFiles[i];
-                string thisDistFile = distFName;
-                string thisDupsFile = dupsfile;
-                
-                //extract only distances related to the list file
-                string inputString = "list=" + thislistFileName;
-                m->mothurOut("/******************************************/\n");
-                m->mothurOut("Running command: list.seqs(" + inputString + ")\n");
-                current->setMothurCalling(true);
-                
-                Command* listSeqsCommand = new ListSeqsCommand(inputString);
-                listSeqsCommand->execute();
-                
-                map<string, vector<string> > filenames = listSeqsCommand->getOutputFiles();
-                
-                delete listSeqsCommand;
-                current->setMothurCalling(false);
-                
-                string accnosFileName = filenames["accnos"][0];
-                
-                inputString = "column=" + thisDistFile + ", accnos=" + accnosFileName;
-                m->mothurOut("\n/***** NOTE: Please ignore warnings for get.dists command *****/\n");
-                m->mothurOut("Running command: get.dists(" + inputString + ")\n");
-                current->setMothurCalling(true);
-                
-                Command* getDistsCommand = new GetDistsCommand(inputString);
-                getDistsCommand->execute();
-                
-                filenames = getDistsCommand->getOutputFiles();
-                
-                delete getDistsCommand;
-                current->setMothurCalling(false);
-                
-                thisDistFile = filenames["column"][0];
-                
-                inputString = "accnos=" + accnosFileName;
-                inputString += ", " + dupsFormat + "=" + thisDupsFile;
-                
-                m->mothurOut("/nRunning command: get.seqs(" + inputString + ")\n");
-                current->setMothurCalling(true);
-                
-                Command* getSeqsCommand = new GetSeqsCommand(inputString);
-                getSeqsCommand->execute();
-                
-                filenames = getSeqsCommand->getOutputFiles();
-                
-                if (dupsFormat == "name")         {  thisDupsFile = filenames["name"][0];       }
-                else if (dupsFormat == "count")   { thisDupsFile = filenames["count"][0];       }
-                
-                util.mothurRemove(accnosFileName);
-                
-                delete getSeqsCommand;
-                current->setMothurCalling(false);
-                
-                InputData input(thislistFileName, "list", nullVector);
+               
+                InputData input(listFiles[i], "list", nullVector);
                 ListVector* list = input.getListVector();
                 
                 string label = list->getLabel();
                 int numBins = list->getNumBins();
                 
-                OptiMatrix matrix(thisDistFile, thisDupsFile, dupsFormat, "column", cutoff, false);
-                SensSpecCalc senscalc(matrix, list);
+                //extract seqs in list file from matrix
+                set<string> listNames;
+                for (int i = 0; i < list->getNumBins(); i++){
+                    string bin = list->get(i);
+                    if (bin != "") {
+                        vector<string> binSeqs; util.splitAtComma(bin, binSeqs);
+                        for (int j = 0; j < binSeqs.size(); j++) {
+                            listNames.insert(binSeqs[j]);
+                        }
+                    }
+                }
+                
+                OptiData* fitMatrix = matrix->extractMatrixSubset(listNames);
+                SensSpecCalc senscalc(*fitMatrix, list);
                 double truePositives, trueNegatives, falsePositives, falseNegatives;
-                senscalc.getResults(matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                senscalc.getResults(*fitMatrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                delete fitMatrix;
                 
                 double tp =  truePositives;
                 double fp =  falsePositives;
@@ -1006,63 +976,61 @@ string ClusterFitCommand::runSensSpec(string distFName, string dupsfile, string 
         
     }
     catch(exception& e) {
-        m->errorOut(e, "ClusterFitCommand", "runSensSpec");
+        m->errorOut(e, "ClusterFitCommand", "compareSensSpec");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-void ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts, string listFileName) {
+void ClusterFitCommand::runSensSpec(OptiData*& matrix, ClusterMetric*& userMetric, ListVector*& list, map<string, int>& counts, ofstream& sensSpecFile) {
     try {
-
-        ofstream sensSpecFile;
-        map<string, string> variables;
-        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFileName));
-        string sensSpecFileName = getOutputFileName("sensspec",variables);
-        util.openOutputFile(sensSpecFileName, sensSpecFile);
-        outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
         
         sensSpecFile << "iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
         m->mothurOut("iter\tlabel\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
         
         if (method == "open") {
-
-                string label = list->getLabel();
-                int numBins = list->getNumBins();
-                
+            double truePositives, trueNegatives, falsePositives, falseNegatives;
+            string label = list->getLabel();
+            int numBins = list->getNumBins();
+            
+            if (printref) { //pass whole matrix
                 SensSpecCalc senscalc(*matrix, list);
-                double truePositives, trueNegatives, falsePositives, falseNegatives;
                 senscalc.getResults(*matrix, truePositives, trueNegatives, falsePositives, falseNegatives);
-                
-                double tp =  truePositives;
-                double fp =  falsePositives;
-                double tn =  trueNegatives;
-                double fn =  falseNegatives;
-                
-                Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
-                Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
-                PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
-                NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
-                FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
-                Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
-                MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
-                F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
-                
-                sensSpecFile << "1" << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
-                sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
-                sensSpecFile << setprecision(4);
-                sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
-                sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
-                
-                m->mothurOut(toString(1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
-                m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
-                m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
+            }else { //pass subset matrix
+                vector<long long> fSeqs = matrix->getFitSeqs();
+                set<long long> fitSeqs = util.mothurConvert(fSeqs);
+                OptiData* fitMatrix = matrix->extractMatrixSubset(fitSeqs);
+                SensSpecCalc senscalc(*fitMatrix, list);
+                senscalc.getResults(*fitMatrix, truePositives, trueNegatives, falsePositives, falseNegatives);
+                delete fitMatrix;
+            }
+            
+            double tp =  truePositives;
+            double fp =  falsePositives;
+            double tn =  trueNegatives;
+            double fn =  falseNegatives;
+            
+            Sensitivity sens;   double sensitivity = sens.getValue(tp, tn, fp, fn);
+            Specificity spec;   double specificity = spec.getValue(tp, tn, fp, fn);
+            PPV ppv;            double positivePredictiveValue = ppv.getValue(tp, tn, fp, fn);
+            NPV npv;            double negativePredictiveValue = npv.getValue(tp, tn, fp, fn);
+            FDR fdr;            double falseDiscoveryRate = fdr.getValue(tp, tn, fp, fn);
+            Accuracy acc;       double accuracy = acc.getValue(tp, tn, fp, fn);
+            MCC mcc;            double matthewsCorrCoef = mcc.getValue(tp, tn, fp, fn);
+            F1Score f1;         double f1Score = f1.getValue(tp, tn, fp, fn);
+            
+            sensSpecFile << "1" << '\t' << label << '\t' << cutoff << '\t' << numBins << '\t';
+            sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';
+            sensSpecFile << setprecision(4);
+            sensSpecFile << sensitivity << '\t' << specificity << '\t' << positivePredictiveValue << '\t' << negativePredictiveValue << '\t';
+            sensSpecFile << falseDiscoveryRate << '\t' << accuracy << '\t' << matthewsCorrCoef << '\t' << f1Score << endl;
+            
+            m->mothurOut(toString(1) + "\t" + label + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t"+ toString(truePositives) + "\t" + toString(trueNegatives) + "\t" + toString(falsePositives) + "\t" + toString(falseNegatives) + "\t");
+            m->mothurOut(toString(sensitivity) + "\t" + toString(specificity) + "\t" + toString(positivePredictiveValue) + "\t" + toString(negativePredictiveValue) + "\t");
+            m->mothurOut(toString(falseDiscoveryRate) + "\t" + toString(accuracy) + "\t" + toString(matthewsCorrCoef) + "\t" + toString(f1Score) + "\n\n");
         }else {
             m->mothurOut("[ERROR]: should never get here... \n");
         }
-        
-        sensSpecFile.close();
-    
-        return;
+
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterFitCommand", "runSensSpec");

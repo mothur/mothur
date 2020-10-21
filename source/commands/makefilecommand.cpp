@@ -84,7 +84,7 @@ MakeFileCommand::MakeFileCommand(string option)  {
             inputDir = validParameter.valid(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting.\n");  abort = true;	}
             else {
-                if (util.dirCheck(inputDir)) {} // all set
+                if (util.dirCheckExists(inputDir)) {} // all set
                 else { abort = true; }
             }
             
