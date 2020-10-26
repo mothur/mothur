@@ -1898,8 +1898,11 @@ bool Utils::dirCheckWritable(string& dirName){
     }
 }
 /***********************************************************************/
-
 bool Utils::dirCheckExists(string& dirName){
+    return (dirCheckExists(dirName, true));
+}
+/***********************************************************************/
+bool Utils::dirCheckExists(string& dirName, bool reportError){
     try {
         
         if (dirName == "") { return false; }
@@ -1916,11 +1919,11 @@ bool Utils::dirCheckExists(string& dirName){
         struct stat info;
         
         if(stat(dirName.c_str(), &info ) != 0 ) {
-            m->mothurOut("[ERROR]: cannot access " + dirName + "\n");
+            if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); }
         }else if( info.st_mode & S_IFDIR ) { // S_ISDIR() doesn't exist on my windows
             return true;
         }else {
-            m->mothurOut("[ERROR]: cannot access " + dirName + "\n");
+            if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); }
         }
 
 #else
@@ -1928,7 +1931,7 @@ bool Utils::dirCheckExists(string& dirName){
 
          if (dwAttrib != INVALID_FILE_ATTRIBUTES &&
              (dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) { return true; }
-         else { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); }
+         else { if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); } }
         
 #endif
         
@@ -1943,7 +1946,7 @@ bool Utils::dirCheckExists(string& dirName){
 //returns true if it exists or if we can make it
 bool Utils::mkDir(string& dirName){
     try {
-        bool dirExist = dirCheckExists(dirName);
+        bool dirExist = dirCheckExists(dirName, false);
         if (dirExist) { return true; }
 
         string makeDirectoryCommand = "mkdir -p \"" + dirName + "\"";

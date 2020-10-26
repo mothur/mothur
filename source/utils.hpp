@@ -88,7 +88,8 @@ public:
     bool checkLocations(string&, vector<string>, string silent);
     bool checkLocations(string&, vector<string>);  //filename, inputDir, outputDir. checks for file in ./, inputdir, outputdir, default and mothur's exe location, and tools location.  Returns false if cant be found. If found completes name with location
     bool dirCheckWritable(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
-    bool dirCheckExists(string&); //completes path, appends appropriate / or \, makes sure dir is present. 
+    bool dirCheckExists(string&);
+    bool dirCheckExists(string&, bool); //completes path, appends appropriate / or \, makes sure dir is present.
     bool fileExists(string name);
     string findProgramPath(string programName);
     string getExtension(string);
