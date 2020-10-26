@@ -15,7 +15,6 @@ double oneGapIgnoreTermGapDist::calcDist(Sequence A, Sequence B){
         string seqA = A.getAligned();
         string seqB = B.getAligned();
         
-        int alignLength = (int)seqA.length();
         bool overlap = false;
         
         int start = setStartIgnoreTermGap(seqA, seqB, overlap);

@@ -47,9 +47,7 @@ bool SffCommonHeader::read(ifstream& in){
         bool goodHeader = true;
         
         if (!in.eof()) {
-            
-            unsigned long long startSpotInFile = in.tellg();
-            
+                        
             //read magic number
             char* magic = new char[4];
             in.read(&(*magic), 4);

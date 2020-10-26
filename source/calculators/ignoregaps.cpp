@@ -96,9 +96,7 @@ vector<double> ignoreGaps::calcDist(Sequence A, classifierOTU otu, vector<int> c
                 int maxMinLength = ends[h] - starts[h] + 1;
                 
                 int difference = 0;
-                bool openGapA = false;
-                bool openGapB = false;
-                
+                   
                 for(int i=starts[h];i<alignLength;i++){
                     
                     char seqA = seq.otuData[cols[i]][0];
