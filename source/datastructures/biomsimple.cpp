@@ -13,10 +13,6 @@ BiomSimple::BiomSimple() : Biom(){
     try {
        
         version = "Biological Observation Matrix 0.9.1";
-        label = "userLabel";
-        
-        
-        
     }
     catch(exception& e) {
         m->errorOut(e, "BiomSimple", "BiomSimple");
@@ -25,13 +21,9 @@ BiomSimple::BiomSimple() : Biom(){
 }
 
 /**************************************************************************************************/
-BiomSimple::BiomSimple(string fname) : Biom(){
+BiomSimple::BiomSimple(string fname, string b, string l, int pl, bool r) : Biom("Biological Observation Matrix 0.9.1", b, pl, r){
     try {
-       
-        version = "Biological Observation Matrix 0.9.1";
-        label = "userLabel";
-       
-        
+        label = l;
         read(fname);
     }
     catch(exception& e) {
@@ -49,7 +41,12 @@ void BiomSimple::read(string fname){
          "format_url": "http://biom-format.org",
          "type": "OTU table",
          "generated_by": "mothur1.44.0",
-         "date": "Tue Apr 17 13:12:07 2020", */
+         "date": "Tue Apr 17 13:12:07 2020",
+         
+         rows represent OTUS
+         columns represent samples
+         
+         */
         
         ifstream in; util.openInputFile(fname, in);
         
@@ -57,9 +54,9 @@ void BiomSimple::read(string fname){
         vector<string> otuNames;  vector<string> groupNames;
         map<string, string> fileLines;
         //vector<string> names;
-        int numOTUs, numCols, maxLevel;
+        int numOTUs, numCols;
         bool hasTaxonomy;
-        //string label;
+       
         numOTUs = 0; numCols = 0; maxLevel = 0;
         int shapeNumRows = 0; int shapeNumCols = 0;
         
@@ -172,7 +169,6 @@ void BiomSimple::read(string fname){
         
         if (m->getControl_pressed()) {  return; }
         
-        vector<string> taxonomies;
         it = fileLines.find("columns");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a columns provided.\n"); }
         else {
@@ -184,41 +180,18 @@ void BiomSimple::read(string fname){
             vector< vector<string> > results = extractTaxonomyData(thisLine, numCols, hasTaxonomy);
             groupNames = results[0];
             if (hasTaxonomy) {
-                //write taxonomy file
+                GroupMap* g = NULL; if (taxSum != NULL) { delete taxSum; }
                 
-                //GroupMap* g = NULL;
-                //PhyloSummary taxaSum(g, relabund, printlevel);
+                taxSum = new PhyloSummary(g, relabund, printLevel);
                 
                 for (int i = 0; i < results[1].size(); i++) {
                     if (m->getControl_pressed()) { break; }
                     
-                    //string newTax = util.addUnclassifieds(results[1][i], maxLevel, false);
-                    
-                    taxonomies.push_back(util.addUnclassifieds(results[1][i], maxLevel, false));
-                    
-                    //outTax << results[0][i] << '\t' << newTax << endl;
-                    
-                    //taxaSum.addSeqToTree(results[0][i], newTax);
+                    string completeTax = util.addUnclassifieds(results[1][i], maxLevel, false);
+                    groupTaxonomies[results[0][i]] = completeTax;
+                    taxSum->addSeqToTree(results[0][i], completeTax);
                 }
-                
-                //write taxonomy file
-                //variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
-                //variables["[tag]"] = label;
-                //variables["[tag2]"] = "";
-               // string taxSumFilename = getOutputFileName("taxsummary",variables);
-                //outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
-                //ofstream outTaxSum;
-                //util.openOutputFile(taxSumFilename, outTaxSum);
-                
-                //write tax.summary
-               // if (relabund)   {   taxaSum.print(outTaxSum, relabund);     }
-               // else            {   taxaSum.print(outTaxSum, output);       }
-                
-               // outTaxSum.close();
             }
-            
-            //set fileroot
-            //fileroot = outputdir + util.getRootName(util.getSimpleName(biomfile));
         }
         
         if (m->getControl_pressed()) {  return; }
@@ -241,6 +214,7 @@ void BiomSimple::read(string fname){
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a data provided.\n"); }
         else {
             string thisLine = it->second;
+            
             if (shared != NULL) { delete shared; }
             shared = extractOTUData(thisLine, groupNames, numOTUs);
             shared->setOTUNames(otuNames);
@@ -248,7 +222,7 @@ void BiomSimple::read(string fname){
             
             if (conTaxonomy.size() != 0) {
                 //sanity check
-                if ((shared->getNumBins() == conTaxonomy.size()) && (shared->getNumBins() == otuNames.size())) {
+                if ((shared->getNumBins() == conTaxonomy.size()) && (shared->getNumBins() == numOTUs)) {
                     CountTable ct;
                     vector<string> groupNames = shared->getNamesGroups();
                     for (int j = 0; j < groupNames.size(); j++) {  ct.addGroup(groupNames[j]); }
@@ -266,7 +240,8 @@ void BiomSimple::read(string fname){
                         ct.push_back(otuNames[i], abunds);
                     }
                     
-                    PhyloSummary taxaSum(&ct, relabund, printlevel);
+                    if (consTaxSum != NULL) { delete consTaxSum; }
+                    consTaxSum = new PhyloSummary(&ct, relabund, printLevel);
                     
                     for (int i = 0; i < shared->getNumBins(); i++) {
                         if (m->getControl_pressed()) { break; }
@@ -280,26 +255,12 @@ void BiomSimple::read(string fname){
                         }
                         
                         string newTax = util.addUnclassifieds(conTaxonomy[i], maxLevel, false);
-                        outTax << otuNames[i] << '\t' << total << '\t' << newTax << endl;
+                        Taxonomy thisOTUsTaxonomy(otuNames[i], newTax, total);
+                        consTax.push_back(thisOTUsTaxonomy);
                         
-                        if (basis == "sequence") {
-                            taxaSum.addSeqToTree(otuNames[i], newTax);
-                        }else {
-                            taxaSum.addSeqToTree(newTax, containsGroup); //add otu
-                        }
+                        if (basis == "sequence")    {  consTaxSum->addSeqToTree(otuNames[i], newTax);  }
+                        else                       { consTaxSum->addSeqToTree(newTax, containsGroup); } //add otu
                     }
-                    outTax.close();
-                    
-                    //write taxonomy file
-                    variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(filename));
-                    variables["[tag]"] = label;
-                    variables["[tag2]"] = "cons";
-                    string taxSumFilename = getOutputFileName("taxsummary",variables);
-                    outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
-                    ofstream outTaxSum;
-                    util.openOutputFile(taxSumFilename, outTaxSum);
-                    taxaSum.print(outTaxSum, output);
-                    outTaxSum.close();
                 }
             }
         }
@@ -340,7 +301,7 @@ string BiomSimple::getTag(string& line) {
 }
 //**********************************************************************************************************************
 //readRows
-vector< vector<string> > BiomSimple::extractTaxonomyData(string line) {
+vector< vector<string> > BiomSimple::extractTaxonomyData(string line, int& numOTUs, bool& hasTaxonomy) {
     try {
         /*"rows":[
          {"id":"Otu01", "metadata":{"taxonomy":["Bacteria", "Bacteroidetes", "Bacteroidia", "Bacteroidales", "Porphyromonadaceae", "unclassified"], "bootstrap":[100, 100, 100, 100, 100, 100]}},

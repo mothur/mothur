@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "phylosummary.h"
+#include "biomsimple.hpp"
 
 #define MAX_NAME 1024
 
@@ -41,6 +42,7 @@ public:
 protected:
     void printSharedData(SharedRAbundVectors*, ofstream&);
     int createFilesFromBiom();
+    int createFilesFromBiom2();
     int extractFilesFromHDF5();
     string getTag(string&);
     string getName(string);

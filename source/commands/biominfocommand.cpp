@@ -132,7 +132,9 @@ BiomInfoCommand::BiomInfoCommand(string option)  {
             output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "detail"; }
             if ((output != "simple") && (output != "detail")) { m->mothurOut(output + " is not a valid output form. Options are simple and detail. I will use detail.\n");  output = "detail"; }
             
-            string temp = validParameter.valid(parameters, "relabund");		if (temp == "not found"){	temp = "false";			}
+            string temp = validParameter.valid(parameters, "relabund");
+            if (temp == "not found"){	temp = "false";			}
+            else { temp = util.getSimpleName(temp); }
             relabund = util.isTrue(temp);
             
             temp = validParameter.valid(parameters, "printlevel");		if (temp == "not found"){	temp = "-1";		}
@@ -172,10 +174,11 @@ int BiomInfoCommand::execute(){
         
         long start = time(NULL);
         
+        createFilesFromBiom2(); exit(1);
         if (format == "hdf5")   { extractFilesFromHDF5();   }
         else                    { createFilesFromBiom();    }
         
-        m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n");	m->mothurOutEndLine();
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n\n");
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } }
         
@@ -583,6 +586,83 @@ int BiomInfoCommand::extractFilesFromHDF5() {
         #endif
         
         return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomInfoCommand", "extractFilesFromHDF5");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//biom version 0.9.1
+int BiomInfoCommand::createFilesFromBiom2() {
+    try {
+        //pass filename, basis, printlevel, relabund
+        BiomSimple biom(biomfile, basis, label, printlevel, relabund);
+        
+        //getting output filename
+        string filename = biomfile;
+        if (outputdir == "") { outputdir += util.hasPath(filename); }
+        fileroot = outputdir + util.getRootName(util.getSimpleName(biomfile));
+        
+        SharedRAbundVectors* shared = biom.getSharedRAbundVectors();
+        
+        if (shared != NULL) {
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[tag]"] = label;
+            string sharedFilename = getOutputFileName("shared",variables);
+            outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
+            bool printHeaders = true;
+            
+            ofstream out; util.openOutputFile(sharedFilename, out);
+            shared->print(out, printHeaders);
+            out.close();
+        }
+        
+        //print group taxonomy if given
+        map<string, string> taxonomies = biom.getTaxonomies();
+        if (taxonomies.size() != 0) {
+            //write taxonomy file
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[tag]"] = label;
+            string taxFilename = getOutputFileName("taxonomy",variables);
+            outputNames.push_back(taxFilename); outputTypes["taxonomy"].push_back(taxFilename);
+            ofstream outTax; util.openOutputFile(taxFilename, outTax);
+            
+            //print group taxonomy if given
+            for (map<string, string>::iterator it = taxonomies.begin(); it!= taxonomies.end(); it++) {
+                outTax << it->first << '\t' << it->second << endl;
+            }
+            
+            //print group taxsummary if given
+            PhyloSummary* taxSum = biom.getTaxSummary();
+            if (taxSum != NULL) {
+                //write taxonomy file
+                map<string, string> variables;
+                variables["[filename]"] = fileroot;
+                variables["[tag]"] = label;
+                variables["[tag2]"] = "";
+                string taxSumFilename = getOutputFileName("taxsummary",variables);
+                outputNames.push_back(taxSumFilename); outputTypes["taxsummary"].push_back(taxSumFilename);
+                ofstream outTaxSum; util.openOutputFile(taxSumFilename, outTaxSum);
+                
+                //write tax.summary
+                if (relabund)   {   taxSum->print(outTaxSum, relabund);     }
+                else            {   taxSum->print(outTaxSum, output);       }
+                
+                outTaxSum.close();
+            }
+        }
+        
+        //print consTaxonomy if given
+        vector<Taxonomy> consTax = biom.getConsTaxonomies();
+        if (consTax.size() != 0) {
+            
+        
+            //print constaxsummary if given
+        }
+        
     }
     catch(exception& e) {
         m->errorOut(e, "BiomInfoCommand", "extractFilesFromHDF5");

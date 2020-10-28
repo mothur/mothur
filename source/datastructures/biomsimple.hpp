@@ -18,16 +18,16 @@ class BiomSimple : public Biom {
 public:
     
     BiomSimple();
-    BiomSimple(string); //pass filename
+    BiomSimple(string, string, string, int, bool); // filename, basis, label, printlevel, relabund
     ~BiomSimple() {  }
     
     void read(string);
-    void setLabel(string l) { label = l; }
+    
     
 private:
    
     //examples: tableType = "OTU table", matrixFormat = "sparse" or "dense", matrixElementType = "int" or "float"
-    string matrixFormat, matrixElementType, tableType, label;
+    string matrixFormat, matrixElementType, tableType;
     
     string getTag(string&);
     void getDims(string, int&, int&);

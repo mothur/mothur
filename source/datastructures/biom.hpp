@@ -14,6 +14,7 @@
 #include "sharedrabundfloatvectors.hpp"
 #include "sharedrabundvectors.hpp"
 #include "phylosummary.h"
+#include "taxonomy.hpp"
 
 //http://biom-format.org
 //http://biom-format.org/documentation/format_versions/biom-1.0.html
@@ -23,36 +24,32 @@
 class Biom {
 
 public:
-    Biom(){ version = ""; formatURL = "http://biom-format.org"; m = MothurOut::getInstance(); shared = NULL; taxSum = NULL; }
+    Biom();
+    Biom(string, string, int, bool); //version, basis, printlevel, relabund
     
-    virtual ~Biom(){};
+    virtual ~Biom();
+    
     virtual void read(string) = 0;
+    virtual string getVersion() { return version; }
+    
     virtual SharedRAbundVectors* getSharedRAbundVectors() { return shared; }
-    virtual SharedRAbundFloatVectors* getSharedRAbundFloatVectors();
+    //virtual SharedRAbundFloatVectors* getSharedRAbundFloatVectors();
     virtual PhyloSummary* getTaxSummary() { return taxSum; }
+    virtual PhyloSummary* getConsTaxSummary() { return consTaxSum; }
     virtual vector<Taxonomy> getConsTaxonomies() { return consTax; }
     virtual map<string, string> getTaxonomies() {  return groupTaxonomies; }
-    //virtual void addSequence(Sequence) = 0;  //add sequence to search engine
-   // virtual void addSequences(vector<Sequence> seqs) { for (int i = 0; i < seqs.size(); i++) { addSequence(seqs[i]); } }
-
-   // virtual void setNumSeqs(int i) {    numSeqs = i;     }
-    
-   // virtual vector<int> findClosestSequences(Sequence*, int, vector<float>&) const = 0;  // returns indexes of n closest sequences to query
-    
-    virtual string getVersion() { return version; }
-   // virtual vector<int> getIndicatorColumns() { return nullIntVector; }
-    //virtual map<int, int> getFilteredIndicatorColumns(string, vector<int>&) { return nullIntMap; }
     
 protected:
     
     MothurOut* m;
     Utils util;
-    string version, formatURL; //version = simple or hdf5, set by child
-    int printLevel;
+    string version, formatURL, basis, label; //version = simple or hdf5, set by child
+    int printLevel, maxLevel;
     bool relabund;
     
     SharedRAbundVectors* shared;
     PhyloSummary* taxSum;
+    PhyloSummary* consTaxSum;
     vector<Taxonomy> consTax;
     map<string, string> groupTaxonomies;
     
