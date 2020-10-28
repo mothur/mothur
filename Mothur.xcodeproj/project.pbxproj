@@ -437,6 +437,9 @@
 		489AF6962106195E0028155E /* optidata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48FB99C720A48EF700FF9F6E /* optidata.cpp */; };
 		48A055302490066C00D0F97F /* sffread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A0552E2490066C00D0F97F /* sffread.cpp */; };
 		48A055332491577800D0F97F /* sffheader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A055312491577800D0F97F /* sffheader.cpp */; };
+		48A0B8EC2547282600726384 /* biom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A0B8EA2547282600726384 /* biom.cpp */; };
+		48A0B8F125472C4500726384 /* biomhdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A0B8EF25472C4500726384 /* biomhdf5.cpp */; };
+		48A0B8F625472C6500726384 /* biomsimple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A0B8F425472C6500726384 /* biomsimple.cpp */; };
 		48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */; };
 		48A85BAD18E1AF2000199B6F /* (null) in Sources */ = {isa = PBXBuildFile; };
 		48B01D2920163594006BE140 /* clusterfitcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B01D2720163594006BE140 /* clusterfitcommand.cpp */; };
@@ -1046,6 +1049,12 @@
 		48A0552F2490066C00D0F97F /* sffread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sffread.hpp; path = source/datastructures/sffread.hpp; sourceTree = SOURCE_ROOT; };
 		48A055312491577800D0F97F /* sffheader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sffheader.cpp; path = source/datastructures/sffheader.cpp; sourceTree = SOURCE_ROOT; };
 		48A055322491577800D0F97F /* sffheader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sffheader.hpp; path = source/datastructures/sffheader.hpp; sourceTree = SOURCE_ROOT; };
+		48A0B8EA2547282600726384 /* biom.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = biom.cpp; path = source/datastructures/biom.cpp; sourceTree = SOURCE_ROOT; };
+		48A0B8EB2547282600726384 /* biom.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = biom.hpp; path = source/datastructures/biom.hpp; sourceTree = SOURCE_ROOT; };
+		48A0B8EF25472C4500726384 /* biomhdf5.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = biomhdf5.cpp; path = source/datastructures/biomhdf5.cpp; sourceTree = SOURCE_ROOT; };
+		48A0B8F025472C4500726384 /* biomhdf5.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = biomhdf5.hpp; path = source/datastructures/biomhdf5.hpp; sourceTree = SOURCE_ROOT; };
+		48A0B8F425472C6500726384 /* biomsimple.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = biomsimple.cpp; path = source/datastructures/biomsimple.cpp; sourceTree = SOURCE_ROOT; };
+		48A0B8F525472C6500726384 /* biomsimple.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = biomsimple.hpp; path = source/datastructures/biomsimple.hpp; sourceTree = SOURCE_ROOT; };
 		48A11C6C1CDA40F0003481D8 /* testrenamefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testrenamefilecommand.cpp; path = TestMothur/testcommands/testrenamefilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		48A11C6D1CDA40F0003481D8 /* testrenamefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenamefilecommand.h; path = TestMothur/testcommands/testrenamefilecommand.h; sourceTree = SOURCE_ROOT; };
 		48B01D2720163594006BE140 /* clusterfitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clusterfitcommand.cpp; path = source/commands/clusterfitcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -2762,6 +2771,12 @@
 				A7E9B65812D37EC300DA6239 /* alignmentdb.h */,
 				A7E9B76312D37EC400DA6239 /* alignreport.cpp */,
 				A7E9B76412D37EC400DA6239 /* alignreport.hpp */,
+				48A0B8EA2547282600726384 /* biom.cpp */,
+				48A0B8EB2547282600726384 /* biom.hpp */,
+				48A0B8EF25472C4500726384 /* biomhdf5.cpp */,
+				48A0B8F025472C4500726384 /* biomhdf5.hpp */,
+				48A0B8F425472C6500726384 /* biomsimple.cpp */,
+				48A0B8F525472C6500726384 /* biomsimple.hpp */,
 				A7E9B66212D37EC300DA6239 /* blastalign.cpp */,
 				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
 				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
@@ -3511,6 +3526,7 @@
 				A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */,
 				A7E9B88412D37EC400DA6239 /* alignmentcell.cpp in Sources */,
 				48ED1E81235E1D59003E66F7 /* batchengine.cpp in Sources */,
+				48A0B8F125472C4500726384 /* biomhdf5.cpp in Sources */,
 				A7E9B88512D37EC400DA6239 /* alignmentdb.cpp in Sources */,
 				A7E9B88712D37EC400DA6239 /* bayesian.cpp in Sources */,
 				A7E9B88812D37EC400DA6239 /* bellerophon.cpp in Sources */,
@@ -3609,6 +3625,8 @@
 				A7E9B8DC12D37EC400DA6239 /* gotohoverlap.cpp in Sources */,
 				A7E9B8DD12D37EC400DA6239 /* gower.cpp in Sources */,
 				A7E9B8DE12D37EC400DA6239 /* groupmap.cpp in Sources */,
+				48A0B8F625472C6500726384 /* biomsimple.cpp in Sources */,
+				48A0B8EC2547282600726384 /* biom.cpp in Sources */,
 				488841651CC6C34900C5E972 /* renamefilecommand.cpp in Sources */,
 				4893DE2918EEF28100C615DF /* (null) in Sources */,
 				A7E9B8DF12D37EC400DA6239 /* hamming.cpp in Sources */,

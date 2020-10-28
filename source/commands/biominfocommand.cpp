@@ -590,6 +590,7 @@ int BiomInfoCommand::extractFilesFromHDF5() {
     }
 }
 //**********************************************************************************************************************
+//biom version 0.9.1
 int BiomInfoCommand::createFilesFromBiom() {
     try {
         //getting output filename

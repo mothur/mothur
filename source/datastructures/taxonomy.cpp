@@ -33,7 +33,7 @@ Taxonomy::Taxonomy(string otuname, string consensusTax) {
         m = MothurOut::getInstance();
         
         name = otuname;
-        numReps = 0;
+        numReps = 1;
         taxonomy = parseTax(consensusTax);
         
     }
