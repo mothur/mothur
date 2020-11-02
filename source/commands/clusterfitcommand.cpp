@@ -672,12 +672,12 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
             
             if (printref) { //combo
                 results = cluster.getStats(tp, tn, fp, fn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-                for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
+                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn;
+                for (int i = 0; i < results.size(); i++) {  sensFile << '\t' << results[i]; } sensFile << '\n';
             }else { //fit
                 fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
-                for (int i = 0; i < fitresults.size(); i++) {  sensFile << fitresults[i] << "\t"; } sensFile << endl;
+                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
+                for (int i = 0; i < fitresults.size(); i++) {  sensFile << "\t" << fitresults[i]; } sensFile << endl;
             }
         }else {
             runSensSpec(matrix, metric, list, counts, sensFile);
@@ -839,12 +839,12 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
          
             if (printref) { //combo
                 results = cluster.getStats(tp, tn, fp, fn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
-                for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
+                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn;
+                for (int i = 0; i < results.size(); i++) {  sensFile << '\t' << results[i]; } sensFile << '\n';
             }else { //fit
                 fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn << '\t';
-                for (int i = 0; i < fitresults.size(); i++) {  sensFile << fitresults[i] << "\t"; } sensFile << endl;
+                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
+                for (int i = 0; i < fitresults.size(); i++) {  sensFile << "\t" << fitresults[i]; } sensFile << endl;
             }
         }else {
             runSensSpec(matrix, metric, list, counts, sensFile);
