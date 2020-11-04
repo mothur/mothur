@@ -46,6 +46,7 @@ protected:
     MothurOut* m;
     string name;
     int numReps;
+    bool containsConfidence;
     vector<Taxon> taxonomy;
     Utils util;
     
