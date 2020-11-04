@@ -21,7 +21,7 @@ BiomSimple::BiomSimple() : Biom(){
 }
 
 /**************************************************************************************************/
-BiomSimple::BiomSimple(string fname, string b, string l, int pl, bool r) : Biom("Biological Observation Matrix 0.9.1", b, pl, r){
+BiomSimple::BiomSimple(string fname, string l) : Biom("Biological Observation Matrix 0.9.1"){
     try {
         label = l;
         read(fname);
@@ -132,7 +132,7 @@ void BiomSimple::read(string fname){
         
         if (m->getControl_pressed()) { return; }
         
-        vector<string> conTaxonomy;
+        map<string, string> otuTaxonomies;
         it = fileLines.find("rows");
         if (it == fileLines.end()) { m->mothurOut("[ERROR]: you file does not have a rows provided.\n"); }
         else {
@@ -143,7 +143,7 @@ void BiomSimple::read(string fname){
             vector< vector<string> > results = extractTaxonomyData(thisLine, numOTUs, hasTaxonomy);
             
             if ((tableType == "Taxon table") || (tableType == "Taxontable")) {
-                conTaxonomy = results[0];
+                vector<string> taxonomies = results[0];
                 
                 //create OTU names
                 string snumBins = toString(numOTUs);
@@ -159,11 +159,14 @@ void BiomSimple::read(string fname){
                     binLabel += sbinNumber;
                     
                     otuNames.push_back(binLabel);
+                    otuTaxonomies[otuNames[i]] = taxonomies[i];
                 }
                
             }else{
                 otuNames = results[0];
-                if (hasTaxonomy) { conTaxonomy = results[1]; }
+                if (hasTaxonomy) {
+                    for (int i = 0; i < otuNames.size(); i++) { otuTaxonomies[otuNames[i]] = results[1][i]; }
+                }
             }
         }
         
@@ -180,16 +183,11 @@ void BiomSimple::read(string fname){
             vector< vector<string> > results = extractTaxonomyData(thisLine, numCols, hasTaxonomy);
             groupNames = results[0];
             if (hasTaxonomy) {
-                GroupMap* g = NULL; if (taxSum != NULL) { delete taxSum; }
-                
-                taxSum = new PhyloSummary(g, relabund, printLevel);
-                
                 for (int i = 0; i < results[1].size(); i++) {
                     if (m->getControl_pressed()) { break; }
                     
                     string completeTax = util.addUnclassifieds(results[1][i], maxLevel, false);
                     groupTaxonomies[results[0][i]] = completeTax;
-                    taxSum->addSeqToTree(results[0][i], completeTax);
                 }
             }
         }
@@ -216,50 +214,22 @@ void BiomSimple::read(string fname){
             string thisLine = it->second;
             
             if (shared != NULL) { delete shared; }
+           
             shared = extractOTUData(thisLine, groupNames, numOTUs);
             shared->setOTUNames(otuNames);
             m->mothurOut("\n"+shared->getLabel()+"\n");
             
-            if (conTaxonomy.size() != 0) {
+            if (otuTaxonomies.size() != 0) {
                 //sanity check
-                if ((shared->getNumBins() == conTaxonomy.size()) && (shared->getNumBins() == numOTUs)) {
-                    CountTable ct;
-                    vector<string> groupNames = shared->getNamesGroups();
-                    for (int j = 0; j < groupNames.size(); j++) {  ct.addGroup(groupNames[j]); }
-                        
-                    int numBins = shared->getNumBins();
-                    
-                    for (int i = 0; i < numBins; i++) {
-                        vector<int> abunds;
-                        for (int j = 0; j < shared->size(); j++) {
-                            if (m->getControl_pressed()) { break; }
-                            int abund = shared->get(i, groupNames[j]);
-                            if (basis == "otu") { if (abund > 0) { abund = 1;  } } //count presence in otu
-                            abunds.push_back(abund);
-                        }
-                        ct.push_back(otuNames[i], abunds);
-                    }
-                    
-                    if (consTaxSum != NULL) { delete consTaxSum; }
-                    consTaxSum = new PhyloSummary(&ct, relabund, printLevel);
+                if ((shared->getNumBins() == otuTaxonomies.size()) && (shared->getNumBins() == numOTUs)) {
                     
                     for (int i = 0; i < shared->getNumBins(); i++) {
                         if (m->getControl_pressed()) { break; }
                         
-                        int total = 0;
-                        map<string, bool> containsGroup;
-                        for (int j = 0; j < shared->size(); j++) {
-                            int abund = shared->get(i, groupNames[j]);
-                            total += abund;
-                            containsGroup[groupNames[j]] = abund;
-                        }
-                        
-                        string newTax = util.addUnclassifieds(conTaxonomy[i], maxLevel, false);
-                        Taxonomy thisOTUsTaxonomy(otuNames[i], newTax, total);
+                        string thisOTUsTax = otuTaxonomies[otuNames[i]];
+                        string newTax = util.addUnclassifieds(thisOTUsTax, maxLevel, false);
+                        Taxonomy thisOTUsTaxonomy(otuNames[i], newTax, shared->getOTUTotal(i));
                         consTax.push_back(thisOTUsTaxonomy);
-                        
-                        if (basis == "sequence")    {  consTaxSum->addSeqToTree(otuNames[i], newTax);  }
-                        else                       { consTaxSum->addSeqToTree(newTax, containsGroup); } //add otu
                     }
                 }
             }

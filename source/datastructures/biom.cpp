@@ -14,12 +14,9 @@ Biom::Biom() {
         m = MothurOut::getInstance();
         
         formatURL = "http://biom-format.org";
-        label = "";
-        
-        version = ""; basis = "otu"; printLevel = 0; relabund = false;
-        
-        shared = NULL; taxSum = NULL; consTaxSum = NULL;
-        
+        label = ""; version = "";
+       
+        shared = NULL; 
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -27,15 +24,14 @@ Biom::Biom() {
     }
 }
 /**************************************************************************************************/
-Biom::Biom(string v, string b, int pl, bool rel) : version(v), basis(b), printLevel(pl), relabund(rel){
+Biom::Biom(string v) : version(v){
     try {
         m = MothurOut::getInstance();
         
         formatURL = "http://biom-format.org";
         label = "";
         
-        shared = NULL; taxSum = NULL; consTaxSum = NULL;
-        
+        shared = NULL;
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -45,7 +41,6 @@ Biom::Biom(string v, string b, int pl, bool rel) : version(v), basis(b), printLe
 /**************************************************************************************************/
 Biom::~Biom() {
     if (shared != NULL) { delete shared; }
-    if (taxSum != NULL) { delete taxSum; }
-    if (consTaxSum != NULL) { delete consTaxSum; }
+    
 }
 /**************************************************************************************************/

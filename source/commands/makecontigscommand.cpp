@@ -1799,7 +1799,7 @@ void driverContigs(contigsData* params){
 
                 if(trashCode.length() == 0){
                     string thisGroup = params->group;
-                    if (params->createGroup) {
+                    if (params->createGroup) { //you want the group name from the oligos file
                         if(numBarcodes != 0){
                             thisGroup = params->barcodeNameVector[barcodeIndex];
                             if (numPrimers != 0) {
@@ -2074,7 +2074,7 @@ void driverContigsGroups(groupContigsData* gparams) {
             string rfastqfile = gparams->fileInputs[l][1]; theseFileInputs.push_back(rfastqfile);
             string findexfile = gparams->fileInputs[l][2]; theseQIInputs.push_back(findexfile); //could be blank, "NONE" or filename
             string rindexfile = gparams->fileInputs[l][3]; theseQIInputs.push_back(rindexfile); //could be blank, "NONE" or filename
-            gparams->bundle->group = gparams->file2Groups[l];
+            gparams->bundle->group = gparams->file2Groups[l]; //blank if no group assigned to file pair
             
             bool decompressionHelped = false;
             

@@ -18,10 +18,11 @@ class BiomSimple : public Biom {
 public:
     
     BiomSimple();
-    BiomSimple(string, string, string, int, bool); // filename, basis, label, printlevel, relabund
+    BiomSimple(string, string); // filename, label
     ~BiomSimple() {  }
     
     void read(string);
+    string getMatrixElementType() { return matrixElementType; }
     
     
 private:

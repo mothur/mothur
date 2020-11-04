@@ -40,18 +40,10 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 protected:
-    void printSharedData(SharedRAbundVectors*, ofstream&);
-    int createFilesFromBiom();
-    int createFilesFromBiom2();
-    int extractFilesFromHDF5();
-    string getTag(string&);
-    string getName(string);
-    string getTaxonomy(string, string);
-    vector< vector<string> > readRows(string, int&, bool&);
-    int getDims(string, int&, int&);
-    SharedRAbundVectors* readData(string, string, string, vector<string>&, int);
-    vector<string> getNamesAndTaxonomies(string);
     
+    void createFilesFromBiomSimple();
+    int extractFilesFromHDF5();
+   
     vector<string> outputNames, otuNames, sampleNames, taxonomy;
     vector<int> indices, indptr, otudata;
     string fileroot, biomfile, label, basis, output, format;

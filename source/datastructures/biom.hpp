@@ -25,31 +25,30 @@ class Biom {
 
 public:
     Biom();
-    Biom(string, string, int, bool); //version, basis, printlevel, relabund
+    Biom(string); //version
     
     virtual ~Biom();
     
     virtual void read(string) = 0;
     virtual string getVersion() { return version; }
+    virtual string getMatrixElementType() { return "int"; }
     
     virtual SharedRAbundVectors* getSharedRAbundVectors() { return shared; }
-    //virtual SharedRAbundFloatVectors* getSharedRAbundFloatVectors();
-    virtual PhyloSummary* getTaxSummary() { return taxSum; }
-    virtual PhyloSummary* getConsTaxSummary() { return consTaxSum; }
+    
+    //otu taxonomies
     virtual vector<Taxonomy> getConsTaxonomies() { return consTax; }
-    virtual map<string, string> getTaxonomies() {  return groupTaxonomies; }
+    
+    //sample taxonomies
+    virtual map<string, string> getGroupTaxonomies() {  return groupTaxonomies; }
     
 protected:
     
     MothurOut* m;
     Utils util;
-    string version, formatURL, basis, label; //version = simple or hdf5, set by child
-    int printLevel, maxLevel;
-    bool relabund;
-    
+    string version, formatURL, label; //version = simple or hdf5, set by child
+    int maxLevel;
+   
     SharedRAbundVectors* shared;
-    PhyloSummary* taxSum;
-    PhyloSummary* consTaxSum;
     vector<Taxonomy> consTax;
     map<string, string> groupTaxonomies;
     
