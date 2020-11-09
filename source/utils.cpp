@@ -1914,7 +1914,7 @@ bool Utils::dirCheckExists(string& dirName, bool reportError){
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
         
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
+#if defined NON_WINDOWS
 
         struct stat info;
         
@@ -1951,15 +1951,12 @@ bool Utils::mkDir(string& dirName){
 
 #if defined NON_WINDOWS
         
-       int status = mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int status = mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         
         if (status == 0) { return true; }
 #else
         
-        string makeDirectoryCommand = "mkdir \"" + dirName + "\"";
-        system(makeDirectoryCommand.c_str());
-        
-        if (dirCheckWritable(dirName)) { return true; }
+        if (CreateDirectory(dirName.c_str(), NULL)) { return true; }
         
 #endif
         
