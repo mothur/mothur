@@ -1949,10 +1949,20 @@ bool Utils::mkDir(string& dirName){
         bool dirExist = dirCheckExists(dirName, false);
         if (dirExist) { return true; }
 
-        string makeDirectoryCommand = "mkdir -p \"" + dirName + "\"";
+#if defined NON_WINDOWS
+        
+       int status = mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        
+        if (status == 0) { return true; }
+#else
+        
+        string makeDirectoryCommand = "mkdir \"" + dirName + "\"";
         system(makeDirectoryCommand.c_str());
+        
         if (dirCheckWritable(dirName)) { return true; }
-
+        
+#endif
+        
         return false;
     }
     catch(exception& e) {
