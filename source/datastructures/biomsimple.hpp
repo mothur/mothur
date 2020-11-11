@@ -22,13 +22,17 @@ public:
     ~BiomSimple() {  }
     
     void read(string);
-    string getMatrixElementType() { return matrixElementType; }
+    
+    void printHeading(ofstream&, string, string); //fileHandle, mothurVersion, sharedfileName
+    void print(ofstream&);
+    
+    
     
     
 private:
    
-    //examples: tableType = "OTU table", matrixFormat = "sparse" or "dense", matrixElementType = "int" or "float"
-    string matrixFormat, matrixElementType, tableType;
+    //examples: tableType = "OTU table", matrixFormat = "sparse" or "dense", 
+    string matrixFormat, tableType;
     
     string getTag(string&);
     void getDims(string, int&, int&);

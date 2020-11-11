@@ -30,10 +30,15 @@ public:
     virtual ~Biom();
     
     virtual void read(string) = 0;
+    virtual void print(ofstream&) = 0;
+    
+    virtual void printHeading(ofstream&, string, string) {}
+    
     virtual string getVersion() { return version; }
-    virtual string getMatrixElementType() { return "int"; }
+    virtual string getMatrixElementType() { return matrixElementType; }
     
     virtual SharedRAbundVectors* getSharedRAbundVectors() { return shared; }
+    virtual SharedRAbundFloatVectors* getSharedRAbundFloatVectors() { return sharedFloat; }
     
     //otu taxonomies
     virtual vector<Taxonomy> getConsTaxonomies() { return consTax; }
@@ -45,10 +50,11 @@ protected:
     
     MothurOut* m;
     Utils util;
-    string version, formatURL, label; //version = simple or hdf5, set by child
+    string version, formatURL, label, matrixElementType; //version = simple or hdf5, set by child. matrixElementType = "int" or "float"
     int maxLevel;
    
-    SharedRAbundVectors* shared;
+    SharedRAbundVectors* shared; //always created with read
+    SharedRAbundFloatVectors* sharedFloat; //only created if the matrixElementType is float
     vector<Taxonomy> consTax;
     map<string, string> groupTaxonomies;
     

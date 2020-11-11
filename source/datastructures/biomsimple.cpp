@@ -555,8 +555,246 @@ SharedRAbundVectors* BiomSimple::extractOTUData(string line, vector<string>& gro
         return lookup;
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomInfoCommand", "readData");
+        m->errorOut(e, "BiomSimple", "readData");
         exit(1);
     }
+}
+//**********************************************************************************************************************
+void BiomSimple::printHeading(ofstream& out, string mothurVersionString, string sharedfile) {
+    try {
+        //string mothurString = "mothur" + toString(current->getVersion());
+        
+        time_t rawtime; struct tm * timeinfo;
+        time ( &rawtime );
+        timeinfo = localtime ( &rawtime );
+        string dateString = asctime (timeinfo);
+        int pos = dateString.find('\n');
+        if (pos != string::npos) { dateString = dateString.substr(0, pos);}
+        string spaces = "      ";
+        
+        //standard
+        out << "{\n" + spaces + "\"id\":\"" + util.getSimpleName(sharedfile) + "-" + label + "\",\n" + spaces + "\"format\": \"" + version + "\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
+        out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurVersionString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
+        
+   
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomSimple", "printHeadings");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void BiomSimple::print(ofstream& out) {
+    try {
+       /* vector<string> metadata = getMetaData(lookup);
+        int numBins = lookup->getNumBins();
+        
+        if (m->getControl_pressed()) {  out.close(); return 0; }
+        
+        //get row info
+        /*"rows":[
+                {"id":"GG_OTU_1", "metadata":null},
+                {"id":"GG_OTU_2", "metadata":null},
+                {"id":"GG_OTU_3", "metadata":null},
+                {"id":"GG_OTU_4", "metadata":null},
+                {"id":"GG_OTU_5", "metadata":null}
+                ],*/
+       /* out << spaces + "\"rows\":[\n";
+        string rowFront = spaces + spaces + "{\"id\":\"";
+        string rowBack = "\", \"metadata\":";
+        vector<string> currentLabels = lookup->getOTUNames();
+        for (int i = 0; i < numBins-1; i++) {
+            if (m->getControl_pressed()) {  out.close(); return 0; }
+            out << rowFront << currentLabels[i] << rowBack << metadata[i] << "},\n";
+        }
+        out << rowFront << currentLabels[(numBins-1)] << rowBack << metadata[(numBins-1)] << "}\n" + spaces + "],\n";
+       
+        //get column info
+        /*"columns": [
+                    {"id":"Sample1", "metadata":null},
+                    {"id":"Sample2", "metadata":null},
+                    {"id":"Sample3", "metadata":null},
+                    {"id":"Sample4", "metadata":null},
+                    {"id":"Sample5", "metadata":null},
+                    {"id":"Sample6", "metadata":null}
+                    ],*/
+        /*
+        string colBack = "\", \"metadata\":";
+        out << spaces + "\"columns\":[\n";
+        vector<string> namesOfGroups = lookup->getNamesGroups();
+        for (int i = 0; i < namesOfGroups.size()-1; i++) {
+            if (m->getControl_pressed()) {  out.close(); return 0; }
+            out << rowFront << namesOfGroups[i] << colBack << sampleMetadata[i] << "},\n";
+        }
+        out << rowFront << namesOfGroups[(namesOfGroups.size()-1)] << colBack << sampleMetadata[lookup->size()-1] << "}\n" + spaces + "],\n";
+        
+        out << spaces + "\"matrix_type\": \"" << format << "\",\n" + spaces + "\"matrix_element_type\": \"int\",\n";
+        out <<  spaces + "\"shape\": [" << numBins << "," << lookup->size() << "],\n";
+        out << spaces + "\"data\":  [";
+        
+        vector<string> dataRows;
+        if (format == "sparse") {
+            /*"data":[[0,2,1],
+             [1,0,5],
+             [1,1,1],
+             [1,3,2],
+             [1,4,3],
+             [1,5,1],
+             [2,2,1],
+             [2,3,4],
+             [2,4,2],
+             [3,0,2],
+             [3,1,1],
+             [3,2,1],
+             [3,5,1],
+             [4,1,1],
+             [4,2,1]
+             ]*/
+        /*    string output = "";
+            for (int i = 0; i < lookup->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { out.close(); return 0; }
+                vector<int> binAbunds = lookup->getOTU(i);
+                
+                for (int j = 0; j < binAbunds.size(); j++) {
+                    int abund = binAbunds[j];
+                    string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
+                    //only print non zero values
+                    if (abund != 0) { dataRows.push_back(binInfo); }
+                }
+            }
+        }else {
+            
+            /* "matrix_type": "dense",
+             "matrix_element_type": "int",
+             "shape": [5,6],
+             "data":  [[0,0,1,0,0,0],
+             [5,1,0,2,3,1],
+             [0,0,1,4,2,0],
+             [2,1,1,0,0,1],
+             [0,1,1,0,0,0]]*/
+            /*
+            for (int i = 0; i < lookup->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { out.close(); return 0; }
+                
+                string binInfo = "[";
+                vector<int> binAbund = lookup->getOTU(i);
+                for (int j = 0; j < binAbund.size()-1; j++) {  binInfo += toString(binAbund[j]) + ","; }
+                binInfo += toString(binAbund[binAbund.size()-1]) + "]";
+                dataRows.push_back(binInfo);
+            }
+        }
+        
+        for (int i = 0; i < dataRows.size()-1; i++) {
+            out << dataRows[i] << ",\n" + spaces  + spaces;
+        }
+        out << dataRows[dataRows.size()-1] << "]\n";
+        
+        out << "}\n";*/
+   
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomSimple", "print");
+        exit(1);
+    }
+}
+/**********************************************************************************************************************
+vector<string> BiomSimple::getMetaData(SharedRAbundVectors*& lookup){
+    try {
+        vector<string> metadata;
+        
+        if (consTax.size() == 0) { for (int i = 0; i < lookup->getNumBins(); i++) {  metadata.push_back("null");  } }
+        else {
+            
+            //should the labels be Otu001 or PhyloType001
+            string firstBin = lookup->getOTUNames()[0];
+            string binTag = "Otu";
+            if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
+            
+            //convert list file bin labels to shared file bin labels
+            //parse tax strings
+            //save in map
+            map<string, string> labelTaxMap;
+            string snumBins = toString(otuLabels.size());
+            for (int i = 0; i < otuLabels.size(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                //if there is a bin label use it otherwise make one
+                if (util.isContainingOnlyDigits(otuLabels[i])) {
+                    string binLabel = binTag;
+                    string sbinNumber = otuLabels[i];
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabel = util.getSimpleLabel(binLabel);
+                    labelTaxMap[binLabel] = taxs[i];
+                }else {
+                    map<string, string>::iterator it = labelTaxMap.find(util.getSimpleLabel(otuLabels[i]));
+                    if (it == labelTaxMap.end()) {
+                        labelTaxMap[util.getSimpleLabel(otuLabels[i])] = taxs[i];
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  otuLabels[i] + " because it's simple label " + util.getSimpleLabel(otuLabels[i]) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->setControl_pressed(true);
+                    }
+                }
+            }
+            
+            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
+            if (lookup->getNumBins() != labelTaxMap.size()) {
+                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(lookup->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            }
+            
+            //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
+            if (picrust) {  getGreenGenesOTUIDs(lookup, labelTaxMap);  }
+            
+            //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
+            
+            //traverse the binLabels forming the metadata strings and saving them
+            //make sure to sanity check
+            map<string, string>::iterator it;
+            vector<string> currentLabels = lookup->getOTUNames();
+            for (int i = 0; i < lookup->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                it = labelTaxMap.find(util.getSimpleLabel(currentLabels[i]));
+                
+                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + currentLabels[i] + ".\n"); m->setControl_pressed(true); }
+                else {
+                    vector<string> bootstrapValues;
+                    string data = "{\"taxonomy\":[";
+            
+                    vector<string> scores;
+                    vector<string> taxonomies = parseTax(it->second, scores);
+                    
+                    for (int j = 0; j < taxonomies.size()-1; j ++) { data += "\"" + taxonomies[j] + "\", "; }
+                    data += "\"" + taxonomies[taxonomies.size()-1] + "\"]";
+                    
+                    //add bootstrap values if available
+                    if (scores[0] != "null") {
+                        data += ", \"bootstrap\":[";
+                        
+                        for (int j = 0; j < scores.size()-1; j ++) { data += scores[j] + ", "; }
+                        data += scores[scores.size()-1] + "]";
+
+                    }
+                    data += "}";
+                    
+                    metadata.push_back(data);
+                }
+            }
+        }
+        
+        return metadata;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomSimple", "getMetadata");
+        exit(1);
+    }
+
 }
 /**************************************************************************************************/
