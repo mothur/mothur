@@ -668,15 +668,15 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
         outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
         
         if (method == "closed") {
-            sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-            
+            sensFile << "label\tcutoff\tnumotus\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+            int numBins = list->getNumBins();
             if (printref) { //combo
                 results = cluster.getStats(tp, tn, fp, fn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn;
+                sensFile << cutoff << '\t' << cutoff << '\t' << numBins << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn;
                 for (int i = 0; i < results.size(); i++) {  sensFile << '\t' << results[i]; } sensFile << '\n';
             }else { //fit
                 fitresults = cluster.getFitStats(fittp, fittn, fitfp, fitfn);
-                sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
+                sensFile << cutoff << '\t' << cutoff << '\t' << numBins << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
                 for (int i = 0; i < fitresults.size(); i++) {  sensFile << "\t" << fitresults[i]; } sensFile << endl;
             }
         }else {
