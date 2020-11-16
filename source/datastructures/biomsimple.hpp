@@ -12,22 +12,21 @@
 //biom version 0.9.1
 
 #include "biom.hpp"
+#include "picrust.hpp"
 
 class BiomSimple : public Biom {
     
 public:
     
     BiomSimple();
-    BiomSimple(string, string); // filename, label
+    BiomSimple(string, string); // filename, label, picrust
     ~BiomSimple() {  }
     
     void read(string);
     
     void printHeading(ofstream&, string, string); //fileHandle, mothurVersion, sharedfileName
-    void print(ofstream&);
-    
-    
-    
+    void print(ofstream&, vector<string>, Picrust*); //filehandle, metatdata, picrust
+
     
 private:
    
@@ -42,6 +41,8 @@ private:
     vector<string> getNamesAndTaxonomies(string);
     string getName(string);
     string getTaxonomy(string, string);
+    vector<string> getMetaData(Picrust*);
+    
 };
 
 

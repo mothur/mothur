@@ -243,7 +243,9 @@ public:
     float removeConfidences(string&);
     string removeQuotes(string);
     void removeQuotes(vector<Taxon>& tax);
+    vector<string> parseTax(string tax, vector<string>& scores);
     bool stringBlank (string);
+    
     
     //file reading
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&, string optionalOutput = "");//input, allLines, userLabels, processedLabels, lastLabel

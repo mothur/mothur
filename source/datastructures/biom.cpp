@@ -16,7 +16,7 @@ Biom::Biom() {
         formatURL = "http://biom-format.org";
         label = ""; version = "";
        
-        shared = NULL; 
+        shared = NULL;  sharedFloat = NULL;
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -24,14 +24,14 @@ Biom::Biom() {
     }
 }
 /**************************************************************************************************/
-Biom::Biom(string v) : version(v){
+Biom::Biom(string v) : version(v) {
     try {
         m = MothurOut::getInstance();
         
         formatURL = "http://biom-format.org";
         label = "";
         
-        shared = NULL;
+        shared = NULL; sharedFloat = NULL;
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -41,6 +41,6 @@ Biom::Biom(string v) : version(v){
 /**************************************************************************************************/
 Biom::~Biom() {
     if (shared != NULL) { delete shared; }
-    
+    if (sharedFloat != NULL) { delete sharedFloat; }
 }
 /**************************************************************************************************/

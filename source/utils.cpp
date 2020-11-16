@@ -1999,6 +1999,57 @@ map<string, vector<string> > Utils::parseClasses(string classes){
         exit(1);
     }
 }
+/**************************************************************************************************/
+//returns {Bacteria, Bacteroidetes, ..} and scores is filled with {100, 98, ...} or {null, null, null}
+vector<string> Utils::parseTax(string tax, vector<string>& scores) {
+    try {
+        
+        string taxon;
+        vector<string> taxs;
+        
+        while (tax.find_first_of(';') != -1) {
+            
+            if (m->getControl_pressed()) { return taxs; }
+            
+            //get taxon
+            taxon = tax.substr(0,tax.find_first_of(';'));
+            
+            int pos = taxon.find_last_of('(');
+            if (pos != -1) {
+                //is it a number?
+                int pos2 = taxon.find_last_of(')');
+                if (pos2 != -1) {
+                    string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
+                    if (isNumeric1(confidenceScore)) {
+                        taxon = taxon.substr(0, pos); //rip off confidence
+                        scores.push_back(confidenceScore);
+                    }else{ scores.push_back("null"); }
+                }
+            }else{ scores.push_back("null"); }
+            
+            //strip "" if they are there
+            pos = taxon.find("\"");
+            if (pos != string::npos) {
+                string newTax = "";
+                for (int k = 0; k < taxon.length(); k++) {
+                    if (taxon[k] != '\"') { newTax += taxon[k]; }
+                }
+                taxon = newTax;
+            }
+            
+            //look for bootstrap value
+            taxs.push_back(taxon);
+            tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+        }
+        
+        return taxs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "parseTax");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 string Utils::hasPath(string longName){
     try {

@@ -15,6 +15,7 @@
 #include "sharedrabundvectors.hpp"
 #include "phylosummary.h"
 #include "taxonomy.hpp"
+#include "picrust.hpp"
 
 //http://biom-format.org
 //http://biom-format.org/documentation/format_versions/biom-1.0.html
@@ -30,7 +31,7 @@ public:
     virtual ~Biom();
     
     virtual void read(string) = 0;
-    virtual void print(ofstream&) = 0;
+    virtual void print(ofstream&, vector<string>, Picrust*) = 0;
     
     virtual void printHeading(ofstream&, string, string) {}
     
