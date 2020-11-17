@@ -20,14 +20,14 @@
 class Picrust {
     
 public:
-    Picrust(string, string);
+    Picrust(string, string); //reference, otumap
     Picrust();
     ~Picrust();
     
     void read(string, string);
     
-    void setGGOTUIDs(map<string, string>&, SharedRAbundFloatVectors*);
-    void setGGOTUIDs(map<string, string>&, SharedRAbundVectors*);
+    void setGGOTUIDs(map<string, string>&, SharedRAbundFloatVectors*&);
+    void setGGOTUIDs(map<string, string>&, SharedRAbundVectors*&);
     
         
 protected:

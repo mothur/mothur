@@ -19,7 +19,7 @@ class BiomSimple : public Biom {
 public:
     
     BiomSimple();
-    BiomSimple(string, string); // filename, label, picrust
+    BiomSimple(string, string); // filename, label
     ~BiomSimple() {  }
     
     void read(string);

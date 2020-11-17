@@ -12,7 +12,7 @@
 
 #include "command.hpp"
 #include "inputdata.h"
-
+#include "picrust.hpp"
 
 class MakeBiomCommand : public Command {
 	
@@ -35,22 +35,17 @@ public:
 private:
     
 	string sharedfile, relabundfile, contaxonomyfile, metadatafile, groups,  format, label, referenceTax, picrustOtuFile, inputFileName, fileFormat;
-	vector<string> outputNames, Groups, sampleMetadata;
+	vector<string> outputNames, Groups;
 	set<string> labels;
     
 	bool abort, allLines, picrust;
     
-    int getBiom(SharedRAbundVectors*&);
-    int getBiom(SharedRAbundFloatVectors*&);
-    vector<string> getMetaData(SharedRAbundVectors*&);
-    vector<string> getMetaData(SharedRAbundFloatVectors*&);
-    vector<string> parseTax(string tax, vector<string>& scores);
-    int getSampleMetaData(SharedRAbundVectors*&);
-    int getSampleMetaData(SharedRAbundFloatVectors*&);
-    //for picrust
-    int getGreenGenesOTUIDs(SharedRAbundVectors*&, map<string, string>&);
-    int getGreenGenesOTUIDs(SharedRAbundFloatVectors*&, map<string, string>&);
-    map<string, string> readGGOtuMap();
+    void getBiom(SharedRAbundVectors*&, Picrust*, vector<Taxonomy>, vector<string>);
+    void getBiom(SharedRAbundFloatVectors*&, Picrust*, vector<Taxonomy>, vector<string>);
+     
+    vector<string> getSampleMetaData(SharedRAbundVectors*&);
+    vector<string> getSampleMetaData(SharedRAbundFloatVectors*&);
+    
 };
 
 

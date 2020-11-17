@@ -148,6 +148,7 @@ public:
     void printAccnos(string, set<string>&);
     void printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
+    void readConsTax(string, vector<Taxonomy>&);
     vector<Taxonomy> readConsTax(string inputfile, PhyloTree& tree); //fills tree
     int readConsTax(string, map<int, consTax2>&);
     void readNames(string, map<string, long long>&);

@@ -21,7 +21,7 @@ class Taxonomy {
 public:
     
     Taxonomy();
-    Taxonomy(string, string, int);
+    Taxonomy(string, string, int); //name, tax, abund
     Taxonomy(string, string);
     Taxonomy(ifstream&);
     ~Taxonomy() {}

@@ -13,7 +13,8 @@
 BiomSimple::BiomSimple() : Biom(){
     try {
        
-        version = "Biological Observation Matrix 0.9.1";
+        version = "Biological Observation Matrix 1.0.0";
+        matrixFormat = "sparse";
     }
     catch(exception& e) {
         m->errorOut(e, "BiomSimple", "BiomSimple");
@@ -22,9 +23,9 @@ BiomSimple::BiomSimple() : Biom(){
 }
 
 /**************************************************************************************************/
-BiomSimple::BiomSimple(string fname, string l) : Biom("Biological Observation Matrix 0.9.1"){
+BiomSimple::BiomSimple(string fname, string l) : Biom("Biological Observation Matrix 1.0.0"){
     try {
-        label = l;
+        label = l; matrixFormat = "sparse";
         read(fname);
     }
     catch(exception& e) {
@@ -718,7 +719,7 @@ void BiomSimple::print(ofstream& out, vector<string> sampleMetadata, Picrust* pi
                         float abund = binAbunds[j];
                         string binInfo = "[" + toString(i) + "," + toString(j) + "," + toString(abund) + "]";
                         //only print non zero values
-                        if (util.isEqual(abund,zero)) { dataRows.push_back(binInfo); }
+                        if (!util.isEqual(abund,zero)) { dataRows.push_back(binInfo); }
                     }
                 }
             }

@@ -2454,6 +2454,37 @@ vector<consTax> Utils::readConsTax(string inputfile){
     }
 }
 //**********************************************************************************************************************
+void Utils::readConsTax(string inputfile, vector<Taxonomy>& conTax){
+    try {
+        conTax.clear();
+        
+        ifstream in; openInputFile(inputfile, in);
+        getline(in); //read headers
+
+        while (!in.eof()) {
+
+            if (m->getControl_pressed()) { break; }
+
+            string otu = ""; string tax = "unknown";
+            int size = 0;
+
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+
+            Taxonomy temp(otu, tax, size);
+            conTax.push_back(temp);
+        }
+        in.close();
+
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readConsTax");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int Utils::readConsTax(string inputfile, map<int, consTax2>& taxes){
     try {
         ifstream in;

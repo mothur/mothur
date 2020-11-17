@@ -31,6 +31,8 @@ public:
     virtual ~Biom();
     
     virtual void read(string) = 0;
+    virtual void load(SharedRAbundVectors* s, vector<Taxonomy> c);
+    virtual void load(SharedRAbundFloatVectors* s, vector<Taxonomy> c);
     virtual void print(ofstream&, vector<string>, Picrust*) = 0;
     
     virtual void printHeading(ofstream&, string, string) {}

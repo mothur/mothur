@@ -66,7 +66,7 @@ void Picrust::read(string ref, string otumapfile){
     }
 }
 //**********************************************************************************************************************
-void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVectors* lookup){
+void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVectors*& lookup){
     try {
         
         map<string, vector<string> > ggOTUIDs;
@@ -86,7 +86,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVec
                 OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
                 thisPos = OTUTaxonomy.find_last_of(";"); //remove rest of parent taxon
                 if (thisPos != string::npos) {
-                    OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
+                    OTUTaxonomy = OTUTaxonomy.substr(0, thisPos+1);
                 }
             }
             
@@ -210,13 +210,13 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVec
         return;
     }
     catch(exception& e) {
-        m->errorOut(e, "Picrust", "getGGOTUIDs");
+        m->errorOut(e, "Picrust", "setGGOTUIDs");
         exit(1);
     }
     
 }
 //**********************************************************************************************************************
-void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors* lookup){
+void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*& lookup){
     try {
         
         map<string, vector<string> > ggOTUIDs;
@@ -236,7 +236,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*
                 OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
                 thisPos = OTUTaxonomy.find_last_of(";"); //remove rest of parent taxon
                 if (thisPos != string::npos) {
-                    OTUTaxonomy = OTUTaxonomy.substr(0, thisPos);
+                    OTUTaxonomy = OTUTaxonomy.substr(0, thisPos+1);
                 }
             }
             
@@ -360,7 +360,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*
         return;
     }
     catch(exception& e) {
-        m->errorOut(e, "Picrust", "getGGOTUIDs");
+        m->errorOut(e, "Picrust", "setGGOTUIDs");
         exit(1);
     }
     
