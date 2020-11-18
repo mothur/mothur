@@ -23,7 +23,6 @@ public:
     ~BiomSimple() {  }
     
     void read(string);
-    
     void printHeading(ofstream&, string, string); //fileHandle, mothurVersion, sharedfileName
     void print(ofstream&, vector<string>, Picrust*); //filehandle, metatdata, picrust
 

@@ -13,6 +13,7 @@
 #include "inputdata.h"
 #include "phylosummary.h"
 #include "biomsimple.hpp"
+#include "biomhdf5.hpp"
 
 #define MAX_NAME 1024
 

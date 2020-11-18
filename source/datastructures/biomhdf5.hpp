@@ -6,6 +6,10 @@
 //  Copyright © 2020 Schloss Lab. All rights reserved.
 //
 
+
+//#ifdef USE_HDF5
+//#endif
+
 #ifndef biomhdf5_hpp
 #define biomhdf5_hpp
 
@@ -17,13 +21,31 @@ class BiomHDF5 : public Biom {
     
 public:
     
-    BiomHDF5(string);
+    BiomHDF5();
+    BiomHDF5(string, string);
     ~BiomHDF5() {  }
+    
+    void read(string);
+    void print(ofstream&, vector<string>, Picrust*) {}
     
     
     
 private:
+    int nnz;
    
+    set<string> requiredTopLevelAttrib;
+    map<string, vector<string> > requiredOTUDatasets;
+    map<string, vector<string> > requiredSampleDatasets;
+    map<string, vector<string> > optionalDatasets;
+    
+    vector<string> otuNames, sampleNames, taxonomy, otuTaxonomies;
+    vector<int> indices, indptr;
+    vector<float> otudata;
+
+#ifdef USE_HDF5
+    void processAttributes(H5::Group&, set<string>&);
+    void checkGroups(H5::H5File&, map<string, vector<string> >&);
+#endif
     
 };
 

@@ -128,16 +128,23 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, str
     int bestRefDiffs = numeric_limits<int>::max();
     double bestRefLength = 0;
     
+   // if (queryName == "OTU_1008") {
+   //     cout << queryName << endl << querySeq << endl << endl;
+   // }
     for(int i=0;i<numRefSeqs;i++){
         double length = 0;
         double diffs = alignQueryToReferences(querySeq, referenceSeqs[i], queryAlign[i], refAlign[i], length);
         if(diffs < bestRefDiffs){
             bestRefDiffs = diffs;
             bestRefLength = length;
+            //if (queryName == "OTU_1008") {
+              //  cout << queryName << endl << queryAlign[i] << endl << endl << refAlign[i] << endl;
+            //}
             bestRefIndex = i;
         }
     }
 
+   
     if(bestRefDiffs >= 3){
         for(int i=0;i<numRefSeqs;i++){
             leftDiffs[i].assign(seqLength, 0);
@@ -409,6 +416,7 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
             rAlign = reference.substr(0, j) + rAlign;
         }
 
+        if (length == 0) { diffs = MAXINT; }
         
 		return diffs;
 	}

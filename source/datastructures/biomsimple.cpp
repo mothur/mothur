@@ -10,10 +10,9 @@
 #include "picrust.hpp"
 
 /**************************************************************************************************/
-BiomSimple::BiomSimple() : Biom(){
+BiomSimple::BiomSimple() : Biom("Biological Observation Matrix 1.0.0"){
     try {
-       
-        version = "Biological Observation Matrix 1.0.0";
+
         matrixFormat = "sparse";
     }
     catch(exception& e) {
