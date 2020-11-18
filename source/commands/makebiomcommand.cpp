@@ -100,6 +100,7 @@ vector<string> MakeBiomCommand::setParameters(){
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter ppicrust("picrust", "InputTypes", "", "", "none", "none", "refPi","shared",false,false); parameters.push_back(ppicrust);
+        CommandParameter poutput("output", "Multiple", "simple-hdf5", "hdf5", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -134,6 +135,7 @@ string MakeBiomCommand::getHelpString(){
         helpString += "The metadata parameter is used to provide experimental parameters to the columns.  Things like 'sample1 gut human_gut'. \n";
         helpString += "The picrust parameter is used to provide the greengenes OTU IDs map table.  NOTE: Picrust requires a greengenes taxonomy. \n";
         helpString += "The referencetax parameter is used with the picrust parameter.  Picrust requires the greengenes OTU IDs to be in the biom file. \n";
+        helpString += "The output parameter allows you to specify format of your biom file. Options hdf5 or simple. Default is hdf5, unless you are running a version without HDF5 libraries.\n";
 		helpString += "The make.biom command should be in the following format: make.biom(shared=yourShared, groups=yourGroups, label=yourLabels).\n";
 		helpString += "Example make.biom(shared=abrecovery.an.shared, groups=A-B-C).\n";
 		helpString += "The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n";
@@ -248,6 +250,27 @@ MakeBiomCommand::MakeBiomCommand(string option) {
 			if ((format != "sparse") && (format != "dense")) {
 				m->mothurOut(format + " is not a valid option for the matrixtype parameter. Options are sparse and dense.\n");  abort = true; 
 			}
+            
+            output = validParameter.valid(parameters, "output");
+            if (output == "not found") {
+                #ifdef USE_HDF5
+                    output = "hdf5";
+                #else
+                    output = "simple";
+                #endif
+            }
+            
+            if ((output != "hdf5") && (output != "simple")) {
+                 m->mothurOut("Invalid option for output. output options are hdf5 and simple, quitting.\n"); abort = true;
+            }
+            
+            if (output == "hdf5") {
+                #ifdef USE_HDF5
+                //do nothing we have the api
+                #else
+                    m->mothurOut("[ERROR]: To write HDF5 biom files, you must have the API installed, quitting.\n"); abort=true;
+                #endif
+            }
 		}
         
 	}
