@@ -961,7 +961,28 @@ vector<bool> Utils::allGZFiles(vector<string> & files){
         exit(1);
     }
 }
-
+/***********************************************************************/
+//returns false if no api installed
+bool Utils::isHDF5(string filename){
+    try {
+        bool result = false;
+        
+        #ifdef USE_HDF5
+            if(!H5::H5File::isHdf5(filename.c_str())){
+                //m->mothurOut("[WARNING]: " + filename + " is not an HDF5 file.\n");
+                return false;
+            }else { return true; }
+        #else
+            return false;
+        #endif
+        
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isHDF5");
+        exit(1);
+    }
+}
 /***********************************************************************/
 vector<bool> Utils::isGZ(string filename){
     try {
