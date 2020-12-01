@@ -9,7 +9,6 @@
 #include "makebiomcommand.h"
 #include "inputdata.h"
 #include "phylotree.h"
-#include "biomsimple.hpp"
 
 //taken from http://biom-format.org/documentation/biom_format.html
 /* Minimal Sparse 
@@ -367,11 +366,17 @@ void MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup, Picrust* picrust, ve
         
         string mothurString = "mothur_" + toString(current->getVersion());
 
-        BiomSimple biom; biom.load(lookup, consTax);
-       
-        biom.printHeading(out, mothurString, sharedfile);
+        Biom* biom;
+        if (output == "hdf5")   { biom = new BiomHDF5();   }
+        else                   { biom = new BiomSimple(); }
         
-        biom.print(out, sampleMetadata, picrust);
+        biom->load(lookup, consTax);
+       
+        if (output != "hdf5")   {
+            biom->printHeading(out, mothurString, sharedfile);
+        }
+        
+        biom->print(out, sampleMetadata, picrust);
        
         out.close();
         
@@ -380,11 +385,12 @@ void MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup, Picrust* picrust, ve
             outputNames.push_back(outputFileName2); outputTypes["shared"].push_back(outputFileName2);
             ofstream out2; util.openOutputFile(outputFileName2, out2);  bool printHeaders = true;
         
-            biom.getSharedRAbundVectors()->print(out2, printHeaders);
+            biom->getSharedRAbundVectors()->print(out2, printHeaders);
         
             out2.close();
         }
        
+        delete biom;
     }
 	catch(exception& e) {
 		m->errorOut(e, "MakeBiomCommand", "getBiom");

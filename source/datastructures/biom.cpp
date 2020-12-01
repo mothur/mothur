@@ -14,7 +14,9 @@ Biom::Biom() {
         m = MothurOut::getInstance();
         
         formatURL = "http://biom-format.org";
-        label = ""; version = ""; 
+        label = ""; version = "";
+        
+        tableID = "No Table ID";
        
         shared = NULL;  sharedFloat = NULL;
     }
@@ -30,6 +32,8 @@ Biom::Biom(string v) : version(v) {
         
         formatURL = "http://biom-format.org";
         label = "";
+        
+        tableID = "No Table ID";
         
         shared = NULL; sharedFloat = NULL;
     }

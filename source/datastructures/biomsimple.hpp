@@ -29,8 +29,7 @@ public:
     
 private:
    
-    //examples: tableType = "OTU table", matrixFormat = "sparse" or "dense", 
-    string matrixFormat, tableType;
+    
     
     string getTag(string&);
     void getDims(string, int&, int&);

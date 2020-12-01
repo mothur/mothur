@@ -13,6 +13,9 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "picrust.hpp"
+#include "biomsimple.hpp"
+#include "biomhdf5.hpp"
+
 
 class MakeBiomCommand : public Command {
 	

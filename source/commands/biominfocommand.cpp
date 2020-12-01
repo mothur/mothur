@@ -8,8 +8,6 @@
 
 #include "biominfocommand.h"
 
-
-
 //**********************************************************************************************************************
 vector<string> BiomInfoCommand::setParameters(){
     try {
