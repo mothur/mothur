@@ -307,6 +307,7 @@ void driver(vsearchData* params){
         cPara.push_back(tempVsearch);
         
         string fileToRemove = "";
+        string numProcessors = toString(params->processors);
         //are you using a reference file
         if (params->templatefile != "self") {
             string rootFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
@@ -346,6 +347,7 @@ void driver(vsearchData* params){
             cPara.push_back(temp);
 
         }else { //denovo
+            numProcessors = toString(1);
             char* tempIn = new char[16];
             *tempIn = '\0'; strncat(tempIn, "--uchime_denovo", 15);
             cPara.push_back(tempIn);
@@ -459,7 +461,6 @@ void driver(vsearchData* params){
         //--threads=1
         char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", 9);
         cPara.push_back(threads);
-        string numProcessors = toString(1);
         char* tempThreads = new char[numProcessors.length()+1];
         *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), numProcessors.length());
         cPara.push_back(tempThreads);
@@ -673,7 +674,7 @@ int ChimeraVsearchCommand::execute(){
             }
             in.close(); outT.close();
             
-            vsearchData* dataBundle = new vsearchData(dummay, outputFileName, vsearchLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, dummay, outputFileName, vsearchLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
 
             dataBundle->setDriverNames(outputFileName, alnsFileName, accnosFileName);
             driver(dataBundle);
@@ -1162,7 +1163,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
                 }
                 else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
             }
-            vsearchData* dataBundle = new vsearchData(thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
@@ -1178,7 +1179,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
             }
             else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
         }
-        vsearchData* dataBundle = new vsearchData(thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, fastafile, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, fastafile, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;

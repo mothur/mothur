@@ -52,14 +52,14 @@ struct vsearchData {
     map<string, vector<string> > parsedFiles;
     map<string, vector<string> > seqs2RemoveByGroup;
     
-    int count, numChimeras;
+    int count, numChimeras, processors;
     vector<string> groups;
     vsearchVariables* vars;
     MothurOut* m;
     Utils util;
     
     vsearchData(){}
-    vsearchData(map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
+    vsearchData(int proc, map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
         fastafile = f;
         dupsfile = n;
         formattedFastaFilename = file;
@@ -77,6 +77,7 @@ struct vsearchData {
         driverAlns = al;
         driverOutputFName = o;
         parsedFiles = g2f;
+        processors = proc;
     }
     void setDriverNames(string o, string al, string ac) {
         driverAccnos = ac;
