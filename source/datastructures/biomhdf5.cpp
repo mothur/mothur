@@ -484,12 +484,6 @@ void BiomHDF5::readAttributes(H5::H5File& file) {
 //**********************************************************************************************************************
 void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata, Picrust* picrust) {
     try {
-        //set required fields
-        set<string> requiredTopLevelAttrib;
-        requiredTopLevelAttrib.insert("id"); requiredTopLevelAttrib.insert("type"); requiredTopLevelAttrib.insert("format-url");
-        requiredTopLevelAttrib.insert("format-version"); requiredTopLevelAttrib.insert("generated-by"); requiredTopLevelAttrib.insert("creation-date");
-        requiredTopLevelAttrib.insert("shape"); requiredTopLevelAttrib.insert("nnz");
-        
         //set required datasets - groupname -> datasetname
         //"observation/ids" -> otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5
         
@@ -513,40 +507,80 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         
         int   RANK = 2;
         
+        //set required fields
+        set<string> requiredTopLevelAttrib;
+        //requiredTopLevelAttrib.insert("id"); requiredTopLevelAttrib.insert("type"); requiredTopLevelAttrib.insert("format-url");
+        //requiredTopLevelAttrib.insert("format-version"); //requiredTopLevelAttrib.insert("generated-by"); requiredTopLevelAttrib.insert("creation-date");
+        requiredTopLevelAttrib.insert("shape"); requiredTopLevelAttrib.insert("nnz");
+  
+        
         #ifdef USE_HDF5
            
         
             H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
         
-        H5::Group group = file.createGroup("/");
+            H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR); // Create new dataspace for attribute
+            H5::StrType strdatatype(H5::PredType::C_S1, 256); // Create new string datatype for attribute of length 256 characters
         
-        // Create new dataspace for attribute
-        H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR);
+            H5std_string idValue(tableID);
+            H5::Attribute idAttribute = file.createAttribute("id", strdatatype, attr_dataspace);
+            idAttribute.write(strdatatype, idValue);
         
-        H5::Attribute idAttribute = group.createAttribute("id", H5T_STRING, attr_dataspace);
+            H5std_string typeValue(tableType);
+            H5::Attribute typeAttribute = file.createAttribute("type", strdatatype, attr_dataspace);
+            typeAttribute.write(strdatatype, typeValue);
         
+            H5std_string formatUrl(formatURL);
+            H5::Attribute urlAttribute = file.createAttribute("format-url", strdatatype, attr_dataspace);
+            urlAttribute.write(strdatatype, formatUrl);
+        
+            H5std_string generatedByValue(mothurVersion);
+            H5::Attribute generatedByAttribute = file.createAttribute("generated-by", strdatatype, attr_dataspace);
+            generatedByAttribute.write(strdatatype, generatedByValue);
+        
+            time_t rawtime; struct tm * timeinfo;
+            time ( &rawtime );
+            timeinfo = localtime ( &rawtime );
+            string dateString = asctime (timeinfo);
+            int pos = dateString.find('\n');
+            if (pos != string::npos) { dateString = dateString.substr(0, pos);}
+        
+            H5std_string dataValue(dateString);
+            H5::Attribute dateAttribute = file.createAttribute("creation-date", strdatatype, attr_dataspace);
+            dateAttribute.write(strdatatype, dataValue);
 
-            // Create new string datatype for attribute
-            H5::StrType strdatatype(H5::PredType::C_S1, 256); // of length 256 characters
+            H5::DataType datatype(H5::PredType::NATIVE_INT); // Create new int datatype
+            const hsize_t dims=2;
+            hsize_t data[dims]; data[0] = 2; data[1] = 1;
+            H5::DataSpace intSpace(1, &dims);
+        
+            H5::Attribute formatVersionAttribute = file.createAttribute("format-version", datatype, intSpace);
+            formatVersionAttribute.write(datatype, data);
+        
+        H5::Attribute myatt_out = file.openAttribute("format-version");
+        hsize_t shape[2];
+            myatt_out.read(datatype, shape);
 
-            // Set up write buffer for attribute
-            const H5std_string strwritebuf ("a field that can be used to id a table (or null)");
+            // Display attribute contents
+            cout << formatVersionAttribute.getName() << " = " << shape[0] << '\t' << shape[1] << endl;
 
-            // Create attribute and write to it
-        //H5::Attribute myatt_in = dataset.createAttribute(ATTR_NAME, strdatatype, attr_dataspace);
-        idAttribute.write(strdatatype, strwritebuf);
+      
+        
+            //data[0] = shared->getNumBins(); data[0] = shared->size();
+            H5::Attribute shapeAttribute = file.createAttribute("shape", datatype, attr_dataspace);
+            shapeAttribute.write(datatype, data);
+        
+            hsize_t nnzValue = nnz;
+            H5::Attribute nnzAttribute = file.createAttribute("nnz", datatype, attr_dataspace);
+            nnzAttribute.write(datatype, &nnzValue);
+        
+      
 
             // Set up read buffer for attribute
             H5std_string strreadbuf ("");
 
             // Open attribute and read its contents
-        H5::Group     what(file.openGroup( "/" ));
-        H5::Attribute myatt_out = what.openAttribute("id");
-            myatt_out.read(strdatatype, strreadbuf);
-
-            // Display attribute contents
-            cout << "Attribute contents: " << strreadbuf << endl;
-
+        
         
             //int** data = new int*[numOtus*numGroups];
             

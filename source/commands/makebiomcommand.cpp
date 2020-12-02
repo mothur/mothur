@@ -360,8 +360,6 @@ void MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup, Picrust* picrust, ve
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sharedfile));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["biom"].push_back(outputFileName);
         
         string mothurString = "mothur_" + toString(current->getVersion());
@@ -371,14 +369,9 @@ void MakeBiomCommand::getBiom(SharedRAbundVectors*& lookup, Picrust* picrust, ve
         else                   { biom = new BiomSimple(); }
         
         biom->load(lookup, consTax);
-       
-        if (output != "hdf5")   {
-            biom->printHeading(out, mothurString, sharedfile);
-        }
+        biom->fillHeading(mothurString, sharedfile);
         
-        biom->print(out, sampleMetadata, picrust);
-       
-        out.close();
+        biom->print(outputFileName, sampleMetadata, picrust);
         
         if (picrust) {
             string outputFileName2 = getOutputFileName("shared",variables);
@@ -404,19 +397,14 @@ void MakeBiomCommand::getBiom(SharedRAbundFloatVectors*& lookup, Picrust* picrus
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         variables["[distance]"] = lookup->getLabel();
         string outputFileName = getOutputFileName("biom",variables);
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["biom"].push_back(outputFileName);
         
         string mothurString = "mothur_" + toString(current->getVersion());
         
         BiomSimple biom; biom.load(lookup, consTax);
        
-        biom.printHeading(out, mothurString, sharedfile);
-        
-        biom.print(out, sampleMetadata, picrust);
-        
-        out.close();
+        biom.fillHeading(mothurString, sharedfile);
+        biom.print(outputFileName, sampleMetadata, picrust);
         
         if (picrust) {
             string outputFileName2 = getOutputFileName("relabund",variables);

@@ -598,9 +598,15 @@ SharedRAbundVectors* BiomSimple::extractOTUData(string line, vector<string>& gro
     }
 }
 //**********************************************************************************************************************
-void BiomSimple::printHeading(ofstream& out, string mothurVersionString, string sharedfile) {
+void BiomSimple::print(string filename, vector<string> sampleMetadata, Picrust* picrust) {
     try {
-        //string mothurString = "mothur" + toString(current->getVersion());
+        vector<string> metadata = getMetaData(picrust);
+        int numBins = shared->getNumBins();
+        int numSamples = shared->size();
+        vector<string> currentLabels = shared->getOTUNames();
+        vector<string> namesOfGroups = shared->getNamesGroups();
+        
+        if (m->getControl_pressed()) { return; }
         
         time_t rawtime; struct tm * timeinfo;
         time ( &rawtime );
@@ -610,27 +616,12 @@ void BiomSimple::printHeading(ofstream& out, string mothurVersionString, string 
         if (pos != string::npos) { dateString = dateString.substr(0, pos);}
         string spaces = "      ";
         
-        //standard
-        out << "{\n" + spaces + "\"id\":\"" + util.getSimpleName(sharedfile) + "-" + label + "\",\n" + spaces + "\"format\": \"" + version + "\",\n" + spaces + "\"format_url\": \"http://biom-format.org\",\n";
-        out << spaces + "\"type\": \"OTU table\",\n" + spaces + "\"generated_by\": \"" << mothurVersionString << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
+        ofstream out; util.openOutputFile(filename, out);
+        
+        out << "{\n" + spaces + "\"id\":\"" + util.getSimpleName(sharedFileName) + "-" + label + "\",\n" + spaces + "\"format\": \"" + version + "\",\n" + spaces + "\"format_url\": \"" + formatURL + "\",\n";
+        out << spaces + "\"type\": \"" + tableType + " \",\n" + spaces + "\"generated_by\": \"" << mothurVersion << "\",\n" + spaces + "\"date\": \"" << dateString << "\",\n";
         
    
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomSimple", "printHeadings");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-void BiomSimple::print(ofstream& out, vector<string> sampleMetadata, Picrust* picrust) {
-    try {
-        vector<string> metadata = getMetaData(picrust);
-        int numBins = shared->getNumBins();
-        int numSamples = shared->size();
-        vector<string> currentLabels = shared->getOTUNames();
-        vector<string> namesOfGroups = shared->getNamesGroups();
-        
-        if (m->getControl_pressed()) {  out.close(); return; }
         
         //get row info
         /*"rows":[
@@ -641,7 +632,6 @@ void BiomSimple::print(ofstream& out, vector<string> sampleMetadata, Picrust* pi
                 {"id":"GG_OTU_5", "metadata":null}
                 ],*/
         
-        string spaces = "      ";
         out << spaces + "\"rows\":[\n";
         string rowFront = spaces + spaces + "{\"id\":\"";
         string rowBack = "\", \"metadata\":";

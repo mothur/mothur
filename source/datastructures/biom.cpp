@@ -17,6 +17,7 @@ Biom::Biom() {
         label = ""; version = "";
         
         tableID = "No Table ID";
+        mothurVersion = ""; sharedFileName = "";
        
         shared = NULL;  sharedFloat = NULL;
     }
@@ -34,6 +35,7 @@ Biom::Biom(string v) : version(v) {
         label = "";
         
         tableID = "No Table ID";
+        mothurVersion = ""; sharedFileName = "";
         
         shared = NULL; sharedFloat = NULL;
     }

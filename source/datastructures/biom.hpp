@@ -33,13 +33,9 @@ public:
     virtual void read(string) = 0;
     virtual void load(SharedRAbundVectors* s, vector<Taxonomy> c);
     virtual void load(SharedRAbundFloatVectors* s, vector<Taxonomy> c);
+    virtual void fillHeading(string mv, string sfn) { mothurVersion = mv; sharedFileName = sfn; }
     
-    //simple format prints
-    virtual void print(ofstream&, vector<string>, Picrust*) { }
-    virtual void printHeading(ofstream&, string, string) { }
-    
-    //hdf5 print
-    virtual void print(string, vector<string>, Picrust*) { }
+    virtual void print(string, vector<string>, Picrust*) { } //hdf5 print
     
     virtual string getVersion() { return version; }
     virtual string getMatrixElementType() { return matrixElementType; }
@@ -59,7 +55,7 @@ protected:
     Utils util;
     string matrixFormat, tableType;     //examples: tableType = "OTU table", matrixFormat = "sparse" or "dense"
     string version, formatURL, label, matrixElementType; //version = simple or hdf5, set by child. matrixElementType = "int" or "float"
-    string tableID;
+    string tableID, mothurVersion, sharedFileName;
     int maxLevel;
    
     SharedRAbundVectors* shared; //always created with read
