@@ -18,6 +18,7 @@ mothur
 Mothur.1
 DerivedData/
 mothur.entitlements
+tools
 
 *.stdout
 
