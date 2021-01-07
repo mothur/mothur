@@ -630,11 +630,10 @@ int driver(uchimeData* params){
             
             if (params->m->getControl_pressed()) { break; }
             
-            string name = "";
-            string chimeraFlag = "";
-            //in >> chimeraFlag >> name;
+            string name = ""; string chimeraFlag = "";
             
-            string line = params->util.getline(in);
+            string line = params->util.getline(in); params->util.gobble(in);
+            
             vector<string> pieces = params->util.splitWhiteSpace(line);
             if (pieces.size() > 2) {
                 name = pieces[1];
@@ -646,10 +645,8 @@ int driver(uchimeData* params){
                 
                 chimeraFlag = pieces[pieces.size()-1];
             }
-            //for (int i = 0; i < 15; i++) {  in >> chimeraFlag; }
-            params->util.gobble(in);
             
-            if (chimeraFlag == "Y") {  out << name << endl; params->numChimeras++; }
+            if (chimeraFlag == "Y") { out << name << endl; params->numChimeras++; }
             num++;
         }
         in.close();
@@ -1339,12 +1336,12 @@ int ChimeraUchimeCommand::createProcessesGroups(map<string, vector<string> >& gr
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;
+        seqs2RemoveByGroup = dataBundle->seqs2RemoveByGroup;
 
         for (int i = 0; i < processors-1; i++) {
             workerThreads[i]->join();
             num += data[i]->count;
             numChimeras += data[i]->numChimeras;
-            seqs2RemoveByGroup = dataBundle->seqs2RemoveByGroup;
             
             for (map<string, vector<string> >::iterator it = data[i]->seqs2RemoveByGroup.begin(); it != data[i]->seqs2RemoveByGroup.end(); it++) {
                            

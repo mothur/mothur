@@ -9,13 +9,10 @@
 /* Begin PBXBuildFile section */
 		219C1DE01552C4BD004209F9 /* newcommandtemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DDF1552C4BD004209F9 /* newcommandtemplate.cpp */; };
 		219C1DE41559BCCF004209F9 /* getcoremicrobiomecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */; };
-		4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A52118B352001C63B5 /* miseqsop.cpp */; };
-		4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */; };
 		4803D5AD211CA67F001C63B5 /* testsharedrabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */; };
 		4803D5B0211CD839001C63B5 /* testsharedrabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */; };
 		4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B1211DDA5A001C63B5 /* testsharedrabundvectors.cpp */; };
 		4803D5B621231D9D001C63B5 /* testsharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */; };
-		4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4803D5B721271B47001C63B5 /* 454sop.cpp */; };
 		48098ED6219DE7A500031FA4 /* testsubsample.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48098ED4219DE7A500031FA4 /* testsubsample.cpp */; };
 		4809EC95227B3A5B00B4D0E5 /* metrolognormal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48E7E0A12278A21B00B74910 /* metrolognormal.cpp */; };
 		4809EC98227B405700B4D0E5 /* metrologstudent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4809EC96227B405700B4D0E5 /* metrologstudent.cpp */; };
@@ -30,8 +27,6 @@
 		480D1E311EA92D5500BF9C77 /* fakeoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480D1E2F1EA92D5500BF9C77 /* fakeoptimatrix.cpp */; };
 		480E8DB11CAB12ED00A0D137 /* testfastqread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 480E8DAF1CAB12ED00A0D137 /* testfastqread.cpp */; };
 		480E8DB21CAB1F5E00A0D137 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
-		4810D5B3217A1D2F00C668E8 /* libhdf5.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA5215EB4750036D42C /* libhdf5.a */; };
-		4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 489ECDA7215EB4980036D42C /* libhdf5_cpp.a */; };
 		4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4810D5B5218208CC00C668E8 /* testcounttable.cpp */; };
 		4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEAF2289E13500677EE2 /* lnrarefaction.cpp */; };
 		4815BEB4228B371E00677EE2 /* lnshift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4815BEB2228B371E00677EE2 /* lnshift.cpp */; };
@@ -392,8 +387,6 @@
 		484976E42255412400F3A291 /* igabundance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E12255412400F3A291 /* igabundance.cpp */; };
 		484976E72256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
 		484976E82256799100F3A291 /* diversityestimatorcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484976E52256799100F3A291 /* diversityestimatorcommand.cpp */; };
-		4853365E225F7926003CC483 /* libgslcblas.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365D225F7926003CC483 /* libgslcblas.a */; };
-		48533660225F7929003CC483 /* libgsl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4853365F225F7929003CC483 /* libgsl.a */; };
 		48576EA11D05DBC600BBC9C0 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2114A7671C654D7400D3D8D9 /* averagelinkage.cpp */; };
 		48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */; };
 		48576EA51D05E8F600BBC9C0 /* testoptimatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */; };
@@ -448,8 +441,8 @@
 		48B662031BBB1B6600997EE4 /* testrenameseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48B662011BBB1B6600997EE4 /* testrenameseqscommand.cpp */; };
 		48BD4EB821F7724C008EA73D /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BD4EB621F7724C008EA73D /* filefile.cpp */; };
 		48BD4EB921F77258008EA73D /* filefile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BD4EB621F7724C008EA73D /* filefile.cpp */; };
-		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
-		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
+		48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.hpp */; };
+		48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.hpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.hpp */; };
 		48BDDA751ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */; };
 		48BDDA761ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */; };
 		48BDDA791ECA3B8E00F0F6C0 /* rabundfloatvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */; };
@@ -846,6 +839,8 @@
 		A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */; };
 		A7FF19F2140FFDA500AD216D /* trimoligos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FF19F1140FFDA500AD216D /* trimoligos.cpp */; };
 		A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */; };
+		F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
+		F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -902,10 +897,6 @@
 		219C1DE11552C508004209F9 /* newcommandtemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = newcommandtemplate.h; path = source/commands/newcommandtemplate.h; sourceTree = SOURCE_ROOT; };
 		219C1DE31559BCCD004209F9 /* getcoremicrobiomecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = getcoremicrobiomecommand.cpp; path = source/commands/getcoremicrobiomecommand.cpp; sourceTree = SOURCE_ROOT; };
 		219C1DE51559BCF2004209F9 /* getcoremicrobiomecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = getcoremicrobiomecommand.h; path = source/commands/getcoremicrobiomecommand.h; sourceTree = SOURCE_ROOT; };
-		4803D5A52118B352001C63B5 /* miseqsop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = miseqsop.cpp; path = TestMothur/IntegrationTests/miseqsop.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5A62118B352001C63B5 /* miseqsop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = miseqsop.hpp; path = TestMothur/IntegrationTests/miseqsop.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testintegrationalignseqs.cpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testintegrationalignseqs.hpp; path = TestMothur/IntegrationTests/testintegrationalignseqs.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5AB211CA67F001C63B5 /* testsharedrabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundvector.cpp; path = TestMothur/testcontainers/testsharedrabundvector.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5AC211CA67F001C63B5 /* testsharedrabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvector.hpp; path = TestMothur/testcontainers/testsharedrabundvector.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5AE211CD839001C63B5 /* testsharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvector.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
@@ -914,8 +905,6 @@
 		4803D5B2211DDA5A001C63B5 /* testsharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundvectors.hpp; path = TestMothur/testcontainers/testsharedrabundvectors.hpp; sourceTree = SOURCE_ROOT; };
 		4803D5B421231D9D001C63B5 /* testsharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testsharedrabundfloatvectors.cpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
 		4803D5B521231D9D001C63B5 /* testsharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = testsharedrabundfloatvectors.hpp; path = TestMothur/testcontainers/testsharedrabundfloatvectors.hpp; sourceTree = SOURCE_ROOT; };
-		4803D5B721271B47001C63B5 /* 454sop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 454sop.cpp; path = TestMothur/IntegrationTests/454sop.cpp; sourceTree = SOURCE_ROOT; };
-		4803D5B821271B47001C63B5 /* 454sop.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = 454sop.hpp; path = TestMothur/IntegrationTests/454sop.hpp; sourceTree = SOURCE_ROOT; };
 		48098ED4219DE7A500031FA4 /* testsubsample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = testsubsample.cpp; sourceTree = "<group>"; };
 		48098ED5219DE7A500031FA4 /* testsubsample.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = testsubsample.hpp; sourceTree = "<group>"; };
 		4809EC94227B2CB500B4D0E5 /* metrolognormal.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = metrolognormal.hpp; path = source/calculators/metrolognormal.hpp; sourceTree = SOURCE_ROOT; };
@@ -976,11 +965,8 @@
 		484976DE22552E0B00F3A291 /* erarefaction.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = erarefaction.hpp; path = source/calculators/erarefaction.hpp; sourceTree = SOURCE_ROOT; };
 		484976E12255412400F3A291 /* igabundance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = igabundance.cpp; path = source/calculators/igabundance.cpp; sourceTree = SOURCE_ROOT; };
 		484976E22255412400F3A291 /* igabundance.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = igabundance.hpp; path = source/calculators/igabundance.hpp; sourceTree = SOURCE_ROOT; };
-		484976E52256799100F3A291 /* diversityestimatorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityestimatorcommand.cpp; path = source/commands/diversityestimatorcommand.cpp; sourceTree = "<group>"; };
-		484976E62256799100F3A291 /* diversityestimatorcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityestimatorcommand.hpp; path = source/commands/diversityestimatorcommand.hpp; sourceTree = "<group>"; };
+		484976E52256799100F3A291 /* diversityestimatorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityestimatorcommand.cpp; path = source/commands/diversityestimatorcommand.cpp; sourceTree = SOURCE_ROOT; };
 		484F21691BA1C5F8001C1B5F /* makefile-internal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "makefile-internal"; sourceTree = SOURCE_ROOT; };
-		4853365D225F7926003CC483 /* libgslcblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgslcblas.a; path = ../../../../usr/local/gsl/lib/libgslcblas.a; sourceTree = "<group>"; };
-		4853365F225F7929003CC483 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = ../../../../usr/local/gsl/lib/libgsl.a; sourceTree = "<group>"; };
 		48576EA31D05E8F600BBC9C0 /* testoptimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testoptimatrix.cpp; path = TestMothur/testcontainers/testoptimatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48576EA41D05E8F600BBC9C0 /* testoptimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testoptimatrix.h; path = TestMothur/testcontainers/testoptimatrix.h; sourceTree = SOURCE_ROOT; };
 		48576EA61D05F59300BBC9C0 /* distpdataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = distpdataset.cpp; path = TestMothur/distpdataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -1000,8 +986,6 @@
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = SOURCE_ROOT; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = SOURCE_ROOT; };
 		4875F69922DCC723006A7D8C /* Ubuntu_18_Build.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Ubuntu_18_Build.txt; sourceTree = SOURCE_ROOT; };
-		48769D83218B60950023CD1F /* libboost_iostreams.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_iostreams.a; path = ../../../../usr/local/lib/libboost_iostreams.a; sourceTree = "<group>"; };
-		48769D85218B609F0023CD1F /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = ../../../../usr/local/lib/libboost_filesystem.a; sourceTree = "<group>"; };
 		48789AEF2061776100A7D848 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utf8.h; path = source/utf8.h; sourceTree = SOURCE_ROOT; };
 		48789AF02061776100A7D848 /* checked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = checked.h; path = source/checked.h; sourceTree = SOURCE_ROOT; };
 		48789AF12061776100A7D848 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = source/core.h; sourceTree = SOURCE_ROOT; };
@@ -1021,7 +1005,7 @@
 		48910D421D5243E500F60EDB /* mergecountcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergecountcommand.hpp; path = source/commands/mergecountcommand.hpp; sourceTree = SOURCE_ROOT; };
 		48910D451D58CAD700F60EDB /* opticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = opticluster.cpp; path = source/opticluster.cpp; sourceTree = SOURCE_ROOT; };
 		48910D491D58CBA300F60EDB /* optimatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optimatrix.cpp; path = source/datastructures/optimatrix.cpp; sourceTree = SOURCE_ROOT; };
-		48910D4A1D58CBA300F60EDB /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = "<group>"; };
+		48910D4A1D58CBA300F60EDB /* optimatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = optimatrix.h; path = source/datastructures/optimatrix.h; sourceTree = SOURCE_ROOT; };
 		48910D4C1D58CBFC00F60EDB /* opticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = opticluster.h; path = source/opticluster.h; sourceTree = SOURCE_ROOT; };
 		48910D4D1D58E26C00F60EDB /* testopticluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testopticluster.cpp; path = TestMothur/testopticluster.cpp; sourceTree = SOURCE_ROOT; };
 		48910D4E1D58E26C00F60EDB /* testopticluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testopticluster.h; path = TestMothur/testopticluster.h; sourceTree = SOURCE_ROOT; };
@@ -1034,14 +1018,6 @@
 		48998B68242E785100DBD0A9 /* onegapdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = onegapdist.cpp; path = source/calculators/onegapdist.cpp; sourceTree = SOURCE_ROOT; };
 		489B55701BCD7F0100FB7DC8 /* vsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vsearchfileparser.cpp; path = source/vsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		489B55711BCD7F0100FB7DC8 /* vsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vsearchfileparser.h; path = source/vsearchfileparser.h; sourceTree = SOURCE_ROOT; };
-		489ECDA3215EB30A0036D42C /* libhdf5_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_cpp.a; path = ../libhdf5_cpp.a; sourceTree = "<group>"; };
-		489ECDA5215EB4750036D42C /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = ../../../../usr/local/lib/libhdf5.a; sourceTree = "<group>"; };
-		489ECDA7215EB4980036D42C /* libhdf5_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_cpp.a; path = ../../../../usr/local/lib/libhdf5_cpp.a; sourceTree = "<group>"; };
-		489ECDA9215EB4BB0036D42C /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = ../../../../usr/local/lib/libhdf5_hl.a; sourceTree = "<group>"; };
-		489ECDAB215EB5690036D42C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../../../../usr/local/hdf5/lib; sourceTree = "<group>"; };
-		489ECDAD215EB7660036D42C /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = ../../../../usr/local/hdf5/lib/libhdf5_hl.a; sourceTree = "<group>"; };
-		489ECDAE215EB7660036D42C /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = ../../../../usr/local/hdf5/lib/libhdf5.a; sourceTree = "<group>"; };
-		489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl_cpp.a; path = ../../../../usr/local/lib/libhdf5_hl_cpp.a; sourceTree = "<group>"; };
 		48A0552E2490066C00D0F97F /* sffread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sffread.cpp; path = source/datastructures/sffread.cpp; sourceTree = SOURCE_ROOT; };
 		48A0552F2490066C00D0F97F /* sffread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = sffread.hpp; path = source/datastructures/sffread.hpp; sourceTree = SOURCE_ROOT; };
 		48A055312491577800D0F97F /* sffheader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sffheader.cpp; path = source/datastructures/sffheader.cpp; sourceTree = SOURCE_ROOT; };
@@ -1059,12 +1035,12 @@
 		48B662021BBB1B6600997EE4 /* testrenameseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testrenameseqscommand.h; path = TestMothur/testcommands/testrenameseqscommand.h; sourceTree = SOURCE_ROOT; };
 		48BD4EB621F7724C008EA73D /* filefile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = filefile.cpp; path = source/datastructures/filefile.cpp; sourceTree = SOURCE_ROOT; };
 		48BD4EB721F7724C008EA73D /* filefile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = filefile.hpp; path = source/datastructures/filefile.hpp; sourceTree = SOURCE_ROOT; };
-		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
-		48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvectors.hpp; path = source/datastructures/sharedrabundvectors.hpp; sourceTree = "<group>"; };
+		48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundvectors.hpp; path = source/datastructures/sharedrabundvectors.hpp; sourceTree = SOURCE_ROOT; };
+		48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundvectors.cpp; path = source/datastructures/sharedrabundvectors.cpp; sourceTree = SOURCE_ROOT; };
 		48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrabundfloatvectors.cpp; path = source/datastructures/sharedrabundfloatvectors.cpp; sourceTree = SOURCE_ROOT; };
-		48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvectors.hpp; path = source/datastructures/sharedrabundfloatvectors.hpp; sourceTree = "<group>"; };
+		48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sharedrabundfloatvectors.hpp; path = source/datastructures/sharedrabundfloatvectors.hpp; sourceTree = SOURCE_ROOT; };
 		48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rabundfloatvector.cpp; path = source/datastructures/rabundfloatvector.cpp; sourceTree = SOURCE_ROOT; };
-		48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rabundfloatvector.hpp; path = source/datastructures/rabundfloatvector.hpp; sourceTree = "<group>"; };
+		48BDDA781ECA3B8E00F0F6C0 /* rabundfloatvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rabundfloatvector.hpp; path = source/datastructures/rabundfloatvector.hpp; sourceTree = SOURCE_ROOT; };
 		48C51DEE1A76B870004ECDF1 /* fastqread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fastqread.h; path = source/datastructures/fastqread.h; sourceTree = SOURCE_ROOT; };
 		48C51DEF1A76B888004ECDF1 /* fastqread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastqread.cpp; path = source/datastructures/fastqread.cpp; sourceTree = SOURCE_ROOT; };
 		48C51DF11A793EFE004ECDF1 /* kmeralign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kmeralign.cpp; path = source/datastructures/kmeralign.cpp; sourceTree = SOURCE_ROOT; };
@@ -1081,9 +1057,7 @@
 		48C728781B728D6B00D40830 /* biominfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = biominfocommand.h; path = source/commands/biominfocommand.h; sourceTree = SOURCE_ROOT; };
 		48CC010E1EB79E49009D61E6 /* fakeoligos.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fakeoligos.h; path = fakes/fakeoligos.h; sourceTree = "<group>"; };
 		48CF76EE21BEBDD300B2FB5C /* mergeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mergeotuscommand.cpp; path = source/commands/mergeotuscommand.cpp; sourceTree = SOURCE_ROOT; };
-		48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergeotuscommand.hpp; path = source/commands/mergeotuscommand.hpp; sourceTree = "<group>"; };
-		48D36FC724C1EAAF001A0FDC /* contigsreport.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = contigsreport.cpp; path = source/datastructures/contigsreport.cpp; sourceTree = SOURCE_ROOT; };
-		48D36FC824C1EAAF001A0FDC /* contigsreport.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = contigsreport.hpp; path = source/datastructures/contigsreport.hpp; sourceTree = SOURCE_ROOT; };
+		48CF76EF21BEBDD300B2FB5C /* mergeotuscommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mergeotuscommand.hpp; path = source/commands/mergeotuscommand.hpp; sourceTree = SOURCE_ROOT; };
 		48D6E9661CA42389008DF76B /* testvsearchfileparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testvsearchfileparser.cpp; path = TestMothur/testvsearchfileparser.cpp; sourceTree = SOURCE_ROOT; };
 		48D6E9671CA42389008DF76B /* testvsearchfileparser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = testvsearchfileparser.h; path = TestMothur/testvsearchfileparser.h; sourceTree = SOURCE_ROOT; };
 		48D6E9691CA4262A008DF76B /* dataset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dataset.cpp; path = TestMothur/dataset.cpp; sourceTree = SOURCE_ROOT; };
@@ -1107,26 +1081,22 @@
 		48E544571E9C2E6500FF6AB8 /* fp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fp.cpp; path = source/calculators/fp.cpp; sourceTree = SOURCE_ROOT; };
 		48E544581E9C2E6500FF6AB8 /* fp.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fp.hpp; path = source/calculators/fp.hpp; sourceTree = SOURCE_ROOT; };
 		48E5445B1E9C2F0F00FF6AB8 /* fn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fn.cpp; path = source/calculators/fn.cpp; sourceTree = SOURCE_ROOT; };
-		48E5445C1E9C2F0F00FF6AB8 /* fn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fn.hpp; path = source/calculators/fn.hpp; sourceTree = "<group>"; };
+		48E5445C1E9C2F0F00FF6AB8 /* fn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fn.hpp; path = source/calculators/fn.hpp; sourceTree = SOURCE_ROOT; };
 		48E5445F1E9C2FB800FF6AB8 /* fpfn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fpfn.cpp; path = source/calculators/fpfn.cpp; sourceTree = SOURCE_ROOT; };
-		48E544601E9C2FB800FF6AB8 /* fpfn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fpfn.hpp; path = source/calculators/fpfn.hpp; sourceTree = "<group>"; };
+		48E544601E9C2FB800FF6AB8 /* fpfn.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fpfn.hpp; path = source/calculators/fpfn.hpp; sourceTree = SOURCE_ROOT; };
 		48E5446A1E9D3A8C00FF6AB8 /* f1score.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = f1score.cpp; path = source/calculators/f1score.cpp; sourceTree = SOURCE_ROOT; };
 		48E5446B1E9D3A8C00FF6AB8 /* f1score.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = f1score.hpp; path = source/calculators/f1score.hpp; sourceTree = SOURCE_ROOT; };
 		48E5446E1E9D3B2D00FF6AB8 /* accuracy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = accuracy.cpp; path = source/calculators/accuracy.cpp; sourceTree = SOURCE_ROOT; };
-		48E5446F1E9D3B2D00FF6AB8 /* accuracy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = accuracy.hpp; path = source/calculators/accuracy.hpp; sourceTree = "<group>"; };
+		48E5446F1E9D3B2D00FF6AB8 /* accuracy.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = accuracy.hpp; path = source/calculators/accuracy.hpp; sourceTree = SOURCE_ROOT; };
 		48E544721E9D3C1200FF6AB8 /* ppv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ppv.cpp; path = source/calculators/ppv.cpp; sourceTree = SOURCE_ROOT; };
-		48E544731E9D3C1200FF6AB8 /* ppv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ppv.hpp; path = source/calculators/ppv.hpp; sourceTree = "<group>"; };
+		48E544731E9D3C1200FF6AB8 /* ppv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = ppv.hpp; path = source/calculators/ppv.hpp; sourceTree = SOURCE_ROOT; };
 		48E544761E9D3CE400FF6AB8 /* npv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = npv.cpp; path = source/calculators/npv.cpp; sourceTree = SOURCE_ROOT; };
-		48E544771E9D3CE400FF6AB8 /* npv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = npv.hpp; path = source/calculators/npv.hpp; sourceTree = "<group>"; };
+		48E544771E9D3CE400FF6AB8 /* npv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = npv.hpp; path = source/calculators/npv.hpp; sourceTree = SOURCE_ROOT; };
 		48E5447A1E9D3F0400FF6AB8 /* fdr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fdr.cpp; path = source/calculators/fdr.cpp; sourceTree = SOURCE_ROOT; };
-		48E5447B1E9D3F0400FF6AB8 /* fdr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fdr.hpp; path = source/calculators/fdr.hpp; sourceTree = "<group>"; };
-		48E5EAF02195151600D86887 /* libhdf5_hl_cpp.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_hl_cpp.la; path = "../hdf5-1.10.3/hl/c++/src/libhdf5_hl_cpp.la"; sourceTree = "<group>"; };
-		48E5EAF22195156700D86887 /* libhdf5_cpp.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_cpp.la; path = "../hdf5-1.10.3/c++/src/libhdf5_cpp.la"; sourceTree = "<group>"; };
-		48E5EAF4219515A700D86887 /* libhdf5_hl.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5_hl.la; path = "../hdf5-1.10.3/hl/src/libhdf5_hl.la"; sourceTree = "<group>"; };
-		48E5EAF6219515C000D86887 /* libhdf5.la */ = {isa = PBXFileReference; lastKnownFileType = text; name = libhdf5.la; path = "../hdf5-1.10.3/src/libhdf5.la"; sourceTree = "<group>"; };
+		48E5447B1E9D3F0400FF6AB8 /* fdr.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fdr.hpp; path = source/calculators/fdr.hpp; sourceTree = SOURCE_ROOT; };
 		48E7E0A12278A21B00B74910 /* metrolognormal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metrolognormal.cpp; path = source/calculators/metrolognormal.cpp; sourceTree = SOURCE_ROOT; };
-		48E7E0A42278AD4800B74910 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = "<group>"; };
-		48E7E0A52278AD4800B74910 /* diversityutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityutils.hpp; path = source/calculators/diversityutils.hpp; sourceTree = "<group>"; };
+		48E7E0A42278AD4800B74910 /* diversityutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = diversityutils.cpp; path = source/calculators/diversityutils.cpp; sourceTree = SOURCE_ROOT; };
+		48E7E0A52278AD4800B74910 /* diversityutils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityutils.hpp; path = source/calculators/diversityutils.hpp; sourceTree = SOURCE_ROOT; };
 		48ED1E77235E1ACA003E66F7 /* scriptengine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = scriptengine.cpp; path = source/engines/scriptengine.cpp; sourceTree = SOURCE_ROOT; };
 		48ED1E78235E1ACA003E66F7 /* scriptengine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = scriptengine.hpp; path = source/engines/scriptengine.hpp; sourceTree = SOURCE_ROOT; };
 		48ED1E7B235E1BB4003E66F7 /* interactengine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = interactengine.cpp; path = source/engines/interactengine.cpp; sourceTree = SOURCE_ROOT; };
@@ -1148,10 +1118,10 @@
 		48F98E4C1A9CFD670005E81B /* completelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = completelinkage.cpp; path = source/completelinkage.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C3209B69FA00FF9F6E /* optirefmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optirefmatrix.cpp; path = source/datastructures/optirefmatrix.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C4209B69FA00FF9F6E /* optirefmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optirefmatrix.hpp; path = source/datastructures/optirefmatrix.hpp; sourceTree = SOURCE_ROOT; };
-		48FB99C720A48EF700FF9F6E /* optidata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optidata.cpp; path = source/datastructures/optidata.cpp; sourceTree = "<group>"; };
+		48FB99C720A48EF700FF9F6E /* optidata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optidata.cpp; path = source/datastructures/optidata.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99C820A48EF700FF9F6E /* optidata.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optidata.hpp; path = source/datastructures/optidata.hpp; sourceTree = SOURCE_ROOT; };
 		48FB99CA20A4AD7D00FF9F6E /* optiblastmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optiblastmatrix.cpp; path = source/datastructures/optiblastmatrix.cpp; sourceTree = SOURCE_ROOT; };
-		48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optiblastmatrix.hpp; path = source/datastructures/optiblastmatrix.hpp; sourceTree = "<group>"; };
+		48FB99CB20A4AD7D00FF9F6E /* optiblastmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optiblastmatrix.hpp; path = source/datastructures/optiblastmatrix.hpp; sourceTree = SOURCE_ROOT; };
 		48FB99CD20A4F3FB00FF9F6E /* optifitcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = optifitcluster.cpp; path = source/optifitcluster.cpp; sourceTree = SOURCE_ROOT; };
 		48FB99CE20A4F3FB00FF9F6E /* optifitcluster.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = optifitcluster.hpp; path = source/optifitcluster.hpp; sourceTree = SOURCE_ROOT; };
 		48FD9946243E5FB10017C521 /* Makefile_cluster */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile_cluster; sourceTree = SOURCE_ROOT; };
@@ -1813,6 +1783,15 @@
 		A7FF19F1140FFDA500AD216D /* trimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trimoligos.cpp; path = source/trimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		A7FFB556142CA02C004884F2 /* summarytaxcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = summarytaxcommand.h; path = source/commands/summarytaxcommand.h; sourceTree = SOURCE_ROOT; };
 		A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summarytaxcommand.cpp; path = source/commands/summarytaxcommand.cpp; sourceTree = SOURCE_ROOT; };
+		F4103A4B25A3A40F001ED741 /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = mothur_resources/libs/libboost_filesystem.a; sourceTree = SOURCE_ROOT; };
+		F4103A4F25A3A411001ED741 /* libboost_iostreams.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_iostreams.a; path = mothur_resources/libs/libboost_iostreams.a; sourceTree = SOURCE_ROOT; };
+		F4103A5D25A3A7C7001ED741 /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = mothur_resources/libs/libhdf5_hl.a; sourceTree = SOURCE_ROOT; };
+		F4103A5E25A3A7C7001ED741 /* libhdf5_hl_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl_cpp.a; path = mothur_resources/libs/libhdf5_hl_cpp.a; sourceTree = SOURCE_ROOT; };
+		F4103A5F25A3A7C7001ED741 /* libhdf5.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5.a; path = mothur_resources/libs/libhdf5.a; sourceTree = SOURCE_ROOT; };
+		F4103A6025A3A7C7001ED741 /* libhdf5_cpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_cpp.a; path = mothur_resources/libs/libhdf5_cpp.a; sourceTree = SOURCE_ROOT; };
+		F4103A6F25A4C4D2001ED741 /* diversityestimatorcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityestimatorcommand.hpp; path = source/commands/diversityestimatorcommand.hpp; sourceTree = SOURCE_ROOT; };
+		F4103A7F25A4C831001ED741 /* libgslcblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgslcblas.a; path = mothur_resources/libs/libgslcblas.a; sourceTree = SOURCE_ROOT; };
+		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1820,8 +1799,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4810D5B3217A1D2F00C668E8 /* libhdf5.a in Frameworks */,
-				4810D5B4217A1D3800C668E8 /* libhdf5_cpp.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1829,8 +1806,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4853365E225F7926003CC483 /* libgslcblas.a in Frameworks */,
-				48533660225F7929003CC483 /* libgsl.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1980,20 +1955,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4803D5A42118B2AA001C63B5 /* Integration */ = {
-			isa = PBXGroup;
-			children = (
-				4803D5A62118B352001C63B5 /* miseqsop.hpp */,
-				4803D5A52118B352001C63B5 /* miseqsop.cpp */,
-				4803D5B721271B47001C63B5 /* 454sop.cpp */,
-				4803D5B821271B47001C63B5 /* 454sop.hpp */,
-				4803D5A8211C9867001C63B5 /* testintegrationalignseqs.cpp */,
-				4803D5A9211C9867001C63B5 /* testintegrationalignseqs.hpp */,
-			);
-			name = Integration;
-			path = TestMothur;
-			sourceTree = SOURCE_ROOT;
-		};
 		480D1E2B1EA6858700BF9C77 /* fakes */ = {
 			isa = PBXGroup;
 			children = (
@@ -2032,7 +1993,6 @@
 				48D6E9671CA42389008DF76B /* testvsearchfileparser.h */,
 				481FB5221AC0AA010076CFF3 /* testcontainers */,
 				481FB5211AC0A9B40076CFF3 /* testcommands */,
-				4803D5A42118B2AA001C63B5 /* Integration */,
 			);
 			path = TestMothur;
 			sourceTree = "<group>";
@@ -2139,22 +2099,14 @@
 		489ECDA2215EB30A0036D42C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4853365F225F7929003CC483 /* libgsl.a */,
-				4853365D225F7926003CC483 /* libgslcblas.a */,
-				48E5EAF6219515C000D86887 /* libhdf5.la */,
-				48E5EAF4219515A700D86887 /* libhdf5_hl.la */,
-				48E5EAF22195156700D86887 /* libhdf5_cpp.la */,
-				48E5EAF02195151600D86887 /* libhdf5_hl_cpp.la */,
-				48769D85218B609F0023CD1F /* libboost_filesystem.a */,
-				48769D83218B60950023CD1F /* libboost_iostreams.a */,
-				489ECDB4215EC5160036D42C /* libhdf5_hl_cpp.a */,
-				489ECDAD215EB7660036D42C /* libhdf5_hl.a */,
-				489ECDAE215EB7660036D42C /* libhdf5.a */,
-				489ECDAB215EB5690036D42C /* lib */,
-				489ECDA9215EB4BB0036D42C /* libhdf5_hl.a */,
-				489ECDA7215EB4980036D42C /* libhdf5_cpp.a */,
-				489ECDA5215EB4750036D42C /* libhdf5.a */,
-				489ECDA3215EB30A0036D42C /* libhdf5_cpp.a */,
+				F4103A9D25A4D00F001ED741 /* libgsl.a */,
+				F4103A7F25A4C831001ED741 /* libgslcblas.a */,
+				F4103A6025A3A7C7001ED741 /* libhdf5_cpp.a */,
+				F4103A5E25A3A7C7001ED741 /* libhdf5_hl_cpp.a */,
+				F4103A5D25A3A7C7001ED741 /* libhdf5_hl.a */,
+				F4103A5F25A3A7C7001ED741 /* libhdf5.a */,
+				F4103A4F25A3A411001ED741 /* libboost_iostreams.a */,
+				F4103A4B25A3A40F001ED741 /* libboost_filesystem.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2412,8 +2364,8 @@
 				7B21820217AD77BD00286E6A /* svm.hpp */,
 			);
 			name = svm;
-			path = ../../../sarahwestcott/Desktop/mothur;
-			sourceTree = "<group>";
+			path = source/svm;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7D395C1184FA34300A350D7 /* communitytype */ = {
 			isa = PBXGroup;
@@ -2428,8 +2380,8 @@
 				A7548FAE171440EC00B1F05A /* qFinderDMM.cpp */,
 			);
 			name = communitytype;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/communitytype;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA3812D3956100DA6239 /* commands */ = {
 			isa = PBXGroup;
@@ -2515,8 +2467,8 @@
 				A7E9B6CB12D37EC400DA6239 /* distancecommand.cpp */,
 				A7E9B74A12D37EC400DA6239 /* distsharedcommand.h */,
 				A7E9B74912D37EC400DA6239 /* distsharedcommand.cpp */,
+				F4103A6F25A4C4D2001ED741 /* diversityestimatorcommand.hpp */,
 				484976E52256799100F3A291 /* diversityestimatorcommand.cpp */,
-				484976E62256799100F3A291 /* diversityestimatorcommand.hpp */,
 				A7E9B6E412D37EC400DA6239 /* filterseqscommand.h */,
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A79EEF8816971D640006DEC1 /* filtersharedcommand.h */,
@@ -2729,8 +2681,8 @@
 				A7E9B87A12D37EC400DA6239 /* venncommand.cpp */,
 			);
 			name = commands;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/commands;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA3F12D395F700DA6239 /* calculators */ = {
 			isa = PBXGroup;
@@ -2748,8 +2700,8 @@
 				48E544681E9D175100FF6AB8 /* unifraccalcs */,
 			);
 			name = calculators;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/calculators;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA4212D3960D00DA6239 /* containers */ = {
 			isa = PBXGroup;
@@ -2849,8 +2801,8 @@
 				485B0E0D1F27C40500CA5F57 /* sharedrabundfloatvector.hpp */,
 				48BDDA741ECA067000F0F6C0 /* sharedrabundfloatvectors.hpp */,
 				48BDDA731ECA067000F0F6C0 /* sharedrabundfloatvectors.cpp */,
-				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
-				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
+				48BDDA6F1EC9D31400F0F6C0 /* sharedrabundvectors.hpp */,
+				48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */,
 				A7E9B83912D37EC400DA6239 /* sparsematrix.cpp */,
 				A7E9B83A12D37EC400DA6239 /* sparsematrix.hpp */,
 				A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */,
@@ -2871,8 +2823,8 @@
 				A7E9B86712D37EC400DA6239 /* treenode.h */,
 			);
 			name = containers;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/datastructures;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA4512D3965600DA6239 /* chimera */ = {
 			isa = PBXGroup;
@@ -2901,8 +2853,8 @@
 				A7E9B82F12D37EC400DA6239 /* slayer.h */,
 			);
 			name = chimera;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/chimera;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA4B12D3966900DA6239 /* classifier */ = {
 			isa = PBXGroup;
@@ -2931,8 +2883,8 @@
 				A721AB73161C573B009860A1 /* taxonomynode.cpp */,
 			);
 			name = classifier;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/classifier;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA4F12D398D700DA6239 /* clearcut */ = {
 			isa = PBXGroup;
@@ -2952,8 +2904,8 @@
 				A7E9B6FC12D37EC400DA6239 /* getopt_long.cpp */,
 			);
 			name = clearcut;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/clearcut;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA5312D39A5E00DA6239 /* read */ = {
 			isa = PBXGroup;
@@ -2977,8 +2929,8 @@
 				A7D755D91535F679009BF21A /* treereader.cpp */,
 			);
 			name = read;
-			path = ../../../sarahwestcott/Desktop/mothur;
-			sourceTree = "<group>";
+			path = source/read;
+			sourceTree = SOURCE_ROOT;
 		};
 		A7E9BA5612D39BD800DA6239 /* metastats */ = {
 			isa = PBXGroup;
@@ -2989,8 +2941,8 @@
 				A73DDC3713C4BF64006AAE38 /* mothurmetastats.cpp */,
 			);
 			name = metastats;
-			path = /Users/sarahwestcott/Desktop/mothur;
-			sourceTree = "<absolute>";
+			path = source/metastats;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -3257,8 +3209,7 @@
 				481FB5911AC1B71B0076CFF3 /* amovacommand.cpp in Sources */,
 				4829D9671B8387D0002EEED4 /* testbiominfocommand.cpp in Sources */,
 				484976E42255412400F3A291 /* igabundance.cpp in Sources */,
-				4803D5AA211C9867001C63B5 /* testintegrationalignseqs.cpp in Sources */,
-				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
+				48BDDA721EC9D31400F0F6C0 /* sharedrabundvectors.hpp in Sources */,
 				4815BEB5228B371E00677EE2 /* lnshift.cpp in Sources */,
 				481FB58A1AC1B6FF0076CFF3 /* myPerseus.cpp in Sources */,
 				487D09EC1CB2CEFE007039BF /* averagelinkage.cpp in Sources */,
@@ -3308,7 +3259,6 @@
 				488841661CC6C35500C5E972 /* renamefilecommand.cpp in Sources */,
 				481FB53F1AC1B6000076CFF3 /* canberra.cpp in Sources */,
 				48A11C6E1CDA40F0003481D8 /* testrenamefilecommand.cpp in Sources */,
-				4803D5B921271B47001C63B5 /* 454sop.cpp in Sources */,
 				481FB5BD1AC1B74F0076CFF3 /* getlabelcommand.cpp in Sources */,
 				481FB5B91AC1B74F0076CFF3 /* getcurrentcommand.cpp in Sources */,
 				481FB5991AC1B71B0076CFF3 /* chimeraperseuscommand.cpp in Sources */,
@@ -3409,7 +3359,6 @@
 				481FB53D1AC1B5F80076CFF3 /* bstick.cpp in Sources */,
 				481FB60B1AC1B7AC0076CFF3 /* sffmultiplecommand.cpp in Sources */,
 				481FB5F51AC1B77E0076CFF3 /* primerdesigncommand.cpp in Sources */,
-				4803D5A72118B352001C63B5 /* miseqsop.cpp in Sources */,
 				481FB5B41AC1B7300076CFF3 /* distancecommand.cpp in Sources */,
 				481FB5391AC1B5E90076CFF3 /* ace.cpp in Sources */,
 				481FB5751AC1B6EA0076CFF3 /* soergel.cpp in Sources */,
@@ -3480,6 +3429,7 @@
 				481FB6071AC1B7970076CFF3 /* setcurrentcommand.cpp in Sources */,
 				481FB5321AC1B5D00076CFF3 /* cmdargs.cpp in Sources */,
 				481FB6711AC1B8820076CFF3 /* rarefact.cpp in Sources */,
+				F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */,
 				481FB5841AC1B6FF0076CFF3 /* mothurchimera.cpp in Sources */,
 				481FB6121AC1B7AC0076CFF3 /* splitgroupscommand.cpp in Sources */,
 				489AF692210619170028155E /* sharedrabundfloatvector.cpp in Sources */,
@@ -3515,6 +3465,7 @@
 				A7E9B88712D37EC400DA6239 /* bayesian.cpp in Sources */,
 				A7E9B88812D37EC400DA6239 /* bellerophon.cpp in Sources */,
 				A7E9B88912D37EC400DA6239 /* bergerparker.cpp in Sources */,
+				F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */,
 				A7E9B88A12D37EC400DA6239 /* binsequencecommand.cpp in Sources */,
 				A7E9B88B12D37EC400DA6239 /* blastalign.cpp in Sources */,
 				A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */,
@@ -3775,7 +3726,7 @@
 				A7E9B97312D37EC400DA6239 /* structchord.cpp in Sources */,
 				A7E9B97412D37EC400DA6239 /* structeuclidean.cpp in Sources */,
 				A7E9B97512D37EC400DA6239 /* structkulczynski.cpp in Sources */,
-				48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.cpp in Sources */,
+				48BDDA711EC9D31400F0F6C0 /* sharedrabundvectors.hpp in Sources */,
 				A7E9B97612D37EC400DA6239 /* structpearson.cpp in Sources */,
 				48E544411E9C292900FF6AB8 /* mcc.cpp in Sources */,
 				A7E9B97712D37EC400DA6239 /* subsamplecommand.cpp in Sources */,
@@ -3932,46 +3883,48 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = TARGET_BUILD_DIR;
-				"DSTROOT[sdk=*]" = TARGET_BUILD_DIR;
+				DSTROOT = "";
+				"DSTROOT[sdk=*]" = "";
 				"DYLIB_CURRENT_VERSION[sdk=*]" = "";
+				"FRAMEWORK_SEARCH_PATHS[arch=*]" = "${SRCROOT}/mothur_resources_11.1/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"silent\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_FUNCTION = YES;
-				"INSTALL_PATH[sdk=*]" = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib,
-					/usr/local/gsl/lib,
-				);
-				"LIBRARY_SEARCH_PATHS[arch=*]" = (
-					/usr/local/lib/,
-					/usr/local/gsl/lib,
-				);
+				INSTALL_PATH = "${SRCROOT}";
+				"INSTALL_PATH[sdk=*]" = "";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources_11.1/libs";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-pthreads",
-					"-v",
-					"-lhdf5_cpp",
-					"-lhdf5",
-					"-lboost_iostreams",
-					"-lz",
+					"${SRCROOT}/mothur_resources_11.1/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libszip.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libz.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5.a",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_11.1/headers/";
 			};
 			name = Debug;
 		};
@@ -3986,39 +3939,45 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = YES;
-				DSTROOT = TARGET_BUILD_DIR;
+				DSTROOT = "";
+				"FRAMEWORK_SEARCH_PATHS[arch=*]" = "${SRCROOT}/mothur_resources_11.1/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					/usr/local/lib/,
-					/usr/local/gsl/lib,
-				);
+				INSTALL_PATH = "${SRCROOT}";
+				"INSTALL_PATH[sdk=*]" = "";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources_11.1/libs";
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-pthreads",
-					"-v",
-					"-lhdf5_cpp",
-					"-lhdf5",
-					"-lboost_iostreams",
-					"-lz",
+					"${SRCROOT}/mothur_resources_11.1/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libszip.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libz.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources_11.1/libs/libhdf5.a",
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_11.1/headers/";
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};
 			name = Release;
@@ -4026,6 +3985,7 @@
 		1DEB928A08733DD80010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -4057,13 +4017,13 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.3\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
-				GCC_VERSION = "/usr/local/bin/g++-9";
-				"GCC_VERSION[arch=*]" = "/usr/local/bin/g++-9";
+				GCC_VERSION = "";
+				"GCC_VERSION[arch=*]" = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4078,42 +4038,43 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include/,
 				);
-				INSTALL_PATH = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = (
-					/usr/local/lib/,
-					/usr/local/gsl/lib,
-					/usr/local/lib,
-				);
+				INSTALL_PATH = "${SRCROOT}";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DUNIT_TEST",
 					"-DUSE_BOOST",
 					"-DUSE_READLINE",
 					"$(OTHER_CFLAGS)",
-					"-DUSE_HDF5",
 					"-DUSE_GSL",
+					"-DUSE_HDF5",
 				);
 				OTHER_LDFLAGS = (
-					"-lreadline",
-					"-pthreads",
-					"-v",
-					"-lhdf5_cpp",
-					"-lhdf5",
-					"-lcblas",
-					"-l",
+					"${SRCROOT}/mothur_resources/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources/libs/libz.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5.a",
+					"-libreadline",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include /usr/local/gsl/include";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources/headers/";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "";
 			};
 			name = Debug;
 		};
 		1DEB928B08733DD80010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_CXX_LIBRARY = "libc++";
@@ -4144,11 +4105,11 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.44.3\\\"\"",
-					"MOTHUR_FILES=\"\\\"/Users/sarahwestcott/desktop/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/sarahwestcott/desktop/mothur/TARGET_BUILD_DIRTARGET_BUILD_DIR/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
-				GCC_VERSION = "/usr/local/bin/g++-9";
+				GCC_VERSION = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4166,35 +4127,35 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include/,
 				);
-				INSTALL_PATH = TARGET_BUILD_DIR;
-				LIBRARY_SEARCH_PATHS = "";
-				"LIBRARY_SEARCH_PATHS[arch=*]" = (
-					/usr/local/lib/,
-					/usr/local/gsl/lib,
-					/usr/local/lib,
-				);
+				INSTALL_PATH = "${SRCROOT}";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				MACH_O_TYPE = mh_execute;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-DUSE_READLINE",
 					"-DUNIT_TEST",
 					"-DUSE_BOOST",
 					"$(OTHER_CFLAGS)",
-					"-DUSE_HDF5",
 					"-DUSE_GSL",
+					"-DUSE_HDF5",
 				);
 				OTHER_LDFLAGS = (
-					"-lreadline",
-					"-pthreads",
-					"-v",
-					"-lhdf5_cpp",
-					"-lhdf5",
-					"-lcblas",
-					"-l",
+					"${SRCROOT}/mothur_resources/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources/libs/libz.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources/libs/libhdf5.a",
+					"-libreadline",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "$(TARGET_BUILD_DIR)/gtest /usr/local/include /usr/local/gsl/include";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources/headers/";
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = "";
 			};
 			name = Release;
 		};
@@ -4216,6 +4177,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "${SRCROOT}/mothur_resources/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -4229,18 +4191,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/libs";
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-lboost_iostreams",
 					"-lz",
-					"-pthreads",
-					/usr/local/lib/gmock_main.a,
-					/usr/local/lib/gtest.a,
-					"-v",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -4268,6 +4226,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "${SRCROOT}/mothur_resources/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -4279,19 +4238,14 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = NO;
-				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/libs";
 				"LIBRARY_SEARCH_PATHS[arch=*]" = /usr/local/lib/;
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
-					"-lboost_iostreams",
 					"-lz",
-					"-pthreads",
-					/usr/local/lib/gmock_main.a,
-					/usr/local/lib/gtest.a,
-					"-v",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
