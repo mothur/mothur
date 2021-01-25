@@ -217,8 +217,9 @@ void BiomInfoCommand::processAttributes(H5::Group& groupID, set<string>& require
         
         for (set<string>::iterator it = requiredAttributes.begin(); it != requiredAttributes.end(); it++) {
             
+            H5std_string thisAttribute = *it;
             
-            H5::Attribute attribute(groupID.openAttribute(*it));
+            H5::Attribute attribute(groupID.openAttribute(thisAttribute));
             H5std_string attributeName; attribute.getName(attributeName);
             H5::DataType  attributeType(attribute.getDataType());
             H5::DataSpace attDataSpace = attribute.getSpace();
@@ -289,7 +290,7 @@ void BiomInfoCommand::checkGroups( H5::H5File& file, map<string, vector<string> 
             H5::Group group(file.openGroup(groupName));
             
             for (int h = 0; h < datasetNames.size(); h++) {
-                string datasetName = datasetNames[h];
+                H5std_string datasetName = datasetNames[h];
                 int numObjects = group.getNumObjs();
                 
                 if (numObjects != 0) {

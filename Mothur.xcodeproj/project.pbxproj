@@ -1795,6 +1795,7 @@
 		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
 		F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = contigsreport.hpp; sourceTree = "<group>"; };
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
+		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1821,6 +1822,7 @@
 				4837E5D622DE1BC400D3234B /* TestBatches */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				481FB51A1AC0A63E0076CFF3 /* TestMothur */,
+				F45A2E4F25BF229600994F76 /* mothur */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
 				489ECDA2215EB30A0036D42C /* Frameworks */,
 			);
@@ -2947,6 +2949,14 @@
 			path = source/metastats;
 			sourceTree = SOURCE_ROOT;
 		};
+		F45A2E4F25BF229600994F76 /* mothur */ = {
+			isa = PBXGroup;
+			children = (
+				F45A2E5025BF229600994F76 /* main.cpp */,
+			);
+			path = mothur;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -3894,7 +3904,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.3\\\"\"",
@@ -3947,7 +3957,7 @@
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = "${SRCROOT}/mothur_resources_11.1/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.44.3\\\"\"",
