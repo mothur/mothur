@@ -18,6 +18,7 @@
 #ifdef USE_BOOST
     #include <boost/iostreams/filtering_stream.hpp>
     #include <boost/iostreams/filter/gzip.hpp>
+    #include <boost/filesystem.hpp>
 #endif
 
 #ifdef USE_HDF5
