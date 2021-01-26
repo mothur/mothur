@@ -38,6 +38,7 @@ GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
 VERSION = "\"1.44.3\""
+RELEASE_DATE = "\"1/21/21\""
 
 
 # Set a static logfile name
@@ -49,7 +50,7 @@ ifeq  ($(strip $(OPTIMIZE)),yes)
     CXXFLAGS += -O3
 endif
 
-CXXFLAGS += -std=c++11 -pthread -DVERSION=${VERSION}
+CXXFLAGS += -std=c++11 -pthread -DVERSION=${VERSION} -DRELEASE_DATE=${RELEASE_DATE}
 LDFLAGS += -std=c++11 -pthread
 
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
