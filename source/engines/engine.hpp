@@ -54,6 +54,7 @@ public:
             
             start = time(NULL);
             numCommandsRun = 0;
+            noBufferNeeded = false;
         }
         catch(exception& e) {
             m->errorOut(e, "Engine", "Engine");
@@ -141,6 +142,7 @@ protected:
     Utils util;
     time_t start;
     int numCommandsRun;
+    bool noBufferNeeded;
     string path;
     map<string, string> environmentalVariables;
 };

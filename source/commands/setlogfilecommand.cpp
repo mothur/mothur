@@ -90,6 +90,8 @@ int SetLogFileCommand::execute(){
             m->setLogFileName(name, append);
         }
 		
+        m->mothurOut("\nSetting logfile name to " + m->getLogFileName() + "\n\n");
+        
 		return 0;
 	}
 	catch(exception& e) {

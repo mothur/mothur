@@ -14,14 +14,35 @@
 BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev) : Engine(tpath) {
     try {
         batchFile = util.removeQuotes(batchFile);
-        openedBatch = util.openInputFile(batchFile, inputBatchFile, "no error");
+        ifstream inBatchTest;
+        openedBatch = util.openInputFile(batchFile, inBatchTest, "no error");
         if (!openedBatch) {
-            if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inputBatchFile); }
+            if (util.checkLocations(batchFile, current->getLocations())) { openedBatch = util.openInputFile(batchFile, inBatchTest); }
             else {  m->mothurOut("[ERROR]: unable to open " + batchFile + " batch file, please correct.\n");  }
         }
         
         batchFileName = batchFile;
         setEnvironmentVariables(ev); //inherit environmental variables from nested batch files
+        
+        noBufferNeeded = true;
+        
+        if (openedBatch) { //check for set.logfile
+            string nextcommand = "#"; //force grabbing first command
+
+            while (!inBatchTest.eof()) {
+                
+                nextcommand = util.getline(inBatchTest); util.gobble(inBatchTest);
+                
+                if (nextcommand[0] != '#') { //skip comments
+                    
+                    int pos = nextcommand.find("set.logfile");
+                    if (pos != string::npos) { noBufferNeeded = false; break; }
+                }
+            }
+            inBatchTest.close();
+            
+            openedBatch = util.openInputFile(batchFileName, inputBatchFile, "no error");
+        }
         
         bstart = time(NULL);
         numBatches = 0;
@@ -56,7 +77,8 @@ bool BatchEngine::getInput(){
             
             string input = getNextCommand(inputBatchFile);
             
-            m->appendLogBuffer("\nmothur > " + input + "\n");
+            if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
+            else                    { m->mothurOut("\nmothur > " + input + "\n");       }
                 
             if (m->getControl_pressed()) { input = "quit()"; }
 
