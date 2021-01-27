@@ -248,7 +248,9 @@ int DistanceCommand::execute(){
 		numSeqs = alignDB.getNumSeqs();
 		
 		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting.\n");  return 0; }
-		
+        if (numSeqs < 2) {  m->mothurOut("[ERROR]: you must have at least 2 sequences to calculate the distances, aborting.\n");  return 0; }
+
+        
 		string outputFile;
         map<string, string> variables; 
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));

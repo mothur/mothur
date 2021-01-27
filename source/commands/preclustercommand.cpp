@@ -529,7 +529,7 @@ int process(string group, string newMapFile, preClusterData* params){
             
         } else if(params->pc_method == "unoise") {
             
-            vector<double> beta(params->diffs, 0);
+            vector<double> beta(params->diffs+1, 0);
             for(int i=0;i<beta.size();i++){
                 beta[i] = pow(0.5, params->alpha * i + 1.0);
             }
@@ -551,7 +551,11 @@ int process(string group, string newMapFile, preClusterData* params){
                             
                             int mismatch = calcMisMatches(params->alignSeqs[i]->sequence, params->alignSeqs[j]->sequence, params);
                         
-                            if (mismatch <= params->diffs && skew <= beta[mismatch]) { mergeSeqs(params->alignSeqs[i], params->alignSeqs[j], chunk, mismatch, originalCount[j], params); count++; }
+                            if (mismatch <= params->diffs) {
+                                if (skew <= beta[mismatch]) {
+                                    mergeSeqs(params->alignSeqs[i], params->alignSeqs[j], chunk, mismatch, originalCount[j], params); count++;
+                                }
+                            }
                         }
                     }
                     out << chunk;
@@ -907,7 +911,7 @@ int PreClusterCommand::execute(){
             current->setMothurCalling(true);
             SequenceCountParser cparser(countfile, fastafile, nullVector);
             current->setMothurCalling(false);
-            cout << " groups = "<< cparser.getNamesOfGroups().size() << endl;
+            //cout << " groups = "<< cparser.getNamesOfGroups().size() << endl;
             groups = cparser.getNamesOfGroups();
             group2Files = cparser.getFiles();
             

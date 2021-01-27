@@ -250,7 +250,8 @@ void driverCreateSummary(seqSumQualData* params) {
 				for (int i = 0; i < thisScores.size(); i++) { 
 					params->position[i] += num;
 					params->averageQ[i] += (thisScores[i] * num); //weighting for namesfile
-					if (thisScores[i] > 41) { params->m->mothurOut("[ERROR]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40.\n");  params->m->setControl_pressed(true); }
+                    if (thisScores[i] > 41) { params->m->mothurOut("[WARNING]: " + current.getName() + " has a quality scores of " + toString(thisScores[i]) + ", expecting values to be less than 40. Setting to 40.\n");  thisScores[i] = 40;
+                    }
 					else { params->scores[i][thisScores[i]] += num; }
 				}
 				

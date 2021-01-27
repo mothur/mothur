@@ -4,7 +4,8 @@ USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes
 LOGFILE_NAME ?= yes
-VERSION = "\"1.44.1\""
+VERSION = "\"1.44.3\""
+RELEASE_DATE = "\"1/21/21\""
 
 # Optimize to level 3:
     CXXFLAGS += -O3 -std=c++11
@@ -49,14 +50,11 @@ ifeq  ($(strip $(USEBOOST)),yes)
 
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 
+    LIBS += ${BOOST_LIBRARY_DIR}/libboost_system.a
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_iostreams.a
     LIBS += ${BOOST_LIBRARY_DIR}/libboost_filesystem.a
-
-    #if mac
-    LIBS += -lz
-
-    #if linux or windows
-    #LIBS += ${BOOST_LIBRARY_DIR}/libz.a
+    LIBS += ${BOOST_LIBRARY_DIR}/libz.a
+    
 endif
 
 #User specified HDF5 library
@@ -96,9 +94,9 @@ endif
 # INCLUDE directories for mothur
 #
 #
-    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm
+    VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm:source/
     skipUchime := source/uchime_src/
-    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), source/, $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
     CXXFLAGS += -I. $(subDirIncludes)

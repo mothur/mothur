@@ -69,7 +69,9 @@ QualityScores::QualityScores(ifstream& qFile){
                   //check temp to make sure its a number
                 if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
-
+                
+                if (score > 40) { score = 40; }
+                
                 qScores.push_back(score);
                 count++;
             }
@@ -119,6 +121,7 @@ QualityScores::QualityScores(boost::iostreams::filtering_istream& qFile){
                 if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
 
+                if (score > 40) { score = 40; }
                 
                 qScores.push_back(score);
                 count++;
@@ -169,6 +172,8 @@ int QualityScores::read(ifstream& qFile){
                 if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
 
+                if (score > 40) { score = 40; }
+                
                 qScores.push_back(score);
                 count++;
             }

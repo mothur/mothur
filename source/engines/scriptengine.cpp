@@ -13,6 +13,10 @@ ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, strin
     try {
         //remove quotes
         listOfCommands = commandString.substr(1, (commandString.length()-1));
+        
+        int pos = listOfCommands.find("set.logfile");
+        if (pos == string::npos) { noBufferNeeded = true; }
+        
         setEnvironmentVariables(ev);
     }
     catch(exception& e) {
@@ -44,7 +48,8 @@ bool ScriptEngine::getInput(){
             
             if (input == "") { input = "quit()"; }
             
-            m->appendLogBuffer("\nmothur > " + input + "\n");
+            if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
+            else                    { m->mothurOut("\nmothur > " + input + "\n");       }
         
             if (m->getControl_pressed()) { input = "quit()"; }
 

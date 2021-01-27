@@ -411,22 +411,32 @@ string Utils::reverseOligo(string oligo){
 /*********************************************************************************************/
 bool Utils::fileExists(string name)  {
     try {
-        bool exists = false;
+        bool fExists = false;
         name = getFullPathName(name);
+        
+#if defined USE_BOOST
+        
+           boost::filesystem::path p(name.c_str());
+
+           if (exists(p)) {
+              if (is_regular_file(p)) { fExists = true; } // is path p a regular file?
+           }
+#else
 
     #if defined NON_WINDOWS
-        ifstream in;
-        openInputFile(name, in, "");
+        ifstream in; openInputFile(name, in, "");
 
         //if this file exists
-        if (in) { in.close(); exists = true;  }
+        if (in) { in.close(); fExists = true;  }
     #else
 
         DWORD attributes = GetFileAttributes(name.c_str());
-        exists = (attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY));
+        fExists = (attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY));
     #endif
+        
+#endif
 
-        return exists;
+        return fExists;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "fileExists");
@@ -1934,8 +1944,16 @@ bool Utils::dirCheckExists(string& dirName, bool reportError){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
+      
+#if defined USE_BOOST
         
-#if defined NON_WINDOWS
+        boost::filesystem::path p(dirName.c_str());
+        
+        if (exists(p))  { return true; }
+        else { if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); } }
+        
+#else
+    #if defined NON_WINDOWS
 
         struct stat info;
         
@@ -1947,15 +1965,15 @@ bool Utils::dirCheckExists(string& dirName, bool reportError){
             if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); }
         }
 
-#else
+    #else
         DWORD dwAttrib = GetFileAttributes(dirName.c_str());
 
          if (dwAttrib != INVALID_FILE_ATTRIBUTES &&
              (dwAttrib & FILE_ATTRIBUTE_DIRECTORY)) { return true; }
          else { if (reportError) { m->mothurOut("[ERROR]: cannot access " + dirName + "\n"); } }
         
+    #endif
 #endif
-        
         return false;
     }
     catch(exception& e) {
@@ -1969,18 +1987,30 @@ bool Utils::mkDir(string& dirName){
     try {
         bool dirExist = dirCheckExists(dirName, false);
         if (dirExist) { return true; }
-
-#if defined NON_WINDOWS
         
-        int status = mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+#ifdef USE_BOOST
         
-        if (status == 0) { return true; }
+        boost::filesystem::path dir(dirName.c_str());
+        if(boost::filesystem::create_directory(dir)) {}
+        else { return false; }
+        
 #else
+    #if defined NON_WINDOWS
         
-        if (CreateDirectory(dirName.c_str(), NULL)) { return true; }
+        if ((mkdir(dirName.c_str(), S_IRWXU | S_IRWXG | S_IRWXO )) == 0) {}
+        else { return false; }
         
+    #else
+        
+        if (CreateDirectory(dirName.c_str(), NULL) ||
+            ERROR_ALREADY_EXISTS == GetLastError()) { }
+        else { return false; }
+        
+    #endif
 #endif
-        
+
+        if (dirCheckWritable(dirName)) { return true; }
+
         return false;
     }
     catch(exception& e) {

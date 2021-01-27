@@ -29,7 +29,7 @@ struct logger {
         cout << m; return *this;
     }
 private:
-    std::mutex token;
+    //std::mutex token;
 };
 /***********************************************/
 

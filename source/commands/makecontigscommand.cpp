@@ -685,7 +685,7 @@ struct contigsData {
     OutputWriter* misMatchesFile;
     string align, group, format;
     float match, misMatch, gapOpen, gapExtend;
-    bool gz, reorient, trimOverlap, createGroup, makeQualFile;
+    bool gz, reorient, trimOverlap, createGroupFromOligos, createGroupFromFilePairs, makeQualFile;
     char delim;
     int nameType, offByOneTrimLength, pdiffs, bdiffs, tdiffs, kmerSize, insert, deltaq, maxee;
     vector<string> inputFiles, qualOrIndexFiles, outputNames;
@@ -735,7 +735,7 @@ struct contigsData {
         makeQualFile = true;
         if (trimQFileName == NULL) { makeQualFile = false; }
     }
-    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, map<int, oligosPair> repbr, map<int, oligosPair> reppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, string gp) {
+    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, map<int, oligosPair> repbr, map<int, oligosPair> reppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, bool cgff, string gp) {
         gz = isgz;
         delim = de;
         nameType = nt;
@@ -749,7 +749,8 @@ struct contigsData {
         primerNameVector = priNameVector;
         barcodeNameVector = barNameVector;
         group = gp;
-        createGroup = cfg;
+        createGroupFromOligos = cfg;
+        createGroupFromFilePairs = cgff;
         pdiffs = pdf;
         bdiffs = bdf;
         tdiffs = tdf;
@@ -780,7 +781,8 @@ struct contigsData {
         primerNameVector = copy->primerNameVector;
         barcodeNameVector = copy->barcodeNameVector;
         group = copy->group;
-        createGroup = copy->createGroup;
+        createGroupFromOligos = copy->createGroupFromOligos;
+        createGroupFromFilePairs = copy->createGroupFromFilePairs;
         pdiffs = copy->pdiffs;
         bdiffs = copy->bdiffs;
         tdiffs = copy->tdiffs;
@@ -1798,8 +1800,8 @@ void driverContigs(contigsData* params){
 								if(expected_errors > params->maxee) { trashCode += 'e' ;}
 
                 if(trashCode.length() == 0){
-                    string thisGroup = params->group;
-                    if (params->createGroup) { //you want the group name from the oligos file
+                    string thisGroup = params->group; //group from file file
+                    if (params->createGroupFromOligos) { //overwrite file file group for oligos group
                         if(numBarcodes != 0){
                             thisGroup = params->barcodeNameVector[barcodeIndex];
                             if (numPrimers != 0) {
@@ -1984,7 +1986,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 
             int spot = (i+1)*2;
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter, fileInputs, qualOrIndexFiles, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1]);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new std::thread(driverContigs, dataBundle));
@@ -2000,7 +2002,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter, fileInputs, qualOrIndexFiles, lines[0], lines[1], qLines[0], qLines[1]);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, group);
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group);
 
         driverContigs(dataBundle);
 
@@ -2059,7 +2061,6 @@ void driverContigsGroups(groupContigsData* gparams) {
     try {
         gparams->count = 0;
         gparams->bundle->delim = '@';
-        gparams->bundle->createGroup = false;
 
         for (int l = gparams->start; l < gparams->end; l++) {
             int startTime = time(NULL);
@@ -2151,6 +2152,9 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
         vector<string> barcodeNames, primerNames;
 
         if(oligosfile != "")  {   createOligosGroup = getOligos(pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes, barcodeNames, primerNames);    }
+        
+        //give group in file file precedence
+        if (createFileGroup) {  createOligosGroup = false; }
 
         vector<std::thread*> workerThreads;
         vector<groupContigsData*> data;
@@ -2187,7 +2191,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             }
 
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "");
             groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[i+1].start, startEndIndexes[i+1].end, dataBundle, file2Groups);
             data.push_back(groupDataBundle);
 
@@ -2204,7 +2208,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, "");
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "");
         groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, dataBundle, file2Groups);
         driverContigsGroups(groupDataBundle);
 
