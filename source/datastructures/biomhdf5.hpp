@@ -84,6 +84,8 @@ private:
     void readIntAttributes(H5::Group& fileAttributes, string);
     //void checkGroups(H5::H5File&, map<string, vector<string> >&);
     
+    void printRequiredFileAttributes(H5::H5File& file, int, int);
+    
     void readNames( H5::H5File& file, H5std_string groupName);
     void readTaxonomy( H5::H5File& file);
     void readOTUAbundances( H5::H5File& file);

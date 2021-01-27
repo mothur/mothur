@@ -25,8 +25,6 @@ BiomHDF5::BiomHDF5(string fname, string l) : Biom("Biological Observation Matrix
 BiomHDF5::BiomHDF5() : Biom("Biological Observation Matrix 2.1.0"){
     try {
         numOTUs = 0; numSamples = 0;
-       
-        
     }
     catch(exception& e) {
         m->errorOut(e, "BiomHDF5", "BiomHDF5");
@@ -42,7 +40,7 @@ void BiomHDF5::read(string fname){
 #ifdef USE_HDF5
         
         Picrust* picrust; vector<string> metadata;
-        printShared("/Users/sarahwestcott/desktop/release/temp.biom", metadata, picrust );
+        printShared("/Users/swestcott/desktop/release/temp.biom", metadata, picrust );
         
         H5::H5File file( fname.c_str(), H5F_ACC_RDONLY );
         //H5::Group     what(file.openGroup( "/" ));
@@ -480,6 +478,63 @@ void BiomHDF5::readAttributes(H5::H5File& file) {
         exit(1);
     }
 }
+//**********************************************************************************************************************
+//print required dataset attributes
+void BiomHDF5::printRequiredFileAttributes(H5::H5File& file, int numBins, int numSamples) {
+    try {
+        H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR); // Create new dataspace for attribute
+        H5::StrType strdatatype(H5::PredType::C_S1, 256); // Create new string datatype for attribute of length 256 characters
+    
+        H5std_string idValue(tableID);
+        H5::Attribute idAttribute = file.createAttribute("id", strdatatype, attr_dataspace);
+        idAttribute.write(strdatatype, idValue);
+    
+        H5std_string typeValue(tableType);
+        H5::Attribute typeAttribute = file.createAttribute("type", strdatatype, attr_dataspace);
+        typeAttribute.write(strdatatype, typeValue);
+    
+        H5std_string formatUrl(formatURL);
+        H5::Attribute urlAttribute = file.createAttribute("format-url", strdatatype, attr_dataspace);
+        urlAttribute.write(strdatatype, formatUrl);
+    
+        H5std_string generatedByValue(mothurVersion);
+        H5::Attribute generatedByAttribute = file.createAttribute("generated-by", strdatatype, attr_dataspace);
+        generatedByAttribute.write(strdatatype, generatedByValue);
+    
+        time_t rawtime; struct tm * timeinfo;
+        time ( &rawtime );
+        timeinfo = localtime ( &rawtime );
+        string dateString = asctime (timeinfo);
+        int pos = dateString.find('\n');
+        if (pos != string::npos) { dateString = dateString.substr(0, pos);}
+    
+        H5std_string dataValue(dateString);
+        H5::Attribute dateAttribute = file.createAttribute("creation-date", strdatatype, attr_dataspace);
+        dateAttribute.write(strdatatype, dataValue);
+
+        const hsize_t dims=2;
+        H5::DataType datatype = H5::ArrayType(H5::PredType::NATIVE_INT, 1, &dims); // Create new int datatype
+        hsize_t data[dims]; data[0] = 2; data[1] = 1;
+        H5::DataSpace intSpace(1, &dims);
+    
+        H5::Attribute formatVersionAttribute = file.createAttribute("format-version", datatype, intSpace);
+        formatVersionAttribute.write(datatype, data);
+
+        data[0] = numBins; data[1] = numSamples;
+        H5::Attribute shapeAttribute = file.createAttribute("shape", datatype, intSpace);
+        shapeAttribute.write(datatype, data);
+    
+        hsize_t nnzValue = nnz;
+        H5::DataType nnzDatatype = H5::PredType::NATIVE_INT;
+        H5::Attribute nnzAttribute = file.createAttribute("nnz", nnzDatatype, attr_dataspace);
+        nnzAttribute.write(nnzDatatype, &nnzValue);
+ 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "printRequiredAttributes");
+        exit(1);
+    }
+}
 #endif
 //**********************************************************************************************************************
 void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata, Picrust* picrust) {
@@ -507,77 +562,23 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         
         int   RANK = 2;
         
-        //set required fields
-        set<string> requiredTopLevelAttrib;
-        //requiredTopLevelAttrib.insert("id"); requiredTopLevelAttrib.insert("type"); requiredTopLevelAttrib.insert("format-url");
-        //requiredTopLevelAttrib.insert("format-version"); //requiredTopLevelAttrib.insert("generated-by"); requiredTopLevelAttrib.insert("creation-date");
-        requiredTopLevelAttrib.insert("shape"); requiredTopLevelAttrib.insert("nnz");
-  
-        
-        #ifdef USE_HDF5
+    #ifdef USE_HDF5
            
         
-            H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
+        H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
         
-            H5::DataSpace attr_dataspace = H5::DataSpace(H5S_SCALAR); // Create new dataspace for attribute
-            H5::StrType strdatatype(H5::PredType::C_S1, 256); // Create new string datatype for attribute of length 256 characters
+        nnz = 0;
+        for (int j = 0; j < shared->getNumBins(); j++) {
+            vector<int> thisOTU = shared->getOTU(j);
+            for (int i = 0; i < thisOTU.size(); i++) {
+                if (thisOTU[i] != 0) { nnz++; }
+            }
+        }
         
-            H5std_string idValue(tableID);
-            H5::Attribute idAttribute = file.createAttribute("id", strdatatype, attr_dataspace);
-            idAttribute.write(strdatatype, idValue);
-        
-            H5std_string typeValue(tableType);
-            H5::Attribute typeAttribute = file.createAttribute("type", strdatatype, attr_dataspace);
-            typeAttribute.write(strdatatype, typeValue);
-        
-            H5std_string formatUrl(formatURL);
-            H5::Attribute urlAttribute = file.createAttribute("format-url", strdatatype, attr_dataspace);
-            urlAttribute.write(strdatatype, formatUrl);
-        
-            H5std_string generatedByValue(mothurVersion);
-            H5::Attribute generatedByAttribute = file.createAttribute("generated-by", strdatatype, attr_dataspace);
-            generatedByAttribute.write(strdatatype, generatedByValue);
-        
-            time_t rawtime; struct tm * timeinfo;
-            time ( &rawtime );
-            timeinfo = localtime ( &rawtime );
-            string dateString = asctime (timeinfo);
-            int pos = dateString.find('\n');
-            if (pos != string::npos) { dateString = dateString.substr(0, pos);}
-        
-            H5std_string dataValue(dateString);
-            H5::Attribute dateAttribute = file.createAttribute("creation-date", strdatatype, attr_dataspace);
-            dateAttribute.write(strdatatype, dataValue);
-
-            H5::DataType datatype(H5::PredType::NATIVE_INT); // Create new int datatype
-            const hsize_t dims=2;
-            hsize_t data[dims]; data[0] = 2; data[1] = 1;
-            H5::DataSpace intSpace(1, &dims);
-        
-            H5::Attribute formatVersionAttribute = file.createAttribute("format-version", datatype, intSpace);
-            formatVersionAttribute.write(datatype, data);
-        
-        H5::Attribute myatt_out = file.openAttribute("format-version");
-        hsize_t shape[2];
-            myatt_out.read(datatype, shape);
-
-            // Display attribute contents
-            cout << formatVersionAttribute.getName() << " = " << shape[0] << '\t' << shape[1] << endl;
-
-      
-        
-            //data[0] = shared->getNumBins(); data[0] = shared->size();
-            H5::Attribute shapeAttribute = file.createAttribute("shape", datatype, attr_dataspace);
-            shapeAttribute.write(datatype, data);
-        
-            hsize_t nnzValue = nnz;
-            H5::Attribute nnzAttribute = file.createAttribute("nnz", datatype, attr_dataspace);
-            nnzAttribute.write(datatype, &nnzValue);
-        
-      
-
+        printRequiredFileAttributes(file, shared->getNumBins(), shared->size()); //id, type, format-url, format-version, generated-by, creation-date, shape, nnz
+            
             // Set up read buffer for attribute
-            H5std_string strreadbuf ("");
+            //H5std_string strreadbuf ("");
 
             // Open attribute and read its contents
         
@@ -598,10 +599,11 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         //
 
         
-        #endif
+    #endif
+        
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomHDF5", "checkGroups");
+        m->errorOut(e, "BiomHDF5", "printShared");
         exit(1);
     }
 }
