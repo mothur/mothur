@@ -201,7 +201,9 @@ string ValidParameters::valid(map<string, string>& container, string parameter) 
         map<string, string>::iterator it;
         
         it = container.find(parameter);
-        if(it != container.end()){ }
+        if(it != container.end()){
+            Utils util; it->second = util.getSimpleName(it->second); //remove path from non file options
+        }
         else { return "not found"; }
         
         return it->second;
