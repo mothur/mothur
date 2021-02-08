@@ -560,13 +560,10 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         //"observation/metadata/taxonomy" -> taxonomy info - otu classifications
         //"sample/metadata/" -> group metadata (optional)
         
-        int   RANK = 2;
+        //run this first because if picrust alters the shared vector we will need to use the updated info
+        vector< vector<string> > taxMetadata = getMetaDataShared(picrust);
         
-    #ifdef USE_HDF5
-           
-        
-        H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
-        
+        //find number of non zero otus
         nnz = 0;
         for (int j = 0; j < shared->getNumBins(); j++) {
             vector<int> thisOTU = shared->getOTU(j);
@@ -575,8 +572,16 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
             }
         }
         
+    #ifdef USE_HDF5
+           
+        
+        H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
+        
+        //print required file attributes
         printRequiredFileAttributes(file, shared->getNumBins(), shared->size()); //id, type, format-url, format-version, generated-by, creation-date, shape, nnz
             
+        //print otuLabels called "observation/ids" in biom file
+        //printOTULabels(file, shared->getOTUNames());
             // Set up read buffer for attribute
             //H5std_string strreadbuf ("");
 
@@ -621,5 +626,177 @@ void BiomHDF5::print(string outputFileName, vector<string> sampleMetadata, Picru
         m->errorOut(e, "BiomHDF5", "print");
         exit(1);
     }
+}
+//**********************************************************************************************************************
+vector< vector<string> > BiomHDF5::getMetaDataShared(Picrust* picrust){
+    try {
+        vector< vector<string> > metadata;
+        
+        if (consTax.size() == 0) { for (int i = 0; i < shared->getNumBins(); i++) {  vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  } }
+        else {
+            
+            if (shared == NULL) { m->setControl_pressed(true); return metadata; }
+            
+            //should the labels be Otu001 or PhyloType001
+            vector<string> otuNames = shared->getOTUNames();
+            string firstBin = otuNames[0];
+            string binTag = "Otu";
+            if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
+            
+            map<string, string> labelTaxMap;
+            string snumBins = toString(otuNames.size());
+            for (int i = 0; i < consTax.size(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                string thisOtuLabel = consTax[i].getName();
+                
+                //if there is a bin label use it otherwise make one
+                if (util.isContainingOnlyDigits(thisOtuLabel)) {
+                    string binLabel = binTag;
+                    string sbinNumber = thisOtuLabel;
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabel = util.getSimpleLabel(binLabel);
+                    labelTaxMap[binLabel] = consTax[i].getConsTaxString();
+                }else {
+                    map<string, string>::iterator it = labelTaxMap.find(util.getSimpleLabel(thisOtuLabel));
+                    if (it == labelTaxMap.end()) {
+                        labelTaxMap[util.getSimpleLabel(thisOtuLabel)] = consTax[i].getConsTaxString();
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  thisOtuLabel + " because it's simple label " + util.getSimpleLabel(consTax[i].getName()) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->setControl_pressed(true);
+                    }
+                }
+            }
+            
+            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
+            if (shared->getNumBins() != labelTaxMap.size()) {
+                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(shared->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            }
+            
+            //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
+            if (picrust != NULL) {
+                picrust->setGGOTUIDs(labelTaxMap, shared);
+            }
+            
+            //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
+            
+            //traverse the binLabels forming the metadata strings and saving them
+            //make sure to sanity check
+            map<string, string>::iterator it;
+            vector<string> currentLabels = shared->getOTUNames();
+            for (int i = 0; i < shared->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                it = labelTaxMap.find(util.getSimpleLabel(currentLabels[i]));
+                
+                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + currentLabels[i] + ".\n"); m->setControl_pressed(true); }
+                else {
+                    vector<string> scores;
+                    vector<string> taxonomies = util.parseTax(it->second, scores);
+                    
+                    metadata.push_back(taxonomies);
+                }
+            }
+        }
+        
+        return metadata;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "getMetadataShared");
+        exit(1);
+    }
+
+}
+//**********************************************************************************************************************
+vector< vector<string> > BiomHDF5::getMetaDataFloat(Picrust* picrust){
+    try {
+        vector< vector<string> > metadata;
+        
+        if (consTax.size() == 0) { for (int i = 0; i < sharedFloat->getNumBins(); i++) { vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  } }
+        else {
+            
+            if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
+            
+            //should the labels be Otu001 or PhyloType001
+            vector<string> otuNames = sharedFloat->getOTUNames();
+            string firstBin = otuNames[0];
+            string binTag = "Otu";
+            if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
+            
+            map<string, string> labelTaxMap;
+            string snumBins = toString(otuNames.size());
+            for (int i = 0; i < consTax.size(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                string thisOtuLabel = consTax[i].getName();
+                
+                //if there is a bin label use it otherwise make one
+                if (util.isContainingOnlyDigits(thisOtuLabel)) {
+                    string binLabel = binTag;
+                    string sbinNumber = thisOtuLabel;
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabel = util.getSimpleLabel(binLabel);
+                    labelTaxMap[binLabel] = consTax[i].getConsTaxString();
+                }else {
+                    map<string, string>::iterator it = labelTaxMap.find(util.getSimpleLabel(thisOtuLabel));
+                    if (it == labelTaxMap.end()) {
+                        labelTaxMap[util.getSimpleLabel(thisOtuLabel)] = consTax[i].getConsTaxString();
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  thisOtuLabel + " because it's simple label " + util.getSimpleLabel(consTax[i].getName()) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->setControl_pressed(true);
+                    }
+                }
+            }
+            
+            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
+            if (sharedFloat->getNumBins() != labelTaxMap.size()) {
+                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(sharedFloat->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            }
+            
+            //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
+            if (picrust != NULL) {
+                picrust->setGGOTUIDs(labelTaxMap, sharedFloat);
+            }
+            
+            //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
+            
+            //traverse the binLabels forming the metadata strings and saving them
+            //make sure to sanity check
+            map<string, string>::iterator it;
+            vector<string> currentLabels = sharedFloat->getOTUNames();
+            for (int i = 0; i < sharedFloat->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                it = labelTaxMap.find(util.getSimpleLabel(currentLabels[i]));
+                
+                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + currentLabels[i] + ".\n"); m->setControl_pressed(true); }
+                else {
+                    vector<string> bootstrapValues;vector<string> scores;
+                    vector<string> taxonomies = util.parseTax(it->second, scores);
+                    
+                    metadata.push_back(taxonomies);
+                }
+            }
+        }
+        
+        return metadata;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomSimple", "getMetadataFloat");
+        exit(1);
+    }
+
 }
 /**************************************************************************************************/

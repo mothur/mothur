@@ -77,6 +77,9 @@ private:
     
     void printShared(string, vector<string>, Picrust*);
     void printFloat(string, vector<string>, Picrust*) {}
+    
+    vector< vector<string> > getMetaDataShared(Picrust*); 
+    vector< vector<string> > getMetaDataFloat(Picrust*);
 
 #ifdef USE_HDF5
     void readAttributes(H5::H5File& file);

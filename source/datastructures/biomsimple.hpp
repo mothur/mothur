@@ -27,8 +27,6 @@ public:
 
     
 private:
-   
-    
     
     string getTag(string&);
     void getDims(string, int&, int&);
@@ -38,8 +36,10 @@ private:
     vector<string> getNamesAndTaxonomies(string);
     string getName(string);
     string getTaxonomy(string, string);
-    vector<string> getMetaData(Picrust*);
     
+    vector<string> getMetaDataShared(Picrust*);
+    vector<string> getMetaDataFloat(Picrust*);
+
 };
 
 

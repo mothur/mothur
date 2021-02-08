@@ -600,7 +600,7 @@ SharedRAbundVectors* BiomSimple::extractOTUData(string line, vector<string>& gro
 //**********************************************************************************************************************
 void BiomSimple::print(string filename, vector<string> sampleMetadata, Picrust* picrust) {
     try {
-        vector<string> metadata = getMetaData(picrust);
+        vector<string> metadata = getMetaDataShared(picrust);
         int numBins = shared->getNumBins();
         int numSamples = shared->size();
         vector<string> currentLabels = shared->getOTUNames();
@@ -762,12 +762,14 @@ void BiomSimple::print(string filename, vector<string> sampleMetadata, Picrust* 
     }
 }
 //**********************************************************************************************************************
-vector<string> BiomSimple::getMetaData(Picrust* picrust){
+vector<string> BiomSimple::getMetaDataShared(Picrust* picrust){
     try {
         vector<string> metadata;
         
         if (consTax.size() == 0) { for (int i = 0; i < shared->getNumBins(); i++) {  metadata.push_back("null");  } }
         else {
+            
+            if (shared == NULL) { m->setControl_pressed(true); return metadata; }
             
             //should the labels be Otu001 or PhyloType001
             vector<string> otuNames = shared->getOTUNames();
@@ -856,7 +858,109 @@ vector<string> BiomSimple::getMetaData(Picrust* picrust){
         
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomSimple", "getMetadata");
+        m->errorOut(e, "BiomSimple", "getMetadataShared");
+        exit(1);
+    }
+
+}
+//**********************************************************************************************************************
+vector<string> BiomSimple::getMetaDataFloat(Picrust* picrust){
+    try {
+        vector<string> metadata;
+        
+        if (consTax.size() == 0) { for (int i = 0; i < sharedFloat->getNumBins(); i++) {  metadata.push_back("null");  } }
+        else {
+            
+            if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
+            
+            //should the labels be Otu001 or PhyloType001
+            vector<string> otuNames = sharedFloat->getOTUNames();
+            string firstBin = otuNames[0];
+            string binTag = "Otu";
+            if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
+            
+            map<string, string> labelTaxMap;
+            string snumBins = toString(otuNames.size());
+            for (int i = 0; i < consTax.size(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                string thisOtuLabel = consTax[i].getName();
+                
+                //if there is a bin label use it otherwise make one
+                if (util.isContainingOnlyDigits(thisOtuLabel)) {
+                    string binLabel = binTag;
+                    string sbinNumber = thisOtuLabel;
+                    if (sbinNumber.length() < snumBins.length()) {
+                        int diff = snumBins.length() - sbinNumber.length();
+                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
+                    }
+                    binLabel += sbinNumber;
+                    binLabel = util.getSimpleLabel(binLabel);
+                    labelTaxMap[binLabel] = consTax[i].getConsTaxString();
+                }else {
+                    map<string, string>::iterator it = labelTaxMap.find(util.getSimpleLabel(thisOtuLabel));
+                    if (it == labelTaxMap.end()) {
+                        labelTaxMap[util.getSimpleLabel(thisOtuLabel)] = consTax[i].getConsTaxString();
+                    }else {
+                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  thisOtuLabel + " because it's simple label " + util.getSimpleLabel(consTax[i].getName()) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->setControl_pressed(true);
+                    }
+                }
+            }
+            
+            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
+            if (sharedFloat->getNumBins() != labelTaxMap.size()) {
+                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(sharedFloat->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            }
+            
+            //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
+            if (picrust != NULL) {
+                picrust->setGGOTUIDs(labelTaxMap, sharedFloat);
+            }
+            
+            //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
+            
+            //traverse the binLabels forming the metadata strings and saving them
+            //make sure to sanity check
+            map<string, string>::iterator it;
+            vector<string> currentLabels = sharedFloat->getOTUNames();
+            for (int i = 0; i < sharedFloat->getNumBins(); i++) {
+                
+                if (m->getControl_pressed()) { return metadata; }
+                
+                it = labelTaxMap.find(util.getSimpleLabel(currentLabels[i]));
+                
+                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + currentLabels[i] + ".\n"); m->setControl_pressed(true); }
+                else {
+                    vector<string> bootstrapValues;
+                    string data = "{\"taxonomy\":[";
+            
+                    vector<string> scores;
+                    vector<string> taxonomies = util.parseTax(it->second, scores);
+                    
+                    for (int j = 0; j < taxonomies.size()-1; j ++) { data += "\"" + taxonomies[j] + "\", "; }
+                    data += "\"" + taxonomies[taxonomies.size()-1] + "\"]";
+                    
+                    //add bootstrap values if available
+                    if (scores[0] != "null") {
+                        data += ", \"bootstrap\":[";
+                        
+                        for (int j = 0; j < scores.size()-1; j ++) { data += scores[j] + ", "; }
+                        data += scores[scores.size()-1] + "]";
+
+                    }
+                    data += "}";
+                    
+                    metadata.push_back(data);
+                }
+            }
+        }
+        
+        return metadata;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomSimple", "getMetadataFloat");
         exit(1);
     }
 
