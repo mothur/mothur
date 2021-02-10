@@ -535,6 +535,122 @@ void BiomHDF5::printRequiredFileAttributes(H5::H5File& file, int numBins, int nu
         exit(1);
     }
 }
+//**********************************************************************************************************************
+//print otuNames
+//"observation/ids" -> otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5
+void BiomHDF5::printOTULabels(H5::H5File& file, vector<string> otuNames, H5::Group& group) {
+    try {
+        
+        
+        H5std_string datasetName = "ids";
+        
+        
+        
+        
+        hsize_t dim[] = {1, otuNames.size()};
+        H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE); //string type
+        H5::DataType datatype = H5::ArrayType(str_type, 1, dim); // Create new array of strings datatype
+        H5::DataSpace otuNameDataSpace( 1, dim );
+        
+        //char **data = new char*[dims[0]];
+        
+        //dataset.read((void*)data, str_type);
+        
+        for (int i = 0; i < otuNames.size(); i++) {
+
+        }
+        
+        //TODO: finish printing OTU names
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "printOTULabels");
+        exit(1);
+    }
+}
+//**************************************************************************************************************
+//"observation/matrix/data" -> otu abundances for each non zero abundnace entry - 1, 5, 1, 2, 3, 1, 1, 4, 2, 2, 1, 1, 1, 1, 1
+//"observation/matrix/indices" -> index of group - maps into samples/ids  2, 0, 1, 3, 4, 5, 2, 3, 5, 0, 1, 2, 5, 1, 2
+//"observation/matrix/indptr" -> maps non zero abundance to OTU - 0, 1, 6, 9, 13, 15 - 0 start of OTU1s indexes, 1 start of OTU2s indexes, ... 15 start of OTU5s indexes
+
+/*
+ label group numOtus GG_OTU_1  GG_OTU_2  GG_OTU_3  GG_OTU_4  GG_OTU_5
+ userLabel  Sample1     0           5       0           2       0
+ userLabel  Sample2     0           1       0           2       1
+ userLabel  Sample3     1           0       1           1       1
+ userLabel  Sample4     0           2       4           0       0
+ userLabel  Sample5     0           3       0           0       0
+ userLabel  Sample6     0           1       2           1       0
+ */
+void BiomHDF5::printOTUAbundances(H5::H5File& file, int numBins, int numSamples, bool useRelabund=false) {
+    try {
+        
+        int otuStartIndex = 0;
+        vector<int> indptr, indices, abunds;
+        vector<float> abundsFloat;
+        
+        //find numOTUs
+        if (useRelabund)    { numBins = sharedFloat->getNumBins(); numSamples = sharedFloat->size();  }
+        else                { numBins = shared->getNumBins(); numSamples = shared->size();            }
+            
+        //fill indices, indptr and data vectors
+        for (int i = 0; i < numBins; i++) {
+            
+            if (m->getControl_pressed()) { return; }
+            
+            vector<int> thisOtusAbundances; vector<float> thisOtusFloatAbundances; float zero = 0.0;
+            if (useRelabund) { thisOtusFloatAbundances = sharedFloat->getOTU(i);    }
+            else             { thisOtusAbundances = shared->getOTU(i);              }
+            
+            indptr.push_back(otuStartIndex);
+            for (int j = 0; j < numSamples; j++) {
+                
+                if (useRelabund) {
+                    if (util.isEqual(thisOtusFloatAbundances[j], zero)) {} //skip zero values
+                    else {
+                        otuStartIndex++; //update number of non zero values for this OTU - use to create indptr values
+                        indices.push_back(j); //index to sample providing this abund
+                        abundsFloat.push_back(thisOtusFloatAbundances[j]); //save this samples OTU abundance
+                    }
+                }else {
+                    if (thisOtusAbundances[j] == 0) {} //skip zero values
+                    else {
+                        otuStartIndex++; //update number of non zero values for this OTU - use to create indptr values
+                        indices.push_back(j); //index to sample providing this abund
+                        abunds.push_back(thisOtusAbundances[j]); //save this samples OTU abundance
+                    }
+                }
+            }
+        }
+        
+        //data
+        const hsize_t dims=otuStartIndex;
+        hsize_t data[dims];
+        for (int i = 0; i < otuStartIndex; i++) { data[i] = indices[i]; } //fill data with indices
+        
+        H5::DataType datatype = H5::ArrayType(H5::PredType::NATIVE_INT, 1, &dims); // Create new vector<int> datatype
+        H5::DataSpace intSpace(1, &dims); //set dataset dimensions
+    
+        
+        //create indices dataset
+        H5::DataSet indiciesDataset = file.createDataSet("observation/matrix/indices", datatype, intSpace);
+        indiciesDataset.write(&data[0], datatype, intSpace);
+        
+        //TODO: attempt to read the dataset created above - unit test
+        
+        //TODO: create indptr dataset
+        
+        //TODO: create data dataset - type depends on whether or not we are using the relabund values
+        
+        
+        
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "printOTUAbundances");
+        exit(1);
+    }
+}
 #endif
 //**********************************************************************************************************************
 void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata, Picrust* picrust) {
@@ -556,12 +672,14 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
          userLabel  Sample6     0           1       2           1       0
          */
         
-        //"sample/ids" -> group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
         //"observation/metadata/taxonomy" -> taxonomy info - otu classifications
+        
+        //"sample/ids" -> group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
         //"sample/metadata/" -> group metadata (optional)
         
         //run this first because if picrust alters the shared vector we will need to use the updated info
-        vector< vector<string> > taxMetadata = getMetaDataShared(picrust);
+        //taxMetadata[0] = taxonomy for otu0
+        vector< vector<string> > taxMetadata = getMetaData(picrust);
         
         //find number of non zero otus
         nnz = 0;
@@ -574,14 +692,24 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         
     #ifdef USE_HDF5
            
-        
         H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
         
         //print required file attributes
         printRequiredFileAttributes(file, shared->getNumBins(), shared->size()); //id, type, format-url, format-version, generated-by, creation-date, shape, nnz
-            
+        
+        H5::Group observationGroup( file.createGroup( "observation/" ));
+        H5::Group sampleGroup( file.createGroup( "sample/" ));
+       // H5::Group matrixGroup( file.createGroup( "observation/matrix/" ));
+
+        
         //print otuLabels called "observation/ids" in biom file
-        //printOTULabels(file, shared->getOTUNames());
+        printOTULabels(file, shared->getOTUNames(), observationGroup);
+        
+        //print otuAbundances called "observation/matrix/" (data, indicies, indptr) in biom file
+        printOTUAbundances(file, shared->getNumBins(), shared->size());
+        
+        
+        
             // Set up read buffer for attribute
             //H5std_string strreadbuf ("");
 
@@ -628,17 +756,30 @@ void BiomHDF5::print(string outputFileName, vector<string> sampleMetadata, Picru
     }
 }
 //**********************************************************************************************************************
-vector< vector<string> > BiomHDF5::getMetaDataShared(Picrust* picrust){
+vector< vector<string> > BiomHDF5::getMetaData(Picrust* picrust, bool useRelabund){
     try {
         vector< vector<string> > metadata;
         
-        if (consTax.size() == 0) { for (int i = 0; i < shared->getNumBins(); i++) {  vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  } }
+        if (consTax.size() == 0) {
+            if (!useRelabund) {
+                for (int i = 0; i < shared->getNumBins(); i++) {  vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  } }
+            else {
+                for (int i = 0; i < sharedFloat->getNumBins(); i++) { vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  }
+            }
+        }
         else {
             
-            if (shared == NULL) { m->setControl_pressed(true); return metadata; }
+            if (!useRelabund) {
+                if (shared == NULL) { m->setControl_pressed(true); return metadata; }
+            }else {
+                if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
+            }
             
             //should the labels be Otu001 or PhyloType001
-            vector<string> otuNames = shared->getOTUNames();
+            vector<string> otuNames;
+            if (!useRelabund) { otuNames = shared->getOTUNames(); }
+            else { otuNames = sharedFloat->getOTUNames(); }
+            
             string firstBin = otuNames[0];
             string binTag = "Otu";
             if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
@@ -673,13 +814,20 @@ vector< vector<string> > BiomHDF5::getMetaDataShared(Picrust* picrust){
             }
             
             //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
-            if (shared->getNumBins() != labelTaxMap.size()) {
-                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(shared->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+            if (!useRelabund) {
+                if (shared->getNumBins() != labelTaxMap.size()) {
+                    m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(shared->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+                }
+            }else {
+                if (sharedFloat->getNumBins() != labelTaxMap.size()) {
+                    m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(sharedFloat->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
+                }
             }
             
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
             if (picrust != NULL) {
-                picrust->setGGOTUIDs(labelTaxMap, shared);
+                if (!useRelabund)   { picrust->setGGOTUIDs(labelTaxMap, shared);        }
+                else                { picrust->setGGOTUIDs(labelTaxMap, sharedFloat);   }
             }
             
             //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
@@ -687,8 +835,12 @@ vector< vector<string> > BiomHDF5::getMetaDataShared(Picrust* picrust){
             //traverse the binLabels forming the metadata strings and saving them
             //make sure to sanity check
             map<string, string>::iterator it;
-            vector<string> currentLabels = shared->getOTUNames();
-            for (int i = 0; i < shared->getNumBins(); i++) {
+            vector<string> currentLabels; int numBins = 0;
+            if (!useRelabund)   { currentLabels = shared->getOTUNames();    numBins = shared->getNumBins();      }
+            else                { currentLabels = sharedFloat->getOTUNames();   numBins = sharedFloat->getNumBins();
+            }
+            
+            for (int i = 0; i < numBins; i++) {
                 
                 if (m->getControl_pressed()) { return metadata; }
                 
@@ -705,96 +857,9 @@ vector< vector<string> > BiomHDF5::getMetaDataShared(Picrust* picrust){
         }
         
         return metadata;
-        
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomHDF5", "getMetadataShared");
-        exit(1);
-    }
-
-}
-//**********************************************************************************************************************
-vector< vector<string> > BiomHDF5::getMetaDataFloat(Picrust* picrust){
-    try {
-        vector< vector<string> > metadata;
-        
-        if (consTax.size() == 0) { for (int i = 0; i < sharedFloat->getNumBins(); i++) { vector<string> temp; temp.push_back("null"); metadata.push_back(temp);  } }
-        else {
-            
-            if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
-            
-            //should the labels be Otu001 or PhyloType001
-            vector<string> otuNames = sharedFloat->getOTUNames();
-            string firstBin = otuNames[0];
-            string binTag = "Otu";
-            if ((firstBin.find("Otu")) == string::npos) { binTag = "PhyloType";  }
-            
-            map<string, string> labelTaxMap;
-            string snumBins = toString(otuNames.size());
-            for (int i = 0; i < consTax.size(); i++) {
-                
-                if (m->getControl_pressed()) { return metadata; }
-                
-                string thisOtuLabel = consTax[i].getName();
-                
-                //if there is a bin label use it otherwise make one
-                if (util.isContainingOnlyDigits(thisOtuLabel)) {
-                    string binLabel = binTag;
-                    string sbinNumber = thisOtuLabel;
-                    if (sbinNumber.length() < snumBins.length()) {
-                        int diff = snumBins.length() - sbinNumber.length();
-                        for (int h = 0; h < diff; h++) { binLabel += "0"; }
-                    }
-                    binLabel += sbinNumber;
-                    binLabel = util.getSimpleLabel(binLabel);
-                    labelTaxMap[binLabel] = consTax[i].getConsTaxString();
-                }else {
-                    map<string, string>::iterator it = labelTaxMap.find(util.getSimpleLabel(thisOtuLabel));
-                    if (it == labelTaxMap.end()) {
-                        labelTaxMap[util.getSimpleLabel(thisOtuLabel)] = consTax[i].getConsTaxString();
-                    }else {
-                        m->mothurOut("[ERROR]: Cannot add OTULabel " +  thisOtuLabel + " because it's simple label " + util.getSimpleLabel(consTax[i].getName()) + " has already been added and will result in downstream errors. Have you mixed mothur labels and non mothur labels? To make the files work well together and backwards compatible mothur treats 1, OTU01, OTU001, OTU0001 all the same. We do this by removing any non numeric characters and leading zeros. For eaxample: Otu000018 and OtuMY18 both map to 18.\n"); m->setControl_pressed(true);
-                    }
-                }
-            }
-            
-            //sanity check for file issues - do you have the same number of bins in the shared and constaxonomy file
-            if (sharedFloat->getNumBins() != labelTaxMap.size()) {
-                m->mothurOut("[ERROR]: Your constaxonomy file contains " + toString(labelTaxMap.size()) + " otus and your shared file contain " + toString(sharedFloat->getNumBins()) + " otus, cannot continue.\n"); m->setControl_pressed(true); return metadata;
-            }
-            
-            //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
-            if (picrust != NULL) {
-                picrust->setGGOTUIDs(labelTaxMap, sharedFloat);
-            }
-            
-            //{"taxonomy":["k__Bacteria", "p__Proteobacteria", "c__Gammaproteobacteria", "o__Enterobacteriales", "f__Enterobacteriaceae", "g__Escherichia", "s__"]}
-            
-            //traverse the binLabels forming the metadata strings and saving them
-            //make sure to sanity check
-            map<string, string>::iterator it;
-            vector<string> currentLabels = sharedFloat->getOTUNames();
-            for (int i = 0; i < sharedFloat->getNumBins(); i++) {
-                
-                if (m->getControl_pressed()) { return metadata; }
-                
-                it = labelTaxMap.find(util.getSimpleLabel(currentLabels[i]));
-                
-                if (it == labelTaxMap.end()) { m->mothurOut("[ERROR]: can't find taxonomy information for " + currentLabels[i] + ".\n"); m->setControl_pressed(true); }
-                else {
-                    vector<string> bootstrapValues;vector<string> scores;
-                    vector<string> taxonomies = util.parseTax(it->second, scores);
-                    
-                    metadata.push_back(taxonomies);
-                }
-            }
-        }
-        
-        return metadata;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "BiomSimple", "getMetadataFloat");
+        m->errorOut(e, "BiomHDF5", "getMetadata");
         exit(1);
     }
 

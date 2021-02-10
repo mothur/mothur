@@ -78,8 +78,7 @@ private:
     void printShared(string, vector<string>, Picrust*);
     void printFloat(string, vector<string>, Picrust*) {}
     
-    vector< vector<string> > getMetaDataShared(Picrust*); 
-    vector< vector<string> > getMetaDataFloat(Picrust*);
+    vector< vector<string> > getMetaData(Picrust*, bool useRelabund=false);
 
 #ifdef USE_HDF5
     void readAttributes(H5::H5File& file);
@@ -88,6 +87,8 @@ private:
     //void checkGroups(H5::H5File&, map<string, vector<string> >&);
     
     void printRequiredFileAttributes(H5::H5File& file, int, int);
+    void printOTULabels(H5::H5File& file, vector<string>, H5::Group&);
+    void printOTUAbundances(H5::H5File& file, int, int, bool);
     
     void readNames( H5::H5File& file, H5std_string groupName);
     void readTaxonomy( H5::H5File& file);
