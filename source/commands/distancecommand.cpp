@@ -379,7 +379,7 @@ void driverColumn(distanceData* params){
                 double dist = distCalculator->calcDist(seqI, seqJ);
                 
                 if(dist <= params->cutoff){
-                    buffer += seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n";
+                    buffer += (seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n");
                     params->count++;
                 }
             }
