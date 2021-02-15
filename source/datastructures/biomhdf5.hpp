@@ -87,8 +87,8 @@ private:
     //void checkGroups(H5::H5File&, map<string, vector<string> >&);
     
     void printRequiredFileAttributes(H5::H5File& file, int, int);
-    void printOTULabels(H5::H5File& file, vector<string>, H5::Group&);
-    void printOTUAbundances(H5::H5File& file, int, int, bool);
+    void printOTULabels(H5::Group& group, vector<string>);
+    void printOTUAbundances(H5::Group& group, int, int, bool);
     
     void readNames( H5::H5File& file, H5std_string groupName);
     void readTaxonomy( H5::H5File& file);
