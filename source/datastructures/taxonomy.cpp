@@ -94,6 +94,30 @@ string Taxonomy::getInlineConsTaxonomy(){
     }
 }
 /***********************************************************************/
+vector<string> Taxonomy::getSimpleTaxons(bool includeConfidence) { //pass in true to include confidences
+    try {
+        
+        if (!containsConfidence) { includeConfidence = false; }
+        vector<string> items;
+        
+        for (int i = 0; i < taxonomy.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            string conTax = taxonomy[i].name;
+            
+            if (includeConfidence) { conTax += "(" + toString(taxonomy[i].confidence) + ")"; }
+            
+            items.push_back(conTax);
+        }
+        
+        return items;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Taxonomy", "getSimpleTaxons");
+            exit(1);
+    }
+}
+/***********************************************************************/
 string Taxonomy::getConsTaxString(bool includeConfidence) { //pass in true to include confidences
     try {
         

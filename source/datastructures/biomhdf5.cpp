@@ -49,7 +49,9 @@ void BiomHDF5::read(string fname){
 
         try {
             //read otu names
-            readNames(file, "observation/"); if (m->getControl_pressed()) { return; }
+            H5::Group group(file.openGroup("observation/"));
+            otuNames = readNames(file, group, "ids"); if (m->getControl_pressed()) { return; }
+            group.close();
     
         }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
             m->mothurOut("[ERROR]: Missing /""observation/ids/"" needed for OTU names.\n");
@@ -58,7 +60,9 @@ void BiomHDF5::read(string fname){
         
         try {
             //read group names
-            readNames(file, "sample/"); if (m->getControl_pressed()) { return; }
+            H5::Group group(file.openGroup("sample/"));
+            sampleNames = readNames(file, group, "ids"); if (m->getControl_pressed()) { return; }
+            group.close();
     
         }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
             m->mothurOut("[ERROR]: Missing /""sample/ids/"" needed for group names.\n");
@@ -175,17 +179,16 @@ void BiomHDF5::read(string fname){
 #ifdef USE_HDF5
 //**********************************************************************************************************************
 //Group = "observation/" or "sample/", datasetName = "ids"
-void BiomHDF5::readNames( H5::H5File& file, H5std_string groupName) {
+vector<string> BiomHDF5::readNames( H5::H5File& file, H5::Group& group, string datasetname) {
     try {
-        
-        H5std_string datasetName = "ids";
-        H5::Group group(file.openGroup(groupName));
+          
+        vector<string> items;
         
         hsize_t numObjects = group.getNumObjs();
         
         if (numObjects != 0) { //we have this group
             
-            H5::DataSet dataset = group.openDataSet(datasetName);
+            H5::DataSet dataset = group.openDataSet(datasetname.c_str());
             H5::DataType  dataType(dataset.getDataType());
             H5::DataSpace dataSpace = dataset.getSpace();
             
@@ -196,15 +199,14 @@ void BiomHDF5::readNames( H5::H5File& file, H5std_string groupName) {
             H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
             dataset.read((void*)data, str_type);
             
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetname + " = "); }
             
             for (int i = 0; i < dims[0]; i++) {
                 
                 if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
                 
-                if (groupName == "observation/") { otuNames.push_back(data[i]); }
-                else if (groupName == "sample/") { sampleNames.push_back(data[i]); }
-               
+                items.push_back(data[i]);
+                
                 delete[] data[i];
             }  if (m->getDebug()) { m->mothurOutEndLine(); }
             delete[] data;
@@ -212,7 +214,7 @@ void BiomHDF5::readNames( H5::H5File& file, H5std_string groupName) {
             dataset.close();
         }
         
-        group.close();
+        return items;
     }
     catch(exception& e) {
         m->errorOut(e, "BiomHDF5", "readNames");
@@ -235,35 +237,33 @@ void BiomHDF5::readTaxonomy( H5::H5File& file) {
             H5::DataSet dataset = group.openDataSet(datasetName);
             H5::DataType  dataType(dataset.getDataType());
             H5::DataSpace dataSpace = dataset.getSpace();
+            H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
             
             int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
             hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
             
             if (dataset.getTypeClass() == H5T_STRING) {
+                
+                int numberOfTaxonomies = dims[0];
+                if (rank == 2) { numberOfTaxonomies *= dims[1]; }
+            
+                char **data = new char*[numberOfTaxonomies];
+                dataset.read((void*)data, str_type);
+                        
                 if (rank == 1) {
-                    char **data = new char*[dims[0]];
-                    H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
-                    dataset.read((void*)data, str_type);
-                    
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: " + datasetName + " = "); }
-                    
-                    for (int i = 0; i < dims[0]; i++) {
+
+                    for (int i = 0; i < numberOfTaxonomies; i++) {
                         if (m->getDebug()) { m->mothurOut(toString(data[i]) + "\t"); }
                         
                         taxonomy.push_back(data[i]);
                         
                         delete[] data[i];
-                    }  if (m->getDebug()) { m->mothurOutEndLine(); }
+                    }
                     delete[] data;
                 }else if (rank == 2) {
                     
-                    char **data = new char*[dims[0]*dims[1]];
-
-                    H5::StrType str_type(H5::PredType::C_S1, H5T_VARIABLE);
-                    dataset.read((void*)data, str_type);
-                    
                     string otuTaxonomy = ""; int count = 0;
-                    for (int i = 0; i < dims[0]*dims[1]; i++) {
+                    for (int i = 0; i < numberOfTaxonomies; i++) {
                         
                         otuTaxonomy += data[i];  otuTaxonomy += ";";  count++;
                         
@@ -511,22 +511,20 @@ void BiomHDF5::printRequiredFileAttributes(H5::H5File& file, int numBins, int nu
         H5::Attribute dateAttribute = file.createAttribute("creation-date", strdatatype, attr_dataspace);
         dateAttribute.write(strdatatype, dataValue);
 
-        const hsize_t dims=2;
-        H5::DataType datatype = H5::ArrayType(H5::PredType::NATIVE_INT, 1, &dims); // Create new int datatype
-        hsize_t data[dims]; data[0] = 2; data[1] = 1;
-        H5::DataSpace intSpace(1, &dims);
-    
-        H5::Attribute formatVersionAttribute = file.createAttribute("format-version", datatype, intSpace);
-        formatVersionAttribute.write(datatype, data);
+        hsize_t dims[1]; dims[0] = 2;
+        H5::DataSpace dataspace( 1, dims );
+        
+        hsize_t data[2]; data[0] = 2; data[1] = 1;
+        H5::Attribute formatVersionAttribute = file.createAttribute("format-version", H5::PredType::NATIVE_INT, dataspace);
+        formatVersionAttribute.write(H5::PredType::NATIVE_INT, data);
 
         data[0] = numBins; data[1] = numSamples;
-        H5::Attribute shapeAttribute = file.createAttribute("shape", datatype, intSpace);
-        shapeAttribute.write(datatype, data);
+        H5::Attribute shapeAttribute = file.createAttribute("shape", H5::PredType::NATIVE_INT, dataspace);
+        shapeAttribute.write(H5::PredType::NATIVE_INT, data);
     
         hsize_t nnzValue = nnz;
-        H5::DataType nnzDatatype = H5::PredType::NATIVE_INT;
-        H5::Attribute nnzAttribute = file.createAttribute("nnz", nnzDatatype, attr_dataspace);
-        nnzAttribute.write(nnzDatatype, &nnzValue);
+        H5::Attribute nnzAttribute = file.createAttribute("nnz", H5::PredType::NATIVE_INT, attr_dataspace);
+        nnzAttribute.write(H5::PredType::NATIVE_INT, &nnzValue);
  
     }
     catch(exception& e) {
@@ -537,24 +535,59 @@ void BiomHDF5::printRequiredFileAttributes(H5::H5File& file, int numBins, int nu
 //**********************************************************************************************************************
 //print otuNames
 //"observation/ids" -> otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5
-void BiomHDF5::printOTULabels(H5::Group& group, vector<string> otuNames) {
+//"sample/ids" -> group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
+void BiomHDF5::printNames(H5::Group& group, vector<string> names, string datasetname) {
     try {
-        hsize_t     dimsf[1]; dimsf[0] = otuNames.size();
+        hsize_t     dimsf[1]; dimsf[0] = names.size();
         H5::DataSpace dataspace( 1, dimsf );
         H5::StrType datatype(H5::PredType::C_S1, H5T_VARIABLE); 
         
         //fill data with names
         char* data[dimsf[0]];
-        for (int i = 0; i < otuNames.size(); i++) { data[i] = (char*) otuNames[i].c_str(); }
+        for (int i = 0; i < names.size(); i++) { data[i] = (char*) names[i].c_str(); }
              
-        const H5std_string  DATASET_NAME( "ids" );
+        const H5std_string  DATASET_NAME( datasetname.c_str() );
         H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatype, dataspace );
         
         dataset.write( data, datatype );
         dataset.close();
     }
     catch(exception& e) {
-        m->errorOut(e, "BiomHDF5", "printOTULabels");
+        m->errorOut(e, "BiomHDF5", "printNames");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//"observation/metadata/taxonomy" -> taxonomy info - otu classifications
+void BiomHDF5::printOTUTaxonomy(H5::Group& group, string datasetname) {
+    try {
+        int maxLevel = consTax[0].getNumLevels();
+        
+        hsize_t     dimsf[2]; dimsf[0] = consTax.size(); dimsf[1] = maxLevel;
+        H5::DataSpace dataspace(2, dimsf); //2D array, (numOtus x vector<taxonomy>)
+        H5::StrType datatype(H5::PredType::C_S1, H5T_VARIABLE);
+        
+        const H5std_string  DATASET_NAME( datasetname.c_str() );
+        H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatype, dataspace );
+    
+        char **data = new char*[dimsf[0]*dimsf[1]];
+        int count = 0;
+        
+        for (int i = 0; i < consTax.size(); i++) {
+            
+            if (m->getControl_pressed()) { break; }
+        
+            vector<Taxon> thisOtusTaxonomy = consTax[i].getTaxons();
+            
+            for (int j = 0; j < maxLevel; j++) { data[count] = (char*) thisOtusTaxonomy[j].name.c_str();  count++; }
+             
+        }
+        
+        dataset.write( data, datatype );
+        dataset.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "printOTUTaxonomy");
         exit(1);
     }
 }
@@ -618,32 +651,30 @@ void BiomHDF5::printOTUAbundances(H5::Group& group, int numBins, int numSamples,
         // dataset dimensions
         hsize_t     dimsf[1]; dimsf[0] = otuStartIndex;
         H5::DataSpace dataspace( 1, dimsf ); //dataspace 1 x nnz
-        H5::IntType datatype( H5::PredType::NATIVE_INT );
         
         int data[otuStartIndex];
         for (int i = 0; i < otuStartIndex; i++) { data[i] = indices[i]; } //fill data with indices
              
         const H5std_string  DATASET_NAME( "indices" );
-        H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatype, dataspace );
+        H5::DataSet dataset = group.createDataSet( DATASET_NAME, H5::PredType::NATIVE_INT, dataspace );
         
         dataset.write( data, H5::PredType::NATIVE_INT );
         dataset.close();
         
         //create data dataset - type depends on whether or not we are using the relabund values
         if (useRelabund) { //print float
-            H5::FloatType datatypeFloat( H5::PredType::NATIVE_FLOAT );
             float dataFloat[otuStartIndex];
             
             for (int i = 0; i < otuStartIndex; i++) { dataFloat[i] = abundsFloat[i]; } //fill data with abunds
             const H5std_string  DATASET_NAME( "data" );
-            H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatypeFloat, dataspace );
+            H5::DataSet dataset = group.createDataSet( DATASET_NAME, H5::PredType::NATIVE_FLOAT, dataspace );
             
             dataset.write( dataFloat, H5::PredType::NATIVE_FLOAT );
             dataset.close();
         }else { //print shared
             for (int i = 0; i < otuStartIndex; i++) { data[i] = abunds[i]; } //fill data with abunds
             const H5std_string  DATASET_NAME( "data" );
-            H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatype, dataspace );
+            H5::DataSet dataset = group.createDataSet( DATASET_NAME, H5::PredType::NATIVE_INT, dataspace );
             
             dataset.write( data, H5::PredType::NATIVE_INT );
             dataset.close();
@@ -657,7 +688,7 @@ void BiomHDF5::printOTUAbundances(H5::Group& group, int numBins, int numSamples,
         for (int i = 0; i < numBins; i++) { dataIndptr[i] = indptr[i]; } //fill data with indptr
              
         const H5std_string  DATASET_NAME_INDPTR( "indptr" );
-        H5::DataSet datasetIndptr = group.createDataSet( DATASET_NAME_INDPTR, datatype, dataspaceIndptr );
+        H5::DataSet datasetIndptr = group.createDataSet( DATASET_NAME_INDPTR, H5::PredType::NATIVE_INT, dataspaceIndptr );
         
         datasetIndptr.write(dataIndptr, H5::PredType::NATIVE_INT);
         datasetIndptr.close();
@@ -713,15 +744,20 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
         //print required file attributes
         printRequiredFileAttributes(file, shared->getNumBins(), shared->size()); //id, type, format-url, format-version, generated-by, creation-date, shape, nnz
         
-        H5::Group sampleGroup( file.createGroup( "sample/" ));
+        
         
         //print otuLabels called "observation/ids" in biom file
         H5::Group observationGroup( file.createGroup( "observation/" ));
-        printOTULabels(observationGroup, shared->getOTUNames());
+        printNames(observationGroup, shared->getOTUNames(), "ids");
+        
+        //print group names called "sample/ids" in biom file
+        H5::Group sampleGroup( file.createGroup( "sample/" ));
+        printNames(sampleGroup, shared->getNamesGroups(), "ids");
         
         //print otuAbundances called "observation/matrix/" (data, indicies, indptr) in biom file
         H5::Group matrixGroup( file.createGroup( "observation/matrix/" ));
         printOTUAbundances(matrixGroup, shared->getNumBins(), shared->size());
+        
         
        
     #endif
