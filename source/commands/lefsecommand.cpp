@@ -425,7 +425,7 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
             string treatment = designMap.get(group, mclass); //get value for this group in this category
             treatments.insert(treatment);
         }
-        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things to classes to compare, quitting.\n"); m->setControl_pressed(true); }
+        if (treatments.size() < 2) { m->mothurOut("[ERROR]: need at least 2 things for classes to compare, quitting.\n"); m->setControl_pressed(true); }
         
         LinearAlgebra linear;
         for (int i = 0; i < numBins; i++) {
