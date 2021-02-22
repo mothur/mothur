@@ -82,17 +82,17 @@ private:
 
 #ifdef USE_HDF5
     void readAttributes(H5::H5File& file);
-    void readStringAttributes(H5::Group& fileAttributes, string);
+    string readStringAttributes(H5::Group& fileAttributes, string);
     void readIntAttributes(H5::Group& fileAttributes, string);
     
     vector<string> readNames( H5::H5File& file, H5::Group& group, string);
-    void readTaxonomy( H5::H5File& file);
-    void readOTUAbundances( H5::H5File& file);
+    int readTaxonomy( H5::Group& group, string);
+    string readOTUAbundances( H5::Group& group, vector<string>);
     
-    void printRequiredFileAttributes(H5::H5File& file, int, int);
+    void printRequiredFileAttributes(H5::Group& fileAttributes, int, int);
     
     void printNames(H5::Group& group, vector<string>, string);
-    void printOTUAbundances(H5::Group& group, int, int, bool);
+    void printOTUAbundances(H5::Group& group, int, int, string, bool);
     void printOTUTaxonomy(H5::Group& group, string);
     
     

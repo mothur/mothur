@@ -30,7 +30,7 @@ public:
     void setNumSeqs(int n)          { numReps = n;      }
     string getName()                { return name;      }
     vector<Taxon> getTaxons()       { return taxonomy;  }
-    vector<string> getSimpleTaxons(bool includeConfidence=true);
+    vector<string> getSimpleTaxons (bool includeConfidence=false);
     void setTaxons(vector<Taxon> t) { taxonomy = t;     }
     int getNumSeqs()                { return numReps;   }
     int getNumLevels()              { return taxonomy.size();   }

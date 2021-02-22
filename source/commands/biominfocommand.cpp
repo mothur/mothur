@@ -193,6 +193,8 @@ int BiomInfoCommand::execute(){
         fileroot = outputdir + util.getRootName(util.getSimpleName(biomfile));
         
         SharedRAbundVectors* shared = biom->getSharedRAbundVectors();
+        if (format == "hdf5")   {  label = shared->getLabel(); }
+        if (label == "") { label = "userLabel"; shared->setLabels(label); }
         
         CountTable ct;
         vector< map<string, bool> > otuContainsGroups;
