@@ -1,0 +1,25 @@
+
+Setting logfile name to 123.log
+
+
+mothur > summary.seqs(fasta=final.fasta)
+Unable to open final.fasta. Trying default /Users/swestcott/Desktop/release/final.fasta.
+
+Using 16 processors.
+
+		Start	End	NBases	Ambigs	Polymer	NumSeqs
+Minimum:	1	375	249	0	3	1
+2.5%-tile:	1	375	252	0	4	61
+25%-tile:	1	375	252	0	4	607
+Median: 	1	375	253	0	4	1213
+75%-tile:	1	375	253	0	5	1819
+97.5%-tile:	1	375	254	0	6	2365
+Maximum:	1	375	256	0	6	2425
+Mean:	1	375	252	0	4
+# of Seqs:	2425
+
+It took 0 secs to summarize 2425 sequences.
+
+Output File Names:
+/Users/swestcott/Desktop/release/final.summary
+

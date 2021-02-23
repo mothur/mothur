@@ -21,7 +21,7 @@ class Taxonomy {
 public:
     
     Taxonomy();
-    Taxonomy(string, string, int);
+    Taxonomy(string, string, int); //name, tax, abund
     Taxonomy(string, string);
     Taxonomy(ifstream&);
     ~Taxonomy() {}
@@ -30,8 +30,10 @@ public:
     void setNumSeqs(int n)          { numReps = n;      }
     string getName()                { return name;      }
     vector<Taxon> getTaxons()       { return taxonomy;  }
+    vector<string> getSimpleTaxons (bool includeConfidence=false);
     void setTaxons(vector<Taxon> t) { taxonomy = t;     }
     int getNumSeqs()                { return numReps;   }
+    int getNumLevels()              { return taxonomy.size();   }
     void setTaxons(string);
     
     string getInlineConsTaxonomy();
@@ -46,6 +48,7 @@ protected:
     MothurOut* m;
     string name;
     int numReps;
+    bool containsConfidence;
     vector<Taxon> taxonomy;
     Utils util;
     

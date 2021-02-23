@@ -103,6 +103,7 @@ public:
     int getAlignmentLength(string);
     
     vector<bool> isGZ(string); //checks existence and format - will fail for either or both.
+    bool isHDF5(string);
     bool mkDir(string&); //completes path, appends appropriate / or \. //returns true it exits or if we can make it
     bool mothurRemove(string);
     bool openInputFile(string, ifstream&, string); //no error given
@@ -148,6 +149,7 @@ public:
     void printAccnos(string, set<string>&);
     void printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
+    void readConsTax(string, vector<Taxonomy>&);
     vector<Taxonomy> readConsTax(string inputfile, PhyloTree& tree); //fills tree
     int readConsTax(string, map<int, consTax2>&);
     void readNames(string, map<string, long long>&);
@@ -243,7 +245,9 @@ public:
     float removeConfidences(string&);
     string removeQuotes(string);
     void removeQuotes(vector<Taxon>& tax);
+    vector<string> parseTax(string tax, vector<string>& scores);
     bool stringBlank (string);
+    
     
     //file reading
     SharedRAbundVectors* getNextShared(InputData&, bool, set<string>&, set<string>&, string&, string optionalOutput = "");//input, allLines, userLabels, processedLabels, lastLabel

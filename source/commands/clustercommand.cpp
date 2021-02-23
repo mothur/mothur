@@ -921,14 +921,12 @@ int ClusterCommand::runOptiCluster(){
 
 int ClusterCommand::runUniqueCluster(){
     try {
-        if (!cutOffSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03;  }
-        
         if (countfile != "") {  distfile = countfile;   }
         else if (namefile != "") {  distfile = namefile;  }
         
         m->mothurOut("\nClustering " + distfile+"\n"); 
         
-        ListVector list; list.setLabel(toString(cutoff));
+        ListVector list; list.setLabel("ASV");
         
         map<string, int> counts;
         if (countfile != "") {

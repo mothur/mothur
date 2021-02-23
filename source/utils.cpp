@@ -971,7 +971,28 @@ vector<bool> Utils::allGZFiles(vector<string> & files){
         exit(1);
     }
 }
-
+/***********************************************************************/
+//returns false if no api installed
+bool Utils::isHDF5(string filename){
+    try {
+        bool result = false;
+        
+        #ifdef USE_HDF5
+            if(!H5::H5File::isHdf5(filename.c_str())){
+                //m->mothurOut("[WARNING]: " + filename + " is not an HDF5 file.\n");
+                return false;
+            }else { return true; }
+        #else
+            return false;
+        #endif
+        
+        return result;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "isHDF5");
+        exit(1);
+    }
+}
 /***********************************************************************/
 vector<bool> Utils::isGZ(string filename){
     try {
@@ -2029,6 +2050,57 @@ map<string, vector<string> > Utils::parseClasses(string classes){
         exit(1);
     }
 }
+/**************************************************************************************************/
+//returns {Bacteria, Bacteroidetes, ..} and scores is filled with {100, 98, ...} or {null, null, null}
+vector<string> Utils::parseTax(string tax, vector<string>& scores) {
+    try {
+        
+        string taxon;
+        vector<string> taxs;
+        
+        while (tax.find_first_of(';') != -1) {
+            
+            if (m->getControl_pressed()) { return taxs; }
+            
+            //get taxon
+            taxon = tax.substr(0,tax.find_first_of(';'));
+            
+            int pos = taxon.find_last_of('(');
+            if (pos != -1) {
+                //is it a number?
+                int pos2 = taxon.find_last_of(')');
+                if (pos2 != -1) {
+                    string confidenceScore = taxon.substr(pos+1, (pos2-(pos+1)));
+                    if (isNumeric1(confidenceScore)) {
+                        taxon = taxon.substr(0, pos); //rip off confidence
+                        scores.push_back(confidenceScore);
+                    }else{ scores.push_back("null"); }
+                }
+            }else{ scores.push_back("null"); }
+            
+            //strip "" if they are there
+            pos = taxon.find("\"");
+            if (pos != string::npos) {
+                string newTax = "";
+                for (int k = 0; k < taxon.length(); k++) {
+                    if (taxon[k] != '\"') { newTax += taxon[k]; }
+                }
+                taxon = newTax;
+            }
+            
+            //look for bootstrap value
+            taxs.push_back(taxon);
+            tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+        }
+        
+        return taxs;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "parseTax");
+        exit(1);
+    }
+}
+
 /***********************************************************************/
 string Utils::hasPath(string longName){
     try {
@@ -2426,6 +2498,37 @@ vector<consTax> Utils::readConsTax(string inputfile){
         in.close();
 
         return taxes;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "readConsTax");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void Utils::readConsTax(string inputfile, vector<Taxonomy>& conTax){
+    try {
+        conTax.clear();
+        
+        ifstream in; openInputFile(inputfile, in);
+        getline(in); //read headers
+
+        while (!in.eof()) {
+
+            if (m->getControl_pressed()) { break; }
+
+            string otu = ""; string tax = "unknown";
+            int size = 0;
+
+            in >> otu; gobble(in);
+            in >> size; gobble(in);
+            tax = getline(in); gobble(in);
+
+            Taxonomy temp(otu, tax, size);
+            conTax.push_back(temp);
+        }
+        in.close();
+
+        return;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "readConsTax");

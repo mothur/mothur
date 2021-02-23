@@ -209,7 +209,7 @@ SharedCommand::SharedCommand(string option)  {
             keepZeroes = util.isTrue(temp);
             
             if ((listfile == "") && (biomfile == "") && (countfile != "")) { //building a shared file from a count file, require label
-                if (labels.size() == 0) { labels.insert("asv"); }
+                if (labels.size() == 0) { labels.insert("ASV"); }
             }
 		}
 
@@ -437,7 +437,7 @@ int SharedCommand::createSharedFromCount() {
     try {
         //getting output filename
         if (outputdir == "") { outputdir += util.hasPath(countfile); }
-        string label = "asv";
+        string label = "ASV";
         if (labels.size() != 0) { label = *labels.begin(); }
         
         map<string, string> variables;

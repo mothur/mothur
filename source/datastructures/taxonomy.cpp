@@ -11,11 +11,13 @@
 /***********************************************************************/
 Taxonomy::Taxonomy(){
     m = MothurOut::getInstance();
+    containsConfidence = false;
 }
 /***********************************************************************/
 Taxonomy::Taxonomy(string otuname, string consensusTax, int num) {
     try {
         m = MothurOut::getInstance();
+        containsConfidence = false;
         
         name = otuname;
         numReps = num;
@@ -31,9 +33,10 @@ Taxonomy::Taxonomy(string otuname, string consensusTax, int num) {
 Taxonomy::Taxonomy(string otuname, string consensusTax) {
     try {
         m = MothurOut::getInstance();
+        containsConfidence = false;
         
         name = otuname;
-        numReps = 0;
+        numReps = 1;
         taxonomy = parseTax(consensusTax);
         
     }
@@ -46,6 +49,7 @@ Taxonomy::Taxonomy(string otuname, string consensusTax) {
 Taxonomy::Taxonomy(ifstream& in) {
     try {
         m = MothurOut::getInstance();
+        containsConfidence = false;
         
         string otu = ""; string consensusTax = "unknown";
         int size = 0;
@@ -90,10 +94,35 @@ string Taxonomy::getInlineConsTaxonomy(){
     }
 }
 /***********************************************************************/
+vector<string> Taxonomy::getSimpleTaxons(bool includeConfidence) { //pass in true to include confidences
+    try {
+        
+        if (!containsConfidence) { includeConfidence = false; }
+        vector<string> items;
+        
+        for (int i = 0; i < taxonomy.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            string conTax = taxonomy[i].name;
+            
+            if (includeConfidence) { conTax += "(" + toString(taxonomy[i].confidence) + ")"; }
+            
+            items.push_back(conTax);
+        }
+        
+        return items;
+        
+    }catch(exception& e) {
+            m->errorOut(e, "Taxonomy", "getSimpleTaxons");
+            exit(1);
+    }
+}
+/***********************************************************************/
 string Taxonomy::getConsTaxString(bool includeConfidence) { //pass in true to include confidences
     try {
         
         string conTax = "";
+        if (!containsConfidence) { includeConfidence = false; }
         
         for (int i = 0; i < taxonomy.size(); i++) {
             if (m->getControl_pressed()) { break; }
@@ -125,7 +154,7 @@ vector<Taxon> Taxonomy::parseTax(string tax){
             if(tax[i] == ';'){
                 
                 string newtaxon = taxon; float confidence = 0;
-                util.hasConfidenceScore(newtaxon, confidence);
+                containsConfidence = util.hasConfidenceScore(newtaxon, confidence);
                 
                 Taxon thisTax(newtaxon, confidence);
                 consTaxs.push_back(thisTax);
