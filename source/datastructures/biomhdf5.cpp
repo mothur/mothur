@@ -267,7 +267,7 @@ int BiomHDF5::readTaxonomy( H5::Group& group, string datasetName) {
             
             int rank = dataSpace.getSimpleExtentNdims(); //number of dimensions
             hsize_t dims[rank]; dataSpace.getSimpleExtentDims(dims); //size of each dimension
-            cout << dims[0] << '\t' << dims[1] << endl;
+            
             if (dataset.getTypeClass() == H5T_STRING) {
                 
                 int numberOfTaxonomies = dims[0];
@@ -292,8 +292,6 @@ int BiomHDF5::readTaxonomy( H5::Group& group, string datasetName) {
                     for (int i = 0; i < numberOfTaxonomies; i++) {
                         
                         otuTaxonomy += data[i];  otuTaxonomy += ";";  count++;
-                        
-                        cout << i << '\t' << data[i] << endl;
                         
                         if (count == dims[1]) {
                             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(otuTaxonomy) + "\n"); }
@@ -589,12 +587,8 @@ void BiomHDF5::printOTUTaxonomy(H5::Group& group, string datasetname) {
         
         const H5std_string  DATASET_NAME( datasetname.c_str() );
         H5::DataSet dataset = group.createDataSet( DATASET_NAME, datatype, dataspace );
-    
-        char **data = new char*[dimsf[0]*dimsf[1]];
-        int count = 0;
         
-        //TODO:: resolve issues caused by writing of the constaxonomy
-        
+        vector<char*> cPara;
         for (int i = 0; i < consTax.size(); i++) {
             
             if (m->getControl_pressed()) { break; }
@@ -602,29 +596,24 @@ void BiomHDF5::printOTUTaxonomy(H5::Group& group, string datasetname) {
             vector<string> thisOtusTaxonomy = consTax[i].getSimpleTaxons();
             
             for (int j = 0; j < maxLevel; j++) {
-                char* thisTaxon = new char(thisOtusTaxonomy[j].length()+1); *thisTaxon = '\0';
+                char* thisTaxon; thisTaxon = new char[thisOtusTaxonomy[j].length()+1]; *thisTaxon = '\0';
                 strncat(thisTaxon, thisOtusTaxonomy[j].c_str(), thisOtusTaxonomy[j].length());
 
-                //char* thisTaxon = new char(thisOtusTaxonomy[j].length());
-                //strcpy(thisTaxon, thisOtusTaxonomy[j].c_str());
-                data[count] = thisTaxon;
-                
-                cout << count << '\t' << data[count] << '\n';
-                if ((count+1) % maxLevel == 0) { cout << endl; }
-                count++;
+                cPara.push_back(thisTaxon);
             }
         }
         
-        for (int i = 0; i < count; i++) {
-            cout << i << '\t' << data[i] << '\n';
-            if ((i+1) % maxLevel == 0) { cout << endl; }
+        char** data; data = new char*[cPara.size()];
+        for (int i = 0; i < cPara.size(); i++) {
+            data[i] = cPara[i];
         }
         
         dataset.write(data, datatype);
         dataset.close();
         
-        //for (int i = 0; i < (dimsf[0]*dimsf[1]); i++) { delete data[i]; }
-        delete [] data;
+        //free memory
+        for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
+        delete[] data;
         
     }
     catch(exception& e) {
