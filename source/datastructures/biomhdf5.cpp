@@ -849,6 +849,118 @@ void BiomHDF5::printShared(string outputFileName, vector<string> sampleMetadata,
     }
 }
 //**********************************************************************************************************************
+void BiomHDF5::printFloat(string outputFileName, vector<string> sampleMetadata, Picrust* picrust) {
+    try {
+        //set required datasets - groupname -> datasetname
+        //"observation/ids" -> otuLabels - "GG_OTU_1", "GG_OTU_2", "GG_OTU_3", "GG_OTU_4", "GG_OTU_5
+        
+        //"observation/matrix/data" -> otu abundances for each non zero abundnace entry - 1, 5, 1, 2, 3, 1, 1, 4, 2, 2, 1, 1, 1, 1, 1
+        //"observation/matrix/indices" -> index of group - maps into samples/ids  2, 0, 1, 3, 4, 5, 2, 3, 5, 0, 1, 2, 5, 1, 2
+        //"observation/matrix/indptr" -> maps non zero abundance to OTU - 0, 1, 6, 9, 13, 15 - 0 start of OTU1s indexes, 1 start of OTU2s indexes, ... 15 start of OTU5s indexes
+        
+        /*
+         label group numOtus GG_OTU_1  GG_OTU_2  GG_OTU_3  GG_OTU_4  GG_OTU_5
+         userLabel  Sample1   5   0           5       0           2       0
+         userLabel  Sample2   5   0           1       0           2       1
+         userLabel  Sample3   5   1           0       1           1       1
+         userLabel  Sample4   5   0           2       4           0       0
+         userLabel  Sample5   5   0           3       0           0       0
+         userLabel  Sample6   5   0           1       2           1       0
+         */
+        
+        //"observation/metadata/taxonomy" -> taxonomy info - otu classifications
+        
+        //"sample/ids" -> group names - "Sample1", "Sample2", "Sample3", "Sample4", "Sample5", "Sample6"
+        //"sample/metadata/" -> group metadata (optional)
+        
+        //run this first because if picrust alters the shared vector we will need to use the updated info
+        //taxMetadata[0] = taxonomy for otu0
+        vector< vector<string> > taxMetadata = getMetaData(picrust);
+        
+        //find number of non zero otus
+        nnz = 0; float zero = 0.0;
+        for (int j = 0; j < sharedFloat->getNumBins(); j++) {
+            vector<float> thisOTU = sharedFloat->getOTU(j);
+            for (int i = 0; i < thisOTU.size(); i++) {
+                if (util.isEqual(thisOTU[i], zero)) { nnz++; }
+            }
+        }
+        
+    #ifdef USE_HDF5
+           
+        H5::H5File file(outputFileName.c_str(), H5F_ACC_TRUNC );
+        
+        try {
+            //print required file attributes
+            H5::Group  fileAttributes(file.openGroup( "/" ));
+            printRequiredFileAttributes(fileAttributes, sharedFloat->getNumBins(), sharedFloat->size()); //id, type, format-url, format-version, generated-by, creation-date, shape, nnz
+            fileAttributes.close();
+           
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Unable to print H5 required file attributes.\n");
+            m->setControl_pressed(true);
+        }
+        
+        try {
+            //print otuLabels called "observation/ids" in biom file
+            H5::Group observationGroup( file.createGroup( "observation" ));
+            printNames(observationGroup, sharedFloat->getOTUNames(), "ids");
+            observationGroup.close();
+
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Unable to print otuLabels in 'observation/ids' group.\n");
+            m->setControl_pressed(true);
+        }
+         
+        try {
+            //print group names called "sample/ids" in biom file
+            H5::Group sampleGroup( file.createGroup( "sample" ));
+            printNames(sampleGroup, sharedFloat->getNamesGroups(), "ids");
+            
+            if (sampleMetadata.size() != 0) {
+                printNames(sampleGroup, sampleMetadata, "metadata");
+            }
+            sampleGroup.close();
+      
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Unable to print sample names or sample metadata.\n");
+            m->setControl_pressed(true);
+        }
+        
+        try {
+            //print otuAbundances called "observation/matrix/" (data, indicies, indptr) in biom file
+            H5::Group matrixGroup( file.createGroup( "observation/matrix/" ));
+            printOTUAbundances(matrixGroup, sharedFloat->getNumBins(), sharedFloat->size(), sharedFloat->getLabel());
+            matrixGroup.close();
+
+        }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+            m->mothurOut("[ERROR]: Unable to print otu abundances in 'observation/matrix/' group.\n");
+            m->setControl_pressed(true);
+        }
+          
+        if (consTax.size() != 0) {
+            try {
+                //print otuTaxonomies called "observation/metadata/taxonomy" in the biom file
+                H5::Group taxonomyGroup( file.createGroup( "observation/metadata/" ));
+                printOTUTaxonomy(taxonomyGroup, "taxonomy");
+                taxonomyGroup.close();
+
+            }catch(H5::Exception& e){ //do nothing taxonomy info does not exist
+                m->mothurOut("[ERROR]: Unable to print otu consensus taxonomies in 'observation/metadata/' group.\n");
+                m->setControl_pressed(true);
+            }
+        }
+         
+        file.close();
+    #endif
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "BiomHDF5", "printFloat");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void BiomHDF5::print(string outputFileName, vector<string> sampleMetadata, Picrust* picrust) {
     try {
         

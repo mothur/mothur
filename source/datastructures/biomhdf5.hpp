@@ -76,7 +76,7 @@ private:
     vector<float> otudata;
     
     void printShared(string, vector<string>, Picrust*);
-    void printFloat(string, vector<string>, Picrust*) {}
+    void printFloat(string, vector<string>, Picrust*);
     
     vector< vector<string> > getMetaData(Picrust*, bool useRelabund=false);
 
