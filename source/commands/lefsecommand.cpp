@@ -344,7 +344,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& 
         map<int, double> sigOTUSLDA;
         if (numSigAfterWilcox > 0) {
             sigOTUSLDA = testLDA(lookup, clr, significantOtuLabels, class2GroupIndex, subClass2GroupIndex);
-            m->mothurOut("Number of discriminative features with abs LDA score > " + toString(ldaThreshold) + " : " + toString(significantOtuLabels.size()) + ".\n");
+            m->mothurOut("Number of discriminative features with abs LDA score > " + toString(ldaThreshold) + " : " + toString(sigOTUSLDA.size()) + ".\n");
         }
         else { m->mothurOut("No features with significant differences between the classes.\n"); }
         
@@ -655,7 +655,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, Shared
     try {
         map<int, double> sigOTUS;
         map<int, double>::iterator it;
-        LinearAlgebra linear;
+        LinearAlgebra linear; Utils util;
     
         int numBins = 0;
         int numGroups = 0;
@@ -738,7 +738,7 @@ map<int, double> LefseCommand::testLDA(SharedRAbundFloatVectors*& lookup, Shared
             //find "good" random vector
             vector<int> rand_s;
             int save = 0;
-            Utils util;
+            
             for (int h = 0; h < 1000; h++) { //generate a vector of length fractionNumGroups with range 0 to numGroups-1
                 save = h;
                 rand_s.clear();
