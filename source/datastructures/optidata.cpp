@@ -119,6 +119,21 @@ string OptiData::getName(long long index) {
     }
 }
 /***********************************************************************/
+set<string> OptiData::getNames(set<long long> indexes) {
+    try {
+        set<string> names;
+        for (set<long long>::iterator it = indexes.begin(); it != indexes.end(); it++) {
+            if (m->getControl_pressed()) { break; }
+            names.insert(getName(*it));
+        }
+        return names;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiData", "getNames");
+        exit(1);
+    }
+}
+/***********************************************************************/
 long long OptiData::getNumDists(){
     try {
         long long foundDists = 0;

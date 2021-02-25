@@ -496,7 +496,21 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
                     delete singleton;
                 }
                 
-            }else { m->mothurOut("Disregarding sequences that were unable to be fitted existing OTUs.\n");  }
+            }else {
+                m->mothurOut("\nSequences that were unable to be fitted existing OTUs will be listed in the *.optifit_scrap.accnos file.\n");
+                unfittedNames = matrix->getNames(unFitted);
+                
+                //add in fit singletons
+                ListVector* singleton = matrix->getFitListSingle();
+                
+                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                    for (int i = 0; i < singleton->getNumBins(); i++) {
+                        if (m->getControl_pressed()) { break; }
+                        if (singleton->get(i) != "") { unfittedNames.insert(singleton->get(i)); }
+                    }
+                    delete singleton;
+                }
+            }
         }else {
             if (label != "") {
                 m->mothurOut("\nFitted all " + toString(list->getNumSeqs()) + " sequences to existing OTUs. \n");

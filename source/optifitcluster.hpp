@@ -49,6 +49,7 @@ public:
     
     ListVector* getList();
     ListVector* getFittedList(string, bool);
+    set<string> getUnfittedNames() { return unfittedNames; }
     
 protected:
     MothurOut* m;
@@ -63,6 +64,7 @@ protected:
     map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
     long long maxRefBinNumber;
     bool closed, denovo;
+    set<string> unfittedNames;
     
     double fittruePositives, fittrueNegatives, fitfalsePositives, fitfalseNegatives, combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives;
     long long  numFitSeqs, insertLocation, numFitSingletons;

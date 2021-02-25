@@ -65,6 +65,7 @@ vector<string> ClusterFitCommand::setParameters(){
         outputTypes["list"] = tempOutNames;
         outputTypes["sensspec"] = tempOutNames;
         outputTypes["steps"] = tempOutNames;
+        outputTypes["accnos"] = tempOutNames;
         
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -117,6 +118,7 @@ string ClusterFitCommand::getOutputPattern(string type) {
         if (type == "list") {  pattern = "[filename],[clustertag],list-[filename],[clustertag],[tag2],list"; }
         else if (type == "sensspec") {  pattern = "[filename],sensspec"; }
         else if (type == "steps") {  pattern = "[filename],[clustertag],steps"; }
+        else if (type == "accnos") {  pattern = "[filename],accnos"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -422,7 +424,10 @@ int ClusterFitCommand::execute(){
             
             createReferenceNameCount(); //creates reference name or count file if needed
             
-            calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            string distanceFile = calcDists();  //calc distance matrix for fasta file and distances between fasta file and reffasta file
+            
+            if (outputdir == "") { outputdir += util.hasPath(distanceFile); }
+            fileroot = outputdir + util.getRootName(util.getSimpleName(distanceFile));
             
             m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
             
@@ -463,6 +468,11 @@ int ClusterFitCommand::execute(){
         itTypes = outputTypes.find("list");
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("accnos");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
         }
         
         m->mothurOut("\nOutput File Names: \n");
@@ -679,6 +689,16 @@ ListVector* ClusterFitCommand::runUserRefOptiCluster(OptiData*& matrix, ClusterM
                 sensFile << cutoff << '\t' << cutoff << '\t' << numBins << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
                 for (int i = 0; i < fitresults.size(); i++) {  sensFile << "\t" << fitresults[i]; } sensFile << endl;
             }
+            set<string> unfitted = cluster.getUnfittedNames();
+            
+            string accnosFilename = fileroot+ "optifit_scrap.accnos";
+            outputNames.push_back(accnosFilename); outputTypes["accnos"].push_back(accnosFilename);
+            
+            ofstream accOut; util.openOutputFile(accnosFilename,    accOut);
+            for (set<string>::iterator it = unfitted.begin(); it != unfitted.end(); it++) {
+                accOut << *it << endl;
+            }
+            accOut.close();
         }else {
             runSensSpec(matrix, metric, list, counts, sensFile);
         }
@@ -846,6 +866,17 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
                 sensFile << cutoff << '\t' << cutoff << '\t' << fittp << '\t' << fittn << '\t' << fitfp << '\t' << fitfn;
                 for (int i = 0; i < fitresults.size(); i++) {  sensFile << "\t" << fitresults[i]; } sensFile << endl;
             }
+            set<string> unfitted = cluster.getUnfittedNames();
+            
+            string accnosFilename = fileroot+ "unfitted.accnos";
+            outputNames.push_back(accnosFilename); outputTypes["accnos"].push_back(accnosFilename);
+            
+            ofstream accOut; util.openOutputFile(accnosFilename,    accOut);
+            for (set<string>::iterator it = unfitted.begin(); it != unfitted.end(); it++) {
+                accOut << *it << endl;
+            }
+            accOut.close();
+            
         }else {
             runSensSpec(matrix, metric, list, counts, sensFile);
         }
@@ -1149,7 +1180,7 @@ string ClusterFitCommand::calcDists() {
             //dists between reffasta and fastafile
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-            Command* distCommand = new DistanceCommand(options);
+            DistanceCommand* distCommand = new DistanceCommand(options);
             
             distCommand->execute();
             filenames = distCommand->getOutputFiles();

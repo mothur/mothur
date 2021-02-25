@@ -31,6 +31,7 @@ public:
     long long getNumClose(long long);
     map<string, long long> getNameIndexMap();
     string getName(long long); //name from nameMap index
+    set<string> getNames(set<long long>); //name from nameMap index
     
     long long getNumSeqs() { return closeness.size(); }
     long long getNumSingletons() { return singletons.size(); }
