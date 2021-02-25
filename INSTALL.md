@@ -12,7 +12,7 @@ The easiest way to get mothur is to download the release from [GitHub]([GitHub](
 Download the mothur [source code](https://github.com/mothur/mothur).
 Download the mothur tools [external binaries](https://github.com/mothur/mothur/releases/).
 
-Note: Tool version requirements - vsearch v2.13.3, uchime, blast
+Note: Tool version requirements - vsearch v2.15.2, uchime, blast
 
 ### Compiling with Boost:
 
