@@ -78,19 +78,19 @@ SetDirectoryCommand::SetDirectoryCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			output = validParameter.valid(parameters, "output");
+			output = validParameter.validPath(parameters, "output");
 			if (output == "not found") {  output = "";  } 
 			
-			input = validParameter.valid(parameters, "input");
+			input = validParameter.validPath(parameters, "input");
 			if (input == "not found") {  input = "";  }
 			
-			tempdefault = validParameter.valid(parameters, "tempdefault");
+			tempdefault = validParameter.validPath(parameters, "tempdefault");
 			if (tempdefault == "not found") {  tempdefault = "";  }
             
-            blastLocation = validParameter.valid(parameters, "blastdir");
+            blastLocation = validParameter.validPath(parameters, "blastdir");
             if (blastLocation == "not found") {  blastLocation = "";  }
             
-            toolsLocation = validParameter.valid(parameters, "tools");
+            toolsLocation = validParameter.validPath(parameters, "tools");
             if (toolsLocation == "not found") {  toolsLocation = "";  }
             
             bool debug = false;

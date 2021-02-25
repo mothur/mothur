@@ -214,6 +214,22 @@ string ValidParameters::valid(map<string, string>& container, string parameter) 
     }
 }
 /******************************************************/
+string ValidParameters::validPath(map<string, string>& container, string parameter) {
+    try {
+        map<string, string>::iterator it;
+        
+        it = container.find(parameter);
+        if(it != container.end()){}
+        else { return "not found"; }
+        
+        return it->second;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidParameters", "validPath");
+        exit(1);
+    }
+}
+/******************************************************/
 vector<string> ValidParameters::validFiles(map<string, string>& container, string parameter) {
     try {
         vector<string> vFiles;

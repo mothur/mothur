@@ -30,6 +30,7 @@ class ValidParameters {
 		vector<string> validFiles(map<string, string>&, string); 
         string validFile(map<string, string>&, string);
         string valid(map<string, string>&, string);
+        string validPath(map<string, string>&, string);
 
 	private:
 		map<string, string>::iterator it;
