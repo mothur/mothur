@@ -115,7 +115,6 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos");
 			if (accnosfile == "not open") { abort = true; }

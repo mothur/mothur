@@ -68,7 +68,7 @@ vector<string> ClusterFitCommand::setParameters(){
         outputTypes["accnos"] = tempOutNames;
         
         vector<string> myArray;
-        for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
+        for (int i = 0; i < parameters.size(); i++) {    myArray.push_back(parameters[i].name);        }
         return myArray;
     }
     catch(exception& e) {
@@ -182,7 +182,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
                 if (!selfReference) {
                     fastafile = current->getFastaFile();
                     if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
-                    else { 	m->mothurOut("[ERROR]: You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
+                    else {     m->mothurOut("[ERROR]: You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
                 }else { fastafile = ""; }
             }else { current->setFastaFile(fastafile); }
             
@@ -199,12 +199,12 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             columnfile = validParameter.validFile(parameters, "column");
             if (columnfile == "not open") { columnfile = ""; abort = true; }
             else if (columnfile == "not found") { columnfile = ""; }
-            else {  distfile = columnfile;  current->setColumnFile(columnfile);	}
+            else {  distfile = columnfile;  current->setColumnFile(columnfile);    }
             
             accnosfile = validParameter.validFile(parameters, "accnos");
             if (accnosfile == "not open") { accnosfile = ""; abort = true; }
             else if (accnosfile == "not found") { accnosfile = ""; }
-            else {   current->setAccnosFile(accnosfile); createAccnos = false;	}
+            else {   current->setAccnosFile(accnosfile); createAccnos = false;    }
             
             //extract reference names from reflist instead of accnos fil
             if (selfReference) {
@@ -263,25 +263,25 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             length = temp.length(); ////saves precision length for formatting below
             util.mothurConvert(temp, precision);
             
-            temp = validParameter.valid(parameters, "delta");		if (temp == "not found")  { temp = "0.0001"; }
+            temp = validParameter.valid(parameters, "delta");        if (temp == "not found")  { temp = "0.0001"; }
             util.mothurConvert(temp, stableMetric);
             
-            metricName = validParameter.valid(parameters, "metric");		if (metricName == "not found") { metricName = "mcc"; }
+            metricName = validParameter.valid(parameters, "metric");        if (metricName == "not found") { metricName = "mcc"; }
             
             if ((metricName == "mcc") || (metricName == "sens") || (metricName == "spec") || (metricName == "tptn") || (metricName == "tp") || (metricName == "tn") || (metricName == "fp") || (metricName == "fn") || (metricName == "f1score") || (metricName == "accuracy") || (metricName == "ppv") || (metricName == "npv") || (metricName == "fdr") || (metricName == "fpfn") ){ }
             else { m->mothurOut("[ERROR]: Not a valid metric.  Valid metrics are mcc, sens, spec, tp, tn, fp, fn, tptn, fpfn, f1score, accuracy, ppv, npv, fdr.\n");  abort = true; }
             
-            criteria = validParameter.valid(parameters, "criteria");		if (criteria == "not found") { criteria = "both"; }
+            criteria = validParameter.valid(parameters, "criteria");        if (criteria == "not found") { criteria = "both"; }
             if ((criteria == "fit") || (criteria == "combo") || (criteria == "both")){ }
             else { m->mothurOut("[ERROR]: Not a valid criteria.  Valid criteria are fit, combo and both.\n"); abort = true; }
             
-            refWeight = validParameter.valid(parameters, "refweight");		if (refWeight == "not found") { refWeight = "none"; }
+            refWeight = validParameter.valid(parameters, "refweight");        if (refWeight == "not found") { refWeight = "none"; }
             if ((refWeight == "none") || (refWeight == "abundance") || (refWeight == "connectivity")){ }
             else { m->mothurOut("[ERROR]: Not a valid reference weight.  Valid refweight options are none, abundance and connectivity.\n"); abort = true; }
             
             initialize = "singleton";
             
-            temp = validParameter.valid(parameters, "iters");		if (temp == "not found")  { temp = "100"; }
+            temp = validParameter.valid(parameters, "iters");        if (temp == "not found")  { temp = "100"; }
             util.mothurConvert(temp, maxIters);
             
             temp = validParameter.valid(parameters, "denovoiters");
@@ -291,7 +291,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             }
             util.mothurConvert(temp, denovoIters);
             
-            temp = validParameter.valid(parameters, "fitpercent");		if (temp == "not found")  { temp = "50.0"; }
+            temp = validParameter.valid(parameters, "fitpercent");        if (temp == "not found")  { temp = "50.0"; }
             util.mothurConvert(temp, fitPercent);
             
             if ((fitPercent > 100) || (fitPercent < 0.01)) { abort=true; m->mothurOut("[ERROR]: fitpercent must be less than 100, and more than 0.01.\n"); }
@@ -304,7 +304,7 @@ ClusterFitCommand::ClusterFitCommand(string option)  {
             if (temp == "not found") { temp = "0.03"; }
             util.mothurConvert(temp, cutoff);
             
-            temp = validParameter.valid(parameters, "printref");			if (temp == "not found") { if (selfReference) { temp = "t"; }else { temp = "f"; } }
+            temp = validParameter.valid(parameters, "printref");            if (temp == "not found") { if (selfReference) { temp = "t"; }else { temp = "f"; } }
             printref = util.isTrue(temp);
             
         }
@@ -320,7 +320,7 @@ ClusterFitCommand::~ClusterFitCommand(){}
 int ClusterFitCommand::execute(){
     try {
         
-        if (abort) { if (calledHelp) { return 0; }  return 2;	}
+        if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
         time_t estart = time(NULL);
         
@@ -348,14 +348,14 @@ int ClusterFitCommand::execute(){
         if (outputdir == "") { outputdir += util.hasPath(distfile); }
         fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         
-        map<string, string> variables;
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = "optifit_" + metric->getName();
-        string outputName = getOutputFileName("steps", variables);
-        string listFile = "";
-        string bestListFileName = "";
+        string listFile = ""; string bestListFileName = ""; string outputName = "";
         
         if (selfReference) { //de novo
+            
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = "optifit_" + metric->getName();
+            outputName = getOutputFileName("steps", variables);
             
             if ((accnosfile == "") && (!createAccnos)) { //denovo with mothur randomly assigning references
                 
@@ -429,6 +429,11 @@ int ClusterFitCommand::execute(){
             if (outputdir == "") { outputdir += util.hasPath(distanceFile); }
             fileroot = outputdir + util.getRootName(util.getSimpleName(distanceFile));
             
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = "optifit_" + metric->getName();
+            outputName = getOutputFileName("steps", variables);
+            
             m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
             
             //calc sens.spec values for reference
@@ -454,12 +459,12 @@ int ClusterFitCommand::execute(){
         }
         delete metric;
         
-        if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
+        if (m->getControl_pressed()) {     for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
         outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
         outputNames.push_back(bestListFileName); outputTypes["list"].push_back(bestListFileName);
         
-        if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
+        if (m->getControl_pressed()) {     for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
 
         m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
         
@@ -476,7 +481,7 @@ int ClusterFitCommand::execute(){
         }
         
         m->mothurOut("\nOutput File Names: \n");
-        for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]+"\n");     }
         m->mothurOutEndLine();
         
         return 0;
@@ -537,7 +542,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             
             m->mothurOut("\nFitting " + toString(matrix->getNumFitSeqs()+matrix->getNumFitSingletons()+matrix->getNumFitTrueSingletons()) + " sequences to reference otus.\n");
             
-            m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");  
+            m->mothurOut("\n\nlist\tstate\titer\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
             
             outputSteps(outStepFile, printStepsHeader, tp, tn, fp, fn, results, numBins, fittp, fittn, fitfp, fitfn, fitresults, numFitBins, 0, false, 0);
             
@@ -566,7 +571,7 @@ string ClusterFitCommand::runDenovoOptiCluster(OptiData*& matrix, ClusterMetric*
             ofstream listFile;
             tag = "optifit_" + metric->getName() + "_denovo." + toString(i+1);
             string listFileName = fileroot+ tag + ".list";
-            util.openOutputFile(listFileName,	listFile);
+            util.openOutputFile(listFileName,    listFile);
             
             ListVector* list = cluster.getFittedList(toString(cutoff), printref);
             list->setLabel(toString(cutoff));
@@ -744,7 +749,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
             
-            cluster.update(listVectorMetric); 
+            cluster.update(listVectorMetric);
             
             delta = abs(oldMetric - listVectorMetric);
             iters++;
@@ -778,7 +783,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         OptiFitCluster cluster(matrix, metric, 0, criteria);
         tag = cluster.getTag();
         
-        m->mothurOut("\nClustering " + distfile + "\n"); 
+        m->mothurOut("\nClustering " + distfile + "\n");
         
         int iters = 0;
         double listVectorMetric = 0; //worst state
@@ -843,7 +848,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
         
         ofstream listFile;
         string listFileName = fileroot+ tag + ".list";
-        util.openOutputFile(listFileName,	listFile);
+        util.openOutputFile(listFileName,    listFile);
         
         if(countfile != "") { list->print(listFile, counts); }
         else { list->print(listFile); }
@@ -868,7 +873,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
             }
             set<string> unfitted = cluster.getUnfittedNames();
             
-            string accnosFilename = fileroot+ "unfitted.accnos";
+            string accnosFilename = fileroot+ "optifit_scrap.accnos";
             outputNames.push_back(accnosFilename); outputTypes["accnos"].push_back(accnosFilename);
             
             ofstream accOut; util.openOutputFile(accnosFilename,    accOut);
@@ -1130,6 +1135,10 @@ void ClusterFitCommand::createReferenceNameCount() {
         else if (refnamefile != "") { refNameOrCount = "name"; }
         else { //create count file
             current->setMothurCalling(true);
+            //preserve current file names
+            string currentFasta = current->getFastaFile();
+            string currentCount = current->getCountFile();
+            
             string options = "fasta=" + reffastafile + ", format=count";
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: unique.seqs(" + options + ")\n");
@@ -1139,6 +1148,10 @@ void ClusterFitCommand::createReferenceNameCount() {
             map<string, vector<string> > filenames = deconvoluteCommand->getOutputFiles();
             refcountfile = filenames["count"][0];
             refNameOrCount = "count";
+            
+            //reset current filenames
+            current->setFastaFile(currentFasta);
+            current->setCountFile(currentCount);
             
             delete deconvoluteCommand;
             m->mothurOut("/******************************************/\n");
@@ -1152,7 +1165,13 @@ void ClusterFitCommand::createReferenceNameCount() {
 //**********************************************************************************************************************
 string ClusterFitCommand::calcDists() {
     try {
+        //preserve current file names
+        string currentFasta = current->getFastaFile();
+        string currentCount = current->getCountFile();
+        
         if (columnfile == "") { //calc user distances
+            string currentColumn = current->getColumnFile();
+            
             string options = "fasta=" + fastafile + ", cutoff=" + toString(cutoff);
             current->setMothurCalling(true);
             
@@ -1166,6 +1185,8 @@ string ClusterFitCommand::calcDists() {
             distfile = filenames["column"][0];
             columnfile = distfile;
             
+            current->setColumnFile(currentColumn);
+            
             delete distCommand;
             m->mothurOut("/******************************************/\n");
         }
@@ -1175,6 +1196,8 @@ string ClusterFitCommand::calcDists() {
         int alignLength = util.getAlignmentLength(fastafile);
         
         if (refAlignLength == alignLength) {
+            string currentColumn = current->getColumnFile();
+            
             string options = "fitcalc=t, fasta=" + reffastafile + ", oldfasta=" + fastafile + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
             
             //dists between reffasta and fastafile
@@ -1185,6 +1208,8 @@ string ClusterFitCommand::calcDists() {
             distCommand->execute();
             filenames = distCommand->getOutputFiles();
             comboDistFile = filenames["column"][0];
+            
+            current->setColumnFile(currentColumn);
             
             delete distCommand;
             m->mothurOut("/******************************************/\n");
@@ -1220,6 +1245,7 @@ string ClusterFitCommand::calcDists() {
             
             delete alignCommand;
             m->mothurOut("/******************************************/\n");
+            string currentColumn = current->getColumnFile();
             
             options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + alignedFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
             
@@ -1232,10 +1258,16 @@ string ClusterFitCommand::calcDists() {
             filenames = distCommand->getOutputFiles();
             comboDistFile = filenames["column"][0];
             
+            current->setColumnFile(currentColumn);
+            
             delete distCommand;
             m->mothurOut("/******************************************/\n");
             current->setMothurCalling(false);
         }
+        
+        //reset current filenames
+        current->setFastaFile(currentFasta);
+        current->setCountFile(currentCount);
         
         return comboDistFile;
     }
