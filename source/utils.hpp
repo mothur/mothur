@@ -135,6 +135,7 @@ public:
     
     //file reads
     bool checkReleaseVersion(string, string);
+    bool isVsearchVersionValid(string, string); //check to make sure minimum version requirements are made
     string getline(ifstream&);
     string getline(istringstream&);
     void getline(ifstream&, vector<string>&);

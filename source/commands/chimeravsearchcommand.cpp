@@ -244,8 +244,8 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
                             int pos = version.find_first_of('_');
                             if (pos != string::npos) { version = version.substr(0, pos); }
                                     
-                            if (version != "v2.15.2") {
-                                m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires version v2.15.2 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/tag/v2.15.2, please correct. \n");  abort = true;
+                            if (!util.isVsearchVersionValid(version, "v2.13.5")) {
+                                m->mothurOut("[ERROR]: vsearch version found = " + version + ". Mothur requires minimum version v2.13.5 which is distributed with mothur's executable or available on github https://github.com/torognes/vsearch/releases/, please correct. \n");  abort = true;
                             }else { m->mothurOut("Using vsearch version " + version + ".\n"); }
                         }
                     }

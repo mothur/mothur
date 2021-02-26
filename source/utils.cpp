@@ -5914,7 +5914,49 @@ bool Utils::anyLabelsToProcess(string label, set<string>& userLabels, string err
         exit(1);
     }
 }
+/**************************************************************************************************/
+// query = v2.15.2 minversion = v2.13.5
+bool Utils::isVsearchVersionValid(string query, string minversion) {
+    try {
 
+        bool good = true;
+
+        vector<string> versionVector;
+        splitAtChar(minversion, versionVector, '.');
+        
+        //check file version
+        vector<string> queryVector;
+        splitAtChar(query, queryVector, '.');
+        
+        if (versionVector.size() != queryVector.size()) { good = false; }
+        else if (versionVector.size() != 3) { good = false; }
+        else {
+            if (versionVector[0] != queryVector[0]) { good = false; return good; } //major version - v2 or v1
+            
+            //minor version - 13 or 15
+            int queryNum, minVersionNum;
+            convert(versionVector[1], minVersionNum);
+            convert(queryVector[1], queryNum);
+                
+            //if query minor version is older (smaller) than minversion
+            if (minVersionNum > queryNum) {  good = false; }
+            else if (minVersionNum == queryNum) { //if major and minor versions match, check patches
+            
+                //patch version
+                convert(versionVector[2], minVersionNum);
+                convert(queryVector[2], queryNum);
+                
+                if (minVersionNum > queryNum) {  good = false; }
+            }
+        }
+        
+        return good;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkReleaseVersion");
+        exit(1);
+    }
+}
 /**************************************************************************************************/
 bool Utils::checkReleaseVersion(string line, string version) {
     try {
