@@ -102,7 +102,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
             else if (fastafile == "not open") { abort = true; }
             else { current->setFastaFile(fastafile); }
             
-			maskfile = validParameter.valid(parameters, "mask");
+			maskfile = validParameter.validPath(parameters, "mask");
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
 				ifstream in;

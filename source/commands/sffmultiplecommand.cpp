@@ -255,7 +255,7 @@ SffMultipleCommand::SffMultipleCommand(string option)  {
                 if (!ableToOpen) { abort=true; }
 			}else if(temp == "not open")	{	
 				
-				lookupFileName = validParameter.valid(parameters, "lookup");
+				lookupFileName = validParameter.validPath(parameters, "lookup");
 				
 				//if you can't open it its not inputDir, try mothur excutable location
 				string exepath = current->getProgramPath();

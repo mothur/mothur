@@ -125,7 +125,6 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
                 if ((groupfile != "") && (countfile != "")) {
                     m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
                 }
-
 			}
 			
 			if (outputdir == ""){  	if (randomtree == "")  { outputdir += util.hasPath(treefile); } }

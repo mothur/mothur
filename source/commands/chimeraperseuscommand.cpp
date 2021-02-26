@@ -157,7 +157,7 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
 			temp = validParameter.valid(parameters, "alpha");	if (temp == "not found"){	temp = "-5.54";	}
 			util.mothurConvert(temp, alpha);
 			
-			temp = validParameter.valid(parameters, "cutoff");	if (temp == "not found"){	temp = "0.33";	}
+			temp = validParameter.valid(parameters, "beta");	if (temp == "not found"){	temp = "0.33";	}
 			util.mothurConvert(temp, beta);
             
 			temp = validParameter.valid(parameters, "dereplicate");	

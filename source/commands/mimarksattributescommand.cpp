@@ -76,9 +76,7 @@ MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
             selectedPackage = validParameter.valid(parameters, "package");
             if (selectedPackage == "not found") { selectedPackage = "MIMARKS.survey."; }
             
-            
-            		if (outputdir == ""){    outputdir = util.hasPath(xmlFile);		}
-            
+            if (outputdir == ""){    outputdir = util.hasPath(xmlFile);		}
         }
     }
     catch(exception& e) {

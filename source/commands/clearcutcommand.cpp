@@ -188,7 +188,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			temp = validParameter.valid(parameters, "stdout");		if (temp == "not found"){	temp = "F";			}
 			stdoutWanted = util.isTrue(temp); 
 			
-			matrixout = validParameter.valid(parameters, "matrixout");	if (matrixout == "not found"){	matrixout = "";		}
+			matrixout = validParameter.validPath(parameters, "matrixout");	if (matrixout == "not found"){	matrixout = "";		}
 			
 			ntrees = validParameter.valid(parameters, "ntrees");		if (ntrees == "not found"){	ntrees = "1";		}
 			

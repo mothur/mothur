@@ -38,7 +38,7 @@ SystemCommand::SystemCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			string commandOption = validParameter.valid(parameters, "command");			
+			string commandOption = validParameter.validPath(parameters, "command");
 			if (commandOption == "not found") { commandOption = ""; }
 			else { command = commandOption; }
 			

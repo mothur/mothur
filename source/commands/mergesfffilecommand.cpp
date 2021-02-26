@@ -85,10 +85,10 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
  			
 			ValidParameters validParameter;
 			
-            string inputDir = validParameter.valid(parameters, "inputdir");
-                       if (inputDir == "not found"){    inputDir = "";        }
+            string inputDir = validParameter.validPath(parameters, "inputdir");
+            if (inputDir == "not found"){    inputDir = "";        }
 			
-			sffFilename = validParameter.valid(parameters, "sff");
+			sffFilename = validParameter.validPath(parameters, "sff");
 			if (sffFilename == "not found") { sffFilename = "";  }
 			else {
 				util.splitAtDash(sffFilename, filenames);
@@ -135,7 +135,7 @@ MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
                 m->mothurOut("[ERROR]: cannot use file option and sff option at the same time, choose one.\n");  abort = true;
             }
             
-            outputFile = validParameter.valid(parameters, "output");
+            outputFile = validParameter.validPath(parameters, "output");
 			if (outputFile == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
 			if (outputdir != "") { outputFile = outputdir + util.getSimpleName(outputFile);  }
             

@@ -121,7 +121,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			ValidParameters validParameter;
 			
             
-            string inputDir = validParameter.valid(parameters, "inputdir");
+            string inputDir = validParameter.validPath(parameters, "inputdir");
             if (inputDir == "not found"){    inputDir = "";        }
 
             sffFilename = validParameter.validFile(parameters, "sff");

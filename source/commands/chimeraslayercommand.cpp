@@ -244,7 +244,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
             bool foundTool = false;
             path = current->getProgramPath();
             
-			blastlocation = validParameter.valid(parameters, "blastlocation");	
+			blastlocation = validParameter.validPath(parameters, "blastlocation");
 			if (blastlocation == "not found") {
                 if (search == "blast") {
                     blastlocation = "";

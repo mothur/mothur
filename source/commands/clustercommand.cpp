@@ -167,7 +167,7 @@ ClusterCommand::ClusterCommand(string option)  {
             string path = current->getProgramPath();
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             
-            vsearchLocation = validParameter.valid(parameters, "vsearch");
+            vsearchLocation = validParameter.validPath(parameters, "vsearch");
             if (vsearchLocation == "not found") {
                 vsearchLocation = "";
                 if ((method == "agc") || (method == "dgc")) {

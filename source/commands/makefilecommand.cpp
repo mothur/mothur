@@ -81,14 +81,14 @@ MakeFileCommand::MakeFileCommand(string option)  {
             map<string, string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            inputDir = validParameter.valid(parameters, "inputdir");
+            inputDir = validParameter.validPath(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";	m->mothurOut("[ERROR]: The inputdir parameter is required, aborting.\n");  abort = true;	}
             else {
                 if (util.dirCheckExists(inputDir)) {} // all set
                 else { abort = true; }
             }
             
-            		if (outputdir == ""){    outputdir = inputDir;		}
+            if (outputdir == ""){    outputdir = inputDir;		}
             
             //if the user changes the input directory command factory will send this info to us in the output parameter
             typeFile = validParameter.valid(parameters, "type");

@@ -80,9 +80,8 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			
 			ValidParameters validParameter;
             
-            
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
-			string inputDir = validParameter.valid(parameters, "inputdir");		
+			string inputDir = validParameter.validPath(parameters, "inputdir");
 			if (inputDir == "not found"){	inputDir = "";		}
 
             fastaFileNames = validParameter.validFiles(parameters, "fasta");
@@ -102,7 +101,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
             //make sure there is at least one valid file left
             if (fastaFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid files.\n");  abort = true; }
             
-			output = validParameter.valid(parameters, "output");			
+			output = validParameter.validPath(parameters, "output");
 			if (output == "not found") { output = "";  }
 			else{ filename = output; }
 			

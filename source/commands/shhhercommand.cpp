@@ -169,7 +169,7 @@ ShhherCommand::ShhherCommand(string option) {
 			}
 			else if(temp == "not open")	{	
 				
-				lookupFileName = validParameter.valid(parameters, "lookup");
+				lookupFileName = validParameter.validPath(parameters, "lookup");
 				
                 //check to make sure both are able to be opened
                 bool ableToOpen = util.checkLocations(lookupFileName, current->getLocations());

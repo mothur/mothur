@@ -57,10 +57,10 @@ MergeCountCommand::MergeCountCommand(string option)  {
             map<string,string> parameters = parser.getParameters();
             
             ValidParameters validParameter;
-            string inputDir = validParameter.valid(parameters, "inputdir");
+            string inputDir = validParameter.validPath(parameters, "inputdir");
             if (inputDir == "not found"){	inputDir = "";		}
             
-            string fileList = validParameter.valid(parameters, "count");
+            string fileList = validParameter.validPath(parameters, "count");
             if(fileList == "not found") { m->mothurOut("[ERROR]: you must enter two or more count file names\n");   abort=true;  }
             else{ 	util.splitAtDash(fileList, fileNames);	}
             
@@ -84,7 +84,7 @@ MergeCountCommand::MergeCountCommand(string option)  {
                 }
             }
             
-            outputFileName = validParameter.valid(parameters, "output");
+            outputFileName = validParameter.validPath(parameters, "output");
             if (outputFileName == "not found") { m->mothurOut("you must enter an output file name\n");   abort=true;  }
             else if (outputdir != "") { outputFileName = outputdir + util.getSimpleName(outputFileName);  }
         }

@@ -124,7 +124,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 			}else if (templatefile == "not open") { abort = true; }
 			
 			
-			maskfile = validParameter.valid(parameters, "mask");
+			maskfile = validParameter.validPath(parameters, "mask");
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  {
                 if (util.checkLocations(maskfile, current->getLocations())) {  }

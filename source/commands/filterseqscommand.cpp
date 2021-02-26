@@ -94,7 +94,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			fasta = validParameter.valid(parameters, "fasta");
+			fasta = validParameter.validPath(parameters, "fasta");
 			if (fasta == "not found") { 				
 				fasta = current->getFastaFile(); 
 				if (fasta != "") { 
