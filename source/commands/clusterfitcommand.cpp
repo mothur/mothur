@@ -348,14 +348,14 @@ int ClusterFitCommand::execute(){
         if (outputdir == "") { outputdir += util.hasPath(distfile); }
         fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
         
-        map<string, string> variables;
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = "optifit_" + metric->getName();
-        string outputName = getOutputFileName("steps", variables);
-        string listFile = "";
-        string bestListFileName = "";
+        string listFile = ""; string bestListFileName = ""; string outputName = "";
         
         if (selfReference) { //de novo
+            
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = "optifit_" + metric->getName();
+            outputName = getOutputFileName("steps", variables);
             
             if ((accnosfile == "") && (!createAccnos)) { //denovo with mothur randomly assigning references
                 
@@ -428,6 +428,11 @@ int ClusterFitCommand::execute(){
             
             if (outputdir == "") { outputdir += util.hasPath(distanceFile); }
             fileroot = outputdir + util.getRootName(util.getSimpleName(distanceFile));
+            
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = "optifit_" + metric->getName();
+            outputName = getOutputFileName("steps", variables);
             
             m->mothurOut("\nUsing OTUs from " + reflistfile + " as reference OTUs\n");
             
@@ -868,7 +873,7 @@ string ClusterFitCommand::runRefOptiCluster(OptiData*& matrix, ClusterMetric*& m
             }
             set<string> unfitted = cluster.getUnfittedNames();
             
-            string accnosFilename = fileroot+ "unfitted.accnos";
+            string accnosFilename = fileroot+ "optifit_scrap.accnos";
             outputNames.push_back(accnosFilename); outputTypes["accnos"].push_back(accnosFilename);
             
             ofstream accOut; util.openOutputFile(accnosFilename,    accOut);
@@ -1130,6 +1135,10 @@ void ClusterFitCommand::createReferenceNameCount() {
         else if (refnamefile != "") { refNameOrCount = "name"; }
         else { //create count file
             current->setMothurCalling(true);
+            //preserve current file names
+            string currentFasta = current->getFastaFile();
+            string currentCount = current->getCountFile();
+            
             string options = "fasta=" + reffastafile + ", format=count";
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: unique.seqs(" + options + ")\n");
@@ -1139,6 +1148,10 @@ void ClusterFitCommand::createReferenceNameCount() {
             map<string, vector<string> > filenames = deconvoluteCommand->getOutputFiles();
             refcountfile = filenames["count"][0];
             refNameOrCount = "count";
+            
+            //reset current filenames
+            current->setFastaFile(currentFasta);
+            current->setCountFile(currentCount);
             
             delete deconvoluteCommand;
             m->mothurOut("/******************************************/\n");
@@ -1152,7 +1165,13 @@ void ClusterFitCommand::createReferenceNameCount() {
 //**********************************************************************************************************************
 string ClusterFitCommand::calcDists() {
     try {
+        //preserve current file names
+        string currentFasta = current->getFastaFile();
+        string currentCount = current->getCountFile();
+        
         if (columnfile == "") { //calc user distances
+            string currentColumn = current->getColumnFile();
+            
             string options = "fasta=" + fastafile + ", cutoff=" + toString(cutoff);
             current->setMothurCalling(true);
             
@@ -1166,6 +1185,8 @@ string ClusterFitCommand::calcDists() {
             distfile = filenames["column"][0];
             columnfile = distfile;
             
+            current->setColumnFile(currentColumn);
+            
             delete distCommand;
             m->mothurOut("/******************************************/\n");
         }
@@ -1175,6 +1196,8 @@ string ClusterFitCommand::calcDists() {
         int alignLength = util.getAlignmentLength(fastafile);
         
         if (refAlignLength == alignLength) {
+            string currentColumn = current->getColumnFile();
+            
             string options = "fitcalc=t, fasta=" + reffastafile + ", oldfasta=" + fastafile + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
             
             //dists between reffasta and fastafile
@@ -1185,6 +1208,8 @@ string ClusterFitCommand::calcDists() {
             distCommand->execute();
             filenames = distCommand->getOutputFiles();
             comboDistFile = filenames["column"][0];
+            
+            current->setColumnFile(currentColumn);
             
             delete distCommand;
             m->mothurOut("/******************************************/\n");
@@ -1220,6 +1245,7 @@ string ClusterFitCommand::calcDists() {
             
             delete alignCommand;
             m->mothurOut("/******************************************/\n");
+            string currentColumn = current->getColumnFile();
             
             options = "fitcalc=t, fasta=" + filteredRef + ", oldfasta=" + alignedFasta + ", cutoff=" + toString(cutoff) + ", column=" + distfile;
             
@@ -1232,10 +1258,16 @@ string ClusterFitCommand::calcDists() {
             filenames = distCommand->getOutputFiles();
             comboDistFile = filenames["column"][0];
             
+            current->setColumnFile(currentColumn);
+            
             delete distCommand;
             m->mothurOut("/******************************************/\n");
             current->setMothurCalling(false);
         }
+        
+        //reset current filenames
+        current->setFastaFile(currentFasta);
+        current->setCountFile(currentCount);
         
         return comboDistFile;
     }
