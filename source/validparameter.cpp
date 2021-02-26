@@ -310,8 +310,10 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 
                 //check for blank file
                 if (ableToOpen) {
-                    if (util.isBlank(container[parameter])) {
-                        m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found";
+                    if (parameter != "accnos") { //ignore blank accnos
+                        if (util.isBlank(container[parameter])) {
+                            m->mothurOut("[ERROR]: " + container[parameter] + " is blank, aborting.\n");  return "not found";
+                        }
                     }
                 }
             }
