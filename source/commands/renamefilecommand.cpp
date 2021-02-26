@@ -230,7 +230,7 @@ RenameFileCommand::RenameFileCommand(string option)  {
             
             prefix = validParameter.valid(parameters, "prefix");		if (prefix == "not found") { prefix = ""; }
             
-            outputfile = validParameter.valid(parameters, "new");
+            outputfile = validParameter.validPath(parameters, "new");
             if (outputfile == "not found") {
                 if (!mothurGenerated) { m->mothurOut("[ERROR]: you must enter an output file name\n");   abort=true; }
                 outputfile = "";

@@ -59,15 +59,13 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			name = validParameter.valid(parameters, "name");			
+			name = validParameter.validPath(parameters, "name");
 			if (name == "not found") {  m->mothurOut("name is a required parameter for the set.logfile command."); abort = true; } 
 			
 			string temp = validParameter.valid(parameters, "append");		if (temp == "not found") {  temp = "F";  }
 			append = util.isTrue(temp);
             
-            
             if (outputdir == ""){ outputdir = util.hasPath(name); }
-            
 		}
 	}
 	catch(exception& e) {
