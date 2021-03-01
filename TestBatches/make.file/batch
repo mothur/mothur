@@ -1,6 +1,6 @@
 #make.file
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
-set.dir(input=./TestFiles, output=./make.file, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/make.file, tempdefault=./TestReferences)
 set.logfile(name=makefile.logfile)
 make.file(inputdir=./TestFiles)
 make.file(inputdir=./TestFiles, numcols=2)

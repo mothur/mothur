@@ -5,7 +5,7 @@
 # name and group parameters untested, because the name and group files are auto converted to a count file before running
 # this conversion is tested in the pre.cluster commands use of name and groups
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
-set.dir(input=./TestFiles, output=./chimera.vsearch, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/chimera.vsearch, tempdefault=./TestReferences)
 set.logfile(name=chimera.vsearch.logfile)
 chimera.vsearch(fasta=chimera.fasta, reference=silva.gold.ng.fasta)
 chimera.vsearch(fasta=chimera.fasta, count=chimera.count_table)

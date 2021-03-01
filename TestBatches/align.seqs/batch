@@ -2,12 +2,12 @@
 # testAlign is stability.trim.contigs.good.unique.fasta from MiSeq_SOP
 # test different align method and seaches
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
-set.dir(input=./TestFiles, output=./align.seqs, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/align.seqs, tempdefault=./TestReferences)
 set.logfile(name=alignseqs.logfile)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta)
 summary.seqs(fasta=current)
-align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, search=blast)
-summary.seqs(fasta=current)
+#align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, search=blast)
+#summary.seqs(fasta=current)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, align=needleman)
 summary.seqs(fasta=current)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, align=gotoh)

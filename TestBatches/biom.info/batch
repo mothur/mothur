@@ -3,7 +3,7 @@
 # test different biom formats
 #Test files -> hdf5.min.biom & hdf5.rich.biom from https://github.com/biocore/biom-format/tree/master/examples
 #Test files -> final.biom created by mothur make.biom file with final.opti_mcc.shared, final.cons_taxonomy
-set.dir(input=./TestFiles, output=./biom.info)
+set.dir(input=./TestFiles, output=./TestResults/biom.info)
 set.logfile(name=biominfo.logfile)
 biom.info(biom=hdf5.min.biom)
 biom.info(biom=hdf5.rich.biom, label=0.03, format=hdf5)

@@ -7,7 +7,7 @@
 # screenSeqs2.fasta is stability.trim.contigs.good.unique.align from MISeq_SOP
 # screenSeqs2.count_table is stability.trim.contigs.good.count_table from MISeq_SOP
 # screenSeqs2.summary is stability.trim.contigs.good.unique.summary from MISeq_SOP
-set.dir(input=./TestFiles, output=./screen.seqs, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/screen.seqs, tempdefault=./TestReferences)
 set.logfile(name=screen.seqs.logfile)
 #screening after make.contigs
 screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, maxambig=0, maxlength=275)

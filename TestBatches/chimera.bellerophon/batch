@@ -3,7 +3,7 @@
 # chimera.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.fasta from MISeq_SOP
 # chimera.count is stability.trim.contigs.good.unique.good.filter.unique.precluster.count_table from MISeq_SOP
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
-set.dir(input=./TestFiles, output=./chimera.bellerophon, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/chimera.bellerophon, tempdefault=./TestReferences)
 set.logfile(name=chimera.bellerophon.logfile)
 chimera.bellerophon(fasta=chimera.fasta)
 chimera.bellerophon(fasta=chimera.fasta, filter=t)

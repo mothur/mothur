@@ -3,7 +3,7 @@
 # testClassify.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.fasta from MiSeq_SOP
 # testClassify.count is , count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.count_table from MiSeq_SOP
 # test different classification methods and seaches
-set.dir(input=./TestFiles, output=./classify.seqs, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/classify.seqs, tempdefault=./TestReferences)
 set.logfile(name=classifyseqs.logfile)
 classify.seqs(fasta=testClassify.fasta, reference=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax)
 classify.seqs(fasta=testClassify.fasta, reference=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, relabund=t)
@@ -12,5 +12,5 @@ classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, referenc
 #
 #knn
 classify.seqs(fasta=testClassify.fasta, template=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, method=knn)
-classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, template=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, method=knn, search=blast)
+#classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, template=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, method=knn, search=blast)
 quit()
