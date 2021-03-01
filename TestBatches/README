@@ -22,3 +22,32 @@ Running Test Bathches:
     mothur > set.logfile(name=alignseqs.logfile)
     ...
 
+5. Run all test batches:
+
+    
+    sarahwestcott$ cd mothur_test_batches
+    mothur_test_batches sarahwestcott$ ls
+    TestBatches    TestReferences    fasterq-dump    prefetch    vsearch
+    TestFiles    blast        mothur        uchime
+    mothur_test_batches sarahwestcott$ ./mothur "./TestBatches/master_batch"
+
+    Output to screen will look like:
+    
+    ...
+    Batch Mode
+
+    /*****************************************************************************/
+
+    mothur > set.dir(input=./TestFiles, output=./TestResults/align.seqs, tempdefault=./TestReferences)
+    Mothur's directories:
+    outputDir=/Users/swestcott/Desktop/batchTest/TestResults/align.seqs/
+    inputDir=/Users/swestcott/Desktop/batchTest/TestFiles/
+    tempDefault=/Users/swestcott/Desktop/batchTest/TestReferences/
+
+    mothur > set.logfile(name=alignseqs.logfile)
+
+    Setting logfile name to /Users/swestcott/Desktop/batchTest/TestFiles/alignseqs.logfile
+    ...
+    
+    
+
