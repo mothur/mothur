@@ -1,6 +1,6 @@
 #make.contigs
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
-# stability.files from MISeq_SOP
+# stability.files & *.fastq *.fastq.gz from MISeq_SOP
 set.dir(input=./TestFiles, output=./make.contigs, tempdefault=./TestReferences)
 set.logfile(name=makecontigs.logfile)
 make.contigs(file=stability.files)
