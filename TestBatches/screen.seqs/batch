@@ -7,8 +7,6 @@
 # screenSeqs2.fasta is stability.trim.contigs.good.unique.align from MISeq_SOP
 # screenSeqs2.count_table is stability.trim.contigs.good.count_table from MISeq_SOP
 # screenSeqs2.summary is stability.trim.contigs.good.unique.summary from MISeq_SOP
-screen.seqs(fasta=stability.trim.contigs.good.unique.align, count=stability.trim.contigs.good.count_table, summary=stability.trim.contigs.good.unique.summary, start=1968, end=11550, maxhomop=8)
-
 set.dir(input=./TestFiles, output=./screen.seqs, tempdefault=./TestReferences)
 set.logfile(name=screen.seqs.logfile)
 #screening after make.contigs
@@ -23,4 +21,6 @@ screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=scree
 screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=screenSeqs.contigs.report, minoverlap=25)
 screen.seqs(fasta=screenSeqs.fasta, group=screenSeqs.groups, contigsreport=screenSeqs.contigs.report, optimize=ostart-oend, criteria=90)
 screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, alignreport=screenSeqs.align.report, minscore=60, maxinsert=5, minsim=90)
+screen.seqs(fasta=screenSeqs2.fasta, count=screenSeqs2.count_table, summary=screenSeqs2.summary, start=1968, end=11550, maxhomop=8)
+
 quit()
