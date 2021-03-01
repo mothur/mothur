@@ -2175,12 +2175,6 @@ string Utils::getExtension(string longName){
 /***********************************************************************/
 bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS){
     try {
-
-        #if defined NON_WINDOWS
-            system("clear");
-        #else
-            system("CLS");
-        #endif
         
         string lastChar = "";
         #ifdef MOTHUR_FILES
