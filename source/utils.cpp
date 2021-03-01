@@ -1991,7 +1991,7 @@ bool Utils::mkDir(string& dirName){
 #ifdef USE_BOOST
         
         boost::filesystem::path dir(dirName.c_str());
-        if(boost::filesystem::create_directory(dir)) {}
+        if(boost::filesystem::create_directories(dir)) {}
         else { return false; }
         
 #else
