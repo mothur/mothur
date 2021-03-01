@@ -3,8 +3,8 @@
 #Test files -> final.fasta, final.names, final.count_table, final.groups from MiSeq_SOP
 set.dir(input=./TestFiles, output=./binseqs, tempdefault=./TestReferences)
 set.logfile(name=binseqs.logfile)
-bin.seqs(fasta=final.fasta, name=final.names, list=final.opti_mcc.fornamesgroups.list)
-bin.seqs(fasta=final.fasta, name=final.names, group=final.groups, list=final.opti_mcc.fornamesgroups.list)
+bin.seqs(fasta=final2.fasta, name=final.names, list=final2.opti_mcc.list)
+bin.seqs(fasta=final2.fasta, name=final.names, group=final.groups, list=final2.opti_mcc.list)
 bin.seqs(fasta=final.fasta, list=final.opti_mcc.list)
 bin.seqs(fasta=final.fasta, count=final.count_table, list=final.opti_mcc.list)
 quit()
