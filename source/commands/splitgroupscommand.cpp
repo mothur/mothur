@@ -707,7 +707,7 @@ void SplitGroupCommand::splitFastqOrFlow(string inputFile, string extension){
             workerThreads[i]->join();
 
             outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
-            for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+            for (itTypes = data[i]->outputTypes.begin(); itTypes != data[i]->outputTypes.end(); itTypes++) {
                 outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
             }
 
