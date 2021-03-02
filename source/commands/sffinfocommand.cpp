@@ -343,7 +343,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
             delete read;
             
 			//report progress
-			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)+"\n"); 		}
+			if((count+1) % 10000 == 0){	m->mothurOutJustToScreen(toString(count+1)+"\n"); 		}
 		
 			if (m->getControl_pressed()) { count = 0; break;   }
 			
@@ -353,7 +353,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
 		}
 		
 		//report progress
-		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)+"\n"); 	}  }
+		if (!m->getControl_pressed()) {   if((count) % 10000 != 0){	m->mothurOutJustToScreen(toString(count)+"\n"); 	}  }
 		
 		in.close();
 		
