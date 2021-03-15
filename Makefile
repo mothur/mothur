@@ -37,8 +37,8 @@ GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
-VERSION = "\"1.44.3\""
-RELEASE_DATE = "\"1/21/21\""
+VERSION = "\"1.45.0\""
+RELEASE_DATE = "\"3/12/21\""
 
 
 # Set a static logfile name
@@ -106,7 +106,7 @@ endif
 #
 	VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm:source/
     skipUchime := source/uchime_src/
-    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), source/, $(wildcard source/*/))))
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
     CXXFLAGS += -I. $(subDirIncludes)
