@@ -871,7 +871,7 @@ int ScreenSeqsCommand::optimizeContigs(){
 
         for (int i = 0; i < optimize.size(); i++) {
             if (optimize[i] == "ostart") { oStart = sum.getOStart(criteriaPercentile); m->mothurOut("Optimizing ostart to " + toString(oStart) + ".\n"); }
-            else if (optimize[i] == "oend") {  endPos = sum.getOEnd(mincriteriaPercentile); m->mothurOut("Optimizing oend to " + toString(oEnd) + ".\n"); }
+            else if (optimize[i] == "oend") {  oEnd = sum.getOEnd(mincriteriaPercentile); m->mothurOut("Optimizing oend to " + toString(oEnd) + ".\n"); }
             else if (optimize[i] == "mismatches") { mismatches = sum.getMisMatches(criteriaPercentile); m->mothurOut("Optimizing mismatches to " + toString(mismatches) + ".\n"); }
             else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + ".\n"); }
             else if (optimize[i] == "minoverlap") {  minOverlap = sum.getOLength(mincriteriaPercentile); m->mothurOut("Optimizing minoverlap to " + toString(minOverlap) + ".\n"); }
