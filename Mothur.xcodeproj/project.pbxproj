@@ -3963,7 +3963,7 @@
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers/";
 			};
 			name = Debug;
 		};
@@ -4015,7 +4015,7 @@
 				PRODUCT_NAME = mothur;
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers/";
 				"VALID_ARCHS[sdk=*]" = "i386 x86_64";
 			};
 			name = Release;
@@ -4077,7 +4077,7 @@
 					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include/,
 				);
 				INSTALL_PATH = "${SRCROOT}";
-				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/libs/";
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
@@ -4091,20 +4091,20 @@
 					"-DUSE_HDF5",
 				);
 				OTHER_LDFLAGS = (
-					"${SRCROOT}/mothur_resources/libs/libboost_filesystem.a",
-					"${SRCROOT}/mothur_resources/libs/libboost_iostreams.a",
-					"${SRCROOT}/mothur_resources/libs/libgsl.a",
-					"${SRCROOT}/mothur_resources/libs/libgslcblas.a",
-					"${SRCROOT}/mothur_resources/libs/libz.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_hl_cpp.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_cpp.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_hl.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5.a",
 					"-libreadline",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources/headers/";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers/";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "";
 			};
 			name = Debug;
@@ -4166,7 +4166,7 @@
 					/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk/usr/include/,
 				);
 				INSTALL_PATH = "${SRCROOT}";
-				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources/";
+				LIBRARY_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/libs/";
 				"LIBRARY_SEARCH_PATHS[arch=*]" = "";
 				MACH_O_TYPE = mh_execute;
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
@@ -4179,20 +4179,20 @@
 					"-DUSE_HDF5",
 				);
 				OTHER_LDFLAGS = (
-					"${SRCROOT}/mothur_resources/libs/libboost_filesystem.a",
-					"${SRCROOT}/mothur_resources/libs/libboost_iostreams.a",
-					"${SRCROOT}/mothur_resources/libs/libgsl.a",
-					"${SRCROOT}/mothur_resources/libs/libgslcblas.a",
-					"${SRCROOT}/mothur_resources/libs/libz.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_hl_cpp.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_cpp.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5_hl.a",
-					"${SRCROOT}/mothur_resources/libs/libhdf5.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libboost_filesystem.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libboost_iostreams.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libgsl.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libgslcblas.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl_cpp.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_cpp.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl.a",
+					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5.a",
 					"-libreadline",
 				);
 				SDKROOT = macosx;
 				SKIP_INSTALL = NO;
-				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources/headers/";
+				USER_HEADER_SEARCH_PATHS = "${SRCROOT}/mothur_resources_10.14/headers/";
 				"USER_HEADER_SEARCH_PATHS[arch=*]" = "";
 			};
 			name = Release;
