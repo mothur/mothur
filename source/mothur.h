@@ -16,9 +16,11 @@
 
 //boost libraries
 #ifdef USE_BOOST
+#define BOOST_NO_CXX11_SCOPED_ENUMS
     #include <boost/iostreams/filtering_stream.hpp>
     #include <boost/iostreams/filter/gzip.hpp>
     #include <boost/filesystem.hpp>
+#undef BOOST_NO_CXX11_SCOPED_ENUMS
 #endif
 
 #ifdef USE_HDF5
