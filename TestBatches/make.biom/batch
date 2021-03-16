@@ -1,3 +1,13 @@
 #make.biom
 # NOTE: download TestReferences and TestFiles and put in same location as mothur executable
 # test different biom formats
+#Test files -> makeBiom.cons.taxonomy is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.0.03.cons.taxonomy from the MiSeq_SOP
+#Test files -> makeBiom.gg.cons.taxonomy is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.0.03.cons.taxonomy from the MiSeq_SOP classified using the Green Genes Database
+#Test files -> makeBiom.shared is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.opti_mcc.shared
+set.dir(input=./TestFiles, output=./TestResults/make.biom)
+set.logfile(name=make.biom.logfile)
+make.biom(shared=makeBiom.shared)
+make.biom(shared=makeBiom.shared, constaxonomy=makeBiom.cons.taxonomy)
+make.biom(shared=makeBiom.shared, constaxonomy=makeBiom.cons.taxonomy, output=simple)
+make.biom(shared=makeBiom.gg.shared, label=0.03, reftaxonomy=gg_13_5_99.gg.tax, constaxonomy=makeBiom.gg.cons.taxonomy, picrust=97_otu_map.txt)
+quit()
