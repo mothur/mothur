@@ -104,7 +104,8 @@ int main(int argc, char *argv[], char *envp[]){
                 m->appendLogBuffer("Script Mode\n\n");
 
                 char* temp = new char[16];
-                *temp = '\0'; strncat(temp, "#help();quit();", 15);
+                string helpQuit = "#help();quit();";
+                *temp = '\0'; strncat(temp, helpQuit.c_str(), sizeof temp - strlen (temp) - 1);
                 
                 argv[1] = temp;
                 mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);

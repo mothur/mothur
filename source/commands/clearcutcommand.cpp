@@ -229,50 +229,61 @@ int ClearcutCommand::execute() {
 		clearcutParameters = new char*[numArgs];
         
         clearcutParameters[0] = new char[9];
-		*clearcutParameters[0] = '\0'; strncat(clearcutParameters[0], "clearcut", 8);
+		*clearcutParameters[0] = '\0'; strncat(clearcutParameters[0], "clearcut", sizeof clearcutParameters[0] - strlen (clearcutParameters[0]) - 1);
 				
 		//you gave us a distance matrix
-        if (phylipfile != "") {  clearcutParameters[1] = new char[11];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--distance", 10); 	}
+        if (phylipfile != "") {  clearcutParameters[1] = new char[11];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--distance", sizeof clearcutParameters[1] - strlen (clearcutParameters[1]) - 1); 	}
 		
 		//you gave us a fastafile
-		if (fastafile != "") { clearcutParameters[1] = new char[12];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--alignment", 11);  	}
+		if (fastafile != "") { clearcutParameters[1] = new char[12];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--alignment", sizeof clearcutParameters[1] - strlen (clearcutParameters[1]) - 1);  	}
 		
         int parameterCount = 2;
-		if (version)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--version", 9);  	parameterCount++; }
-		if (verbose)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--verbose", 9);  parameterCount++;	}
-		if (quiet)				{  clearcutParameters[parameterCount] = new char[8];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--quiet", 7);  parameterCount++;	}
+		if (version)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--version", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  	parameterCount++; }
+		if (verbose)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--verbose", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (quiet)				{
+            clearcutParameters[parameterCount] = new char[8];
+            size_t tempInSize = sizeof clearcutParameters[parameterCount];
+            strncpy(clearcutParameters[parameterCount], "--input", tempInSize); clearcutParameters[parameterCount][tempInSize - 1] = '\0';
+
+            //*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--quiet", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
+            parameterCount++;	}
 		if (seed != "*")		{  
 			string tempSeed = "--seed=" + seed;
 			clearcutParameters[parameterCount] = new char[tempSeed.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempSeed.c_str(), tempSeed.length());
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempSeed.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
 			parameterCount++;
 		}
-		if (norandom)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--norandom", 10);  parameterCount++;	}
-		if (shuffle)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--shuffle", 9);  parameterCount++;	}
-		if (neighbor)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--neighbor", 10);  parameterCount++;	}
+		if (norandom)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--norandom", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (shuffle)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--shuffle", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (neighbor)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--neighbor", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
 		
 		string tempIn = "--in=" + inputFile;  
         clearcutParameters[parameterCount] = new char[tempIn.length()+1];
-		*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempIn.c_str(), tempIn.length());
+		*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempIn.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
         parameterCount++;
 		
-		if (stdoutWanted)		{  clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--stdout", 8);  parameterCount++;	}
+		if (stdoutWanted)		{  clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--stdout", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
 		else{  
             string tempOut = "--out=" + outputName;
 			clearcutParameters[parameterCount] = new char[tempOut.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempOut.c_str(), tempOut.length());
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempOut.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
 			parameterCount++;
             
 		}
 			
-		if (DNA)				{  clearcutParameters[parameterCount] = new char[6];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--DNA", 5);  parameterCount++;		}
-		if (protein)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--protein", 9);  parameterCount++;	}
-		if (jukes)				{  clearcutParameters[parameterCount] = new char[8];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--jukes", 7);  parameterCount++;	}
-		if (kimura)				{ clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--kimura", 8);  parameterCount++;		}
+		if (DNA)				{  clearcutParameters[parameterCount] = new char[6];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--DNA", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;		}
+		if (protein)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--protein", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (jukes)				{
+            clearcutParameters[parameterCount] = new char[8];
+            size_t size = sizeof clearcutParameters[parameterCount];
+            strncat(clearcutParameters[parameterCount], "--jukes", size);
+            clearcutParameters[parameterCount][size-1] = '\0'; 
+            parameterCount++;	}
+		if (kimura)				{ clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--kimura", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;		}
 		if (matrixout != "")	{  
 			string tempMatrix =  "--matrixout=" + outputdir + matrixout;
 			clearcutParameters[parameterCount] = new char[tempMatrix.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempMatrix.c_str(), tempMatrix.length());
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempMatrix.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
 			parameterCount++;
 			outputNames.push_back((outputdir + matrixout));
 			outputTypes["matrixout"].push_back((outputdir + matrixout));
@@ -281,12 +292,12 @@ int ClearcutCommand::execute() {
 		if (ntrees != "1")		{  
 			string tempNtrees = "--ntrees=" + ntrees; 
 			clearcutParameters[parameterCount] = new char[tempNtrees.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempNtrees.c_str(), tempNtrees.length());
+			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempNtrees.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
 			parameterCount++;
 		}
 
-		if (expblen)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expblen", 9);  parameterCount++; 	}
-		if (expdist)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expdist", 9);  parameterCount++;	}
+		if (expblen)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expblen", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++; 	}
+		if (expdist)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expdist", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
         
         errno = 0;
 		clearcut_main(numArgs, clearcutParameters); 

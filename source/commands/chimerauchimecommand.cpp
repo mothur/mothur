@@ -355,7 +355,7 @@ int driver(uchimeData* params){
         char* tempUchime;
         tempUchime= new char[uchimeCommand.length()+1];
         *tempUchime = '\0';
-        strncat(tempUchime, uchimeCommand.c_str(), uchimeCommand.length());
+        strncat(tempUchime, uchimeCommand.c_str(), sizeof tempUchime - strlen (tempUchime) - 1);
         cPara.push_back(tempUchime);
         
         //are you using a reference file
@@ -380,213 +380,196 @@ int driver(uchimeData* params){
             params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
             //add reference file
             char* tempRef = new char[5];
-            //strcpy(tempRef, "--db");
-            *tempRef = '\0'; strncat(tempRef, "--db", 4);
+            *tempRef = '\0'; strncat(tempRef, "--db", sizeof tempRef - strlen (tempRef) - 1);
             cPara.push_back(tempRef);
+            
             char* tempR = new char[params->templatefile.length()+1];
-            //strcpy(tempR, templatefile.c_str());
-            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), params->templatefile.length());
+            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), sizeof tempR - strlen (tempR) - 1);
             cPara.push_back(tempR);
         }
         
         char* tempIn = new char[8];
-        *tempIn = '\0'; strncat(tempIn, "--input", 7);
-        //strcpy(tempIn, "--input");
+        size_t tempInSize = sizeof tempIn;
+        strncpy(tempIn, "--input", tempInSize); tempIn[tempInSize - 1] = '\0'; 
         cPara.push_back(tempIn);
+        
         char* temp = new char[params->formattedFastaFilename.length()+1];
-        *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), params->formattedFastaFilename.length());
-        //strcpy(temp, filename.c_str());
+        *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), sizeof temp - strlen (temp) - 1);
         cPara.push_back(temp);
         
         char* tempO = new char[12];
-        *tempO = '\0'; strncat(tempO, "--uchimeout", 11);
-        //strcpy(tempO, "--uchimeout");
+        *tempO = '\0'; strncat(tempO, "--uchimeout", sizeof tempO - strlen (tempO) - 1);
         cPara.push_back(tempO);
+        
         char* tempout = new char[params->driverOutputFName.length()+1];
-        //strcpy(tempout, outputFName.c_str());
-        *tempout = '\0'; strncat(tempout, params->driverOutputFName.c_str(), params->driverOutputFName.length());
+        *tempout = '\0'; strncat(tempout, params->driverOutputFName.c_str(), sizeof tempout - strlen (tempout) - 1);
         cPara.push_back(tempout);
         
         if (params->vars->chimealns) {
             char* tempA = new char[13];
-            *tempA = '\0'; strncat(tempA, "--uchimealns", 12);
-            //strcpy(tempA, "--uchimealns");
+            *tempA = '\0'; strncat(tempA, "--uchimealns", sizeof tempA - strlen (tempA) - 1);
             cPara.push_back(tempA);
+            
             char* tempa = new char[params->driverAlns.length()+1];
-            //strcpy(tempa, alns.c_str());
-            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), params->driverAlns.length());
+            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), sizeof tempa - strlen (tempa) - 1);
             cPara.push_back(tempa);
         }
         
         if (params->vars->strand != "") {
             char* tempA = new char[9];
-            *tempA = '\0'; strncat(tempA, "--strand", 8);
+            *tempA = '\0'; strncat(tempA, "--strand", sizeof tempA - strlen (tempA) - 1);
             cPara.push_back(tempA);
+            
             char* tempa = new char[params->vars->strand.length()+1];
-            *tempa = '\0'; strncat(tempa, params->vars->strand.c_str(), params->vars->strand.length());
+            *tempa = '\0'; strncat(tempa, params->vars->strand.c_str(), sizeof tempa - strlen (tempa) - 1);
             cPara.push_back(tempa);
         }
         
         if (params->vars->useAbskew) {
             char* tempskew = new char[9];
-            *tempskew = '\0'; strncat(tempskew, "--abskew", 8);
-            //strcpy(tempskew, "--abskew");
+            *tempskew = '\0'; strncat(tempskew, "--abskew", sizeof tempskew - strlen (tempskew) - 1);
             cPara.push_back(tempskew);
+            
             char* tempSkew = new char[params->vars->abskew.length()+1];
-            //strcpy(tempSkew, abskew.c_str());
-            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), params->vars->abskew.length());
+            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), sizeof tempSkew - strlen (tempSkew) - 1);
             cPara.push_back(tempSkew);
         }
         
         if (params->vars->useMinH) {
             char* tempminh = new char[7];
-            *tempminh = '\0'; strncat(tempminh, "--minh", 6);
-            //strcpy(tempminh, "--minh");
+            *tempminh = '\0'; strncat(tempminh, "--minh", sizeof tempminh - strlen (tempminh) - 1);
             cPara.push_back(tempminh);
+            
             char* tempMinH = new char[params->vars->minh.length()+1];
-            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), params->vars->minh.length());
-            //strcpy(tempMinH, minh.c_str());
+            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), sizeof tempMinH - strlen (tempMinH) - 1);
             cPara.push_back(tempMinH);
         }
         
         if (params->vars->useMindiv) {
             char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", 8);
-            //strcpy(tempmindiv, "--mindiv");
+            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", sizeof tempmindiv - strlen (tempmindiv) - 1);
             cPara.push_back(tempmindiv);
+            
             char* tempMindiv = new char[params->vars->mindiv.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), params->vars->mindiv.length());
-            //strcpy(tempMindiv, mindiv.c_str());
+            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), sizeof tempMindiv - strlen (tempMindiv) - 1);
             cPara.push_back(tempMindiv);
         }
         
         if (params->vars->useXn) {
             char* tempxn = new char[5];
-            //strcpy(tempxn, "--xn");
-            *tempxn = '\0'; strncat(tempxn, "--xn", 4);
+            *tempxn = '\0'; strncat(tempxn, "--xn", sizeof tempxn - strlen (tempxn) - 1);
             cPara.push_back(tempxn);
+            
             char* tempXn = new char[params->vars->xn.length()+1];
-            //strcpy(tempXn, xn.c_str());
-            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), params->vars->xn.length());
+            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), sizeof tempXn - strlen (tempXn) - 1);
             cPara.push_back(tempXn);
         }
         
         if (params->vars->useDn) {
             char* tempdn = new char[5];
-            //strcpy(tempdn, "--dn");
-            *tempdn = '\0'; strncat(tempdn, "--dn", 4);
+            *tempdn = '\0'; strncat(tempdn, "--dn", sizeof tempdn - strlen (tempdn) - 1);
             cPara.push_back(tempdn);
+            
             char* tempDn = new char[params->vars->dn.length()+1];
-            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), params->vars->dn.length());
-            //strcpy(tempDn, dn.c_str());
+            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), sizeof tempDn - strlen (tempDn) - 1);
             cPara.push_back(tempDn);
         }
         
         if (params->vars->useXa) {
             char* tempxa = new char[5];
-            //strcpy(tempxa, "--xa");
-            *tempxa = '\0'; strncat(tempxa, "--xa", 4);
+            *tempxa = '\0'; strncat(tempxa, "--xa", sizeof tempxa - strlen (tempxa) - 1);
             cPara.push_back(tempxa);
+            
             char* tempXa = new char[params->vars->xa.length()+1];
-            *tempXa = '\0'; strncat(tempXa, params->vars->xa.c_str(), params->vars->xa.length());
-            //strcpy(tempXa, xa.c_str());
+            *tempXa = '\0'; strncat(tempXa, params->vars->xa.c_str(), sizeof tempXa - strlen (tempXa) - 1);
             cPara.push_back(tempXa);
         }
         
         if (params->vars->useChunks) {
             char* tempchunks = new char[9];
-            //strcpy(tempchunks, "--chunks");
-            *tempchunks = '\0'; strncat(tempchunks, "--chunks", 8);
+            *tempchunks = '\0'; strncat(tempchunks, "--chunks", sizeof tempchunks - strlen (tempchunks) - 1);
             cPara.push_back(tempchunks);
+            
             char* tempChunks = new char[params->vars->chunks.length()+1];
-            *tempChunks = '\0'; strncat(tempChunks, params->vars->chunks.c_str(), params->vars->chunks.length());
-            //strcpy(tempChunks, chunks.c_str());
+            *tempChunks = '\0'; strncat(tempChunks, params->vars->chunks.c_str(), sizeof tempChunks - strlen (tempChunks) - 1);
             cPara.push_back(tempChunks);
         }
         
         if (params->vars->useMinchunk) {
             char* tempminchunk = new char[11];
-            //strcpy(tempminchunk, "--minchunk");
-            *tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", 10);
+            *tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", sizeof tempminchunk - strlen (tempminchunk) - 1);
             cPara.push_back(tempminchunk);
+            
             char* tempMinchunk = new char[params->vars->minchunk.length()+1];
-            *tempMinchunk = '\0'; strncat(tempMinchunk, params->vars->minchunk.c_str(), params->vars->minchunk.length());
-            //strcpy(tempMinchunk, minchunk.c_str());
+            *tempMinchunk = '\0'; strncat(tempMinchunk, params->vars->minchunk.c_str(), sizeof tempMinchunk - strlen (tempMinchunk) - 1);
             cPara.push_back(tempMinchunk);
         }
         
         if (params->vars->useIdsmoothwindow) {
             char* tempidsmoothwindow = new char[17];
-            *tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", 16);
-            //strcpy(tempidsmoothwindow, "--idsmoothwindow");
+            *tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", sizeof tempidsmoothwindow - strlen (tempidsmoothwindow) - 1);
             cPara.push_back(tempidsmoothwindow);
+            
             char* tempIdsmoothwindow = new char[params->vars->idsmoothwindow.length()+1];
-            *tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, params->vars->idsmoothwindow.c_str(), params->vars->idsmoothwindow.length());
-            //strcpy(tempIdsmoothwindow, idsmoothwindow.c_str());
+            *tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, params->vars->idsmoothwindow.c_str(), sizeof tempIdsmoothwindow - strlen (tempIdsmoothwindow) - 1);
             cPara.push_back(tempIdsmoothwindow);
         }
         
         if (params->vars->useMaxp) {
             char* tempmaxp = new char[7];
-            //strcpy(tempmaxp, "--maxp");
-            *tempmaxp = '\0'; strncat(tempmaxp, "--maxp", 6);
+            *tempmaxp = '\0'; strncat(tempmaxp, "--maxp", sizeof tempmaxp - strlen (tempmaxp) - 1);
             cPara.push_back(tempmaxp);
+            
             char* tempMaxp = new char[params->vars->maxp.length()+1];
-            *tempMaxp = '\0'; strncat(tempMaxp, params->vars->maxp.c_str(), params->vars->maxp.length());
-            //strcpy(tempMaxp, maxp.c_str());
+            *tempMaxp = '\0'; strncat(tempMaxp, params->vars->maxp.c_str(), sizeof tempMaxp - strlen (tempMaxp) - 1);
             cPara.push_back(tempMaxp);
         }
         
         if (!params->vars->skipgaps) {
             char* tempskipgaps = new char[13];
-            //strcpy(tempskipgaps, "--[no]skipgaps");
-            *tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", 12);
+            *tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", sizeof tempskipgaps - strlen (tempskipgaps) - 1);
             cPara.push_back(tempskipgaps);
         }
         
         if (!params->vars->skipgaps2) {
             char* tempskipgaps2 = new char[14];
-            //strcpy(tempskipgaps2, "--[no]skipgaps2");
-            *tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", 13);
+            *tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", sizeof tempskipgaps2 - strlen (tempskipgaps2) - 1);
             cPara.push_back(tempskipgaps2);
         }
         
         if (params->vars->useMinlen) {
             char* tempminlen = new char[9];
-            *tempminlen = '\0'; strncat(tempminlen, "--minlen", 8);
-            //strcpy(tempminlen, "--minlen");
+            *tempminlen = '\0'; strncat(tempminlen, "--minlen", sizeof tempminlen - strlen (tempminlen) - 1);
             cPara.push_back(tempminlen);
+            
             char* tempMinlen = new char[params->vars->minlen.length()+1];
-            //strcpy(tempMinlen, minlen.c_str());
-            *tempMinlen = '\0'; strncat(tempMinlen, params->vars->minlen.c_str(), params->vars->minlen.length());
+            *tempMinlen = '\0'; strncat(tempMinlen, params->vars->minlen.c_str(), sizeof tempMinlen - strlen (tempMinlen) - 1);
             cPara.push_back(tempMinlen);
         }
         
         if (params->vars->useMaxlen) {
             char* tempmaxlen = new char[9];
-            //strcpy(tempmaxlen, "--maxlen");
-            *tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", 8);
+            *tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", sizeof tempmaxlen - strlen (tempmaxlen) - 1);
             cPara.push_back(tempmaxlen);
+            
             char* tempMaxlen = new char[params->vars->maxlen.length()+1];
-            *tempMaxlen = '\0'; strncat(tempMaxlen, params->vars->maxlen.c_str(), params->vars->maxlen.length());
-            //strcpy(tempMaxlen, maxlen.c_str());
+            *tempMaxlen = '\0'; strncat(tempMaxlen, params->vars->maxlen.c_str(), sizeof tempMaxlen - strlen (tempMaxlen) - 1);
             cPara.push_back(tempMaxlen);
         }
         
         if (params->vars->ucl) {
             char* tempucl = new char[5];
-            strcpy(tempucl, "--ucl");
+            *tempucl = '\0'; strncat(tempucl, "--ucl", sizeof tempucl - strlen (tempucl) - 1);
             cPara.push_back(tempucl);
         }
         
         if (params->vars->useQueryfract) {
             char* tempqueryfract = new char[13];
-            *tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", 12);
-            //strcpy(tempqueryfract, "--queryfract");
+            *tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", sizeof tempqueryfract - strlen (tempqueryfract) - 1);
             cPara.push_back(tempqueryfract);
+            
             char* tempQueryfract = new char[params->vars->queryfract.length()+1];
-            *tempQueryfract = '\0'; strncat(tempQueryfract, params->vars->queryfract.c_str(), params->vars->queryfract.length());
-            //strcpy(tempQueryfract, queryfract.c_str());
+            *tempQueryfract = '\0'; strncat(tempQueryfract, params->vars->queryfract.c_str(), sizeof tempQueryfract - strlen (tempQueryfract) - 1);
             cPara.push_back(tempQueryfract);
         }
         

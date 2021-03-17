@@ -7,7 +7,9 @@
 //
 
 #include "pam.h"
-#define DBL_EPSILON 1e-9
+#ifndef DBL_EPSILON
+    #define DBL_EPSILON 1e-9
+#endif
 
 /**************************************************************************************************/
 Pam::Pam(vector<vector<int> > c, vector<vector<double> > d, int p) : CommunityTypeFinder() {

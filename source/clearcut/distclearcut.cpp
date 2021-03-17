@@ -152,7 +152,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
       return(NULL);
     }
 
-    strncpy(dmat->taxaname[i], alignment->titles[i], strlen(alignment->titles[i]));
+    strncpy(dmat->taxaname[i], alignment->titles[i], sizeof dmat->taxaname[i] - strlen (dmat->taxaname[i]) - 1);
   }
 
   /* allocate val matrix in dmat */
