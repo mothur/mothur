@@ -1,6 +1,6 @@
 USEREADLINE ?= yes
 USEBOOST ?= yes
-VERSION = "\"1.44.1\""
+VERSION = "\"1.45.0\""
 RELEASE_DATE = "\"4/13/20\""
 MOTHUR_TOOLS="\"/nfs/turbo/schloss-lab/bin/mothur_src/tools/\"" 
 
@@ -18,7 +18,7 @@ endif
 #The boost libraries allow you to read gz files.
 ifeq  ($(strip $(USEBOOST)),yes)
 	#statically link so the boost install is not required on users machine
-	LDFLAGS += -L ${BOOST_LIBRARY_DIR}
+	LDFLAGS += -L ${BOOST_LIBRARY_DIR} -lboost_filesystem
 
     LIBS += -lboost_iostreams -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
