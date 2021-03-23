@@ -78,7 +78,7 @@ ifeq  ($(strip $(USEBOOST)),yes)
 
     LDFLAGS += -L ${BOOST_LIBRARY_DIR}
 
-    LIBS += -lboost_iostreams -lz
+    LIBS += -lboost_iostreams -lboost_system -lboost_filesystem -lz
     CXXFLAGS += -DUSE_BOOST -I ${BOOST_INCLUDE_DIR}
 endif
 
