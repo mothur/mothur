@@ -232,6 +232,7 @@ int RenameSeqsCommand::execute() {
             
             if (printMap) {
                 string thisOutputDir = outputdir;
+                if (outputdir == "") {  thisOutputDir += util.hasPath(fastaFile);  }
                 map<string, string> variables;
                 string outMapFile = thisOutputDir + util.getRootName(util.getSimpleName(fastaFile));
                 variables["[filename]"] = outMapFile;
