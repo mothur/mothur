@@ -6,10 +6,13 @@
 3. $ ./bootstrap.sh --help (for options)
 4. $ ./bootstrap.sh
 5. $ ./b2 link=static
-6. Download zlib https://zlib.net
-7. cd path/to/zlib
-8. ./configure --static
-9. make
+
+
+#Install the zlib static library
+1. Download zlib https://zlib.net
+2. cd path/to/zlib
+3. ./configure --static
+4. make
 
 #Install gsl static library
 

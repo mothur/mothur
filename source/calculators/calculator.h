@@ -88,6 +88,8 @@ public:
 
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) = 0;
+    
+    //currently not used
     virtual vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols) { vector<double> dists; dists.resize(otu.numSeqs, 1.0); return dists; }
     
 protected:
@@ -108,7 +110,6 @@ protected:
     int setEndIgnoreTermGap(string, string, bool&);
     
 };
-
 /**************************************************************************************************/
 
 

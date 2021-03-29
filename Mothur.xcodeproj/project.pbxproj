@@ -846,6 +846,7 @@
 		A7FFB558142CA02C004884F2 /* summarytaxcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */; };
 		F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
+		F41A1B91261257DE00144985 /* kmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B8F261257DE00144985 /* kmerdist.cpp */; };
 		F45A2E3D25A78B4D00994F76 /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */; };
 /* End PBXBuildFile section */
 
@@ -1806,6 +1807,8 @@
 		F4103A6F25A4C4D2001ED741 /* diversityestimatorcommand.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = diversityestimatorcommand.hpp; path = source/commands/diversityestimatorcommand.hpp; sourceTree = SOURCE_ROOT; };
 		F4103A7F25A4C831001ED741 /* libgslcblas.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgslcblas.a; path = mothur_resources/libs/libgslcblas.a; sourceTree = SOURCE_ROOT; };
 		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
+		F41A1B8F261257DE00144985 /* kmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kmerdist.cpp; sourceTree = "<group>"; };
+		F41A1B90261257DE00144985 /* kmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kmerdist.hpp; sourceTree = "<group>"; };
 		F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = contigsreport.hpp; sourceTree = "<group>"; };
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -2321,6 +2324,8 @@
 				481E40DE244F619D0059C925 /* eachgapignore.cpp */,
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
 				481E40DC244F52460059C925 /* ignoregaps.cpp */,
+				F41A1B8F261257DE00144985 /* kmerdist.cpp */,
+				F41A1B90261257DE00144985 /* kmerdist.hpp */,
 				A7E9B77312D37EC400DA6239 /* onegapdist.h */,
 				48998B68242E785100DBD0A9 /* onegapdist.cpp */,
 				A7E9B77412D37EC400DA6239 /* onegapignore.h */,
@@ -3643,6 +3648,7 @@
 				A7E9B8FC12D37EC400DA6239 /* mempearson.cpp in Sources */,
 				A7E9B8FD12D37EC400DA6239 /* mergefilecommand.cpp in Sources */,
 				A7E9B8FF12D37EC400DA6239 /* metastatscommand.cpp in Sources */,
+				F41A1B91261257DE00144985 /* kmerdist.cpp in Sources */,
 				A7E9B90012D37EC400DA6239 /* mgclustercommand.cpp in Sources */,
 				A7E9B90112D37EC400DA6239 /* mothur.cpp in Sources */,
 				A7E9B90212D37EC400DA6239 /* mothurout.cpp in Sources */,
