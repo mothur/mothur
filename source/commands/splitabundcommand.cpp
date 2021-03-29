@@ -49,7 +49,7 @@ vector<string> SplitAbundCommand::setParameters(){
 string SplitAbundCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The split.abund command reads a fasta file or a list or a names file splits the sequences into rare and abundant groups. \n";
+		helpString += "The split.abund command reads a fasta file or a list or a names or a count file splits the sequences into rare and abundant groups. \n";
 		helpString += "The split.abund command parameters are fasta, list, name, count, cutoff, group, label and cutoff.\n";
 		helpString += "The fasta or a list or name or count parameter are required, and you must provide a cutoff value.\n";
 		helpString += "The cutoff parameter is used to qualify what is abundant and rare. If cutoff < 1, mothur assumes this is a percentage. 0.02 -> rare reads represent <= 2% of total reads. \n";
