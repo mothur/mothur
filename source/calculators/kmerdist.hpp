@@ -2,7 +2,7 @@
 //  kmerdist.hpp
 //  Mothur
 //
-//  Created by John Westcott on 3/29/21.
+//  Created by Sarah Westcott on 3/29/21.
 //  Copyright © 2021 Schloss Lab. All rights reserved.
 //
 

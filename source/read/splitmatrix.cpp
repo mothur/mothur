@@ -859,9 +859,7 @@ int SplitMatrix::splitDistanceRAM(){
 						break;
 					}
 				}
-				
-	//windows is gonna gag on the reuse of outFile, will need to make it local...
-				
+								
 				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
 					set<string> newGroup;
 					newGroup.insert(seqA);

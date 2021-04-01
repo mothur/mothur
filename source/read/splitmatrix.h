@@ -25,6 +25,7 @@ class SplitMatrix  {
 		SplitMatrix(string, string, string, string, float, float, string, int, bool, string, string); //fastafile, namefile, countfile, taxFile, taxcutoff, cutoff, method, processors, classic, outputDir, ("fasta" or "distance")
 		
 		~SplitMatrix();
+    
 		int split();
 		vector< map<string, string> > getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		string getSingletonNames() { return singleton; } //returns namesfile containing singletons
