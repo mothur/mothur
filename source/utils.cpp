@@ -4127,6 +4127,25 @@ bool Utils::mothurRemove(string filename){
     }
 }
 /***********************************************************************/
+char* Utils::mothurConvert(string item){
+    try {
+    
+        char* converted = new char[item.length()+1];
+        
+        size_t size = item.length()+1;
+        
+        strncat(converted, item.c_str(), size-strlen(converted)-1);
+        
+        converted[size-1] = '\0';
+        
+        return converted;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-char*");
+        exit(1);
+    }
+}
+/***********************************************************************/
 bool Utils::mothurConvert(string item, int& num){
     try {
         bool error = false;

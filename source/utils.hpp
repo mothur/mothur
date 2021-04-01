@@ -210,6 +210,7 @@ public:
     vector<string> mothurConvert(set<string>&);
     set<long long> mothurConvert(vector<long long>&);
     vector<long long > mothurConvert(set<long long>&);
+    char* mothurConvert(string); //convert string to char*
 
     
     //string manipulation

@@ -295,16 +295,10 @@ void driver(vsearchData* params){
         outputFNamec = "\"" + outputFNamec + "\"";
         
         vector<char*> cPara;
-        string vsearchCommand = "";
-
-        vsearchCommand += params->vsearchLocation;
+        string vsearchCommand = params->vsearchLocation;
         vsearchCommand = "\"" + vsearchCommand + "\" ";
-        
-        char* tempVsearch;
-        tempVsearch= new char[vsearchCommand.length()+1];
-        *tempVsearch = '\0'; strncat(tempVsearch, vsearchCommand.c_str(), sizeof tempVsearch - strlen (tempVsearch) - 1);
-        cPara.push_back(tempVsearch);
-        
+        cPara.push_back(params->util.mothurConvert(vsearchCommand));
+       
         string fileToRemove = "";
         string numProcessors = toString(params->processors);
         //are you using a reference file
@@ -328,134 +322,70 @@ void driver(vsearchData* params){
             
             params->formattedFastaFilename = outputFileName;
             params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
+            
             //add reference file
-            char* tempRef = new char[5];
-            *tempRef = '\0'; strncat(tempRef, "--db", sizeof tempRef - strlen (tempRef) - 1);
-            cPara.push_back(tempRef);
+            cPara.push_back(params->util.mothurConvert("--db"));
+            cPara.push_back(params->util.mothurConvert(params->templatefile));
             
-            char* tempR = new char[params->templatefile.length()+1];
-            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), sizeof tempR - strlen (tempR) - 1);
-            cPara.push_back(tempR);
+            //add reference file
+            cPara.push_back(params->util.mothurConvert("--uchime_ref"));
+            cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
             
-            char* tempIn = new char[13];
-            *tempIn = '\0'; strncat(tempIn, "--uchime_ref", sizeof tempIn - strlen (tempIn) - 1);
-            cPara.push_back(tempIn);
-            
-            char* temp = new char[params->formattedFastaFilename.length()+1];
-            *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), sizeof temp - strlen (temp) - 1);
-            cPara.push_back(temp);
-
         }else { //denovo
             numProcessors = toString(1);
-            char* tempIn = new char[16];
-            *tempIn = '\0'; strncat(tempIn, "--uchime_denovo", sizeof tempIn - strlen (tempIn) - 1);
-            cPara.push_back(tempIn);
             
-            char* temp = new char[params->formattedFastaFilename.length()+1];
-            *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), sizeof temp - strlen (temp) - 1);
-            cPara.push_back(temp);
+            cPara.push_back(params->util.mothurConvert("--uchime_denovo"));
+            cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
         }
         
-        char* tempO = new char[11];
-        *tempO = '\0'; strncat(tempO, "--chimeras", sizeof tempO - strlen (tempO) - 1);
-        cPara.push_back(tempO);
+        //output filename
+        cPara.push_back(params->util.mothurConvert("--chimeras"));
+        cPara.push_back(params->util.mothurConvert(outputFNamec));
+          
+        cPara.push_back(params->util.mothurConvert("--uchimeout"));
+        cPara.push_back(params->util.mothurConvert(params->driverOutputFName));
         
-        char* tempout = new char[outputFNamec.length()+1];
-        *tempout = '\0'; strncat(tempout, outputFNamec.c_str(), sizeof tempout - strlen (tempout) - 1);
-        cPara.push_back(tempout);
-        
-        char* tempchimeraout = new char[12];
-        *tempchimeraout = '\0'; strncat(tempchimeraout, "--uchimeout", sizeof tempchimeraout - strlen (tempchimeraout) - 1);
-        cPara.push_back(tempchimeraout);
-        
-        char* tempoutc = new char[params->driverOutputFName.length()+1];
-        *tempoutc = '\0'; strncat(tempoutc, params->driverOutputFName.c_str(), sizeof tempoutc - strlen (tempoutc) - 1);
-        cPara.push_back(tempoutc);
-        
-        char* tempxsize = new char[8];
-        size_t size = sizeof tempxsize;
-        strncat(tempxsize, "--xsize", size); tempxsize[size-1] = '\0';
-        cPara.push_back(tempxsize);
+        cPara.push_back(params->util.mothurConvert("--xsize"));
         
         if (params->vars->chimealns) {
-            char* tempA = new char[13];
-            *tempA = '\0'; strncat(tempA, "--uchimealns", sizeof tempA - strlen (tempA) - 1);
-            cPara.push_back(tempA);
-            
-            char* tempa = new char[params->driverAlns.length()+1];
-            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), sizeof tempa - strlen (tempa) - 1);
-            cPara.push_back(tempa);
+            cPara.push_back(params->util.mothurConvert("--uchimealns"));
+            cPara.push_back(params->util.mothurConvert(params->driverAlns));
         }
         
         
         if (params->vars->useAbskew) {
-            char* tempskew = new char[9];
-            *tempskew = '\0'; strncat(tempskew, "--abskew", sizeof tempskew - strlen (tempskew) - 1);
-            cPara.push_back(tempskew);
-            
-            char* tempSkew = new char[params->vars->abskew.length()+1];
-            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), sizeof tempSkew - strlen (tempSkew) - 1);
-            cPara.push_back(tempSkew);
+            cPara.push_back(params->util.mothurConvert("--abskew"));
+            cPara.push_back(params->util.mothurConvert(params->vars->abskew));
         }
         
         if (params->vars->useMinH) {
-            char* tempminh = new char[7];
-            *tempminh = '\0'; strncat(tempminh, "--minh", sizeof tempminh - strlen (tempminh) - 1);
-            cPara.push_back(tempminh);
-            
-            char* tempMinH = new char[params->vars->minh.length()+1];
-            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), sizeof tempMinH - strlen (tempMinH) - 1);
-            cPara.push_back(tempMinH);
+            cPara.push_back(params->util.mothurConvert("--minh"));
+            cPara.push_back(params->util.mothurConvert(params->vars->minh));
         }
         
         if (params->vars->useMindiv) {
-            char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", sizeof tempmindiv - strlen (tempmindiv) - 1);
-            cPara.push_back(tempmindiv);
-            
-            char* tempMindiv = new char[params->vars->mindiv.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), sizeof tempMindiv - strlen (tempMindiv) - 1);
-            cPara.push_back(tempMindiv);
+            cPara.push_back(params->util.mothurConvert("--mindiv"));
+            cPara.push_back(params->util.mothurConvert(params->vars->mindiv));
         }
         
         if (params->vars->useMindiffs) {
-            char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiffs", sizeof tempmindiv - strlen (tempmindiv) - 1);
-            cPara.push_back(tempmindiv);
-            
-            char* tempMindiv = new char[params->vars->mindiffs.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiffs.c_str(), sizeof tempMindiv - strlen (tempMindiv) - 1);
-            cPara.push_back(tempMindiv);
+            cPara.push_back(params->util.mothurConvert("--mindiffs"));
+            cPara.push_back(params->util.mothurConvert(params->vars->mindiffs));
         }
         
         if (params->vars->useXn) {
-            char* tempxn = new char[5];
-            *tempxn = '\0'; strncat(tempxn, "--xn", sizeof tempxn - strlen (tempxn) - 1);
-            cPara.push_back(tempxn);
-            
-            char* tempXn = new char[params->vars->xn.length()+1];
-            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), sizeof tempXn - strlen (tempXn) - 1);
-            cPara.push_back(tempXn);
+            cPara.push_back(params->util.mothurConvert("--xn"));
+            cPara.push_back(params->util.mothurConvert(params->vars->xn));
         }
         
         if (params->vars->useDn) {
-            char* tempdn = new char[5];
-            *tempdn = '\0'; strncat(tempdn, "--dn", sizeof tempdn - strlen (tempdn) - 1);
-            cPara.push_back(tempdn);
-            
-            char* tempDn = new char[params->vars->dn.length()+1];
-            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), sizeof tempDn - strlen (tempDn) - 1);
-            cPara.push_back(tempDn);
+            cPara.push_back(params->util.mothurConvert("--dn"));
+            cPara.push_back(params->util.mothurConvert(params->vars->dn));
         }
         
-        //--threads=1
-        char* threads = new char[10];  threads[0] = '\0';
-        strncat(threads, "--threads", sizeof threads - strlen (threads) - 1);
-        cPara.push_back(threads);
-        
-        char* tempThreads = new char[numProcessors.length()+1];
-        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), sizeof tempThreads - strlen (tempThreads) - 1);
-        cPara.push_back(tempThreads);
+        //--threads
+        cPara.push_back(params->util.mothurConvert("--threads"));
+        cPara.push_back(params->util.mothurConvert(numProcessors));
         
         char** vsearchParameters;
         vsearchParameters = new char*[cPara.size()];

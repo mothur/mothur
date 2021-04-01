@@ -1113,20 +1113,17 @@ int vsearchDriver(string inputFile, string ucClusteredFile, string logfile, doub
         vsearchCommand = "\"" + vsearchCommand + "\" ";
         
         vector<char*> vsearchParameters;
-        char* vsearchParameter = new char[vsearchCommand.length()+1];  vsearchParameter[0] = '\0'; strncat(vsearchParameter, vsearchCommand.c_str(), sizeof vsearchParameter - strlen (vsearchParameter) - 1);
-        vsearchParameters.push_back(vsearchParameter);
+        vsearchParameters.push_back(params->util.mothurConvert(vsearchCommand));
         
         //--maxaccepts=16
-        char* maxaccepts = new char[16];  maxaccepts[0] = '\0'; strncat(maxaccepts, "--maxaccepts=16", sizeof maxaccepts - strlen (maxaccepts) - 1);
-        vsearchParameters.push_back(maxaccepts);
+        vsearchParameters.push_back(params->util.mothurConvert("--maxaccepts=16"));
         
         //--threads=1
-        char* threads = new char[12];  threads[0] = '\0'; strncat(threads, "--threads=1", sizeof threads - strlen (threads) - 1);
-        vsearchParameters.push_back(threads);
+        string processorsString = "--threads=1";
+        vsearchParameters.push_back(params->util.mothurConvert(processorsString));
         
         //--usersort
-        char* usersort = new char[11];  usersort[0] = '\0'; strncat(usersort, "--usersort", sizeof usersort - strlen (usersort) - 1);
-        vsearchParameters.push_back(usersort);
+        vsearchParameters.push_back(params->util.mothurConvert("--usersort"));
         
         //--id=0.97
         cutoff = abs(1.0 - cutoff); string cutoffString = toString(cutoff);
@@ -1134,46 +1131,36 @@ int vsearchDriver(string inputFile, string ucClusteredFile, string logfile, doub
         else if (cutoffString.length() < 4)  {  for (int i = cutoffString.length(); i < 4; i++)  { cutoffString += "0";  } }
         
         cutoffString = "--id=" +  cutoffString;
-        char* cutoffParameter = new char[cutoffString.length()+1];  cutoffParameter[0] = '\0'; strncat(cutoffParameter, cutoffString.c_str(), sizeof cutoffParameter - strlen (cutoffParameter) - 1);
-        vsearchParameters.push_back(cutoffParameter);
+        vsearchParameters.push_back(params->util.mothurConvert(cutoffString));
         
         //--minseqlength=30
-        char* minseqlength = new char[18];  minseqlength[0] = '\0'; strncat(minseqlength, "--minseqlength=30", sizeof minseqlength - strlen (minseqlength) - 1);
-        vsearchParameters.push_back(minseqlength);
+        vsearchParameters.push_back(params->util.mothurConvert("--minseqlength=30"));
         
         //--wordlength=8
-        char* wordlength = new char[15];  wordlength[0] = '\0'; strncat(wordlength, "--wordlength=8", sizeof wordlength - strlen (wordlength) - 1);
-        vsearchParameters.push_back(wordlength);
-        
+        vsearchParameters.push_back(params->util.mothurConvert("--wordlength=8"));
+
         //--uc=$ROOT.clustered.uc
         string tempIn = "--uc=" + ucClusteredFile;
-        char* uc = new char[tempIn.length()+1];  uc[0] = '\0'; strncat(uc, tempIn.c_str(), sizeof uc - strlen (uc) - 1);
-        vsearchParameters.push_back(uc);
-        
+        vsearchParameters.push_back(params->util.mothurConvert(tempIn));
+
         //--cluster_smallmem $ROOT.sorted.fna
         string tempSorted = "--cluster_smallmem=" + inputFile;
-        char* cluster_smallmen = new char[tempSorted.length()+1];  cluster_smallmen[0] = '\0'; strncat(cluster_smallmen, tempSorted.c_str(), sizeof cluster_smallmen - strlen (cluster_smallmen) - 1);
-        vsearchParameters.push_back(cluster_smallmen);
-        
+        vsearchParameters.push_back(params->util.mothurConvert(tempSorted));
+     
         //--maxrejects=64
-        char* maxrejects = new char[16];  maxrejects[0] = '\0'; strncat(maxrejects, "--maxrejects=64", sizeof maxrejects - strlen (maxrejects) - 1);
-        vsearchParameters.push_back(maxrejects);
+        vsearchParameters.push_back(params->util.mothurConvert("--maxrejects=64"));
         
         //--strand=both
-        char* strand = new char[14];  strand[0] = '\0'; strncat(strand, "--strand=both", sizeof strand - strlen (strand) - 1);
-        vsearchParameters.push_back(strand);
+        vsearchParameters.push_back(params->util.mothurConvert("--strand=both"));
         
         //--log=$ROOT.clustered.log
         string tempLog = "--log=" + logfile;
-        char* log = new char[tempLog.length()+1];  log[0] = '\0'; strncat(log, tempLog.c_str(), sizeof log - strlen (log) - 1);
-        vsearchParameters.push_back(log);
-        
-        if (params->method == "agc") {
-            //--sizeorder
-            char* sizeorder = new char[12];  sizeorder[0] = '\0'; strncat(sizeorder, "--sizeorder", sizeof sizeorder - strlen (sizeorder) - 1);
-            vsearchParameters.push_back(sizeorder);
-        }
-        
+        vsearchParameters.push_back(params->util.mothurConvert(tempLog));
+
+        if (params->method == "agc") { //--sizeorder
+            vsearchParameters.push_back(params->util.mothurConvert("--sizeorder"));
+         }
+          
         if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: "); for(int i = 0; i < vsearchParameters.size(); i++)  { params->m->mothurOut(toString(vsearchParameters[i]) + "\t"); } params->m->mothurOut("\n");  }
         
         string commandString = "";

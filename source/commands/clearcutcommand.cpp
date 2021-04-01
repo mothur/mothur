@@ -228,76 +228,77 @@ int ClearcutCommand::execute() {
         char** clearcutParameters;
 		clearcutParameters = new char*[numArgs];
         
-        clearcutParameters[0] = new char[9];
-		*clearcutParameters[0] = '\0'; strncat(clearcutParameters[0], "clearcut", sizeof clearcutParameters[0] - strlen (clearcutParameters[0]) - 1);
+        clearcutParameters[0] = util.mothurConvert("clearcut");
 				
 		//you gave us a distance matrix
-        if (phylipfile != "") {  clearcutParameters[1] = new char[11];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--distance", sizeof clearcutParameters[1] - strlen (clearcutParameters[1]) - 1); 	}
+        if (phylipfile != "") {  clearcutParameters[1] = util.mothurConvert("--distance");  }
 		
 		//you gave us a fastafile
-		if (fastafile != "") { clearcutParameters[1] = new char[12];  *clearcutParameters[1] = '\0'; strncat(clearcutParameters[1], "--alignment", sizeof clearcutParameters[1] - strlen (clearcutParameters[1]) - 1);  	}
+        if (fastafile != "") { clearcutParameters[1] = util.mothurConvert("--alignment");	}
 		
         int parameterCount = 2;
-		if (version)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--version", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  	parameterCount++; }
-		if (verbose)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--verbose", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+        if (version)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--version"); parameterCount++; }
+        
+        if (verbose)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--verbose"); parameterCount++;  }
+        
 		if (quiet)				{
-            clearcutParameters[parameterCount] = new char[8];
-            size_t tempInSize = sizeof clearcutParameters[parameterCount];
-            strncpy(clearcutParameters[parameterCount], "--input", tempInSize); clearcutParameters[parameterCount][tempInSize - 1] = '\0';
-
-            //*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--quiet", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-            parameterCount++;	}
+            clearcutParameters[parameterCount] = util.mothurConvert("--input"); parameterCount++;	}
+        
 		if (seed != "*")		{  
 			string tempSeed = "--seed=" + seed;
-			clearcutParameters[parameterCount] = new char[tempSeed.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempSeed.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-			parameterCount++;
-		}
-		if (norandom)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--norandom", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
-		if (shuffle)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--shuffle", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
-		if (neighbor)			{  clearcutParameters[parameterCount] = new char[11];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--neighbor", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+            clearcutParameters[parameterCount] = util.mothurConvert(tempSeed); parameterCount++;    }
+        
+		if (norandom)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--norandom"); parameterCount++;  }
+        
+		if (shuffle)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--shuffle"); parameterCount++;  }
+        
+        if (neighbor)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--neighbor"); parameterCount++; 	}
 		
 		string tempIn = "--in=" + inputFile;  
-        clearcutParameters[parameterCount] = new char[tempIn.length()+1];
-		*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempIn.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-        parameterCount++;
+        clearcutParameters[parameterCount] = util.mothurConvert(tempIn); parameterCount++;
 		
-		if (stdoutWanted)		{  clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--stdout", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (stdoutWanted)		{
+            clearcutParameters[parameterCount] = util.mothurConvert("--stdout"); parameterCount++;  }
 		else{  
             string tempOut = "--out=" + outputName;
-			clearcutParameters[parameterCount] = new char[tempOut.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempOut.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-			parameterCount++;
-            
+            clearcutParameters[parameterCount] = util.mothurConvert(tempOut); parameterCount++;
 		}
 			
-		if (DNA)				{  clearcutParameters[parameterCount] = new char[6];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--DNA", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;		}
-		if (protein)			{  clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--protein", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+		if (DNA)				{
+            clearcutParameters[parameterCount] = util.mothurConvert("--DNA"); parameterCount++;  }
+        
+        if (protein)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--protein"); parameterCount++; }
+        
 		if (jukes)				{
-            clearcutParameters[parameterCount] = new char[8];
-            size_t size = sizeof clearcutParameters[parameterCount];
-            strncat(clearcutParameters[parameterCount], "--jukes", size);
-            clearcutParameters[parameterCount][size-1] = '\0'; 
-            parameterCount++;	}
-		if (kimura)				{ clearcutParameters[parameterCount] = new char[9];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--kimura", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;		}
+            clearcutParameters[parameterCount] = util.mothurConvert("--jukes"); parameterCount++;   }
+        
+        if (kimura)				{
+            clearcutParameters[parameterCount] = util.mothurConvert("--kimura"); parameterCount++; }
+        
 		if (matrixout != "")	{  
 			string tempMatrix =  "--matrixout=" + outputdir + matrixout;
-			clearcutParameters[parameterCount] = new char[tempMatrix.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempMatrix.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-			parameterCount++;
+            clearcutParameters[parameterCount] = util.mothurConvert(tempMatrix); parameterCount++;
+            
 			outputNames.push_back((outputdir + matrixout));
 			outputTypes["matrixout"].push_back((outputdir + matrixout));
 		}
 
 		if (ntrees != "1")		{  
-			string tempNtrees = "--ntrees=" + ntrees; 
-			clearcutParameters[parameterCount] = new char[tempNtrees.length()+1];
-			*clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], tempNtrees.c_str(), sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);
-			parameterCount++;
-		}
+			string tempNtrees = "--ntrees=" + ntrees;
+            clearcutParameters[parameterCount] = util.mothurConvert(tempNtrees); parameterCount++;
+        }
 
-		if (expblen)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expblen", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++; 	}
-		if (expdist)			{ clearcutParameters[parameterCount] = new char[10];  *clearcutParameters[parameterCount] = '\0'; strncat(clearcutParameters[parameterCount], "--expdist", sizeof clearcutParameters[parameterCount] - strlen (clearcutParameters[parameterCount]) - 1);  parameterCount++;	}
+        if (expblen)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--expblen"); parameterCount++; }
+        
+        if (expdist)			{
+            clearcutParameters[parameterCount] = util.mothurConvert("--expdist"); parameterCount++;	}
         
         errno = 0;
 		clearcut_main(numArgs, clearcutParameters); 

@@ -595,12 +595,7 @@ void BiomHDF5::printOTUTaxonomy(H5::Group& group, string datasetname) {
         
             vector<string> thisOtusTaxonomy = consTax[i].getSimpleTaxons();
             
-            for (int j = 0; j < maxLevel; j++) {
-                char* thisTaxon; thisTaxon = new char[thisOtusTaxonomy[j].length()+1]; *thisTaxon = '\0';
-                strncat(thisTaxon, thisOtusTaxonomy[j].c_str(), sizeof thisTaxon - strlen (thisTaxon) - 1);
-
-                cPara.push_back(thisTaxon);
-            }
+            for (int j = 0; j < maxLevel; j++) { cPara.push_back(util.mothurConvert(thisOtusTaxonomy[j])); }
         }
         
         char** data; data = new char*[cPara.size()];

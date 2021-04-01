@@ -2,7 +2,7 @@
 //  GetCoreMicroBiomeCommand.cpp
 //  Mothur
 //
-//  Created by John Westcott on 5/8/12.
+//  Created by Sarah Westcott on 5/8/12.
 //  Copyright (c) 2012 Schloss Lab. All rights reserved.
 //
 

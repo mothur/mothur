@@ -351,12 +351,7 @@ int driver(uchimeData* params){
         
         string uchimeCommand = params->uchimeLocation;
         uchimeCommand = "\"" + uchimeCommand + "\" ";
-        
-        char* tempUchime;
-        tempUchime= new char[uchimeCommand.length()+1];
-        *tempUchime = '\0';
-        strncat(tempUchime, uchimeCommand.c_str(), sizeof tempUchime - strlen (tempUchime) - 1);
-        cPara.push_back(tempUchime);
+        cPara.push_back(params->util.mothurConvert(uchimeCommand));
         
         //are you using a reference file
         if (params->templatefile != "self") {
@@ -378,199 +373,106 @@ int driver(uchimeData* params){
             
             params->formattedFastaFilename = outputFileName;
             params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
-            //add reference file
-            char* tempRef = new char[5];
-            *tempRef = '\0'; strncat(tempRef, "--db", sizeof tempRef - strlen (tempRef) - 1);
-            cPara.push_back(tempRef);
             
-            char* tempR = new char[params->templatefile.length()+1];
-            *tempR = '\0'; strncat(tempR, params->templatefile.c_str(), sizeof tempR - strlen (tempR) - 1);
-            cPara.push_back(tempR);
+            cPara.push_back(params->util.mothurConvert("--db"));
+            cPara.push_back(params->util.mothurConvert(params->templatefile));
         }
         
-        char* tempIn = new char[8];
-        size_t tempInSize = sizeof tempIn;
-        strncpy(tempIn, "--input", tempInSize); tempIn[tempInSize - 1] = '\0'; 
-        cPara.push_back(tempIn);
+        //input filename
+        cPara.push_back(params->util.mothurConvert("--input"));
+        cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
         
-        char* temp = new char[params->formattedFastaFilename.length()+1];
-        *temp = '\0'; strncat(temp, params->formattedFastaFilename.c_str(), sizeof temp - strlen (temp) - 1);
-        cPara.push_back(temp);
-        
-        char* tempO = new char[12];
-        *tempO = '\0'; strncat(tempO, "--uchimeout", sizeof tempO - strlen (tempO) - 1);
-        cPara.push_back(tempO);
-        
-        char* tempout = new char[params->driverOutputFName.length()+1];
-        *tempout = '\0'; strncat(tempout, params->driverOutputFName.c_str(), sizeof tempout - strlen (tempout) - 1);
-        cPara.push_back(tempout);
+        //output filename
+        cPara.push_back(params->util.mothurConvert("--uchimeout"));
+        cPara.push_back(params->util.mothurConvert(params->driverOutputFName));
         
         if (params->vars->chimealns) {
-            char* tempA = new char[13];
-            *tempA = '\0'; strncat(tempA, "--uchimealns", sizeof tempA - strlen (tempA) - 1);
-            cPara.push_back(tempA);
-            
-            char* tempa = new char[params->driverAlns.length()+1];
-            *tempa = '\0'; strncat(tempa, params->driverAlns.c_str(), sizeof tempa - strlen (tempa) - 1);
-            cPara.push_back(tempa);
+            //output alns filename
+            cPara.push_back(params->util.mothurConvert("--uchimealns"));
+            cPara.push_back(params->util.mothurConvert(params->driverAlns));
         }
         
+        //strand
         if (params->vars->strand != "") {
-            char* tempA = new char[9];
-            *tempA = '\0'; strncat(tempA, "--strand", sizeof tempA - strlen (tempA) - 1);
-            cPara.push_back(tempA);
-            
-            char* tempa = new char[params->vars->strand.length()+1];
-            *tempa = '\0'; strncat(tempa, params->vars->strand.c_str(), sizeof tempa - strlen (tempa) - 1);
-            cPara.push_back(tempa);
+            cPara.push_back(params->util.mothurConvert("--strand"));
+            cPara.push_back(params->util.mothurConvert(params->vars->strand));
         }
         
         if (params->vars->useAbskew) {
-            char* tempskew = new char[9];
-            *tempskew = '\0'; strncat(tempskew, "--abskew", sizeof tempskew - strlen (tempskew) - 1);
-            cPara.push_back(tempskew);
-            
-            char* tempSkew = new char[params->vars->abskew.length()+1];
-            *tempSkew = '\0'; strncat(tempSkew, params->vars->abskew.c_str(), sizeof tempSkew - strlen (tempSkew) - 1);
-            cPara.push_back(tempSkew);
+            cPara.push_back(params->util.mothurConvert("--abskew"));
+            cPara.push_back(params->util.mothurConvert(params->vars->abskew));
         }
         
         if (params->vars->useMinH) {
-            char* tempminh = new char[7];
-            *tempminh = '\0'; strncat(tempminh, "--minh", sizeof tempminh - strlen (tempminh) - 1);
-            cPara.push_back(tempminh);
-            
-            char* tempMinH = new char[params->vars->minh.length()+1];
-            *tempMinH = '\0'; strncat(tempMinH, params->vars->minh.c_str(), sizeof tempMinH - strlen (tempMinH) - 1);
-            cPara.push_back(tempMinH);
+            cPara.push_back(params->util.mothurConvert("--minh"));
+            cPara.push_back(params->util.mothurConvert(params->vars->minh));
         }
         
         if (params->vars->useMindiv) {
-            char* tempmindiv = new char[9];
-            *tempmindiv = '\0'; strncat(tempmindiv, "--mindiv", sizeof tempmindiv - strlen (tempmindiv) - 1);
-            cPara.push_back(tempmindiv);
-            
-            char* tempMindiv = new char[params->vars->mindiv.length()+1];
-            *tempMindiv = '\0'; strncat(tempMindiv, params->vars->mindiv.c_str(), sizeof tempMindiv - strlen (tempMindiv) - 1);
-            cPara.push_back(tempMindiv);
+            cPara.push_back(params->util.mothurConvert("--mindiv"));
+            cPara.push_back(params->util.mothurConvert(params->vars->mindiv));
         }
         
         if (params->vars->useXn) {
-            char* tempxn = new char[5];
-            *tempxn = '\0'; strncat(tempxn, "--xn", sizeof tempxn - strlen (tempxn) - 1);
-            cPara.push_back(tempxn);
-            
-            char* tempXn = new char[params->vars->xn.length()+1];
-            *tempXn = '\0'; strncat(tempXn, params->vars->xn.c_str(), sizeof tempXn - strlen (tempXn) - 1);
-            cPara.push_back(tempXn);
+            cPara.push_back(params->util.mothurConvert("--xn"));
+            cPara.push_back(params->util.mothurConvert(params->vars->xn));
         }
         
         if (params->vars->useDn) {
-            char* tempdn = new char[5];
-            *tempdn = '\0'; strncat(tempdn, "--dn", sizeof tempdn - strlen (tempdn) - 1);
-            cPara.push_back(tempdn);
-            
-            char* tempDn = new char[params->vars->dn.length()+1];
-            *tempDn = '\0'; strncat(tempDn, params->vars->dn.c_str(), sizeof tempDn - strlen (tempDn) - 1);
-            cPara.push_back(tempDn);
+            cPara.push_back(params->util.mothurConvert("--dn"));
+            cPara.push_back(params->util.mothurConvert(params->vars->dn));
         }
         
         if (params->vars->useXa) {
-            char* tempxa = new char[5];
-            *tempxa = '\0'; strncat(tempxa, "--xa", sizeof tempxa - strlen (tempxa) - 1);
-            cPara.push_back(tempxa);
-            
-            char* tempXa = new char[params->vars->xa.length()+1];
-            *tempXa = '\0'; strncat(tempXa, params->vars->xa.c_str(), sizeof tempXa - strlen (tempXa) - 1);
-            cPara.push_back(tempXa);
+            cPara.push_back(params->util.mothurConvert("--xa"));
+            cPara.push_back(params->util.mothurConvert(params->vars->xa));
         }
         
         if (params->vars->useChunks) {
-            char* tempchunks = new char[9];
-            *tempchunks = '\0'; strncat(tempchunks, "--chunks", sizeof tempchunks - strlen (tempchunks) - 1);
-            cPara.push_back(tempchunks);
-            
-            char* tempChunks = new char[params->vars->chunks.length()+1];
-            *tempChunks = '\0'; strncat(tempChunks, params->vars->chunks.c_str(), sizeof tempChunks - strlen (tempChunks) - 1);
-            cPara.push_back(tempChunks);
+            cPara.push_back(params->util.mothurConvert("--chunks"));
+            cPara.push_back(params->util.mothurConvert(params->vars->chunks));
         }
         
         if (params->vars->useMinchunk) {
-            char* tempminchunk = new char[11];
-            *tempminchunk = '\0'; strncat(tempminchunk, "--minchunk", sizeof tempminchunk - strlen (tempminchunk) - 1);
-            cPara.push_back(tempminchunk);
-            
-            char* tempMinchunk = new char[params->vars->minchunk.length()+1];
-            *tempMinchunk = '\0'; strncat(tempMinchunk, params->vars->minchunk.c_str(), sizeof tempMinchunk - strlen (tempMinchunk) - 1);
-            cPara.push_back(tempMinchunk);
+            cPara.push_back(params->util.mothurConvert("--minchunk"));
+            cPara.push_back(params->util.mothurConvert(params->vars->minchunk));
         }
         
         if (params->vars->useIdsmoothwindow) {
-            char* tempidsmoothwindow = new char[17];
-            *tempidsmoothwindow = '\0'; strncat(tempidsmoothwindow, "--idsmoothwindow", sizeof tempidsmoothwindow - strlen (tempidsmoothwindow) - 1);
-            cPara.push_back(tempidsmoothwindow);
-            
-            char* tempIdsmoothwindow = new char[params->vars->idsmoothwindow.length()+1];
-            *tempIdsmoothwindow = '\0'; strncat(tempIdsmoothwindow, params->vars->idsmoothwindow.c_str(), sizeof tempIdsmoothwindow - strlen (tempIdsmoothwindow) - 1);
-            cPara.push_back(tempIdsmoothwindow);
+            cPara.push_back(params->util.mothurConvert("--idsmoothwindow"));
+            cPara.push_back(params->util.mothurConvert(params->vars->idsmoothwindow));
         }
         
         if (params->vars->useMaxp) {
-            char* tempmaxp = new char[7];
-            *tempmaxp = '\0'; strncat(tempmaxp, "--maxp", sizeof tempmaxp - strlen (tempmaxp) - 1);
-            cPara.push_back(tempmaxp);
-            
-            char* tempMaxp = new char[params->vars->maxp.length()+1];
-            *tempMaxp = '\0'; strncat(tempMaxp, params->vars->maxp.c_str(), sizeof tempMaxp - strlen (tempMaxp) - 1);
-            cPara.push_back(tempMaxp);
+            cPara.push_back(params->util.mothurConvert("--maxp"));
+            cPara.push_back(params->util.mothurConvert(params->vars->maxp));
         }
         
         if (!params->vars->skipgaps) {
-            char* tempskipgaps = new char[13];
-            *tempskipgaps = '\0'; strncat(tempskipgaps, "--noskipgaps", sizeof tempskipgaps - strlen (tempskipgaps) - 1);
-            cPara.push_back(tempskipgaps);
+            cPara.push_back(params->util.mothurConvert("--noskipgaps"));
         }
         
         if (!params->vars->skipgaps2) {
-            char* tempskipgaps2 = new char[14];
-            *tempskipgaps2 = '\0'; strncat(tempskipgaps2, "--noskipgaps2", sizeof tempskipgaps2 - strlen (tempskipgaps2) - 1);
-            cPara.push_back(tempskipgaps2);
+            cPara.push_back(params->util.mothurConvert("--noskipgaps2"));
         }
         
         if (params->vars->useMinlen) {
-            char* tempminlen = new char[9];
-            *tempminlen = '\0'; strncat(tempminlen, "--minlen", sizeof tempminlen - strlen (tempminlen) - 1);
-            cPara.push_back(tempminlen);
-            
-            char* tempMinlen = new char[params->vars->minlen.length()+1];
-            *tempMinlen = '\0'; strncat(tempMinlen, params->vars->minlen.c_str(), sizeof tempMinlen - strlen (tempMinlen) - 1);
-            cPara.push_back(tempMinlen);
+            cPara.push_back(params->util.mothurConvert("--minlen"));
+            cPara.push_back(params->util.mothurConvert(params->vars->minlen));
         }
         
         if (params->vars->useMaxlen) {
-            char* tempmaxlen = new char[9];
-            *tempmaxlen = '\0'; strncat(tempmaxlen, "--maxlen", sizeof tempmaxlen - strlen (tempmaxlen) - 1);
-            cPara.push_back(tempmaxlen);
-            
-            char* tempMaxlen = new char[params->vars->maxlen.length()+1];
-            *tempMaxlen = '\0'; strncat(tempMaxlen, params->vars->maxlen.c_str(), sizeof tempMaxlen - strlen (tempMaxlen) - 1);
-            cPara.push_back(tempMaxlen);
+            cPara.push_back(params->util.mothurConvert("--maxlen"));
+            cPara.push_back(params->util.mothurConvert(params->vars->maxlen));
         }
         
         if (params->vars->ucl) {
-            char* tempucl = new char[5];
-            *tempucl = '\0'; strncat(tempucl, "--ucl", sizeof tempucl - strlen (tempucl) - 1);
-            cPara.push_back(tempucl);
+            cPara.push_back(params->util.mothurConvert("--ucl"));
         }
         
         if (params->vars->useQueryfract) {
-            char* tempqueryfract = new char[13];
-            *tempqueryfract = '\0'; strncat(tempqueryfract, "--queryfract", sizeof tempqueryfract - strlen (tempqueryfract) - 1);
-            cPara.push_back(tempqueryfract);
-            
-            char* tempQueryfract = new char[params->vars->queryfract.length()+1];
-            *tempQueryfract = '\0'; strncat(tempQueryfract, params->vars->queryfract.c_str(), sizeof tempQueryfract - strlen (tempQueryfract) - 1);
-            cPara.push_back(tempQueryfract);
+            cPara.push_back(params->util.mothurConvert("--queryfract"));
+            cPara.push_back(params->util.mothurConvert(params->vars->queryfract));
         }
         
         

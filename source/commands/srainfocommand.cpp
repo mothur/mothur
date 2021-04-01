@@ -258,32 +258,22 @@ string SRAInfoCommand::runPreFetch(string sampleName){
         string prefetchCommand = prefetchLocation;
         prefetchCommand = "\"" + prefetchCommand + "\" " + sampleName + " ";
         
-        char* tempPrefetch= new char[prefetchCommand.length()+1];
-        *tempPrefetch = '\0';
-        strncat(tempPrefetch, prefetchCommand.c_str(), sizeof tempPrefetch - strlen (tempPrefetch) - 1);
-        cPara.push_back(tempPrefetch);
+        cPara.push_back(util.mothurConvert(prefetchCommand));
         
         if (maxSize != 20000000) {
             //-X|--max-size <size>             maximum file size to download in KB (exclusive). Default: 20G
-            char* maxs = new char[3];     maxs[0] = '\0'; strncat(maxs, "-X", sizeof maxs - strlen (maxs) - 1);
-            cPara.push_back(maxs);
-            
             string msize = toString(maxSize);
-            char* tempSize = new char[msize.length()+1];
-            *tempSize = '\0'; strncat(tempSize, msize.c_str(), sizeof tempSize - strlen (tempSize) - 1);
-            cPara.push_back(tempSize);
+            cPara.push_back(util.mothurConvert("-X"));
+            cPara.push_back(util.mothurConvert(msize));
         }
        
         //-o|--outfile                     output-file
-        char* outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", sizeof outputFile - strlen (outputFile) - 1);
-        cPara.push_back(outputFile);
-        
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sampleName))+".";
         string outputFileName = getOutputFileName("sra",variables);
-        char* tempoutfile = new char[outputFileName.length()+1];
-        *tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), sizeof tempoutfile - strlen (tempoutfile) - 1);
-        cPara.push_back(tempoutfile);
+        
+        cPara.push_back(util.mothurConvert("-o"));
+        cPara.push_back(util.mothurConvert(outputFileName));
         
         char** preFetchParameters;
         preFetchParameters = new char*[cPara.size()];
@@ -329,71 +319,52 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         vector<char*> cPara;
         string fasterQCommand = fasterQLocation;
         fasterQCommand = "\"" + fasterQCommand + "\" " + sampleFile + " ";
-        
-        char* tempFasterQ= new char[fasterQCommand.length()+1];
-        *tempFasterQ = '\0';
-        strncat(tempFasterQ, fasterQCommand.c_str(), sizeof tempFasterQ - strlen (tempFasterQ) - 1);
-        cPara.push_back(tempFasterQ);
+        cPara.push_back(util.mothurConvert(fasterQCommand));
         
         //-S|--split-files                 write reads into different files
-        char* splitFiles;
+        string splitFiles;
         #if defined NON_WINDOWS
-            splitFiles = new char[3];     splitFiles[0] = '\0'; strncat(splitFiles, "-S", sizeof splitFiles - strlen (splitFiles) - 1);
+            splitFiles = "-S";
         #else
-            splitFiles = new char[14];     splitFiles[0] = '\0'; strncat(splitFiles, "--split-files", sizeof splitFiles - strlen (splitFiles) - 1);
+            splitFiles = "--split-files";
         #endif
-        cPara.push_back(splitFiles);
+        cPara.push_back(util.mothurConvert(splitFiles));
        
-		char* splitSingleFiles;
+		string splitSingleFiles;
 #if defined NON_WINDOWS
 		//-3|--split-3                     writes single reads in special file
-		splitSingleFiles = new char[3];     
-		splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "-3", sizeof splitSingleFiles - strlen (splitSingleFiles) - 1);
+		splitSingleFiles = "-3";
 #else
-		splitSingleFiles = new char[10];
-		splitSingleFiles[0] = '\0'; strncat(splitSingleFiles, "--split-3", sizeof splitSingleFiles - strlen (splitSingleFiles) - 1);
+		splitSingleFiles = "--split-3";
 #endif
-		cPara.push_back(splitSingleFiles);
+		cPara.push_back(util.mothurConvert(splitSingleFiles));
         
 #if defined NON_WINDOWS
         //--threads=processors
-        char* threads = new char[10];  threads[0] = '\0'; strncat(threads, "--threads", sizeof threads - strlen (threads) - 1);
-        cPara.push_back(threads);
         string numProcessors = toString(processors);
-        char* tempThreads = new char[numProcessors.length()+1];
-        *tempThreads = '\0'; strncat(tempThreads, numProcessors.c_str(), sizeof tempThreads - strlen (tempThreads) - 1);
-        cPara.push_back(tempThreads);
+        cPara.push_back(util.mothurConvert("-threads"));
+        cPara.push_back(util.mothurConvert(numProcessors));
 #endif       
         #if defined NON_WINDOWS
         #else
-            if (compressGZ) {
-                char* gzip = new char[7];     gzip[0] = '\0'; strncat(gzip, "--gzip", sizeof gzip - strlen (gzip) - 1);
-                cPara.push_back(gzip);
-            }
+            if (compressGZ) { cPara.push_back(util.mothurConvert("-gzip")); }
         #endif
         
         //-o|--outfile                     output-file
-			char* outputFile; char* tempoutfile;
 	#if defined NON_WINDOWS
-			outputFile = new char[3];     outputFile[0] = '\0'; strncat(outputFile, "-o", sizeof outputFile - strlen (outputFile) - 1);
-			map<string, string> variables;
-			variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sampleFile));
-			string outputFileName = getOutputFileName("fastq", variables);
-			tempoutfile = new char[outputFileName.length() + 1];
-			*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), sizeof tempoutfile - strlen (tempoutfile) - 1);
-			cPara.push_back(outputFile);
-			cPara.push_back(tempoutfile);
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(sampleFile));
+        string outputFileName = getOutputFileName("fastq", variables);
+        
+        cPara.push_back(util.mothurConvert("-o"));
+        cPara.push_back(util.mothurConvert(outputFileName));
 #else
 			if (outputdir != "") {
-				outputFile = new char[9];     outputFile[0] = '\0'; strncat(outputFile, "--outdir", sizeof outputFile - strlen (outputFile) - 1);
-				string outputFileName = outputdir;
-				tempoutfile = new char[outputFileName.length() + 1];
-				*tempoutfile = '\0'; strncat(tempoutfile, outputFileName.c_str(), sizeof tempoutfile - strlen (tempoutfile) - 1);
-				cPara.push_back(outputFile);
-				cPara.push_back(tempoutfile);
+                string outputFileName = outputdir;
+                cPara.push_back(util.mothurConvert("-outdir"));
+                cPara.push_back(util.mothurConvert(outputFileName));
 			}
 #endif
-        
         
         char** fasterQParameters;
         fasterQParameters = new char*[cPara.size()];

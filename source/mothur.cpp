@@ -103,11 +103,9 @@ int main(int argc, char *argv[], char *envp[]){
                 createLogFile = false;
                 m->appendLogBuffer("Script Mode\n\n");
 
-                char* temp = new char[16];
                 string helpQuit = "#help();quit();";
-                *temp = '\0'; strncat(temp, helpQuit.c_str(), sizeof temp - strlen (temp) - 1);
-                
-                argv[1] = temp;
+               
+                argv[1] = util.mothurConvert(helpQuit);
                 mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);
 			}else{
 				m->appendLogBuffer("Batch Mode\n\n");
