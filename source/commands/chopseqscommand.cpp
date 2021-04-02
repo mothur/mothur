@@ -143,9 +143,6 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
 
-			 
-			
-			
 			string temp = validParameter.valid(parameters, "numbases");	if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, numbases);   
 			
