@@ -54,7 +54,7 @@ double KmerDist::calcDist(Sequence A, Sequence B){
             seqBKmers[kmerNumber] = 1;
         }
         
-        dist = (numMatchingKmers / (float) numKmers);
+        dist = 1.0 - (numMatchingKmers / (float) numKmers);
             
         return dist;
     }

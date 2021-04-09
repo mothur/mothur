@@ -8,6 +8,7 @@
  */
 
 #include "pairwiseseqscommand.h"
+#include "splitkmerdist.hpp"
 
 //**********************************************************************************************************************
 vector<string> PairwiseSeqsCommand::setParameters(){	
@@ -195,6 +196,13 @@ int PairwiseSeqsCommand::execute(){
         time_t start, end;
         time(&start);
 
+        if (true) {
+            SplitKmerDistance split(fastaFileName, outputdir, cutoff, 8);
+            
+            vector<string> splitFastaFiles = split.getFastaFileNames();
+            
+            exit(1);
+        }
 		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
         numDistsBelowCutoff = 0;
 

@@ -32,7 +32,8 @@ public:
 	void generateDB();
 	void addSequence(Sequence);
 	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;
-	void readDB(ifstream&);
+	void readDB(ifstream&); //reads in a shortcut file
+    void readSeqs(ifstream&); //reads in a fasta file
 	int getCount(int);  //returns number of sequences with that kmer number
 	vector<int> getSequencesWithKmer(int);  //returns vector of sequences that contain kmer passed in
 	int getReversed(int);  //returns reverse compliment kmerNumber 

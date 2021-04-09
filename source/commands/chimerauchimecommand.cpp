@@ -249,12 +249,15 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
                 //test to make sure uchime exists
                 ifstream in;
                 uchimeLocation = util.getFullPathName(uchimeLocation);
-                bool ableToOpen = util.openInputFile(uchimeLocation, in, "no error"); in.close();
-                if(!ableToOpen) {
+                foundTool = util.openInputFile(uchimeLocation, in, "no error"); in.close();
+                if(!foundTool) {
                     m->mothurOut(uchimeLocation + " file does not exist or cannot be opened, ignoring.\n"); uchimeLocation = "";
                     foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
                 }
             }
+            
+            if (!foundTool) { abort = true; }
+            
             uchimeLocation = util.getFullPathName(uchimeLocation);
             m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n");
             if (m->getDebug()) { m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n"); }

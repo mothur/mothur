@@ -1810,8 +1810,8 @@
 		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
 		F41A1B8F261257DE00144985 /* kmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = kmerdist.cpp; path = source/calculators/kmerdist.cpp; sourceTree = SOURCE_ROOT; };
 		F41A1B90261257DE00144985 /* kmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = kmerdist.hpp; path = source/calculators/kmerdist.hpp; sourceTree = SOURCE_ROOT; };
-		F41A1B9426136C9D00144985 /* splitkmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = splitkmerdist.cpp; sourceTree = SOURCE_ROOT; };
-		F41A1B9526136C9D00144985 /* splitkmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = splitkmerdist.hpp; sourceTree = SOURCE_ROOT; };
+		F41A1B9426136C9D00144985 /* splitkmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = splitkmerdist.cpp; path = source/splitkmerdist.cpp; sourceTree = SOURCE_ROOT; };
+		F41A1B9526136C9D00144985 /* splitkmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = splitkmerdist.hpp; path = source/splitkmerdist.hpp; sourceTree = SOURCE_ROOT; };
 		F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = contigsreport.hpp; sourceTree = "<group>"; };
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };

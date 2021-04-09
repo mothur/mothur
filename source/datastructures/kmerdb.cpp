@@ -182,7 +182,27 @@ void KmerDB::addSequence(Sequence seq) {
 	}	
 }
 /**************************************************************************************************/
-
+//reads fasta file
+void KmerDB::readSeqs(ifstream& fastaFile){
+    try {
+          
+        while (!fastaFile.eof()) {
+            
+            if (m->getControl_pressed()) { break;  }
+            
+            Sequence seq(fastaFile); util.gobble(fastaFile);
+            
+            addSequence(seq);
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "KmerDB", "readSeqs");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+//reads shortcut file
 void KmerDB::readDB(ifstream& kmerDBFile){
 	try {
 					

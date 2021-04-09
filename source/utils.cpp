@@ -4129,14 +4129,17 @@ bool Utils::mothurRemove(string filename){
 /***********************************************************************/
 char* Utils::mothurConvert(string item){
     try {
-    
         char* converted = new char[item.length()+1];
         
-        size_t size = item.length()+1;
+        *converted = '\0'; strncat(converted, item.c_str(), item.length());
         
-        strncat(converted, item.c_str(), size-strlen(converted)-1);
+        //size_t size = item.length()+1;
         
-        converted[size-1] = '\0';
+        //strncat(converted, item.c_str(), size-strlen(converted)-1);
+        
+        //converted[size-1] = '\0';
+        
+        //if (m->getDebug()) { m->mothurOut("[DEBUG]: converting string " + item + " to char* " + converted + "\n"); }
         
         return converted;
     }
