@@ -10,13 +10,14 @@
 #include "kmer.hpp"
 
 /***********************************************************************/
-KmerDist::KmerDist(double c, int k) : DistCalc(c) {
+KmerDist::KmerDist(int k) {
     try {
+        m = MothurOut::getInstance();
+        
         int power4s[14] = { 1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864 };
         
         kmerSize = k;
         maxKmer = power4s[kmerSize];
-        
     }
     catch(exception& e) {
         m->errorOut(e, "KmerDist", "KmerDist");
@@ -54,7 +55,32 @@ double KmerDist::calcDist(Sequence A, Sequence B){
             seqBKmers[kmerNumber] = 1;
         }
         
-        dist = 1.0 - (numMatchingKmers / (float) numKmers);
+        double dist = abs(log(0.1 + (numMatchingKmers / (float) numKmers)));
+            
+        return dist;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "KmerDist", "calcDist");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+double KmerDist::calcDist(vector<int> A, vector<bool> B, int length){
+    try {
+        int numAKmers = A.size();
+        int numMatchingKmers = 0;
+        
+        int numKmers = length - kmerSize + 1;
+        
+        for (int i = 0; i < numAKmers; i++) {
+            
+            if (B[A[i]]) { //does sequence B contain this kmer
+                numMatchingKmers++;
+            }
+        }
+    
+        double dist = abs(log(0.1 + (numMatchingKmers / (float) numKmers)));
             
         return dist;
     }

@@ -11,7 +11,6 @@
 
 #include "mothurout.h"
 #include "utils.hpp"
-#include "sequencedb.h"
 
 /******************************************************/
 
@@ -32,13 +31,20 @@ class SplitKmerDistance  {
     
         double cutoff;
         int kmerSize;
+        long long numSeqs;
         string fastafile, outputDir;
         vector<string> parsedFiles;
     
-        vector<vector<long long> > split(SequenceDB*&);
+        vector< vector< bool > > kmerDB; //kmerDB[0] = vector<bool> maxKmers long
+        vector<int> lengths;
+    
+    
+        vector<int> getUniqueKmers(int i);
+        vector<vector<long long> > split();
     
         int findRootGroup(vector<int>&, int);
-        void printGroup(SequenceDB*&, vector<long long>, string);
+        //void printGroup(SequenceDB*&, vector<long long>, string);
+        int fillKmerDB();
         
 };
 

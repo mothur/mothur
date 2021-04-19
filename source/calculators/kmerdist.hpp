@@ -13,16 +13,18 @@
 
 /**************************************************************************************************/
 
-class KmerDist : public DistCalc {
+class KmerDist {
     
 public:
     
-    KmerDist(double c, int k); 
+    KmerDist(int k); 
     
     double calcDist(Sequence A, Sequence B);
+    double calcDist(vector<int> A, vector<bool> B, int); //A contains indexes to kmers it contains, B is size maxKmer intialized to false with kmers it contains set to true
 
 private:
     int kmerSize, maxKmer;
+    MothurOut* m;
 };
 /**************************************************************************************************/
 
