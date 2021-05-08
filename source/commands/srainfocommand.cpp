@@ -340,9 +340,9 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
 		cPara.push_back(util.mothurConvert(splitSingleFiles));
         
 #if defined NON_WINDOWS
-        //--threads=processors
+        //-e|--threads=processors
         string numProcessors = toString(processors);
-        cPara.push_back(util.mothurConvert("-threads"));
+        cPara.push_back(util.mothurConvert("-e"));
         cPara.push_back(util.mothurConvert(numProcessors));
 #endif       
         #if defined NON_WINDOWS
@@ -485,13 +485,8 @@ void SRAInfoCommand::runSystemCommand(string inputString){
     try{
         m->mothurOut("/******************************************/\n");
         m->mothurOut("\nRunning command: system(" + inputString + ")\n");
-        current->setMothurCalling(true);
         
-        Command* systemCommand = new SystemCommand(inputString);
-        systemCommand->execute();
-    
-        delete systemCommand;
-        current->setMothurCalling(false);
+        system(inputString.c_str());
         
         m->mothurOut("/******************************************/\n");
     }
