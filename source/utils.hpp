@@ -77,7 +77,7 @@ public:
     bool mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS);
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
-    int appendFiles(string, string);
+    int appendFiles(string first, string second); //first is appending to the end of second. 
     void appendFiles(string, ofstream&);
     int appendFilesFront(string, string);
     int appendFilesWithoutHeaders(string, string);

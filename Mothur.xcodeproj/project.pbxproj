@@ -847,7 +847,6 @@
 		F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		F41A1B91261257DE00144985 /* kmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B8F261257DE00144985 /* kmerdist.cpp */; };
-		F41A1B9626136C9D00144985 /* splitkmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B9426136C9D00144985 /* splitkmerdist.cpp */; };
 		F45A2E3D25A78B4D00994F76 /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */; };
 /* End PBXBuildFile section */
 
@@ -1810,8 +1809,6 @@
 		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
 		F41A1B8F261257DE00144985 /* kmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = kmerdist.cpp; path = source/calculators/kmerdist.cpp; sourceTree = SOURCE_ROOT; };
 		F41A1B90261257DE00144985 /* kmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = kmerdist.hpp; path = source/calculators/kmerdist.hpp; sourceTree = SOURCE_ROOT; };
-		F41A1B9426136C9D00144985 /* splitkmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = splitkmerdist.cpp; path = source/splitkmerdist.cpp; sourceTree = SOURCE_ROOT; };
-		F41A1B9526136C9D00144985 /* splitkmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = splitkmerdist.hpp; path = source/splitkmerdist.hpp; sourceTree = SOURCE_ROOT; };
 		F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = contigsreport.hpp; sourceTree = "<group>"; };
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -1943,8 +1940,6 @@
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
 				A7E9B83012D37EC400DA6239 /* slibshuff.cpp */,
 				A7E9B83112D37EC400DA6239 /* slibshuff.h */,
-				F41A1B9426136C9D00144985 /* splitkmerdist.cpp */,
-				F41A1B9526136C9D00144985 /* splitkmerdist.hpp */,
 				A7876A28152A018B00A0AE86 /* subsample.h */,
 				A7876A25152A017C00A0AE86 /* subsample.cpp */,
 				4889EA211E8962D50054E0BB /* summary.hpp */,
@@ -3616,7 +3611,6 @@
 				A7E9B8DF12D37EC400DA6239 /* hamming.cpp in Sources */,
 				A7E9B8E212D37EC400DA6239 /* heatmap.cpp in Sources */,
 				A7E9B8E312D37EC400DA6239 /* heatmapcommand.cpp in Sources */,
-				F41A1B9626136C9D00144985 /* splitkmerdist.cpp in Sources */,
 				A7E9B8E412D37EC400DA6239 /* heatmapsim.cpp in Sources */,
 				A7E9B8E512D37EC400DA6239 /* heatmapsimcommand.cpp in Sources */,
 				A7E9B8E612D37EC400DA6239 /* heip.cpp in Sources */,

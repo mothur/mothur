@@ -1163,7 +1163,6 @@ int Utils::appendFiles(string temp, string filename) {
         //open output file in append mode
         openOutputFileBinaryAppend(filename, output);
         bool ableToOpen = openInputFileBinary(temp, input, "no error");
-        //bool ableToOpen = openInputFile(temp, input);
 
         int numLines = 0;
         if (ableToOpen) { //you opened it

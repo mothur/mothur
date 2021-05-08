@@ -66,22 +66,25 @@ double KmerDist::calcDist(Sequence A, Sequence B){
 }
 /***********************************************************************/
 
-double KmerDist::calcDist(vector<int> A, vector<bool> B, int length){
+double KmerDist::calcDist(vector<kmerCount> A, vector<int> B, int length){
     try {
-        int numAKmers = A.size();
+        int numAKmers = 0;
         int numMatchingKmers = 0;
         
         int numKmers = length - kmerSize + 1;
         
-        for (int i = 0; i < numAKmers; i++) {
+        for (int i = 0; i < A.size(); i++) {
             
-            if (B[A[i]]) { //does sequence B contain this kmer
+            numAKmers += A[i].kCount;
+            
+            if (B[A[i].kmerNumber] != 0) { //does sequence B contain this kmer
+                //numMatchingKmers += min(A[i].kCount, B[A[i].kmerNumber]);
                 numMatchingKmers++;
             }
         }
     
-        double dist = abs(log(0.1 + (numMatchingKmers / (float) numKmers)));
-            
+        double dist = log(1.0 - (numMatchingKmers / (float) numKmers));
+              
         return dist;
     }
     catch(exception& e) {
