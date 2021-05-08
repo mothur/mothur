@@ -13,22 +13,24 @@
 #include "seqsummarycommand.h"
 
 /***********************************************************************/
-
-SplitMatrix::SplitMatrix(string distfile, string name, string count, string tax, float c, string t, bool l){
+//column formatted distance file
+SplitMatrix::SplitMatrix(string distfile, string name, string count, string tax, float c, string t){
 	m = MothurOut::getInstance();
+    
 	distFile = distfile;
-	cutoff = c;
 	namefile = name;
-	method = t;
-	taxFile = tax;
+    taxFile = tax;
     countfile = count;
-	large = l;
+    
+	method = t;
+    cutoff = c;
     outputType = "distance";
 }
 /***********************************************************************/
 
 SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, string t, int p, bool cl, string output, string ot){
 	m = MothurOut::getInstance();
+    
 	fastafile = ffile;
 	namefile = name;
     countfile = count;
@@ -66,22 +68,6 @@ int SplitMatrix::split(){
 		exit(1);
 	}
 }
-/***********************************************************************/
-int SplitMatrix::splitDistance(){
-	try {
-        
-		if (large)	{ splitDistanceLarge(); }
-		else		{ splitDistanceRAM();	}
-		
-		return 0;
-			
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistance");
-		exit(1);
-	}
-}
-
 /***********************************************************************/
 int SplitMatrix::splitClassify(){
 	try {
@@ -325,206 +311,6 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 		exit(1);
 	}
 }
-/***********************************************************************/
-int SplitMatrix::splitDistanceLarge(){
-	try {
-		vector<set<string> > groups;
-		
-		//for buffering the io to improve speed
-		 //allow for 30 dists to be stored, then output.
-		vector<string> outputs;
-		vector<int> numOutputs;
-		vector<bool> wroteOutPut;
-		
-		int numGroups = 0;
-
-		//ofstream outFile;
-		ifstream dFile;
-		util.openInputFile(distFile, dFile);
-	
-		while(dFile){
-			string seqA, seqB;
-			float dist;
-
-			dFile >> seqA >> seqB >> dist;
-			
-			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
-					
-			if(dist <= cutoff){
-				
-				int groupIDA = -1;
-				int groupIDB = -1;
-				int groupID = -1;
-				
-				for(int i=0;i<numGroups;i++){
-					set<string>::iterator aIt = groups[i].find(seqA);
-					set<string>::iterator bIt = groups[i].find(seqB);
-					
-					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
-						groups[i].insert(seqB);
-						groupIDA = i;
-						groupID = groupIDA;
-
-						
-					}
-					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
-						groups[i].insert(seqA);
-						groupIDB = i;
-						groupID = groupIDB;
-
-					
-					}
-				
-					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
-						if(groupIDA < groupIDB){
-						
-							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
-							groups[groupIDB].clear(); 
-							groupID = groupIDA;
-						}
-						else{
-						
-							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
-							groups[groupIDA].clear();  
-							groupID = groupIDB;
-						}
-						break;
-					}
-				}
-				
-	//windows is gonna gag on the reuse of outFile, will need to make it local...
-				
-				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
-					set<string> newGroup;
-					newGroup.insert(seqA);
-					newGroup.insert(seqB);
-					groups.push_back(newGroup);
-									
-					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
-					outputs.push_back(tempOut);
-					numOutputs.push_back(1);
-					wroteOutPut.push_back(false);
-					
-					numGroups++;
-				}
-				else{
-					string fileName = distFile + "." + toString(groupID) + ".temp";
-											
-					//have we reached the max buffer size
-					if (numOutputs[groupID] > 60) { //write out sequence
-                        ofstream outFile;
-						outFile.open(fileName.c_str(), ios::app);
-						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
-						outFile.close();
-						
-						outputs[groupID] = "";
-						numOutputs[groupID] = 0;
-						wroteOutPut[groupID] = true;
-					}else {
-						outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-						numOutputs[groupID]++;
-					}
-					
-					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
-						string row, column, distance;
-						if(groupIDA<groupIDB){
-							
-							//merge memory
-							numOutputs[groupID] += numOutputs[groupIDB];
-							outputs[groupID] += outputs[groupIDB];
-							
-							outputs[groupIDB] = "";
-							numOutputs[groupIDB] = 0;
-							
-							//if groupB is written to file it is above buffer size so read and write to new merged file
-							if (wroteOutPut[groupIDB]) {
-								string fileName2 = distFile + "." + toString(groupIDB) + ".temp";
-                                util.appendFiles(fileName2, fileName);
-								util.mothurRemove(fileName2);
-                        
-								
-								//write out the merged memory
-								if (numOutputs[groupID] > 60) {
-                                    ofstream tempOut;
-                                    util.openOutputFile(fileName, tempOut);
-									tempOut << outputs[groupID];
-									outputs[groupID] = "";
-									numOutputs[groupID] = 0;
-                                    tempOut.close();
-								}
-								
-								//outFile.close();
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDB] = false;
-							}else{ } //just merge b's memory with a's memory 
-						}
-						else{
-							numOutputs[groupID] += numOutputs[groupIDA];
-							outputs[groupID] += outputs[groupIDA];
-							
-							outputs[groupIDA] = "";
-							numOutputs[groupIDA] = 0;
-							
-							if (wroteOutPut[groupIDA]) {
-								string fileName2 = distFile + "." + toString(groupIDA) + ".temp";
-                                util.appendFiles(fileName2, fileName);
-								util.mothurRemove(fileName2);
-								
-								//write out the merged memory
-								if (numOutputs[groupID] > 60) {
-                                    ofstream tempOut;
-                                    util.openOutputFile(fileName, tempOut);
-									tempOut << outputs[groupID];
-									outputs[groupID] = "";
-									numOutputs[groupID] = 0;
-                                    tempOut.close();
-								}
-								
-								//outFile.close();
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDA] = false;
-							}else { } //just merge memory
-						}					
-					}
-				}
-			}
-			util.gobble(dFile);
-		}
-		dFile.close();
-        
-		vector<string> tempDistFiles;
-		for (int i = 0; i < numGroups; i++) {
-            string fileName = distFile + "." + toString(i) + ".temp";
-            tempDistFiles.push_back(fileName);
-            //remove old names files just in case
-			
-			if (numOutputs[i] > 0) {
-                ofstream outFile;
-				outFile.open(fileName.c_str(), ios::app);
-				outFile << outputs[i];
-				outFile.close();
-			}
-		}
-        
-        map<string, int> seqGroup;
-        for (int i = 0; i < groups.size(); i++) {
-            for (set<string>::iterator itNames = groups[i].begin(); itNames != groups[i].end();) {
-                seqGroup[*itNames] = i;
-                groups[i].erase(itNames++);
-            }
-        }
-        
-		splitNames(seqGroup, numGroups, tempDistFiles);
-				
-		return 0;			
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistanceLarge");
-		exit(1);
-	}
-}
 //********************************************************************************************************************
 int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
 	try {
@@ -681,8 +467,6 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         bool wroteExtra = false;
         string errorMessage = "name";
         
-       
-        
         //grab header line
         string name, nameList;
         string defaultCountTableHeaders = "";
@@ -805,13 +589,44 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
     }
 }
 //********************************************************************************************************************
-int SplitMatrix::splitDistanceRAM(){
+int SplitMatrix::splitDistance(){
 	try {
-		vector<set<string> > groups;
-		vector<string> outputs;
+        Utils util;
+        vector<string> nameMap;
+        map<string, long long> nameAssignment;
+        if (namefile != "") {
+            map<string, string> namefileMap;
+            util.readNames(namefile, namefileMap);
+            for (map<string, string>::iterator it = namefileMap.begin(); it != namefileMap.end(); it++) {
+                nameAssignment[it->first] = 1; //value of 1 reset below, just a placeholder
+            }
+        }
+        else  {
+            CountTable ct; ct.readTable(countfile, false, true);
+            map<string, int> temp = ct.getNameMap();
+            for (map<string, int>::iterator it = temp.begin(); it!= temp.end(); it++) {  nameAssignment[it->first] = it->second; }
+        }
+        long long count = 0;
+        for (map<string, long long>::iterator it = nameAssignment.begin(); it!= nameAssignment.end(); it++) {
+            it->second = count; count++;
+            nameMap.push_back(it->first);
+        }
+        
+        int numSeqs = nameMap.size();
+        
+        //seqsseqsGroupAssignment[0] = group assignment for seq 0
+        vector<long long> seqsGroupAssignment(numSeqs, -1); //assign all seqs no group
+        
+        //when we merge groups, rather than reassigning all the seqs in that group, let's reassign the group
+        //mergedGroups[0] = group assignment for group 0.
+        vector<int> mergedGroups;
+        
+        vector<string> groupFiles; //filenames for each group
+        vector<string> groupOutputs; //buffered file outputs for each group
+        vector<int> groupOutputCounts; //count to empty buffer for each group
 		
 		int numGroups = 0;
-
+    
 		ifstream dFile;
 		util.openInputFile(distFile, dFile);
 
@@ -819,106 +634,145 @@ int SplitMatrix::splitDistanceRAM(){
 			string seqA, seqB;
 			float dist;
 
-			dFile >> seqA >> seqB >> dist;
+            dFile >> seqA >> seqB >> dist; util.gobble(dFile);
 			
-			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
+			if (m->getControl_pressed()) {  break; }
 					
 			if(dist <= cutoff){
-				
-				int groupIDA = -1;
-				int groupIDB = -1;
-				int groupID = -1;
-				
-				for(int i=0;i<numGroups;i++){
-					set<string>::iterator aIt = groups[i].find(seqA);
-					set<string>::iterator bIt = groups[i].find(seqB);
-					
-					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
-						groups[i].insert(seqB);
-						groupIDA = i;
-						groupID = groupIDA;
-					}
-					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
-						groups[i].insert(seqA);
-						groupIDB = i;
-						groupID = groupIDB;
-					}
-				
-					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
-						if(groupIDA < groupIDB){
-						
-							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
-							groups[groupIDB].clear(); 
-							groupID = groupIDA;
-						}
-						else{
-							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
-							groups[groupIDA].clear();  
-							groupID = groupIDB;
-						}
-						break;
-					}
-				}
-								
-				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
-					set<string> newGroup;
-					newGroup.insert(seqA);
-					newGroup.insert(seqB);
-					groups.push_back(newGroup);
-									
-					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
-					outputs.push_back(tempOut);
-					numGroups++;
-				}
-				else{
-											
-					outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-					
-					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
-						string row, column, distance;
-						if(groupIDA<groupIDB){
-							//merge memory
-							outputs[groupID] += outputs[groupIDB];
-							outputs[groupIDB] = "";
-						}else{
-							outputs[groupID] += outputs[groupIDA];
-							outputs[groupIDA] = "";
-						}					
-					}
-				}
+                
+                map<string,long long>::iterator itA = nameAssignment.find(seqA);
+                map<string,long long>::iterator itB = nameAssignment.find(seqB);
+                
+                if(itA == nameAssignment.end()){  m->mothurOut("AAError: Sequence '" + seqA + "' was not found in the name or count file, please correct\n"); exit(1);  }
+                if(itB == nameAssignment.end()){  m->mothurOut("ABError: Sequence '" + seqB + "' was not found in the name or count file, please correct\n"); exit(1);  }
+
+                long long indexA = (itA->second);
+                long long indexB = (itB->second);
+                
+                int groupIDA = findRootGroup(mergedGroups, seqsGroupAssignment[indexA]);
+                int groupIDB = findRootGroup(mergedGroups, seqsGroupAssignment[indexB]);
+                int groupID = -1;
+                
+                if(groupIDA != -1 && groupIDB != -1){ //both are already assigned to a group, so merge the groups. set to groupIDA
+                    
+                    int thisGroup = mergedGroups[groupIDA];
+                    int thatGroup = mergedGroups[groupIDB];
+                    
+                    //merge files and save in groupIDA
+                    util.appendFiles(groupFiles[thatGroup], groupFiles[thisGroup]);
+                    ofstream out; util.openOutputFile(groupFiles[thatGroup], out); out.close(); //clear file
+                    
+                    //append outputs
+                    groupOutputs[thisGroup] += groupOutputs[thatGroup];
+                    groupOutputs[thatGroup] = "";
+                    
+                    //update output counts
+                    groupOutputCounts[thisGroup] += groupOutputCounts[thatGroup];
+                    groupOutputCounts[thatGroup] = 0;
+                    
+                    //set group id
+                    groupID = thisGroup;
+                    mergedGroups[groupIDB] = thisGroup;
+            
+                }else if(groupIDA != -1 && groupIDB == -1){ //seqA has a group and seqB is unassigned
+                    groupID = mergedGroups[groupIDA]; //assign seqB to seqA's group
+                    
+                }else if(groupIDA == -1 && groupIDB != -1) {  //seqB has a group and seqA is unassigned
+                    
+                    groupID = mergedGroups[groupIDB]; //assign seqA to seqB's group
+                    
+                }else {  //both seqs have no group
+                    groupID = numGroups; //we need a new group
+                    mergedGroups.push_back(numGroups); //assign group to merge with self
+                    string fileName = distFile + "." + toString(numGroups) + ".temp";
+                    ofstream out; util.openOutputFile(fileName, out); out.close(); //clear file
+                    groupFiles.push_back(fileName);
+                    groupOutputs.push_back("");
+                    groupOutputCounts.push_back(0);
+                    numGroups++;
+                }
+                
+                string output = seqA + '\t' + seqB +'\t' + toString(dist) + '\n';
+                
+                seqsGroupAssignment[indexA] = groupID;
+                seqsGroupAssignment[indexB] = groupID;
+                groupOutputs[groupID] += output;
+                groupOutputCounts[groupID]++;
+                
+                if (groupOutputCounts[groupID] > 10000) {
+                    ofstream out; util.openOutputFileAppend(groupFiles[groupID], out);
+                    out << groupOutputs[groupID]; out.close();
+                    groupOutputCounts[groupID] = 0;
+                    groupOutputs[groupID] = "";
+                }
 			}
-			util.gobble(dFile);
+			
 		}
 		dFile.close();
-		
-        vector<string> tempDistFiles;
-		for (int i = 0; i < numGroups; i++) {
-            string fileName = distFile + "." + toString(i) + ".temp";
-            tempDistFiles.push_back(fileName);
-			if (outputs[i] != "") {
-				ofstream outFile;
-				outFile.open(fileName.c_str(), ios::ate);
-				outFile << outputs[i];
-				outFile.close();
-			}
-		}
         
-        map<string, int> seqGroup;
-        for (int i = 0; i < groups.size(); i++) {
-            for (set<string>::iterator itNames = groups[i].begin(); itNames != groups[i].end();) {
-                seqGroup[*itNames] = i;
-                groups[i].erase(itNames++);
+        vector<string> tempDistFiles;
+        for (int i = 0; i < numGroups; i++) {
+            if (groupOutputCounts[i] != 0) { //write remaning buffer for group
+                ofstream out; util.openOutputFileAppend(groupFiles[i], out);
+                out << groupOutputs[i]; out.close();
+                groupOutputCounts[i] = 0;
+                groupOutputs[i] = "";
+                tempDistFiles.push_back(groupFiles[i]);
+            }else {
+                //check for blank group - happens when groups merge
+                if (util.isBlank(groupFiles[i])) {
+                    util.mothurRemove(groupFiles[i]);
+                }else {
+                    tempDistFiles.push_back(groupFiles[i]);
+                }
             }
         }
         
+        map<string, int> seqGroup;
+        for (long long i = 0; i < seqsGroupAssignment.size(); i++) {
+            
+            if (m->getControl_pressed()) {  break;  }
+            
+            if (seqsGroupAssignment[i] != -1) { //you have a distance below the cutoff
+                int group = findRootGroup(mergedGroups, seqsGroupAssignment[i]);
+                
+                seqGroup[nameMap[i]] = group;
+            }
+        }
+    
 		splitNames(seqGroup, numGroups, tempDistFiles);
 				
 		return 0;			
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistanceRAM");
+		m->errorOut(e, "SplitMatrix", "splitDistance");
 		exit(1);
 	}
+}
+/***********************************************************************/
+int SplitMatrix::findRootGroup(vector<int>& mergedGroups, int pos){
+    try {
+        
+        //if unassigned
+        if (pos == -1) { return pos; }
+        
+        //if the mergedGroups[10] = 10 then you are at the root
+        //if mergedGroups[10] != 10, find parent group
+        //mergedGroups[10] = 5, then check mergeGroups[5].
+        
+        int rootGroup = mergedGroups[pos];
+        
+        if (rootGroup != pos) { //you need to look at your parent
+            rootGroup = findRootGroup(mergedGroups, rootGroup);
+            mergedGroups[pos] = rootGroup;
+        }//else you are the root
+        
+        return rootGroup;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitMatrix", "findRootGroup");
+        exit(1);
+    }
 }
 //********************************************************************************************************************
 //sorts biggest to smallest
