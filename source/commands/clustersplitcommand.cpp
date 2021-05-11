@@ -489,8 +489,8 @@ int ClusterSplitCommand::execute(){
             
                 //split matrix into non-overlapping groups
                 SplitMatrix* split;
-                if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod);							}
-                else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod);					}
+                if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
+                else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
                 else if (splitmethod == "fasta")		{
                     if ((method == "agc") || (method == "dgc")) {
                         if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }

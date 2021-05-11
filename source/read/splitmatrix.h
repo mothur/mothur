@@ -21,7 +21,7 @@ class SplitMatrix  {
 	
 	public:
 
-		SplitMatrix(string, string, string, string, float, string); //column formatted distance file, namesfile, countfile, cutoff, method, large
+		SplitMatrix(string, string, string, string, float, string, bool); //column formatted distance file, namesfile, countfile, cutoff, method, large
 		SplitMatrix(string, string, string, string, float, float, string, int, bool, string, string); //fastafile, namefile, countfile, taxFile, taxcutoff, cutoff, method, processors, classic, outputDir, ("fasta" or "distance")
 		
 		~SplitMatrix();
@@ -43,7 +43,9 @@ class SplitMatrix  {
         long long numSingleton;
 				
 		int splitClassify();
-		int splitDistance();
+		//int splitDistance();
+        int splitDistanceLarge();
+        int splitDistanceRAM();
         int findRootGroup(vector<int>&, int);
 		int splitNames(map<string, int>& groups, int, vector<string>&);
         int splitNamesVsearch(map<string, int>& groups, int, vector<string>&);
