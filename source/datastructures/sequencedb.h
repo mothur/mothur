@@ -24,6 +24,7 @@ public:
 	SequenceDB();
 	SequenceDB(int);           //makes data that size
 	SequenceDB(ifstream&);	   //reads file to fill data
+    SequenceDB(ifstream&, int, vector< vector< int > >&, vector< int >&); //filehandle, kmersize, kmerdb, lengths
 	SequenceDB(const SequenceDB& sdb) : data(sdb.data) {};
 	~SequenceDB();             //loops through data and delete each sequence
 

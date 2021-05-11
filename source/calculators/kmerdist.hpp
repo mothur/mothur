@@ -26,7 +26,7 @@ public:
     KmerDist(int k); 
     
     double calcDist(Sequence A, Sequence B);
-    double calcDist(vector<kmerCount> A, vector<int> B, int); //A contains indexes to kmers it contains, B is size maxKmer intialized to false with kmers it contains set to true
+    vector<double> calcDist(vector<kmerCount> A, vector<int> B, int); //A contains indexes to kmers it contains, B is size maxKmer intialized to false with kmers it contains set to true
 
 private:
     int kmerSize, maxKmer;

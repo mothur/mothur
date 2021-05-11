@@ -443,9 +443,12 @@ int driverColumn(pairwiseData* params){
                 
                 int length = min(params->lengths[i], params->lengths[j]);
                 
-                double kmerDist = kmerDistCalculator.calcDist(seqA, seqB, length);
+                vector<double> kmerDist = kmerDistCalculator.calcDist(seqA, seqB, length);
                 
-                if (kmerDist <= params->kmerCutoff) {
+                string kmerString = toString(kmerDist[0]);
+                //if (!params->util.isEqual(kmerDist[0], kmerDist[1])) { cout << "diff kmerDist = " << kmerDist[0] << '\t' << kmerDist[1] << endl; }
+                
+               // if (kmerDist <= params->kmerCutoff) {
                     Sequence seqI = seq;
                     Sequence seqJ = params->alignDB.get(j);
                     
@@ -457,13 +460,16 @@ int driverColumn(pairwiseData* params){
                     seqJ.setAligned(alignment->getSeqBAln());
                     
                     double dist = distCalculator->calcDist(seqI, seqJ);
+                
+                
+                    params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(kmerDist[0]) + ' ' + toString(dist) + "\n");
                     
-                    if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + "\n distance = " + toString(dist) + "\n"); }
+                    //if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + "\n distance = " + toString(dist) + "\n"); }
                     
-                    if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n");
+                    //if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n");
                         
-                    }
-                }/*else{
+                    //}
+                /*}else{
                     Sequence seqI = seq;
                     Sequence seqJ = params->alignDB.get(j);
                     
