@@ -38,9 +38,9 @@ public:
 	
 private:
     
-	string fastaFile, listfile, nameFile, groupfile,  placement, delim, countfile, qualfile, contigsfile, fileFile, mapFile, taxfile;
+	string fastaFile, fastqfile, listfile, nameFile, groupfile,  placement, delim, countfile, qualfile, contigsfile, fileFile, mapFile, taxfile, groupName;
 	vector<string> outputNames;
-	bool abort, ignoreNew;
+	bool abort, ignoreNew, gz;
 	
 	map<string, string> nameMap;
     void readQual(map<string, string>&);
@@ -48,9 +48,10 @@ private:
     void readContigs(map<string, string>&);
     void readList(map<string, string>&);
     void readFasta(map<string, string>&);
-    int processFile(map<string, string>&);
+    string readFastq(map<string, string>&);
+    int processFile();
     int readMapFile(map<string, string>&);
-    vector< map<string, string> > readFiles();
+    vector< vector<string> > readFiles(map<int, string>&, bool&);
     void processNameGroupCountFiles(map<string, string>&, map<string, string>&);
     
 };

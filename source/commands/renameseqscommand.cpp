@@ -13,6 +13,7 @@
 #include "qualityscores.h"
 #include "contigsreport.hpp"
 #include "inputdata.h"
+#include "fastqread.h"
 
 //**********************************************************************************************************************
 vector<string> RenameSeqsCommand::setParameters(){
@@ -20,6 +21,7 @@ vector<string> RenameSeqsCommand::setParameters(){
         CommandParameter pfile("file", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfile);
         CommandParameter pmap("map", "InputTypes", "", "", "none", "none", "none","fasta",false,false,true); parameters.push_back(pmap);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pfastq("fastq", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(pfastq);
         CommandParameter plist("list", "InputTypes", "", "", "fileFasta-file", "fileFasta", "none","fasta",false,false,true); parameters.push_back(plist);
         CommandParameter pqfile("qfile", "InputTypes", "", "", "file", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
         CommandParameter pcontigsreport("contigsreport", "InputTypes", "", "", "file", "none", "none","contigsreport",false,false,true); parameters.push_back(pcontigsreport);
@@ -43,6 +45,8 @@ vector<string> RenameSeqsCommand::setParameters(){
         outputTypes["count"] = tempOutNames;
         outputTypes["map"] = tempOutNames;
         outputTypes["qfile"] = tempOutNames;
+        outputTypes["file"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
         outputTypes["contigsreport"] = tempOutNames;
         outputTypes["taxonomy"] = tempOutNames;
 		
@@ -66,7 +70,7 @@ string RenameSeqsCommand::getHelpString(){
         helpString += "The qfile parameter allows you to provide an associated quality file.\n";
         helpString += "The taxonomy parameter allows you to provide an associated taxonomy file.\n";
         helpString += "The contigsreport allows you to provide an associated contigsreport file.\n";
-        helpString += "The file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples. \n";
+        helpString += "The file parameter is 2, 3 or 4 column file containing the forward fastq files in the first column and their matching reverse fastq files in the second column, or a groupName then forward fastq file and reverse fastq file, or forward fastq file then reverse fastq then forward index and reverse index file.  If you only have one index file add 'none' for the other one.  Mothur will process each pair and create a renamed fastq and file file.\n";
         helpString += "The placement parameter allows you to indicate whether you would like the group name appended to the front or back of the sequence number.  Options are front or back. Default=back.\n";
         helpString += "The delim parameter allow you to enter the character or characters you would like to separate the sequence number from the group name. Default='_'.\n";
         helpString += "The rename.seqs command should be in the following format: \n";
@@ -92,6 +96,8 @@ string RenameSeqsCommand::getOutputPattern(string type) {
         else if (type == "count")               {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "taxonomy")            {   pattern = "[filename],renamed,[extension]";    }
         else if (type == "qfile")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "fastq")               {  pattern = "[filename],renamed,[extension]"; }
+        else if (type == "file")               {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "contigsreport")       {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "list")                {  pattern = "[filename],renamed,[extension]"; }
         else if (type == "map")                 {  pattern = "[filename],renamed_map"; }
@@ -123,6 +129,10 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
 			if (fastaFile == "not open") { abort = true; }
 			else if (fastaFile == "not found") { fastaFile = ""; }
 			else { current->setFastaFile(fastaFile); }
+            
+            fastqfile = validParameter.validFile(parameters, "fastq");
+            if (fastqfile == "not open") { abort = true; }
+            else if (fastqfile == "not found") { fastqfile = ""; }
             
             fileFile = validParameter.validFile(parameters, "file");
             if (fileFile == "not open") { abort = true; }
@@ -173,9 +183,9 @@ RenameSeqsCommand::RenameSeqsCommand(string option)  {
             
             if ((countfile != "") && (groupfile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
-            if ((fileFile != "") && ((listfile != "") || (nameFile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (countfile != "") || (fastaFile != "")) ) {
-                m->mothurOut("[ERROR]: The file option cannot be used with any other files except the map file.\n");  abort = true;
-            }else if ((fileFile == "") && (listfile == "") && (nameFile == "") && (groupfile == "") && (qualfile == "") && (contigsfile == "") && (countfile == "") && (fastaFile == "")) {
+            if ((fileFile != "") && ((listfile != "") || (nameFile != "") || (fastqfile != "") || (groupfile != "") || (qualfile != "") || (contigsfile != "") || (countfile != "") || (fastaFile != "")) ) {
+                m->mothurOut("[ERROR]: The file option cannot be used with any other files.\n");  abort = true;
+            }else if ((fileFile == "") && (listfile == "") && (nameFile == "") && (fastqfile == "") && (groupfile == "") && (qualfile == "") && (contigsfile == "") && (countfile == "") && (fastaFile == "")) {
                 m->mothurOut("[ERROR]: No input files provided, please correct.\n");  abort = true;
             }
             
@@ -211,7 +221,7 @@ int RenameSeqsCommand::execute() {
         if (mapFile != "") { readMapFile(renameMap); ignoreNew = true; }
         else { printMap = true; }
         
-        if (fileFile != "") {  processFile(renameMap); }
+        if (fileFile != "") {  processFile(); }
         else {
             
             map<string, string> old2NewNameMap;
@@ -226,6 +236,7 @@ int RenameSeqsCommand::execute() {
             
             if (listfile != "")         {   readList(old2NewNameMap);     }
             if (fastaFile != "")         { readFasta(old2NewNameMap);     }
+            if (fastqfile != "")         { readFastq(old2NewNameMap);     }
             if (qualfile != "")         { readQual(old2NewNameMap);       }
             if (contigsfile != "")      { readContigs(old2NewNameMap);     }
             if (taxfile != "")          { readTax(old2NewNameMap);        }
@@ -250,7 +261,7 @@ int RenameSeqsCommand::execute() {
         
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]);  } return 0; }
 
-        m->mothurOut("\nOutput File Names:\n ");
+        m->mothurOut("\nOutput File Names:\n");
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
         m->mothurOutEndLine();
         
@@ -284,6 +295,11 @@ int RenameSeqsCommand::execute() {
         itTypes = outputTypes.find("qfile");
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setQualFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("file");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFileFile(currentName); }
         }
 				
 		return 0;
@@ -523,8 +539,8 @@ void RenameSeqsCommand::readFasta(map<string, string>& oldMap){
             it = oldMap.find(seq.getName());
             if (it == oldMap.end()) { //not in other files, create name
                 if (!ignoreNew) {
-                    seq.setName(toString(count));
-                    oldMap[seq.getName()] = toString(count); count++;
+                    oldMap[seq.getName()] = toString(count);
+                    seq.setName(toString(count)); count++;
                 }
             }else {
                 seq.setName(it->second);
@@ -536,6 +552,112 @@ void RenameSeqsCommand::readFasta(map<string, string>& oldMap){
     }
     catch(exception& e) {
         m->errorOut(e, "RenameSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string RenameSeqsCommand::readFastq(map<string, string>& oldMap){
+    try {
+        bool oldMapEmpty = true;
+        if (oldMap.size() != 0) { oldMapEmpty = false; }
+        
+        //prepare filenames and open files
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+        string outFastqFile = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        map<string, string> variables;
+        variables["[filename]"] = outFastqFile;
+        variables["[extension]"] = ".fastq";
+        outFastqFile = getOutputFileName("fastq", variables);
+        outputNames.push_back(outFastqFile); outputTypes["fastq"].push_back(outFastqFile);
+        
+        //open input file
+        ifstream inFastq;
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inFastqBoost;
+#endif
+        if (!gz) {  util.openInputFile(fastqfile, inFastq); }
+        else { //compressed files
+#ifdef USE_BOOST
+            util.openInputFileBinary(fastqfile, inFastq, inFastqBoost);
+#endif
+        }
+        
+#ifdef USE_BOOST
+#else
+        if (gz) { m->mothurOut("[ERROR]: Your files are in compressed .gz form and you do not have the boost library install, quitting.\n"); m->setControl_pressed(true); return 0; }
+#endif
+            
+        string format = "illumina1.8+";
+        ofstream out; util.openOutputFile(outFastqFile, out);
+        
+        map<string, string>::iterator it;
+        int count = 0;
+        
+        bool good = true;
+        while (good) {
+            if (m->getControl_pressed()) { break; }
+            
+            bool tignore = false;
+            FastqRead* fread;
+            
+            if (gz) {
+#ifdef USE_BOOST
+            fread = new FastqRead(inFastqBoost, tignore, format);  util.gobble(inFastqBoost);
+#endif
+            }else {
+                fread = new FastqRead(inFastq, tignore, format);  util.gobble(inFastq);
+            }
+            string newName = toString(count);
+            
+            if (oldMapEmpty) {
+
+                if ((placement == "back") && (groupName != "")) { newName += delim + groupName; }
+                else if (groupName != "") { newName = groupName + delim + newName; }
+                
+                oldMap[fread->getName()] = newName;
+                fread->setName(newName);
+                count++;
+
+            }else {
+            
+                it = oldMap.find(fread->getName());
+                if (it == oldMap.end()) { //not in other files, create name
+                    if (!ignoreNew) {
+                        oldMap[fread->getName()] = newName; count++;
+                        fread->setName(newName);
+                    }
+                }else {
+                    fread->setName(it->second);
+                }
+            }
+            
+            fread->printFastq(out);
+            delete fread;
+            
+            if (gz) {
+#ifdef USE_BOOST
+            if (inFastqBoost.eof()) { good = false; break; }
+#endif
+            }else {
+                if (inFastq.eof()) { good = false; break; }
+            }
+        }
+        
+        if (gz) {
+#ifdef USE_BOOST
+        inFastqBoost.pop();
+#endif
+        }else {
+            inFastq.close();
+        }
+        
+        out.close();
+        
+        return outFastqFile;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RenameSeqsCommand", "readFastq");
         exit(1);
     }
 }
@@ -565,8 +687,8 @@ void RenameSeqsCommand::readQual(map<string, string>& oldMap){
             it = oldMap.find(qual.getName());
             if (it == oldMap.end()) {
                 if (!ignoreNew) {
-                    qual.setName(toString(count));
-                    oldMap[qual.getName()] = toString(count); count++;
+                    oldMap[qual.getName()] = toString(count);
+                    qual.setName(toString(count)); count++;
                 }
             }else {
                 qual.setName(it->second);
@@ -608,8 +730,8 @@ void RenameSeqsCommand::readTax(map<string, string>& oldMap){
             it = oldMap.find(name);
             if (it == oldMap.end()) {
                 if (!ignoreNew) {
-                    name = toString(count);
-                    oldMap[name] = toString(count); count++;
+                    oldMap[name] = toString(count);
+                    name = toString(count); count++;
                 }
             }else {
                 name = it->second;
@@ -764,83 +886,73 @@ int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
     }
 }
 //**********************************************************************************************************************
-int RenameSeqsCommand::processFile(map<string, string>& readMap){
+int RenameSeqsCommand::processFile(){
     try {
+        ignoreNew = true; //if there are sequences only present in some files, ignore them
         
-        vector<map<string, string> > files = readFiles();
+        map<int, string> file2Group; gz = false;
+        vector< vector<string> > files = readFiles(file2Group, gz);
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fileFile);  }
+        string outFileFile = thisOutputDir + util.getRootName(util.getSimpleName(fileFile));
+        map<string, string> variables;
+        variables["[filename]"] = outFileFile;
+        variables["[extension]"] = util.getExtension(fileFile);
+        outFileFile = getOutputFileName("file", variables);
+        outputNames.push_back(outFileFile); outputTypes["file"].push_back(outFileFile);
+        ofstream outFile; util.openOutputFile(outFileFile, outFile);
         
         for (int i = 0; i < files.size(); i++) {
             if (m->getControl_pressed()) { break; }
             
-            string thisFile = "";
-            string thisFileType = "";
-            string group = (files[i].begin())->second;
-            string temp = (files[i].begin())->first;
+            m->mothurOut("\n>>>>>\tRenaming file pair " + files[i][0] + " - " + files[i][1] + " (files " + toString(i+1) + " of " + toString(files.size()) + ")\t<<<<<\n");
+
+            map<string, string> old2NewNameMap; //each file pair gets a map file
+            string fileOutput = "";
             
-            int pos = temp.find_first_of('-');
-            if (pos == string::npos) {  m->mothurOut("[Opps]: I should never get here...\n");  }
-            else {
-                thisFileType = temp.substr(0, pos);
-                thisFile = temp.substr(pos+1);
+            groupName = file2Group[i]; //blank if no group is in file
+            if (groupName != "") { fileOutput += groupName + '\t'; }
+            
+            fastqfile = files[i][0]; //forwardFastq
+            string renamedFile = readFastq(old2NewNameMap);
+            fileOutput += util.getSimpleName(renamedFile) + '\t';
+            
+            fastqfile = files[i][1]; //reverseFastq
+            renamedFile = readFastq(old2NewNameMap);
+            fileOutput += util.getSimpleName(renamedFile) + '\t';
+            
+            if (files[i][2] != "") { //blank if no forward index is in file
+                fastqfile = files[i][2]; //forwardIndex
+                renamedFile = readFastq(old2NewNameMap);
+                fileOutput += util.getSimpleName(renamedFile) + '\t';
+            }
+            
+            if (files[i][3] != "") { //blank if no reverse index is in file
+                fastqfile = files[i][3]; //reverseIndex
+                renamedFile = readFastq(old2NewNameMap);
+                fileOutput += util.getSimpleName(renamedFile) + '\t';
             }
             
             string thisOutputDir = outputdir;
-            if (outputdir == "") {  thisOutputDir += util.hasPath(thisFile);  }
-            string outMapFile = thisOutputDir + util.getSimpleName(thisFile);
+            if (outputdir == "") {  thisOutputDir += util.hasPath(files[i][0]);  }
+            string outMapFile = thisOutputDir + util.getRootName(util.getSimpleName(files[i][0]));
             map<string, string> variables;
-            variables["[filename]"] = outMapFile + ".";
+            variables["[filename]"] = outMapFile;
             outMapFile = getOutputFileName("map", variables);
             outputNames.push_back(outMapFile); outputTypes["map"].push_back(outMapFile);
             ofstream outMap; util.openOutputFile(outMapFile, outMap);
             
-            //prepare filenames and open files
-            string outFile = thisOutputDir + util.getRootName(util.getSimpleName(thisFile));
-            variables["[filename]"] = outFile;
-            variables["[extension]"] = util.getExtension(thisFile);
-            outFile = getOutputFileName(thisFileType, variables);
-            outputNames.push_back(outFile); outputTypes[thisFileType].push_back(outFile);
-            
-            ofstream out;
-            util.openOutputFile(outFile, out);
-            
-            ifstream in;
-            util.openInputFile(thisFile, in);
-            
-            int count = 1;
-            while (!in.eof()) {
-                if (m->getControl_pressed()) { break; }
-                
-                Sequence* seq;  QualityScores* qual;
-                string name = "";
-                if (thisFileType == "fasta")        {  seq = new Sequence(in);   name = seq->getName();        }
-                else if (thisFileType == "qfile")   {  qual = new QualityScores(in);  name = qual->getName();  }
-                else if (thisFileType == "group")   {  in >> name; util.gobble(in); in >> group;               }
-                util.gobble(in);
- 
-                //get new name
-                string newName = "";
-                if (mapFile != "") {
-                    map<string, string>::iterator itMap = readMap.find(name);
-                    if (itMap == readMap.end()) { m->mothurOut("[ERROR]: " + name + " is not in your map file, please correct.\n"); m->setControl_pressed(true);}
-                    else { newName = itMap->second; }
-                }else {
-                    newName = toString(count); count++;
-                    if ((placement == "back") && (group != "")) { newName += delim + group; }
-                    else if (group != "") { newName = group + delim + newName; }
-                }
-                
-                
-                if (thisFileType == "fasta")        {  seq->setName(newName);  seq->printSequence(out); delete seq;     }
-                if (thisFileType == "qfile")        {  qual->setName(newName);  qual->printQScores(out); delete qual;   }
-                if (thisFileType == "group")        {  out << newName << '\t' << group << endl;                         }
-                
-                outMap << newName << '\t' << name << endl;
+            //print map
+            for(map<string, string>::iterator it = old2NewNameMap.begin(); it != old2NewNameMap.end(); it++) {
+                outMap << it->second << '\t' << it->first << endl;
             }
-            in.close();
             outMap.close();
-            out.close();
+            
+            //print renamed filenames to new file file
+            outFile << fileOutput << endl;
         }
-        
+        outFile.close();
         
         return 0;
     }
@@ -850,37 +962,17 @@ int RenameSeqsCommand::processFile(map<string, string>& readMap){
     }
 }
 //**********************************************************************************************************************
-vector<map<string, string> > RenameSeqsCommand::readFiles(){
+vector< vector<string> > RenameSeqsCommand::readFiles(map<int, string>& file2Group, bool& isGZ){
     try {
-        
-        FileFile dataFile(fileFile, "renameSeqs");
+        FileFile dataFile(fileFile, "contigs");
         vector< vector<string> > dataFiles = dataFile.getFiles();
         int dataFileFormat = dataFile.getFileFormat();
-        map<int, string> file2Group = dataFile.getFile2Group();
+        file2Group = dataFile.getFile2Group();
+        isGZ = dataFile.isGZ();
         
-        if (dataFileFormat == 3) { //4 column
-            m->mothurOut("[ERROR]: Your file contains " + toString(4) + " columns. The rename.seqs file option allows you to provide a 2 or 3 column file. The first column contains the file type: fasta or qfile. The second column is the filename, and the optional third column can be a group name. If there is a third column, all sequences in the file will be assigned to that group.  This can be helpful when renaming data separated into samples.\n"); m->setControl_pressed(true);
-        }
+        if (file2Group.size() == 0) { m->setControl_pressed(true);  }
 
-        vector<map<string, string> > files;
-        for (int i = 0; i < dataFiles.size(); i++) {
-            string group = "";
-            string thisFileName; thisFileName = "";
-            string thisFileName1, thisFileName2;
-            thisFileName1 = dataFiles[i][0]; thisFileName2 = dataFiles[i][1];
-            
-            if (dataFileFormat == 1) { //2 column
-                thisFileName = thisFileName1+"-"+thisFileName2;
-            }else if (dataFileFormat == 2) { //3 column
-                thisFileName = thisFileName1+"-"+thisFileName2;
-                group = file2Group[i];
-            }
-            
-            map<string, string> temp; temp[thisFileName] = group;
-            files.push_back(temp);
-        }
-
-        return files;
+        return dataFiles;
     }
     catch(exception& e) {
         m->errorOut(e, "RenameSeqsCommand", "readFiles");

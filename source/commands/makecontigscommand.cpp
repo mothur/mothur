@@ -7,7 +7,6 @@
 //
 
 #include "makecontigscommand.h"
-#include "renameseqscommand.h"
 #include "contigsreport.hpp"
 
 //**************************************************************************************************
