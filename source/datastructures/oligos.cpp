@@ -369,7 +369,7 @@ int Oligos::readOligos(){
 				}else if(type == "SPACER"){
 					spacer.push_back(oligo);
 				}
-				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + ".\n");  }
+				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are primer, forward, reverse, and barcode. Ignoring " + oligo + ".\n");  }
 			}
 			util.gobble(inOligos);
 		}

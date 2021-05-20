@@ -410,8 +410,8 @@ int driverColumn(pairwiseData* params){
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
                 if (params->distcalcType == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
                 else if (params->distcalcType == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
-                //else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
-                else if (params->distcalcType == "onegap")        {    distCalculator = new oneGapDist(1.0);    }
+                else if (params->distcalcType == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+                //else if (params->distcalcType == "onegap")        {    distCalculator = new oneGapDist(1.0);    }
             }
         }else {
             if (validCalculator.isValidCalculator("distance", params->distcalcType) ) {
