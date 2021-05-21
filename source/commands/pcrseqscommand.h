@@ -37,7 +37,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-    bool abort, keepprimer, keepdots, fileAligned, pairedOligos;
+    bool abort, keepprimer, keepdots, fileAligned, pairedOligos, reorient;
 	string fastafile, oligosfile, taxfile, groupfile, namefile, countfile, ecolifile,  nomatch;
 	int start, end, processors, length, pdiffs, rdiffs;
     vector<string> outputNames;
