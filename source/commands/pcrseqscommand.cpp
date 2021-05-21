@@ -462,6 +462,139 @@ struct pcrData {
     }
 };
 /**************************************************************************************************/
+vector<TrimOligos*> fillTrims(pcrData* params, bool& pairedOligos) {
+    try {
+        
+        vector<TrimOligos*> trims;
+        
+        if (params->oligosfile != "") {
+            
+            Oligos oligos;
+            params->numFPrimers = 0; params->numRPrimers = 0;
+            map<string, int> barcodes; //not used
+            
+            readOligos(oligos, params->oligosfile, pairedOligos, params->numFPrimers, params->numRPrimers, params->m);
+            
+            if (pairedOligos) {
+                map<string, int> primers; vector<string> revPrimer;
+                map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
+                for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
+                    primers[(it->second).forward] = it->first;
+                    revPrimer.push_back((it->second).reverse);
+                }
+                
+                //standard
+                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+
+            }else{
+                map<string, int> primers; vector<string> revPrimer;
+                primers = oligos.getPrimers();
+                revPrimer = oligos.getReversePrimers();
+                
+                //standard
+                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+            }
+            
+                
+            if (params->reorient) {
+                
+                //reoriented
+                if (pairedOligos) {
+                    map<string, int> primers; vector<string> revPrimer;
+                    map<int, oligosPair> rprimerPairs = oligos.getReorientedPairedPrimers();
+                    for (map<int, oligosPair>::iterator it = rprimerPairs.begin(); it != rprimerPairs.end(); it++) {
+                        primers[(it->second).forward] = it->first;
+                        revPrimer.push_back((it->second).reverse);
+                    }
+                    
+                    //reoriented
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                    primers.clear(); revPrimer.clear();
+                    
+                    map<int, oligosPair> revprimerPairs = oligos.getReversedPairedPrimers();
+                    for (map<int, oligosPair>::iterator it = revprimerPairs.begin(); it != revprimerPairs.end(); it++) {
+                        primers[(it->second).forward] = it->first;
+                        revPrimer.push_back((it->second).reverse);
+                    }
+                    
+                    //reversed
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                }else{
+                    map<string, int> primers; vector<string> revPrimer;
+                    
+                    primers = oligos.getReorientedPrimers();
+                    revPrimer = oligos.getReorientedReversePrimers();
+                    
+                    //reoriented
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                    primers.clear(); revPrimer.clear();
+                    
+                    primers = oligos.getReversedPrimers();
+                    revPrimer = oligos.getReversedReversePrimers();
+                    
+                    //reversed
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                }
+            }
+        }
+        
+        return trims;
+        
+    }catch(exception& e) {
+        params->m->errorOut(e, "PcrSeqsCommand", "fillTrims");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+bool trimStartEnd(Sequence& seq, pcrData* params) {
+    try {
+        bool good = true;
+        
+        //make sure the seqs are aligned
+        if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); good = false; }
+        else {
+            string alignedString = seq.getAligned();
+            
+            if ((seq.getStartPos() > params->start) || (seq.getEndPos() < params->end)) {
+                good = false;
+                if (params->m->getDebug()) {
+                    params->m->mothurOut("[DEBUG]: " + seq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
+                    
+                }
+            }
+            else {
+                if (params->end != -1) {
+                    if (params->end > seq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + seq.getName() + " length of " +toString(seq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); good = false; }
+                    else {
+                        if (params->keepdots)   { seq.filterFromPos(params->end); }
+                        else {
+                            string seqString = seq.getAligned().substr(0, (params->end));
+                            seq.setAligned(seqString);
+                        }
+                    }
+                }
+                
+                if (params->start != -1) {
+                    if (params->keepdots)   {  seq.filterToPos(params->start-1);  }
+                    else {
+                        string seqString = seq.getAligned().substr(params->start);
+                        seq.setAligned(seqString);
+                    }
+                }
+            }
+        }
+        
+        return good;
+        
+    }catch(exception& e) {
+        params->m->errorOut(e, "PcrSeqsCommand", "trimStartEnd");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>& thisSeqsLocations, int& thisPStart, int& thisPEnd, pcrData* params) {
     try {
         
@@ -578,7 +711,7 @@ vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>
         return codes;
 
     }catch(exception& e) {
-        params->m->errorOut(e, "MakeContigsCommand", "trimPrimers");
+        params->m->errorOut(e, "PcrSeqsCommand", "trimPrimers");
         exit(1);
     }
 }
@@ -588,85 +721,11 @@ int driverPcr(pcrData* params){
         ifstream inFASTA; params->util.openInputFile(params->filename, inFASTA);
         inFASTA.seekg(params->fstart);
         
-        bool done = false;
-        params->count = 0;
+        bool done = false; params->count = 0;
         set<int> lengths; set<int> startLocations;  set<int> endLocations;
         
         bool pairedOligos = false;
-        vector<TrimOligos*> trims;
-        
-        if (params->oligosfile != "") {
-            
-            Oligos oligos;
-            params->numFPrimers = 0; params->numRPrimers = 0;
-            map<string, int> barcodes; //not used
-            
-            readOligos(oligos, params->oligosfile, pairedOligos, params->numFPrimers, params->numRPrimers, params->m);
-            
-            if (pairedOligos) {
-                map<string, int> primers; vector<string> revPrimer;
-                map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
-                for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
-                    primers[(it->second).forward] = it->first;
-                    revPrimer.push_back((it->second).reverse);
-                }
-                
-                //standard
-                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-
-            }else{
-                map<string, int> primers; vector<string> revPrimer;
-                primers = oligos.getPrimers();
-                revPrimer = oligos.getReversePrimers();
-                
-                //standard
-                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-            }
-            
-                
-            if (params->reorient) {
-                
-                //reoriented
-                if (pairedOligos) {
-                    map<string, int> primers; vector<string> revPrimer;
-                    map<int, oligosPair> rprimerPairs = oligos.getReorientedPairedPrimers();
-                    for (map<int, oligosPair>::iterator it = rprimerPairs.begin(); it != rprimerPairs.end(); it++) {
-                        primers[(it->second).forward] = it->first;
-                        revPrimer.push_back((it->second).reverse);
-                    }
-                    
-                    //reoriented
-                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-                    
-                    primers.clear(); revPrimer.clear();
-                    
-                    map<int, oligosPair> revprimerPairs = oligos.getReversedPairedPrimers();
-                    for (map<int, oligosPair>::iterator it = revprimerPairs.begin(); it != revprimerPairs.end(); it++) {
-                        primers[(it->second).forward] = it->first;
-                        revPrimer.push_back((it->second).reverse);
-                    }
-                    
-                    //reversed
-                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-                    
-                }else{
-                    map<string, int> primers; vector<string> revPrimer;
-                    
-                    primers = oligos.getReorientedPrimers();
-                    revPrimer = oligos.getReorientedReversePrimers();
-                    
-                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-                    
-                    primers.clear(); revPrimer.clear();
-                    
-                    primers = oligos.getReversedPrimers();
-                    revPrimer = oligos.getReversedReversePrimers();
-                    
-                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
-                    
-                }
-            }
-        }
+        vector<TrimOligos*> trims = fillTrims(params, pairedOligos); //standard, if reorient parameter then (reorient & reverse) as well
         
         while (!done) {
             
@@ -720,40 +779,7 @@ int driverPcr(pcrData* params){
                         }
                     }
                 }else{ //using start and end to trim
-                    //make sure the seqs are aligned
-                    if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); break; }
-                    else {
-                        string alignedString = currSeq.getAligned();
-                        //cout << currSeq.getName() << '\t' << alignedString[params->start] << '\t' << alignedString[params->end] << endl;
-                        if ((currSeq.getStartPos() > params->start) || (currSeq.getEndPos() < params->end)) {
-                            goodSeq = false;
-                            if (params->m->getDebug()) {
-                                params->m->mothurOut("[DEBUG]: " + currSeq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
-                                
-                            }
-                        }
-                        else {
-                            if (params->end != -1) {
-                                if (params->end > currSeq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + currSeq.getName() + " length of " +toString(currSeq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); break; }
-                                else {
-                                    if (params->keepdots)   { currSeq.filterFromPos(params->end); }
-                                    else {
-                                        string seqString = currSeq.getAligned().substr(0, (params->end));
-                                        currSeq.setAligned(seqString);
-                                    }
-                                }
-                            }
-                            
-                            if (params->start != -1) {
-                                if (params->keepdots)   {  currSeq.filterToPos(params->start-1);  }
-                                else {
-                                    string seqString = currSeq.getAligned().substr(params->start);
-                                    currSeq.setAligned(seqString);
-                                }
-                            }
-                       
-                        }
-                    }
+                    goodSeq = trimStartEnd(currSeq, params); //error message if seqs unaligned
                 }
                 
                 //remove super short reads
@@ -1004,15 +1030,14 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
 //***************************************************************************************************************
 Sequence PcrSeqsCommand::readEcoli(){
 	try {
-		ifstream in;
-		util.openInputFile(ecolifile, in);
+		ifstream in; util.openInputFile(ecolifile, in);
 		
         //read seq
         Sequence result;
         if (!in.eof()){ 
             Sequence ecoli(in);
             result.setName(ecoli.getName()); result.setAligned(ecoli.getAligned());
-        }else { in.close(); m->setControl_pressed(true); return result; }
+        }else {  m->setControl_pressed(true);  }
         in.close();    
 			
         return result;
