@@ -30,15 +30,17 @@ public:
     //for processing with trimOligos class
     map<int, oligosPair> getPairedPrimers()                 { return pairedPrimers;     }
     map<int, oligosPair> getPairedBarcodes()                { return pairedBarcodes;    }
-    map<string, int> getPrimers()                           { return primers;           }
-    map<string, int> getBarcodes()                          { return barcodes;          }
-    
     map<int, oligosPair> getReorientedPairedPrimers();
     map<int, oligosPair> getReorientedPairedBarcodes();
     map<int, oligosPair> getReversedPairedPrimers();
     map<int, oligosPair> getReversedPairedBarcodes();
+    
+    map<string, int> getPrimers()                           { return primers;           }
+    map<string, int> getBarcodes()                          { return barcodes;          }
+    map<string, int> getReversedPrimers();
+    vector<string> getReversedReversePrimers();
     map<string, int> getReorientedPrimers();
-    map<string, int> getReorientedBarcodes();
+    vector<string> getReorientedReversePrimers();
     
     
     vector<string> getLinkers()                             { return linker;            }
@@ -87,6 +89,7 @@ protected:
     
     int readOligos();
     string reverseOligo(string);
+    void formatOligo(string&);
     
 };
 

@@ -223,40 +223,24 @@ int Oligos::readOligos(){
 		
 		while(!inOligos.eof()){
             
-			inOligos >> type;
-            
-		 	if (m->getDebug()) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); }
-            
-			if(type[0] == '#'){
-				while (!inOligos.eof())	{	char c = inOligos.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-				util.gobble(inOligos);
-			}
+            string line = util.getline(inOligos); util.gobble(inOligos);
+        
+			if(line[0] == '#'){} //ignore
 			else{
-				util.gobble(inOligos);
-				//make type case insensitive
-				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
-				
-				inOligos >> oligo;
+                vector<string> pieces = util.splitWhiteSpace(line);
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
-				
-				for(int i=0;i<oligo.length();i++){
-					oligo[i] = toupper(oligo[i]);
-					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
-				}
+                type = util.toUpper(pieces[0]); //make type case insensitive
+                
+                oligo = pieces[1]; formatOligo(oligo);
+                
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: reading type - " + type + ".\n"); m->mothurOut("[DEBUG]: reading - " + oligo + ".\n"); }
 				
 				if(type == "FORWARD"){
 					group = "";
+                    
+                    if (pieces.size() > 2) { group = pieces[2]; }
 					
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
-					
-					//check for repeat barcodes
+					//check for repeat primers
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("[WARNING]: primer " + oligo + " is in your oligos file already, disregarding.\n");   }
                     else {
@@ -267,14 +251,8 @@ int Oligos::readOligos(){
                     }
 				}
                 else if (type == "PRIMER"){
-                    util.gobble(inOligos);
-					
-                    inOligos >> roligo;
                     
-                    for(int i=0;i<roligo.length();i++){
-                        roligo[i] = toupper(roligo[i]);
-                        if(roligo[i] == 'U')	{	roligo[i] = 'T';	}
-                    }
+                    roligo = pieces[2]; formatOligo(roligo);
                     
                     if (oligo == "NONE")        {  pfUsesNone = true; }
                     else if (roligo == "NONE")  { prUsesNone = true;  }
@@ -284,13 +262,7 @@ int Oligos::readOligos(){
                     }
                     group = "";
                     
-					// get rest of line in case there is a primer name
-					while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	group += c;  }
-					}
+                    if (pieces.size() > 3) { group = pieces[3]; }
                     
                     oligosPair newPrimer(oligo, roligo);
                     
@@ -313,29 +285,26 @@ int Oligos::readOligos(){
 					revPrimer.push_back(oligoRC);
 				}
 				else if(type == "BARCODE"){
-					inOligos >> group;
-                    
                     //barcode lines can look like   BARCODE   atgcatgc   groupName  - for 454 seqs
                     //or                            BARCODE   atgcatgc   atgcatgc    groupName  - for illumina data that has forward and reverse info
+                    group = "";
                     
-                    string temp = "";
-                    while (!inOligos.eof())	{
-						char c = inOligos.get();
-						if (c == 10 || c == 13 || c == -1){	break;	}
-						else if (c == 32 || c == 9){;} //space or tab
-						else { 	temp += c;  }
-					}
-					
-                    //then this is illumina data with 4 columns
-                    if (temp != "") {
-                        hasPBarcodes = true;
-                        string reverseBarcode = group; //reverseOligo(group); //reverse barcode
-                        group = temp;
+                    if (pieces.size() == 3) {
+                        group = pieces[2];
                         
-                        for(int i=0;i<reverseBarcode.length();i++){
-                            reverseBarcode[i] = toupper(reverseBarcode[i]);
-                            if(reverseBarcode[i] == 'U')	{	reverseBarcode[i] = 'T';	}
+                        //check for repeat barcodes
+                        map<string, int>::iterator itBar = barcodes.find(oligo);
+                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already, disregarding.\n");   }
+                        else {
+                            barcodes[oligo]=indexBarcode; indexBarcode++;
+                            barcodeNameVector.push_back(group);
                         }
+                    }
+                    else if (pieces.size() == 4) {
+                        
+                        hasPBarcodes = true;
+                        string reverseBarcode = pieces[2]; formatOligo(reverseBarcode);
+                        group = pieces[3];
                         
                         if (oligo == "NONE")                {  bfUsesNone = true; }
                         else if (reverseBarcode == "NONE")  { brUsesNone = true;  }
@@ -355,14 +324,7 @@ int Oligos::readOligos(){
                             pairedBarcodes[indexPairedBarcode]=newPair; indexPairedBarcode++;
                             barcodeNameVector.push_back(group);
                         }
-                    }else {
-                        //check for repeat barcodes
-                        map<string, int>::iterator itBar = barcodes.find(oligo);
-                        if (itBar != barcodes.end()) { m->mothurOut("[WARNING]: barcode " + oligo + " is in your oligos file already, disregarding.\n");   }
-                        else {
-                            barcodes[oligo]=indexBarcode; indexBarcode++;
-                            barcodeNameVector.push_back(group);
-                        }
+                        
                     }
 				}else if(type == "LINKER"){
 					linker.push_back(oligo);
@@ -371,7 +333,6 @@ int Oligos::readOligos(){
 				}
 				else{	m->mothurOut("[WARNING]: " + type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + ".\n");  }
 			}
-			util.gobble(inOligos);
 		}
 		inOligos.close();
 		
@@ -670,6 +631,74 @@ map<int, oligosPair> Oligos::getReorientedPairedPrimers(){
 	}
 }
 //********************************************************************/
+vector<string> Oligos::getReorientedReversePrimers(){
+    try {
+        vector<string> revReorientedPrimers;
+        
+        for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
+            string reverse = reverseOligo((it->first)); //rc ForwardPrimer
+            revReorientedPrimers.push_back(reverse);
+        }
+        
+        return revReorientedPrimers;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReorientedPairedPrimers");
+        exit(1);
+    }
+}
+//********************************************************************/
+map<string, int> Oligos::getReorientedPrimers(){
+    try {
+        map<string, int> reorientedPrimers;
+        
+        for (int i = 0; i < revPrimer.size(); i++) {
+            string primer = reverseOligo(revPrimer[i]);
+            reorientedPrimers[primer] = -1; //ignore value
+        }
+        
+        return reorientedPrimers;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReorientedPrimers");
+        exit(1);
+    }
+}
+//********************************************************************/
+vector<string> Oligos::getReversedReversePrimers(){
+    try {
+        vector<string> revReversedPrimers;
+        
+        for (int i = 0; i < revPrimer.size(); i++) {
+            string primer = reverseOligo(revPrimer[i]);
+            revReversedPrimers.push_back(primer);
+        }
+    
+        return revReversedPrimers;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReorientedPairedPrimers");
+        exit(1);
+    }
+}
+//********************************************************************/
+map<string, int> Oligos::getReversedPrimers(){
+    try {
+        map<string, int> revReversedPrimers;
+        
+        for (map<string, int>::iterator it = primers.begin(); it != primers.end(); it++) {
+            string reverse = reverseOligo((it->first)); //rc ForwardPrimer
+            revReversedPrimers[reverse] = it->second;
+        }
+        
+        return revReversedPrimers;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "getReorientedPrimers");
+        exit(1);
+    }
+}
+//********************************************************************/
 //can't have paired and unpaired so this function will either run the paired map or the unpaired
 map<int, oligosPair> Oligos::getReversedPairedBarcodes(){
     try {
@@ -792,6 +821,19 @@ string Oligos::reverseOligo(string oligo){
 		m->errorOut(e, "Oligos", "reverseOligo");
 		exit(1);
 	}
+}
+//********************************************************************/
+void Oligos::formatOligo(string& oligo){
+    try {
+        for(int i=0;i<oligo.length();i++){
+            oligo[i] = toupper(oligo[i]);
+            if(oligo[i] == 'U')    {    oligo[i] = 'T';    }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Oligos", "formatOligo");
+        exit(1);
+    }
 }
 //********************************************************************/
 string Oligos::getBarcodeName(int index){
