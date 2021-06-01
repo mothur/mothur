@@ -385,8 +385,8 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         ifstream testfin, testrin;
         string tag = "fastq";
         if (compressGZ) {   tag += ".gz";   }
-        string ffastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
-        string rfastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
+        string ffastq = outputdir + util.trimStringEnd(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
+        string rfastq = outputdir + util.trimStringEnd(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
         
         bool found = false;
         //already exist??
@@ -407,8 +407,8 @@ bool SRAInfoCommand::runFastqDump(string sampleFile, vector<string>& filenames){
         #if defined NON_WINDOWS
             if (compressGZ) { //run system command to compress files
                 string tag = "fastq";
-                string ffastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
-                string rfastq = outputdir + util.trimString(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
+                string ffastq = outputdir + util.trimStringEnd(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_1." + tag;
+                string rfastq = outputdir + util.trimStringEnd(util.getRootName(util.getSimpleName(sampleFile)), 1) +"_2." + tag;
                 
                 string inputString = "gzip -f " + ffastq;
                 runSystemCommand(inputString);

@@ -849,6 +849,12 @@
 		F41A1B91261257DE00144985 /* kmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B8F261257DE00144985 /* kmerdist.cpp */; };
 		F41A1B9626136C9D00144985 /* splitkmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B9426136C9D00144985 /* splitkmerdist.cpp */; };
 		F45A2E3D25A78B4D00994F76 /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */; };
+		F4A866B7265BE7720010479A /* protein.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866B5265BE7720010479A /* protein.cpp */; };
+		F4A866B8265BE7720010479A /* protein.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866B5265BE7720010479A /* protein.cpp */; };
+		F4A866BF265BE7EC0010479A /* aminoacid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866BD265BE7EC0010479A /* aminoacid.cpp */; };
+		F4A866C0265BE7EC0010479A /* aminoacid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866BD265BE7EC0010479A /* aminoacid.cpp */; };
+		F4A866CB265EBD270010479A /* jtt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866C9265EBD270010479A /* jtt.cpp */; };
+		F4A866CC265EBD270010479A /* jtt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866C9265EBD270010479A /* jtt.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1816,6 +1822,12 @@
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		F490972626090AC500C1B24F /* External_Libraries_INSTALL */ = {isa = PBXFileReference; lastKnownFileType = text; path = External_Libraries_INSTALL; sourceTree = "<group>"; };
+		F4A866B5265BE7720010479A /* protein.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = protein.cpp; sourceTree = "<group>"; };
+		F4A866B6265BE7720010479A /* protein.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = protein.hpp; sourceTree = "<group>"; };
+		F4A866BD265BE7EC0010479A /* aminoacid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aminoacid.cpp; sourceTree = "<group>"; };
+		F4A866BE265BE7EC0010479A /* aminoacid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = aminoacid.hpp; sourceTree = "<group>"; };
+		F4A866C9265EBD270010479A /* jtt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jtt.cpp; sourceTree = "<group>"; };
+		F4A866CA265EBD270010479A /* jtt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jtt.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2329,6 +2341,8 @@
 				481E40DE244F619D0059C925 /* eachgapignore.cpp */,
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
 				481E40DC244F52460059C925 /* ignoregaps.cpp */,
+				F4A866C9265EBD270010479A /* jtt.cpp */,
+				F4A866CA265EBD270010479A /* jtt.hpp */,
 				F41A1B8F261257DE00144985 /* kmerdist.cpp */,
 				F41A1B90261257DE00144985 /* kmerdist.hpp */,
 				A7E9B77312D37EC400DA6239 /* onegapdist.h */,
@@ -2744,6 +2758,8 @@
 				A7E9B65812D37EC300DA6239 /* alignmentdb.h */,
 				A7E9B76312D37EC400DA6239 /* alignreport.cpp */,
 				A7E9B76412D37EC400DA6239 /* alignreport.hpp */,
+				F4A866BE265BE7EC0010479A /* aminoacid.hpp */,
+				F4A866BD265BE7EC0010479A /* aminoacid.cpp */,
 				48A0B8EA2547282600726384 /* biom.cpp */,
 				48A0B8EB2547282600726384 /* biom.hpp */,
 				48A0B8EF25472C4500726384 /* biomhdf5.cpp */,
@@ -2803,6 +2819,8 @@
 				A7E9B77812D37EC400DA6239 /* ordervector.hpp */,
 				482AC3B72562B57600C9AF4A /* picrust.cpp */,
 				482AC3B82562B57600C9AF4A /* picrust.hpp */,
+				F4A866B6265BE7720010479A /* protein.hpp */,
+				F4A866B5265BE7720010479A /* protein.cpp */,
 				A7E9B79F12D37EC400DA6239 /* qualityscores.cpp */,
 				A7E9B7A012D37EC400DA6239 /* qualityscores.h */,
 				48BDDA771ECA3B8E00F0F6C0 /* rabundfloatvector.cpp */,
@@ -3233,6 +3251,7 @@
 				481FB6141AC1B7AC0076CFF3 /* subsamplecommand.cpp in Sources */,
 				481FB5481AC1B61F0076CFF3 /* hellinger.cpp in Sources */,
 				481FB5D41AC1B75C0076CFF3 /* listseqscommand.cpp in Sources */,
+				F4A866B8265BE7720010479A /* protein.cpp in Sources */,
 				481FB6521AC1B8100076CFF3 /* fileoutput.cpp in Sources */,
 				484976E022552E0B00F3A291 /* erarefaction.cpp in Sources */,
 				481FB6851AC1B8B80076CFF3 /* validcalculator.cpp in Sources */,
@@ -3282,6 +3301,7 @@
 				48C7286A1B69598400D40830 /* testmergegroupscommand.cpp in Sources */,
 				481FB62F1AC1B7EA0076CFF3 /* fastqread.cpp in Sources */,
 				481FB6901AC1BA9E0076CFF3 /* knn.cpp in Sources */,
+				F4A866CC265EBD270010479A /* jtt.cpp in Sources */,
 				48E5444A1E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
 				481FB56C1AC1B6BE0076CFF3 /* sharedsorabund.cpp in Sources */,
 				481FB6411AC1B7EA0076CFF3 /* sequenceparser.cpp in Sources */,
@@ -3382,6 +3402,7 @@
 				480D1E2A1EA681D100BF9C77 /* testclustercalcs.cpp in Sources */,
 				481FB5651AC1B6A70076CFF3 /* sharedlennon.cpp in Sources */,
 				481FB6241AC1B7BA0076CFF3 /* qFinderDMM.cpp in Sources */,
+				F4A866C0265BE7EC0010479A /* aminoacid.cpp in Sources */,
 				481FB6311AC1B7EA0076CFF3 /* fullmatrix.cpp in Sources */,
 				481FB51C1AC0A63E0076CFF3 /* main.cpp in Sources */,
 				481FB58F1AC1B71B0076CFF3 /* newcommandtemplate.cpp in Sources */,
@@ -3570,6 +3591,7 @@
 				A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */,
 				A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */,
 				A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */,
+				F4A866BF265BE7EC0010479A /* aminoacid.cpp in Sources */,
 				4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */,
 				A7E9B8BB12D37EC400DA6239 /* deuniqueseqscommand.cpp in Sources */,
 				A7E9B8BC12D37EC400DA6239 /* distancecommand.cpp in Sources */,
@@ -3601,6 +3623,7 @@
 				A7E9B8D712D37EC400DA6239 /* getsabundcommand.cpp in Sources */,
 				48A055302490066C00D0F97F /* sffread.cpp in Sources */,
 				A7E9B8D812D37EC400DA6239 /* getseqscommand.cpp in Sources */,
+				F4A866B7265BE7720010479A /* protein.cpp in Sources */,
 				4809EC9D227C9B3100B4D0E5 /* metrosichel.cpp in Sources */,
 				A7E9B8D912D37EC400DA6239 /* getsharedotucommand.cpp in Sources */,
 				48E544701E9D3B2D00FF6AB8 /* accuracy.cpp in Sources */,
@@ -3880,6 +3903,7 @@
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				481E40E3244F6A050059C925 /* eachgapdist.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
+				F4A866CB265EBD270010479A /* jtt.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
 				835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */,
 				48E5444D1E9C2C8F00FF6AB8 /* tptn.cpp in Sources */,
