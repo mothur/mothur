@@ -45,7 +45,7 @@
  START          ATG
  STOP           TAA,TGA,TAG                 TRA,TAR
  
- 
+ . and -        ./-           gap
 */
 
 /**************************************************************************************************/
@@ -53,14 +53,13 @@
 class AminoAcid {
     
 public:
+    AminoAcid();
     AminoAcid(char);    //AminoAcid character
-    //AminoAcid(string);  //DNA codon
     ~AminoAcid() {}
     
     string getName();
-    char get()          { return aminoBase; }
-    
-    //vector<string> getCodons;
+    char getAmino()          { return aminoBase; }
+    void setAmino(char c);
     
 protected:
     
@@ -68,12 +67,10 @@ protected:
     Utils util;
     
     char aminoBase;
-    map<char, string> aminoNameMap;
-    map<string, char> codonMap;
-    
-    void fillNameMap();
-    void fillCodons();
-    char getAminoBase(string);
+    set<char> validAminoAcids;
+
+    void fillValidAminoAcid();
+    char getAminoBase(string); //from name
     
 };
 

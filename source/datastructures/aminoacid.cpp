@@ -9,78 +9,48 @@
 #include "aminoacid.hpp"
 
 /******************************************************************************************************************/
+AminoAcid::AminoAcid() {
+    try {
+        m = MothurOut::getInstance();
+        fillValidAminoAcid();
+        aminoBase = '0';
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AminoAcid", "AminoAcid");
+        exit(1);
+    }
+}
+/******************************************************************************************************************/
 AminoAcid::AminoAcid(char c) {
     try {
         m = MothurOut::getInstance();
+        fillValidAminoAcid();
         
-        fillNameMap();
-        fillCodons();
-        
-        aminoBase = toupper(c);
+        setAmino(c);
     }
     catch(exception& e) {
         m->errorOut(e, "AminoAcid", "AminoAcid");
         exit(1);
     }
 }
+/******************************************************************************************************************/
+void AminoAcid::setAmino(char c) {
+    try {
+        
+        c = toupper(c);
+        
+        if (validAminoAcids.count(c) != 0) { aminoBase = c; }
+        else {
+            m->mothurOut("[ERROR]: " + toString(c) + " is an invalid amino acid, please correct.\n"); m->setControl_pressed(true);
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AminoAcid", "setAmino");
+        exit(1);
+    }
+}
+
 /******************************************************************************************************************
-AminoAcid::AminoAcid(string codon) {
-    try {
-        m = MothurOut::getInstance();
-    
-        fillNameMap();
-        fillCodons();
-        
-        //trim in case its not a string of 3
-        codon = codon.substr(3);
-        
-        aminoBase = getAminoBase(codon);
-    }
-    catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "AminoAcid");
-        exit(1);
-    }
-}
-/******************************************************************************************************************/
-char AminoAcid::getAminoBase(string codon) {
-    try {
-        char base = ' ';
-        
-        map<string, char>::iterator it = codonMap.find(codon);
-        if (it != codonMap.end()) {
-            base = it->second;
-        }else {
-            m->mothurOut("[ERROR]: " + codon + " is not a valid codon, please correct.\n"); m->setControl_pressed(true);
-        }
-        
-        return base;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "getAminoBase");
-        exit(1);
-    }
-}
-/******************************************************************************************************************/
-string AminoAcid::getName() {
-    try {
-        string aminoName = "unknown";
-        
-        map<char, string>::iterator it = aminoNameMap.find(aminoBase);
-        if (it != aminoNameMap.end()) {
-            aminoName = it->second;
-        }else {
-            m->mothurOut("[ERROR]: " + toString(aminoBase) + " is not an amino acid base, please correct.\n"); m->setControl_pressed(true);
-        }
-        
-        return aminoName;
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "getName");
-        exit(1);
-    }
-}
-/******************************************************************************************************************/
 void AminoAcid::fillCodons() {
     try {
         //Ala, A         GCT,GCC,GCA,GCG
@@ -198,6 +168,8 @@ void AminoAcid::fillCodons() {
         codonMap["AAC"] = 'B';
         codonMap["GAT"] = 'B';
         codonMap["GAC"] = 'B';
+        condonMap["."] = '.';
+        condonMap["-"] = '-';
         
     }
     catch(exception& e) {
@@ -205,44 +177,88 @@ void AminoAcid::fillCodons() {
         exit(1);
     }
 }
+ /******************************************************************************************************************/
+//TODO::resolve multi names issue
+//TODO::start and stop ???
+
+ string AminoAcid::getName() {
+     try {
+         string aminoName = "unknown";
+         
+         if (aminoBase == 'A')          { aminoName = "Alanine"; }
+         else if (aminoBase == 'R')     { aminoName = "Arginine"; }
+         else if (aminoBase == 'N')     { aminoName = "Asparagine"; }
+         else if (aminoBase == 'D')     { aminoName = "Aspartic_acid"; }
+         
+         else if (aminoBase == 'B')     { aminoName = "Asparagine or Aspartic"; }
+         else if (aminoBase == 'C')     { aminoName = "Cysteine"; }
+         else if (aminoBase == 'Q')     { aminoName = "Glutamine"; }
+         else if (aminoBase == 'E')     { aminoName = "Glutamic_Acid"; }
+         
+         else if (aminoBase == 'Z')     { aminoName = "Glutamine or Glutamic_Acid"; }
+         else if (aminoBase == 'G')     { aminoName = "Glycine"; }
+         else if (aminoBase == 'H')     { aminoName = "Histidine"; }
+         else if (aminoBase == 'I')     { aminoName = "Isoleucine"; }
+         
+         else if (aminoBase == 'L')     { aminoName = "Leucine"; }
+         else if (aminoBase == 'K')     { aminoName = "Lysine"; }
+         else if (aminoBase == 'M')     { aminoName = "Methionine"; }
+         else if (aminoBase == 'F')     { aminoName = "Phenylalanine"; }
+         
+         else if (aminoBase == 'P')     { aminoName = "Proline"; }
+         else if (aminoBase == 'S')     { aminoName = "Serine"; }
+         else if (aminoBase == 'T')     { aminoName = "Threonine"; }
+         else if (aminoBase == 'W')     { aminoName = "Tryptophan"; }
+         
+         else if (aminoBase == 'Y')     { aminoName = "Tyrosine"; }
+         else if (aminoBase == 'V')     { aminoName = "Valine"; }
+         else if ((aminoBase == '.') || (aminoBase == '-'))     { aminoName = "Gap"; }
+         
+         
+         return aminoName;
+         
+     }
+     catch(exception& e) {
+         m->errorOut(e, "AminoAcid", "getName");
+         exit(1);
+     }
+ }
 /******************************************************************************************************************/
-void AminoAcid::fillNameMap() {
+void AminoAcid::fillValidAminoAcid() {
     try {
-        aminoNameMap['A'] = "Alanine";
-        aminoNameMap['R'] = "Arginine";
-        aminoNameMap['N'] = "Asparagine";
-        aminoNameMap['D'] = "Aspartic_acid";
+        validAminoAcids.insert('A');
+        validAminoAcids.insert('R');
+        validAminoAcids.insert('N');
+        validAminoAcids.insert('D');
         
-    //TODO::resolve multi names issue
-    //TODO::start and stop ???
+        validAminoAcids.insert('B');
+        validAminoAcids.insert('C');
+        validAminoAcids.insert('Q');
+        validAminoAcids.insert('E');
         
-        aminoNameMap['B'] = "Asparagine or Aspartic";
-        aminoNameMap['C'] = "Cysteine";
-        aminoNameMap['Q'] = "Glutamine";
-        aminoNameMap['E'] = "Glutamic_Acid";
+        validAminoAcids.insert('Z');
+        validAminoAcids.insert('G');
+        validAminoAcids.insert('H');
+        validAminoAcids.insert('I');
         
-        aminoNameMap['Z'] = "Glutamine or Glutamic_Acid";
-        aminoNameMap['G'] = "Glycine";
-        aminoNameMap['H'] = "Histidine";
-        aminoNameMap['I'] = "Isoleucine";
+        validAminoAcids.insert('L');
+        validAminoAcids.insert('K');
+        validAminoAcids.insert('M');
+        validAminoAcids.insert('F');
         
-        aminoNameMap['L'] = "Leucine";
-        aminoNameMap['K'] = "Lysine";
-        aminoNameMap['M'] = "Methionine";
-        aminoNameMap['F'] = "Phenylalanine";
+        validAminoAcids.insert('P');
+        validAminoAcids.insert('S');
+        validAminoAcids.insert('T');
+        validAminoAcids.insert('W');
         
-        aminoNameMap['P'] = "Proline";
-        aminoNameMap['S'] = "Serine";
-        aminoNameMap['T'] = "Threonine";
-        aminoNameMap['W'] = "Tryptophan";
-        
-        aminoNameMap['Y'] = "Tyrosine";
-        aminoNameMap['V'] = "Valine";
-        
+        validAminoAcids.insert('Y');
+        validAminoAcids.insert('V');
+        validAminoAcids.insert('-');
+        validAminoAcids.insert('.');
         
     }
     catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "fillNameMap");
+        m->errorOut(e, "AminoAcid", "fillValidAminoAcid");
         exit(1);
     }
 }

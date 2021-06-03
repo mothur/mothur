@@ -97,18 +97,10 @@ DistanceCommand::DistanceCommand(string option) {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");
-					ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
-					alignDB = SequenceDB(inFASTA); 
-					inFASTA.close();
-				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+                else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
 			}else if (fastafile == "not open") { abort = true; }	
-			else{
-				ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
-				alignDB = SequenceDB(inFASTA); 
-				inFASTA.close();
-				current->setFastaFile(fastafile);
-			}
+			else{ current->setFastaFile(fastafile); }
 			
 			oldfastafile = validParameter.validFile(parameters, "oldfasta");
 			if (oldfastafile == "not found") { oldfastafile = ""; }
@@ -119,9 +111,7 @@ DistanceCommand::DistanceCommand(string option) {
 			else if (column == "not open") { abort = true; }	
 			else { current->setColumnFile(column); }
 			
-            if (outputdir == ""){
-				outputdir += util.hasPath(fastafile); 
-			}
+            if (outputdir == ""){ outputdir += util.hasPath(fastafile);  }
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -173,6 +163,9 @@ int DistanceCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         numDistsBelowCutoff = 0;
+        
+        ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
+        alignDB = SequenceDB(inFASTA); inFASTA.close();
 		
 		//save number of new sequence
 		numNewFasta = alignDB.getNumSeqs();

@@ -12,7 +12,7 @@
 #include "mothurout.h"
 #include "utils.hpp"
 #include "writer.h"
-
+#include "aminoacid.hpp"
 
 /**************************************************************************************************/
 
@@ -25,32 +25,36 @@ class Protein {
 public:
     
     Protein();
-    Protein(string, string);
+    Protein(string, vector<AminoAcid>);
     Protein(ifstream&);
     Protein(ifstream&, string&, bool);
     Protein(istringstream&);
+#ifdef USE_BOOST
+    Protein(boost::iostreams::filtering_istream&);
+#endif
     ~Protein() {}
     
     void setName(string);
     string getName();
-    void setUnaligned(string);
-    string getUnaligned();
-    void setAligned(string);
-    string getAligned();
+    void setUnaligned(vector<AminoAcid>);
+    vector<AminoAcid> getUnaligned();
+    void setAligned(vector<AminoAcid>);
+    vector<AminoAcid> getAligned();
     void setComment(string);
     string getComment();
     string getInlineProtein();
+    void setPairwise(vector<AminoAcid>);
+    vector<AminoAcid> getPairwise();
     
     int getNumBases();
     int getStartPos();
     int getEndPos();
     
-    void reverseComplement();
     void trim(int);
     void padToPos(int);
     void padFromPos(int);
-    int filterToPos(int); //any character before the pos is changed to . and aligned and unaligned strings changed
-    int filterFromPos(int); //any character after the pos is changed to . and aligned and unaligned strings changed
+    void filterToPos(int); //any character before the pos is changed to . and aligned and unaligned strings changed
+    void filterFromPos(int); //any character after the pos is changed to . and aligned and unaligned strings changed
     int getAlignLength();
     
     void printProtein(ostream&);
@@ -63,24 +67,30 @@ protected:
     Utils util;
     
     void initialize();
-    string getProteinString(ifstream&, int&);
+    vector<AminoAcid> getProtein(ifstream&);
+    vector<AminoAcid> getProtein(istringstream&);
     string getCommentString(ifstream&);
-    string getProteinString(istringstream&, int&);
     string getCommentString(istringstream&);
     string getProteinName(ifstream&);
     string getProteinName(istringstream&);
+    string getProteinString(vector<AminoAcid>);
+    
+#ifdef USE_BOOST
+    string getCommentString(boost::iostreams::filtering_istream&);
+    vector<AminoAcid> getProtein(boost::iostreams::filtering_istream&);
+    string getSequenceName(boost::iostreams::filtering_istream&);
+#endif
     
     string name;
-    string unaligned;
-    string aligned;
+    vector<AminoAcid> unaligned;
+    vector<AminoAcid> aligned;
     string comment;
     int numBases;
     int alignmentLength;
     int startPos, endPos;
     
-    //string pairwise;
-    //int longHomoPolymer;
-    //int ambigBases;
+    vector<AminoAcid> pairwise;
+    
    
     
 };
