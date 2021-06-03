@@ -15,8 +15,6 @@
 
 
 #include "sequence.hpp"
-#include "calculator.h"
-
 
 class SequenceDB {
 	

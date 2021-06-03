@@ -8,10 +8,6 @@
  */
 
 #include "sequencedb.h"
-#include "sequence.hpp"
-#include "mothur.h"
-#include "calculator.h"
-
 
 /***********************************************************************/
 
@@ -23,6 +19,7 @@ SequenceDB::~SequenceDB() { data.clear(); }
 /***********************************************************************/
 
 SequenceDB::SequenceDB(int newSize) {
+    m = MothurOut::getInstance(); 
 	data.resize(newSize, Sequence());
 	length = 0; samelength = true;
 }
@@ -31,6 +28,7 @@ SequenceDB::SequenceDB(int newSize) {
 
 SequenceDB::SequenceDB(ifstream& filehandle) {
 	try{
+        m = MothurOut::getInstance();
 		length = 0; samelength = true;
         Utils util;
 		//read through file
