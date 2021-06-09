@@ -382,7 +382,7 @@ int driverColumn(pairwiseData* params){
         
         for(int i=params->start;i<params->end;i++){
             
-            Sequence seq = params->alignDB.get(i);
+            Sequence seq = params->alignDB.getSeq(i);
             if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
         
             for(int j=0;j<i;j++){
@@ -390,7 +390,7 @@ int driverColumn(pairwiseData* params){
                 if (params->m->getControl_pressed()) {  break;  }
                 
                 Sequence seqI = seq;
-                Sequence seqJ = params->alignDB.get(j);
+                Sequence seqJ = params->alignDB.getSeq(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
                 alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
@@ -450,7 +450,7 @@ int driverFitCalc(pairwiseData* params){
         
         for(int i=params->start;i<params->end;i++){ //for each oldDB fasta seq calc the distance to every new seq in alignDB
             
-            Sequence seq = params->oldFastaDB.get(i);
+            Sequence seq = params->oldFastaDB.getSeq(i);
             if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
             
             for(int j = 0; j < params->alignDB.getNumSeqs(); j++){
@@ -458,7 +458,7 @@ int driverFitCalc(pairwiseData* params){
                 if (params->m->getControl_pressed()) {  break;  }
                 
                 Sequence seqI = seq;
-                Sequence seqJ = params->alignDB.get(j);
+                Sequence seqJ = params->alignDB.getSeq(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
                 alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
@@ -530,7 +530,7 @@ int driverLt(pairwiseData* params){
         
         for(int i=params->start;i<params->end;i++){
             
-            Sequence seq = params->alignDB.get(i);
+            Sequence seq = params->alignDB.getSeq(i);
             if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
             
             string name = seq.getName();
@@ -542,7 +542,7 @@ int driverLt(pairwiseData* params){
                 if (params->m->getControl_pressed()) { break;  }
                 
                 Sequence seqI = seq;
-                Sequence seqJ = params->alignDB.get(j);
+                Sequence seqJ = params->alignDB.getSeq(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
                 
                 alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
@@ -618,7 +618,7 @@ int driverSquare(pairwiseData* params){
         
         for(int i=params->start;i<params->end;i++){
             
-            Sequence seq = params->alignDB.get(i);
+            Sequence seq = params->alignDB.getSeq(i);
             if (seq.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seq.getUnaligned().length()+1); }
             
             string name = seq.getName();
@@ -630,7 +630,7 @@ int driverSquare(pairwiseData* params){
                 if (params->m->getControl_pressed()) { break;  }
                 
                 Sequence seqI = seq;
-                Sequence seqJ = params->alignDB.get(j);
+                Sequence seqJ = params->alignDB.getSeq(j);
                 if (seqJ.getUnaligned().length() > alignment->getnRows()) { alignment->resize(seqJ.getUnaligned().length()+1); }
 
                 alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());

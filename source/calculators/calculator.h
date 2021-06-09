@@ -5,6 +5,7 @@
 #include "sabundvector.hpp"
 #include "sharedrabundvector.hpp"
 #include "sequence.hpp"
+#include "protein.hpp"
 #include "mothurout.h"
 #include "utils.hpp"
 
@@ -87,7 +88,8 @@ public:
     DistCalc(double c){ dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
 
     virtual ~DistCalc() {}
-    virtual double calcDist(Sequence, Sequence) = 0;
+    virtual double calcDist(Sequence, Sequence) { return -1.0; }
+    virtual double calcDist(Protein, Protein)   { return -1.0; }
     
     //currently not used
     virtual vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols) { vector<double> dists; dists.resize(otu.numSeqs, 1.0); return dists; }

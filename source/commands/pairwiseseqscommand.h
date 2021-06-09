@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "alignment.hpp"
 #include "validcalculator.h"
 #include "calculator.h"

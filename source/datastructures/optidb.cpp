@@ -10,7 +10,7 @@
 
 /**************************************************************************************************/
 
-OptiDB::OptiDB(string referenceFileName, string v) : Database() {
+OptiDB::OptiDB(string referenceFileName, string v) : SearchDatabase() {
     alignedLength = 0;
     baseMap['A'] = 0;
     baseMap['T'] = 1;

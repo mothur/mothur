@@ -65,13 +65,13 @@ vector<vector<long long> > SplitKmerDistance::split(SequenceDB*& db){
         
         for(long long i = 0; i < numSeqs; i++){
             
-            Sequence seq = db->get(i);
+            Sequence seq = db->getSeq(i);
             
             for(long long j = 0; j < i; j++){
                 
                 if (m->getControl_pressed()) {  break;  }
                 
-                Sequence seqJ = db->get(j);
+                Sequence seqJ = db->getSeq(j);
                    
                 double dist = distCalculator.calcDist(seq, seqJ);
                 
@@ -184,7 +184,7 @@ void SplitKmerDistance::printGroup(SequenceDB*& db, vector<long long> group, str
             
             if (m->getControl_pressed()) {  break;  }
             
-            Sequence seq = db->get(group[i]);
+            Sequence seq = db->getSeq(group[i]);
             
             seq.printSequence(out);
         }

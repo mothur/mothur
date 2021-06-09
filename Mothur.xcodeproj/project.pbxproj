@@ -1388,7 +1388,7 @@
 		A7E9B6BA12D37EC400DA6239 /* corraxescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = corraxescommand.h; path = source/commands/corraxescommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6BB12D37EC400DA6239 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = coverage.cpp; path = source/calculators/coverage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BC12D37EC400DA6239 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = coverage.h; path = source/calculators/coverage.h; sourceTree = SOURCE_ROOT; };
-		A7E9B6BE12D37EC400DA6239 /* database.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = database.hpp; path = source/datastructures/database.hpp; sourceTree = SOURCE_ROOT; };
+		A7E9B6BE12D37EC400DA6239 /* searchdatabase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = searchdatabase.hpp; path = source/datastructures/searchdatabase.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6BF12D37EC400DA6239 /* datavector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = datavector.hpp; path = source/datastructures/datavector.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6C012D37EC400DA6239 /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dayhoff.h; path = source/calculators/dayhoff.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6C112D37EC400DA6239 /* decalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = decalc.cpp; path = source/chimera/decalc.cpp; sourceTree = SOURCE_ROOT; };
@@ -1832,6 +1832,7 @@
 		F4A866CA265EBD270010479A /* jtt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jtt.hpp; sourceTree = "<group>"; };
 		F4A866CF266912830010479A /* proteindb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = proteindb.cpp; sourceTree = "<group>"; };
 		F4A866D0266912830010479A /* proteindb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = proteindb.hpp; sourceTree = "<group>"; };
+		F4A866DA266946AB0010479A /* storagedatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = storagedatabase.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2779,7 +2780,6 @@
 				F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */,
 				A74D59A6159A1E3600043046 /* counttable.h */,
 				A74D59A3159A1E2000043046 /* counttable.cpp */,
-				A7E9B6BE12D37EC400DA6239 /* database.hpp */,
 				A7E9B6BF12D37EC400DA6239 /* datavector.hpp */,
 				A77916E7176F7F7600EEFE18 /* designmap.h */,
 				A77916E6176F7F7600EEFE18 /* designmap.cpp */,
@@ -2837,6 +2837,7 @@
 				48E0230224BF488D00BFEA41 /* report.hpp */,
 				A7E9B7CF12D37EC400DA6239 /* sabundvector.cpp */,
 				A7E9B7D012D37EC400DA6239 /* sabundvector.hpp */,
+				A7E9B6BE12D37EC400DA6239 /* searchdatabase.hpp */,
 				A7E9B7DB12D37EC400DA6239 /* sequence.cpp */,
 				A7E9B7DC12D37EC400DA6239 /* sequence.hpp */,
 				A741FAD415D168A00067BCC5 /* sequencecountparser.h */,
@@ -2869,6 +2870,7 @@
 				A7E9B83A12D37EC400DA6239 /* sparsematrix.hpp */,
 				A7E0243F15B4522000A5F046 /* sparsedistancematrix.h */,
 				A7E0243C15B4520A00A5F046 /* sparsedistancematrix.cpp */,
+				F4A866DA266946AB0010479A /* storagedatabase.hpp */,
 				A7E9B85112D37EC400DA6239 /* suffixdb.cpp */,
 				A7E9B85212D37EC400DA6239 /* suffixdb.hpp */,
 				A7E9B85312D37EC400DA6239 /* suffixnodes.cpp */,

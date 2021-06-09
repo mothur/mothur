@@ -11,7 +11,7 @@
  
 #include "decalc.h"
 #include "mothurchimera.h"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 
 /***********************************************************************/
 //This class was modeled after the chimeraMaligner written by the Broad Institute

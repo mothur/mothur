@@ -13,7 +13,7 @@
 
 #include "mothur.h"
 
-class BlastDB : public Database {
+class BlastDB : public SearchDatabase {
 
 public:
 	BlastDB(string, float, float, float, float, string, int);

@@ -24,12 +24,12 @@
 
 #include "sequence.hpp"
 #include "kmer.hpp"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "kmerdb.hpp"
 
 /**************************************************************************************************/
 
-KmerDB::KmerDB(string fastaFileName, int kSize) : Database(), kmerSize(kSize) {
+KmerDB::KmerDB(string fastaFileName, int kSize) : SearchDatabase(), kmerSize(kSize) {
 	try { 
 	
 		kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
@@ -51,7 +51,7 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(), kmerSize(kSize) {
 
 }
 /**************************************************************************************************/
-KmerDB::KmerDB() : Database() {
+KmerDB::KmerDB() : SearchDatabase() {
     CurrentFile* current; current = CurrentFile::getInstance();
     version = current->getVersion();
 }

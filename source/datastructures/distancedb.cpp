@@ -8,14 +8,14 @@
  */
 
 
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "sequence.hpp"
 #include "distancedb.hpp"
 #include "eachgapignore.h"
 
 
 /**************************************************************************************************/
-DistanceDB::DistanceDB() : Database() { 
+DistanceDB::DistanceDB() : SearchDatabase() { 
 	try {
 		templateAligned = true;  
 		templateSeqsLength = 0; 

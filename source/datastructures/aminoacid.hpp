@@ -48,6 +48,11 @@
  . and -        ./-           gap
 */
 
+typedef enum {
+  ala, arg, asn, asp, cys, gln, glu, gly, his, ileu, leu, lys, met, phe, pro,
+  ser1, ser2, thr, trp, tyr, val, del, stop, asx, glx, ser, unk, quest
+} aas;
+
 /**************************************************************************************************/
 
 class AminoAcid {
@@ -59,6 +64,7 @@ public:
     
     string getName();
     char getAmino()          { return aminoBase; }
+    int getNum()             { return aminoNum; }
     void setAmino(char c);
     
 protected:
@@ -67,6 +73,7 @@ protected:
     Utils util;
     
     char aminoBase;
+    int aminoNum;
     set<char> validAminoAcids;
 
     void fillValidAminoAcid();

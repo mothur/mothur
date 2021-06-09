@@ -8,13 +8,13 @@
  */
 
 
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "sequence.hpp"
 #include "blastdb.hpp"
 
 /**************************************************************************************************/
 
-BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b, int tid) : Database(), 
+BlastDB::BlastDB(string tag, float gO, float gE, float mm, float mM, string b, int tid) : SearchDatabase(),
 gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 	try {
         current = CurrentFile::getInstance();
@@ -64,7 +64,7 @@ gapOpen(gO), gapExtend(gE), match(mm), misMatch(mM) {
 }
 /**************************************************************************************************/
 
-BlastDB::BlastDB(string b, int tid) : Database() {
+BlastDB::BlastDB(string b, int tid) : SearchDatabase() {
 	try {
         current = CurrentFile::getInstance();
 		count = 0;

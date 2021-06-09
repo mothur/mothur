@@ -78,7 +78,7 @@
 #include "sharedjsd.h"
 #include "sharedrjsd.h"
 #include "shannonrange.h"
-
+#include "jtt.hpp"
 
 
 /********************************************************************/
@@ -96,6 +96,7 @@ ValidCalculators::ValidCalculators() {
 		initialVennShared();
 		initialTreeGroups();
 		initialDistance();
+        initialProtDistance();
 		initialMatrix();
 		initialHeat();
         initialEstimators();
@@ -112,6 +113,7 @@ ValidCalculators::ValidCalculators() {
 		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(*it); }
 		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(*it); }
 		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(*it); }
+        for(it = protdistance.begin(); it != protdistance.end(); it++) { allCalcs.insert(*it); }
         for(it = estimators.begin(); it != estimators.end(); it++) { allCalcs.insert(*it); }
 		
 	}
@@ -321,6 +323,13 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
             if ((distance.find(calculator)) != (distance.end())) { return true; }
             else {
                 m->mothurOut(calculator + " is not a valid estimator for the distance command and will be disregarded. Valid estimators are " + util.getStringFromSet(distance, ",") + ".\n");
+                return false;
+            }
+        }else if (parameter == "protdist") {
+            //is it valid
+            if ((protdistance.find(calculator)) != (protdistance.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the distance command and will be disregarded. Valid estimators are " + util.getStringFromSet(protdistance, ",") + ".\n");
                 return false;
             }
 		//not a valid parameter
@@ -743,6 +752,17 @@ void ValidCalculators::initialDistance() {
 		m->errorOut(e, "ValidCalculator", "initialDistance");
 		exit(1);
 	}
+}
+/********************************************************************/
+void ValidCalculators::initialProtDistance() {
+    try {
+        protdistance.insert("jtt");
+       
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidCalculator", "initialProtDistance");
+        exit(1);
+    }
 }
 
 /********************************************************************/

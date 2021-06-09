@@ -10,11 +10,11 @@
 #define optidb_hpp
 
 #include "sequence.hpp"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "calculator.h"
 #include "optimatrix.h"
 
-class OptiDB : public Database {
+class OptiDB : public SearchDatabase {
 
 public:
     

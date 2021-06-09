@@ -132,11 +132,12 @@ public:
     
     JTT(double c) : DistCalc(c) {}
 
-    double calcDist(Sequence A, Sequence B); //calc distance between 2 seqeunces
+    double calcDist(Protein A, Protein B); //calc distance between 2 seqeunces
     
 private:
     
-    
+    void predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, double& d2p, double& tt);
+    void fillNums(vector<int>& nb1, vector<int>& nb2, int, int);
 };
 
 /**************************************************************************************************/

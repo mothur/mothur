@@ -10,8 +10,9 @@
 #define proteindb_hpp
 
 #include "protein.hpp"
+#include "storagedatabase.hpp"
 
-class ProteinDB {
+class ProteinDB : public StorageDatabase {
     
 public:
     
@@ -21,18 +22,15 @@ public:
     ProteinDB(const ProteinDB& sdb) : data(sdb.data) {};
     ~ProteinDB();             //loops through data and delete each protein sequence
 
-    int getNumSeqs();
-    Protein get(int);         //returns sequence name at that location
+    Protein getProt(int);         //returns sequence name at that location
     void push_back(Protein);  //adds unaligned sequence
-    bool sameLength() { return samelength; }
-        
+    
+    int getNumSeqs();
+    
 private:
     
     vector<Protein> data;
-    MothurOut* m;
-    bool samelength;
-    int length;
-    Utils util;
+    
 
 };
 

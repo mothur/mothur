@@ -10,23 +10,19 @@
 
 /***********************************************************************/
 
-ProteinDB::ProteinDB() {  m = MothurOut::getInstance();  length = 0; samelength = true; }
+ProteinDB::ProteinDB() : StorageDatabase() { }
 /***********************************************************************/
 //the clear function free's the memory
 ProteinDB::~ProteinDB() { data.clear(); }
 
 /***********************************************************************/
 
-ProteinDB::ProteinDB(int newSize) {
-    m = MothurOut::getInstance();  length = 0; samelength = true;
-    data.resize(newSize, Protein());
-}
+ProteinDB::ProteinDB(int newSize) : StorageDatabase() {  data.resize(newSize, Protein()); }
 
 /***********************************************************************/
 
-ProteinDB::ProteinDB(ifstream& filehandle) {
+ProteinDB::ProteinDB(ifstream& filehandle) : StorageDatabase() {
     try{
-        m = MothurOut::getInstance(); length = 0; samelength = true;
         
         //read through file
         while (!filehandle.eof()) {
@@ -52,7 +48,7 @@ ProteinDB::ProteinDB(ifstream& filehandle) {
 int ProteinDB::getNumSeqs() { return data.size(); }
 
 /***********************************************************************/
-Protein ProteinDB::get(int index) {
+Protein ProteinDB::getProt(int index) {
     if ((index >= 0) && (index < data.size()) ) { return data[index]; }
     else { m->mothurOut("[ERROR]: invalid database index, please correct.\n"); m->setControl_pressed(true); Protein p; return p; }
 }

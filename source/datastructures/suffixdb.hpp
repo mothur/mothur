@@ -19,10 +19,10 @@
  */
 
 #include "mothur.h"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "suffixtree.hpp"
 
-class SuffixDB : public Database {
+class SuffixDB : public SearchDatabase {
 	
 public:
 	SuffixDB(int);
