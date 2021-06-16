@@ -416,7 +416,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 
         Command* command = NULL;
         
-        if (commandName != "help") { checkForRedirects(optionString); }
+        if ((commandName != "help") && (commandName != "system")) { checkForRedirects(optionString); }
         
 		if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
 		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}

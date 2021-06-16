@@ -1824,8 +1824,8 @@
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		F490972626090AC500C1B24F /* External_Libraries_INSTALL */ = {isa = PBXFileReference; lastKnownFileType = text; path = External_Libraries_INSTALL; sourceTree = "<group>"; };
-		F4A866B5265BE7720010479A /* protein.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = protein.cpp; sourceTree = "<group>"; };
-		F4A866B6265BE7720010479A /* protein.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = protein.hpp; sourceTree = "<group>"; };
+		F4A866B5265BE7720010479A /* protein.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = protein.cpp; path = source/datastructures/protein.cpp; sourceTree = SOURCE_ROOT; };
+		F4A866B6265BE7720010479A /* protein.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = protein.hpp; path = source/datastructures/protein.hpp; sourceTree = SOURCE_ROOT; };
 		F4A866BD265BE7EC0010479A /* aminoacid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aminoacid.cpp; sourceTree = "<group>"; };
 		F4A866BE265BE7EC0010479A /* aminoacid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = aminoacid.hpp; sourceTree = "<group>"; };
 		F4A866C9265EBD270010479A /* jtt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jtt.cpp; sourceTree = "<group>"; };
