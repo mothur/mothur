@@ -457,13 +457,13 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 /***********************************************************/
 int GetSharedOTUCommand::runShared() {
 	try {
-        InputData input(sharedfile, "sharedfile", Groups);
+        InputData input(sharedfile, "sharedfile", nullVector);
 		set<string> processedLabels;
         set<string> userLabels = labels;
         string lastLabel = "";
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
-        Groups = lookup->getNamesGroups();
+        //Groups = lookup->getNamesGroups();
         
         if (userGroups == "") {
             //make string for outputfile name
