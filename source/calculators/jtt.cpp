@@ -15,7 +15,6 @@ double JTT::calcDist(Protein A, Protein B){
         vector<AminoAcid> seqA = A.getAligned();
         vector<AminoAcid> seqB = B.getAligned();
         
-        
         bool inf = false; bool neginfinity = false; bool overlap = false;
         double delta, lnlike, slope, curv, tt;
         tt = 0.1; delta = tt / 2.0;
@@ -24,6 +23,7 @@ double JTT::calcDist(Protein A, Protein B){
             
             //reset for this attempt
             lnlike = 0.0; slope = 0.0; curv = 0.0; neginfinity = false; overlap = false;
+            double oldweight = 1.0;
             
             if (m->getControl_pressed()) { break; }
             
@@ -38,19 +38,20 @@ double JTT::calcDist(Protein A, Protein B){
                     
                     vector<int> numAs; vector<int> numBs;
                     if (numA != asx && numA != glx && numB != asx && numB != glx) {
-                        numAs.push_back(numA+1); numBs.push_back(numB+1); //+1 avoid 0
+                        if (numA < ser2) { numA++; }
+                        if (numB < ser2) { numB++; }
+                        numAs.push_back(numA); numBs.push_back(numB); //+1 avoid 0
                     }else {
                         fillNums(numAs, numBs, numA, numB);
                     }
                     
                     predict(numAs, numBs, p, dp, d2p, tt);
                     
-                    if (p <= 0.0)
-                      neginfinity = true;
-                    else {
-                      lnlike += log(p);
-                      slope += dp / p;
-                      curv += (d2p / p - dp * dp / (p * p));
+                    if (p <= 0.0) {
+                        neginfinity = true;
+                    }else {
+                        slope += oldweight*dp / p;
+                        curv += oldweight*(d2p / p - dp * dp / (p * p));
                     }
                 }//endif stop
             }//endif bases
@@ -71,6 +72,7 @@ double JTT::calcDist(Protein A, Protein B){
             }
             
             if (tt < 0.00001 && !inf) { tt = 0.00001; }
+            
         }//endif attempts
         
         dist = tt;
@@ -86,13 +88,15 @@ double JTT::calcDist(Protein A, Protein B){
 //nb1 and nb2 have size 1, unless amino acid = B or Z
 void JTT::predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, double& d2p, double& tt){
     try {
+        double q;
         
         for (int i = 0; i < nb1.size(); i++) {
             
-            for (int l = 0; l <= 19; l++) {
+            for (int l = 0; l < 20; l++) {
+              
                 double elambdat = exp(tt * jtteigs[l]);
                 
-                double q = jttprobs[l][nb1[i] - 1] * jttprobs[l][nb2[i] - 1] * elambdat;
+                q = jttprobs[l][nb1[i]-1] * jttprobs[l][nb2[i]-1] * elambdat;
                 p += q;
                 
                 dp += jtteigs[l] * q;
@@ -126,8 +130,9 @@ void JTT::fillNums(vector<int>& numAs, vector<int>& numBs, int numA, int numB){
                   numAs.push_back(4); numBs.push_back(6); //asp, gln
                   numAs.push_back(4); numBs.push_back(7); //asp, glu
               }else {
-                  numAs.push_back(3); numBs.push_back(numB+1); //asn, numB
-                  numAs.push_back(4); numBs.push_back(numB+1); //asp, numB
+                  if (numB < ser2) { numB++; }
+                  numAs.push_back(3); numBs.push_back(numB); //asn, numB
+                  numAs.push_back(4); numBs.push_back(numB); //asp, numB
               }
           }
         }else {
@@ -144,21 +149,23 @@ void JTT::fillNums(vector<int>& numAs, vector<int>& numBs, int numA, int numB){
                         numAs.push_back(7); numBs.push_back(6); //glu, gln
                         numAs.push_back(7); numBs.push_back(7); //glu, glu
                     }else {
-                        numAs.push_back(6); numBs.push_back(numB+1); //gln, numB
-                        numAs.push_back(7); numBs.push_back(numB+1); //glu, numB
+                        if (numB < ser2) { numB++; }
+                        numAs.push_back(6); numBs.push_back(numB); //gln, numB
+                        numAs.push_back(7); numBs.push_back(numB); //glu, numB
                     }
                 }
             }else {
+                if (numA < ser2) { numA++; }
                 if (numB == asx) { //B asn or asp
-                    numAs.push_back(numA+1); numBs.push_back(3); //numA, asn
-                    numAs.push_back(numA+1); numBs.push_back(4); //numA, asp
-                    numAs.push_back(numA+1); numBs.push_back(3); //numA, asn
-                    numAs.push_back(numA+1); numBs.push_back(4); //numA, asp
+                    numAs.push_back(numA); numBs.push_back(3); //numA, asn
+                    numAs.push_back(numA); numBs.push_back(4); //numA, asp
+                    numAs.push_back(numA); numBs.push_back(3); //numA, asn
+                    numAs.push_back(numA); numBs.push_back(4); //numA, asp
                 }else if (numB == glx) { //Z gln or glu (6 or 7)
-                    numAs.push_back(numA+1); numBs.push_back(6); //numA, gln
-                    numAs.push_back(numA+1); numBs.push_back(7); //numA, glu
-                    numAs.push_back(numA+1); numBs.push_back(6); //numA, gln
-                    numAs.push_back(numA+1); numBs.push_back(7); //numA, glu
+                    numAs.push_back(numA); numBs.push_back(6); //numA, gln
+                    numAs.push_back(numA); numBs.push_back(7); //numA, glu
+                    numAs.push_back(numA); numBs.push_back(6); //numA, gln
+                    numAs.push_back(numA); numBs.push_back(7); //numA, glu
                 }
             }
         }

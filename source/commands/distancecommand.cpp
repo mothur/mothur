@@ -322,8 +322,8 @@ void driverColumn(distanceData* params){
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
                 Sequence seqJ; Protein seqJP; double dist = 1.0; string nameJ = "";
-                if (params->prot)   { seqJP = params->db->getProt(j); nameJ = seqJP.getName(); distCalculator->calcDist(seqIP, seqJP);   }
-                else                { seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); distCalculator->calcDist(seqI, seqJ);       }
+                if (params->prot)   { seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 
                 if(dist <= params->cutoff){

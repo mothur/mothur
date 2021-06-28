@@ -40,6 +40,7 @@ void AminoAcid::setAmino(char c) {
         c = toupper(c);
         
         if (validAminoAcids.count(c) != 0) { aminoBase = c; getName(); }
+        
         else {
             m->mothurOut("[ERROR]: " + toString(c) + " is an invalid amino acid, please correct.\n"); m->setControl_pressed(true);
         }
@@ -193,26 +194,26 @@ void AminoAcid::fillCodons() {
          
          else if (aminoBase == 'B')     { aminoName = "Asparagine or Aspartic"; aminoNum = asx; } //23
          else if (aminoBase == 'C')     { aminoName = "Cysteine";               aminoNum = cys; } //4
-         else if (aminoBase == 'Q')     { aminoName = "Glutamine";              aminoNum = gln; }
-         else if (aminoBase == 'E')     { aminoName = "Glutamic";               aminoNum = glu; }
+         else if (aminoBase == 'Q')     { aminoName = "Glutamine";              aminoNum = gln; } //5
+         else if (aminoBase == 'E')     { aminoName = "Glutamic";               aminoNum = glu; } //6
          
          else if (aminoBase == 'Z')     { aminoName = "Glutamine or Glutamic_Acid"; aminoNum = glx; } //24
-         else if (aminoBase == 'G')     { aminoName = "Glycine";        aminoNum = gly;     }
-         else if (aminoBase == 'H')     { aminoName = "Histidine";      aminoNum = his;     }
-         else if (aminoBase == 'I')     { aminoName = "Isoleucine";     aminoNum = ileu;    }
+         else if (aminoBase == 'G')     { aminoName = "Glycine";        aminoNum = gly;     } //7
+         else if (aminoBase == 'H')     { aminoName = "Histidine";      aminoNum = his;     } //8
+         else if (aminoBase == 'I')     { aminoName = "Isoleucine";     aminoNum = ileu;    } //9
          
-         else if (aminoBase == 'L')     { aminoName = "Leucine";        aminoNum = leu;     }
-         else if (aminoBase == 'K')     { aminoName = "Lysine";         aminoNum = lys;     }
-         else if (aminoBase == 'M')     { aminoName = "Methionine";     aminoNum = met;     }
-         else if (aminoBase == 'F')     { aminoName = "Phenylalanine";  aminoNum = phe;     }
+         else if (aminoBase == 'L')     { aminoName = "Leucine";        aminoNum = leu;     } //10
+         else if (aminoBase == 'K')     { aminoName = "Lysine";         aminoNum = lys;     } //11
+         else if (aminoBase == 'M')     { aminoName = "Methionine";     aminoNum = met;     } //12
+         else if (aminoBase == 'F')     { aminoName = "Phenylalanine";  aminoNum = phe;     } //13
          
-         else if (aminoBase == 'P')     { aminoName = "Proline";        aminoNum = pro;     }
-         else if (aminoBase == 'S')     { aminoName = "Serine";         aminoNum = ser1;    }
-         else if (aminoBase == 'T')     { aminoName = "Threonine";      aminoNum = thr;     }
-         else if (aminoBase == 'W')     { aminoName = "Tryptophan";     aminoNum = trp;     }
+         else if (aminoBase == 'P')     { aminoName = "Proline";        aminoNum = pro;     } //14
+         else if (aminoBase == 'S')     { aminoName = "Serine";         aminoNum = ser1;    } //15
+         else if (aminoBase == 'T')     { aminoName = "Threonine";      aminoNum = thr;     } //17
+         else if (aminoBase == 'W')     { aminoName = "Tryptophan";     aminoNum = trp;     } //18
          
-         else if (aminoBase == 'Y')     { aminoName = "Tyrosine";       aminoNum = tyr;     }
-         else if (aminoBase == 'V')     { aminoName = "Valine";         aminoNum = val;     }
+         else if (aminoBase == 'Y')     { aminoName = "Tyrosine";       aminoNum = tyr;     } //19
+         else if (aminoBase == 'V')     { aminoName = "Valine";         aminoNum = val;     } //20
          else if ((aminoBase == '.') || (aminoBase == '-'))     { aminoName = "Gap"; aminoNum = del;  } //21
          else if (aminoBase == '*')     { aminoName = "STOP";           aminoNum = stop;    } //22
          else if (aminoBase == '?')     { aminoName = "QUESTION";       aminoNum = quest;   } //27
