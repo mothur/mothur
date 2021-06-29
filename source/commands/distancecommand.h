@@ -24,6 +24,7 @@
 #include "writer.h"
 #include "sequencedb.h"
 #include "proteindb.hpp"
+#include "pmb.hpp"
 
 /**************************************************************************************************/
 struct distanceData {

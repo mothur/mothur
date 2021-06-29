@@ -79,6 +79,7 @@
 #include "sharedrjsd.h"
 #include "shannonrange.h"
 #include "jtt.hpp"
+#include "pmb.hpp"
 
 
 /********************************************************************/
@@ -214,6 +215,8 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "jsd") { Calculator* temp = new JSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "rjsd") { Calculator* temp = new RJSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "jtt") { DistCalc* temp = new JTT(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "pmb") { DistCalc* temp = new PMB(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations.\n");  }
 			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given.\n");  }
 		}
@@ -757,6 +760,7 @@ void ValidCalculators::initialDistance() {
 void ValidCalculators::initialProtDistance() {
     try {
         protdistance.insert("jtt");
+        protdistance.insert("pmb");
        
     }
     catch(exception& e) {

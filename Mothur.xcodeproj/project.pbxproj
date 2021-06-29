@@ -857,6 +857,7 @@
 		F4A866CC265EBD270010479A /* jtt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866C9265EBD270010479A /* jtt.cpp */; };
 		F4A866D1266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A866D2266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
+		F4A86701268B71A80010479A /* pmb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866FF268B71A80010479A /* pmb.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1833,6 +1834,8 @@
 		F4A866CF266912830010479A /* proteindb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = proteindb.cpp; sourceTree = "<group>"; };
 		F4A866D0266912830010479A /* proteindb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = proteindb.hpp; sourceTree = "<group>"; };
 		F4A866DA266946AB0010479A /* storagedatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = storagedatabase.hpp; sourceTree = "<group>"; };
+		F4A866FF268B71A80010479A /* pmb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pmb.cpp; sourceTree = "<group>"; };
+		F4A86700268B71A80010479A /* pmb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pmb.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2354,6 +2357,8 @@
 				48998B68242E785100DBD0A9 /* onegapdist.cpp */,
 				A7E9B77412D37EC400DA6239 /* onegapignore.h */,
 				481E40DA244DFF5A0059C925 /* onegapignore.cpp */,
+				F4A866FF268B71A80010479A /* pmb.cpp */,
+				F4A86700268B71A80010479A /* pmb.hpp */,
 			);
 			name = distcalcs;
 			sourceTree = "<group>";
@@ -3534,6 +3539,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */,
+				F4A86701268B71A80010479A /* pmb.cpp in Sources */,
 				A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */,
 				A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */,
 				A7E9B88412D37EC400DA6239 /* alignmentcell.cpp in Sources */,

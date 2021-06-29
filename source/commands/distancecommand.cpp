@@ -16,7 +16,7 @@ vector<string> DistanceCommand::setParameters(){
 		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn","",false,false); parameters.push_back(poldfasta);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true, true); parameters.push_back(pfasta);
 		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
-		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap-protdist", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap-jtt-pmb", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
         CommandParameter pfitcalc("fitcalc", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfitcalc);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
@@ -49,7 +49,7 @@ string DistanceCommand::getHelpString(){
 		helpString += "The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, compress, cutoff and processors.  \n";
 		helpString += "The fasta parameter is required, unless you have a valid current fasta file.\n";
 		helpString += "The oldfasta and column parameters allow you to append the distances calculated to the column file.\n";
-		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap for dna/rna sequences. If using protein sequences, your calc options are jtt........ The default is onegap.\n";
+		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap for dna/rna sequences. If using protein sequences, your calc options are jtt, pmb....... The default is onegap.\n";
 		helpString += "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n";
 		helpString += "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n";
@@ -146,10 +146,10 @@ DistanceCommand::DistanceCommand(string option) {
 			
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column.\n");  output = "column"; }
             
-            if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps") && (calc != "jtt")) { m->mothurOut(calc + " is not a valid output form. Options are eachgap, onegap, nogaps and jtt. I'll use onegap.\n");  calc = "onegap";  }
+            if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps") && (calc != "jtt") && (calc != "pmb")) { m->mothurOut(calc + " is not a valid output form. Options are eachgap, onegap, nogaps, jtt and pmb. I'll use onegap.\n");  calc = "onegap";  }
             
             prot = false; //not using protein sequences
-            if ((calc == "jtt")) { prot = true; }
+            if ((calc == "jtt") || (calc == "pmb")) { prot = true; }
 
 		}
 	}
@@ -301,6 +301,7 @@ void driverColumn(distanceData* params){
         }else {
             if (validCalculator.isValidCalculator("protdist", params->calc) ) {
                 if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
             }
         }
             

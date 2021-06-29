@@ -85,11 +85,15 @@ protected:
 class DistCalc {
     
 public:
-    DistCalc(double c){ dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
+    DistCalc(double c){ name = "unknown"; dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
 
     virtual ~DistCalc() {}
     virtual double calcDist(Sequence, Sequence) { return -1.0; }
     virtual double calcDist(Protein, Protein)   { return -1.0; }
+    virtual string getCitation() = 0;
+    void citation() { m->mothurOut(getCitation()+"\n");}
+    
+    virtual string getName()        {    return name;        }
     
     //currently not used
     virtual vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols) { vector<double> dists; dists.resize(otu.numSeqs, 1.0); return dists; }
@@ -99,6 +103,7 @@ protected:
     MothurOut* m;
     Utils util;
     double cutoff;
+    string name;
     
     vector<int> setStartsIgnoreTermGap(classifierOTU seqA, classifierOTU otu, vector<int> cols);
     vector<int> setEndsIgnoreTermGap(classifierOTU seqA, classifierOTU otu, vector<int> cols);
@@ -111,6 +116,9 @@ protected:
     int setStartIgnoreTermGap(string, string, bool&);
     int setEndIgnoreTermGap(string, string, bool&);
     
+    //used by protein calcs
+    void predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, double& d2p, double& tt, double eigs[20], double probs[20][20]);
+    void fillNums(vector<int>& nb1, vector<int>& nb2, int, int);
 };
 /**************************************************************************************************/
 

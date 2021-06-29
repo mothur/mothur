@@ -1,15 +1,15 @@
 //
-//  jtt.cpp
+//  pmb.cpp
 //  Mothur
 //
-//  Created by Sarah Westcott on 5/26/21.
+//  Created by Sarah Westcott on 6/29/21.
 //  Copyright © 2021 Schloss Lab. All rights reserved.
 //
 
-#include "jtt.hpp"
+#include "pmb.hpp"
 
 /***********************************************************************/
-double JTT::calcDist(Protein A, Protein B){
+double PMB::calcDist(Protein A, Protein B){
     try {
         int numBases = A.getAlignLength();
         vector<AminoAcid> seqA = A.getAligned();
@@ -45,7 +45,7 @@ double JTT::calcDist(Protein A, Protein B){
                         fillNums(numAs, numBs, numA, numB);
                     }
                     
-                    predict(numAs, numBs, p, dp, d2p, tt, jtteigs, jttprobs);
+                    predict(numAs, numBs, p, dp, d2p, tt, pmbeigs, pmbprobs);
                     
                     if (p <= 0.0) {
                         neginfinity = true;

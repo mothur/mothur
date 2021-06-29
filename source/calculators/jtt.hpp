@@ -130,14 +130,14 @@ class JTT : public DistCalc {
     
 public:
     
-    JTT(double c) : DistCalc(c) {}
+    JTT(double c) : DistCalc(c) { name = "JTT (Jones-Taylor-Thornton matrix)"; }
 
     double calcDist(Protein A, Protein B); //calc distance between 2 seqeunces
+    string getCitation() { return "https://evolution.gs.washington.edu/phylip/doc/protdist.html, https://evolution.genetics.washington.edu/phylip/credits.html"; }
     
 private:
     
-    void predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, double& d2p, double& tt);
-    void fillNums(vector<int>& nb1, vector<int>& nb2, int, int);
+    
 };
 
 /**************************************************************************************************/
