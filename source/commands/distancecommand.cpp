@@ -15,7 +15,7 @@ vector<string> DistanceCommand::setParameters(){
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn","column",false,false); parameters.push_back(pcolumn);
 		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn","",false,false); parameters.push_back(poldfasta);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true, true); parameters.push_back(pfasta);
-		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
+		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
 		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap-jtt-pmb-pam-kimura", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
         CommandParameter pfitcalc("fitcalc", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfitcalc);
@@ -324,9 +324,9 @@ void driverColumn(distanceData* params){
                 
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
-                Sequence seqJ; Protein seqJP; double dist = 1.0; string nameJ = "";
-                if (params->prot)   { seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
-                else                { seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
+                double dist = 1.0; string nameJ = "";
+                if (params->prot)   { Protein seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 
                 if(dist <= params->cutoff){
@@ -355,17 +355,27 @@ void driverLt(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         double cutoff = 1.0;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
         
@@ -380,13 +390,15 @@ void driverLt(distanceData* params){
         
         if(params->startLine == 0){	outFile << numSeqs << endl;	}
         
-        
         params->count = 0;
         for(int i=params->startLine;i<params->endLine;i++){
             
-            string name = params->db->getSeq(i).getName();
-            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } }
-            outFile << name;
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->db->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->db->getSeq(i);     nameI = seqI.getName();     }
+            
+            if (nameI.length() < 10) {  while (nameI.length() < 10) {  nameI += " ";  } }
+            outFile << nameI;
             
             for(int j=0;j<i;j++){
                 
@@ -394,7 +406,9 @@ void driverLt(distanceData* params){
                 
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
-                double dist = distCalculator->calcDist(params->db->getSeq(i), params->db->getSeq(j));
+                double dist = 1.0;
+                if (params->prot)   { Protein seqJP = params->db->getProt(j);  dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 if(dist <= params->cutoff){ params->count++; }
                 outFile  << '\t' << dist;
@@ -422,26 +436,36 @@ void driverSquare(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         double cutoff = 1.0;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	    }
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	    }
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
+        
         int startTime = time(NULL);
         
         //column file
         ofstream outFile;
         params->util.openOutputFile(params->outputFileName, outFile);
-        outFile.setf(ios::fixed, ios::showpoint);
-        outFile << setprecision(4);
+        outFile.setf(ios::fixed, ios::showpoint); outFile << setprecision(4);
         
         long long numSeqs = params->db->getNumSeqs();
         if(params->startLine == 0){	outFile << numSeqs << endl;	}
@@ -449,17 +473,23 @@ void driverSquare(distanceData* params){
         params->count = 0;
         for(int i=params->startLine;i<params->endLine;i++){
             
-            string name = params->db->getSeq(i).getName();
-            //pad with spaces to make compatible
-            if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->db->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->db->getSeq(i);     nameI = seqI.getName();     }
             
-            outFile << name << '\t';
+            if (nameI.length() < 10) {  while (nameI.length() < 10) {  nameI += " ";  } }
+            outFile << nameI << '\t';
             
             for(int j=0;j<numSeqs;j++){
                 
                 if (params->m->getControl_pressed()) { break; }
                 
-                double dist = distCalculator->calcDist(params->db->getSeq(i), params->db->getSeq(j));
+                double dist = 1.0;
+                if (i == j) { dist = 0.0000; }
+                else {
+                    if (params->prot)   { Protein seqJP = params->db->getProt(j);  dist = distCalculator->calcDist(seqIP, seqJP);   }
+                    else                { Sequence seqJ = params->db->getSeq(j);  dist = distCalculator->calcDist(seqI, seqJ);       }
+                }
                 
                 if(dist <= params->cutoff){ params->count++; }
                 
@@ -486,17 +516,27 @@ void driverFitCalc(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
         
@@ -505,16 +545,22 @@ void driverFitCalc(distanceData* params){
         string buffer = "";
         for(int i=params->startLine;i<params->endLine;i++){
             
-            Sequence seqI = params->oldFastaDB->getSeq(i);
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->oldFastaDB->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->oldFastaDB->getSeq(i);     nameI = seqI.getName();     }
+            
+            
             for(int j = 0; j < params->db->getNumSeqs(); j++){
                 
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seqJ = params->db->getSeq(j);
-                double dist = distCalculator->calcDist(seqI, seqJ);
+                double dist = 1.0; string nameJ = "";
+                
+                if (params->prot)   { Protein seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 if(dist <= params->cutoff){
-                    buffer += seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n";
+                    buffer += nameI + " " + nameJ + " " + toString(dist) + "\n";
                     params->count++;
                 }
             }
@@ -548,7 +594,7 @@ void DistanceCommand::createProcesses(string filename) {
         
         double numDists = 0;
         
-        if (output == "square") { numDists = numSeqs * numSeqs; }
+        if (output == "square") { numDists = numSeqs; }
         else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
         if (numDists < processors) { processors = numDists; }
         
