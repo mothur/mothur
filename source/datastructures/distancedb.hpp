@@ -14,7 +14,7 @@
 #include "mothur.h"
 #include "calculator.h"
 
-class DistanceDB : public Database {
+class DistanceDB : public SearchDatabase {
 	
 public:
 	

@@ -15,20 +15,20 @@
  *
  */
 
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "sequence.hpp"
 #include "suffixtree.hpp"
 #include "suffixdb.hpp"
 
 /**************************************************************************************************/
 
-SuffixDB::SuffixDB(int numSeqs) : Database() {
+SuffixDB::SuffixDB(int numSeqs) : SearchDatabase() {
 	suffixForest.resize(numSeqs);
 	count = 0;
 }
 /**************************************************************************************************/
 
-SuffixDB::SuffixDB() : Database() {
+SuffixDB::SuffixDB() : SearchDatabase() {
 	count = 0;
 }
 

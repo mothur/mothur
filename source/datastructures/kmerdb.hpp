@@ -20,9 +20,9 @@
  */
 
 #include "mothur.h"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 
-class KmerDB : public Database {
+class KmerDB : public SearchDatabase {
 	
 public:
 	KmerDB(string, int);

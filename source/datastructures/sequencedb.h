@@ -13,12 +13,10 @@
 
 /* This class is a container to store the sequences. */
 
-
+#include "storagedatabase.hpp"
 #include "sequence.hpp"
-#include "calculator.h"
 
-
-class SequenceDB {
+class SequenceDB : public StorageDatabase {
 	
 public:
 	SequenceDB();
@@ -28,15 +26,14 @@ public:
 	~SequenceDB();             //loops through data and delete each sequence
 
 	int getNumSeqs();
-    Sequence get(int);         //returns sequence name at that location
+    Sequence getSeq(int);         //returns sequence name at that location
 	void push_back(Sequence);  //adds unaligned sequence
 	bool sameLength() { return samelength; }
 		
 private:
 	vector<Sequence> data;
-	MothurOut* m;
-	bool samelength;
-	int length;
+	
+	
 
 };
 

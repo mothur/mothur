@@ -25,6 +25,7 @@ public:
     vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols);
      
     double calcDist(Sequence A, Sequence B); //calc distance between 2 seqeunces
+    string getCitation() { return "http://mothur.org"; }
     
 private:
     

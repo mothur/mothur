@@ -23,6 +23,8 @@ public:
     double calcDist(Sequence A, Sequence B);
     
     vector<double> calcDist(Sequence A, classifierOTU otu, vector<int> cols);
+    
+    string getCitation() { return "http://mothur.org"; }
 
 	
 };

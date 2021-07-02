@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "utils.hpp"
 #include "currentfile.h"
 
@@ -33,7 +33,7 @@ private:
 	int numSeqs, longest, threadID;
 	string method;
 	
-	Database* search;
+    SearchDatabase* search;
 	vector<Sequence> templateSequences;
 	Sequence emptySequence;
 	MothurOut* m;

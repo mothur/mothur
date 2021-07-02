@@ -12,12 +12,14 @@
 //**********************************************************************************************************************
 vector<string> SystemCommand::setParameters(){	
 	try {
-		CommandParameter pcommand("command", "String", "", "", "", "", "","",false,false); parameters.push_back(pcommand);
+		     
+        CurrentFile* current; current = CurrentFile::getInstance();
+        outputdir = current->getOutputDir();
         
         abort = false; calledHelp = false;
 				
 		vector<string> myArray;
-		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
+		
 		return myArray;
 	}
 	catch(exception& e) {
@@ -34,26 +36,18 @@ SystemCommand::SystemCommand(string option)  {
         else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-			OptionParser parser(option, setParameters());
-			map<string, string> parameters = parser.getParameters();
+            setParameters();
+            string optionCopy = option;
+            string parameter = "";
+            
+            //if command is used parameter=command optionCopy=cp ....
+            if (optionCopy.find("command=") != string::npos) { util.splitAtEquals(parameter, optionCopy); }
 			
-			ValidParameters validParameter;
-			string commandOption = validParameter.validPath(parameters, "command");
-			if (commandOption == "not found") { commandOption = ""; }
-			else { command = commandOption; }
+			//ValidParameters validParameter;
+			if (parameter != "command") { command = option; }
+			else { command = optionCopy; } //command= removed
 			
-            if ((option == "") && (commandOption == "")) { m->mothurOut("[ERROR]: You must enter a command to run.\n"); abort = true; }
-			else if (commandOption == "") { 
-				//check for outputdir and inputdir parameters
-				int commaPos = option.find_first_of(',');
-				
-				//if there is a comma then grab string up to that pos
-				if (commaPos != option.npos) {
-					option = option.substr(0, commaPos);
-				}
-			
-				command = option;
-			}
+            if ((command == "")) { m->mothurOut("[ERROR]: You must enter a command to run.\n"); abort = true; }
 		}	
 
 	}
@@ -96,11 +90,14 @@ int SystemCommand::execute(){
 			usedRedirect = true;
 		}
        
-		system(command.c_str());
+        //m->mothurOut("[DEBUG]: command = '" + command + "'\n");
+        
+        if (m->getDebug()) { m->mothurOut("[DEBUG]: command = '" + command + "'\n"); }
+		
+        system(command.c_str());
   
 		if (usedRedirect) {
-			ifstream in;
-			util.openInputFile(redirectFileName, in, "no error");
+			ifstream in; util.openInputFile(redirectFileName, in, "no error");
 			
 			string output = "";
 			while(char c = in.get()){
@@ -110,7 +107,6 @@ int SystemCommand::execute(){
 			in.close();
             
 			m->mothurOut(output); m->mothurOutEndLine();
-            //if (output != "") { exit(1); }
 			util.mothurRemove(redirectFileName);
 		}
 		

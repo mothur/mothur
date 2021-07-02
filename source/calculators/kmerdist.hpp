@@ -20,6 +20,7 @@ public:
     KmerDist(double c, int k); 
     
     double calcDist(Sequence A, Sequence B);
+    string getCitation() { return "http://mothur.org"; }
 
 private:
     int kmerSize, maxKmer;

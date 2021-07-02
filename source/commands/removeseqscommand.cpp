@@ -226,8 +226,8 @@ int RemoveSeqsCommand::execute(){
 		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
-            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
-                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+            if (fastafile != "") {
+                m->mothurOut("\n[WARNING]: Are you run the remove.seqs command after running a chimera command with dereplicate=t? If so, the count file has already been modified to remove all chimeras and adjust group counts. Including the count file here will cause downstream file mismatches.\n\n");
             }
         }
 		

@@ -15,8 +15,8 @@ vector<string> DistanceCommand::setParameters(){
 		CommandParameter pcolumn("column", "InputTypes", "", "", "none", "none", "OldFastaColumn","column",false,false); parameters.push_back(pcolumn);
 		CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn","",false,false); parameters.push_back(poldfasta);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true, true); parameters.push_back(pfasta);
-		CommandParameter poutput("output", "Multiple", "column-lt-square-phylip", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
-		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
+		CommandParameter poutput("output", "Multiple", "column-lt-square", "column", "", "", "","phylip-column",false,false, true); parameters.push_back(poutput);
+		CommandParameter pcalc("calc", "Multiple", "nogaps-eachgap-onegap-jtt-pmb-pam-kimura", "onegap", "", "", "","",false,false); parameters.push_back(pcalc);
 		CommandParameter pcountends("countends", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcountends);
         CommandParameter pfitcalc("fitcalc", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfitcalc);
 		CommandParameter pcompress("compress", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcompress);
@@ -49,7 +49,7 @@ string DistanceCommand::getHelpString(){
 		helpString += "The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, compress, cutoff and processors.  \n";
 		helpString += "The fasta parameter is required, unless you have a valid current fasta file.\n";
 		helpString += "The oldfasta and column parameters allow you to append the distances calculated to the column file.\n";
-		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n";
+		helpString += "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap for dna/rna sequences. If using protein sequences, your calc options are jtt, pmb, pam and kimura. The default is onegap.\n";
 		helpString += "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n";
 		helpString += "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n";
@@ -97,18 +97,10 @@ DistanceCommand::DistanceCommand(string option) {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not found") { 				
 				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");
-					ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
-					alignDB = SequenceDB(inFASTA); 
-					inFASTA.close();
-				}else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+                else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n"); abort = true; }
 			}else if (fastafile == "not open") { abort = true; }	
-			else{
-				ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
-				alignDB = SequenceDB(inFASTA); 
-				inFASTA.close();
-				current->setFastaFile(fastafile);
-			}
+			else{ current->setFastaFile(fastafile); }
 			
 			oldfastafile = validParameter.validFile(parameters, "oldfasta");
 			if (oldfastafile == "not found") { oldfastafile = ""; }
@@ -119,9 +111,7 @@ DistanceCommand::DistanceCommand(string option) {
 			else if (column == "not open") { abort = true; }	
 			else { current->setColumnFile(column); }
 			
-            if (outputdir == ""){
-				outputdir += util.hasPath(fastafile); 
-			}
+            if (outputdir == ""){ outputdir += util.hasPath(fastafile);  }
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -129,7 +119,7 @@ DistanceCommand::DistanceCommand(string option) {
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
-			}
+            }
 
 			string temp;
 			temp = validParameter.valid(parameters, "countends");	if(temp == "not found"){	temp = "T";	}
@@ -149,14 +139,17 @@ DistanceCommand::DistanceCommand(string option) {
 
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output == "phylip") { output = "lt";  }
-			
+            
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both.\n");  abort=true; }
 			
 			if ((column != "") && (oldfastafile != "") && (output != "column")) { m->mothurOut("You have provided column and oldfasta, indicating you want to append distances to your column file. Your output must be in column format to do so.\n"); abort=true; }
 			
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column.\n");  output = "column"; }
             
-            if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps")) { m->mothurOut(calc + " is not a valid output form. Options are eachgap, onegap and nogaps. I'll use onegap.\n");  calc = "onegap";  }
+            if ((calc != "onegap") && (calc != "eachgap") && (calc != "nogaps") && (calc != "jtt") && (calc != "pmb") && (calc != "pam") && (calc != "kimura")) { m->mothurOut(calc + " is not a valid calc. Options are eachgap, onegap, nogaps, jtt, pmb, pam and kimura. I'll use onegap.\n");  calc = "onegap";  }
+            
+            prot = false; //not using protein sequences
+            if ((calc == "jtt") || (calc == "pmb") || (calc == "pam") || (calc == "kimura")) { prot = true; }
 
 		}
 	}
@@ -173,81 +166,23 @@ int DistanceCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         numDistsBelowCutoff = 0;
+        
+        ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
+        if (prot) { db = new ProteinDB(inFASTA);  }
+        else      { db = new SequenceDB(inFASTA); }
+        inFASTA.close();
 		
 		//save number of new sequence
-		numNewFasta = alignDB.getNumSeqs();
+		numNewFasta = db->getNumSeqs();
         
-        if (false) {
-            DistCalc* distCalculator;
-            if (countends) {
-                if (calc == "nogaps")            {    distCalculator = new ignoreGaps(cutoff);    }
-                else if (calc == "eachgap")    {    distCalculator = new eachGapDist(cutoff);    }
-                else if (calc == "onegap")        {    distCalculator = new oneGapDist(cutoff);    }
-            }else {
-                if (calc == "nogaps")        {    distCalculator = new ignoreGaps(cutoff);                    }
-                else if (calc == "eachgap"){    distCalculator = new eachGapIgnoreTermGapDist(cutoff);    }
-                else if (calc == "onegap")    {    distCalculator = new oneGapIgnoreTermGapDist(cutoff);        }
-            }
-            
-            Sequence seqI = alignDB.get(0);
-            vector<int> colsToUse;
-            for (int i = 0; i < seqI.getAligned().length(); i++) {
-                if (i % 8 == 0){ colsToUse.push_back(i); cout << i << endl; }
-            }
-            for(int i=0;i<numNewFasta;i++){
-                
-                Sequence seqI = alignDB.get(i);
-                
-                for(int j=0;j<i;j++){
-                    
-                    if (m->getControl_pressed()) { break;  }
-                    
-                    Sequence seqJ = alignDB.get(j);
-                    double dist = distCalculator->calcDist(seqI, seqJ);
-                    
-                    cout << "seq2seq Dist = "  << dist << endl;
-                    
-                    string seqISampledAligned = ""; string seqJSampledAligned = "";
-                    for (int k = 0; k < colsToUse.size(); k++) {
-                        seqISampledAligned += seqI.getAligned()[colsToUse[k]];
-                        seqJSampledAligned += seqJ.getAligned()[colsToUse[k]];
-                    }
-                    Sequence sampledI("sampledI", seqISampledAligned);
-                    Sequence sampledJ("sampledJ", seqJSampledAligned);
-                    
-                    classifierOTU seqJOTU(seqJ.getAligned());
-                    vector<double> distOTU = distCalculator->calcDist(seqI, seqJOTU, nullIntVector);
-                    
-                    cout << "seq2OTU Dist = " << distOTU[0] << endl;
-                    
-                    vector<string> thisAligned; thisAligned.push_back(seqJ.getAligned());  thisAligned.push_back(seqI.getAligned());
-                    
-                    classifierOTU seqAOTU(thisAligned);
-                    
-                    //cout << seqISampledAligned << endl << seqJSampledAligned << endl;
-                    
-                    dist = distCalculator->calcDist(sampledI, sampledJ);
-                    
-                    cout << "sampled seq2seq dist = " << dist << endl;
-                    
-                    distOTU = distCalculator->calcDist(seqI, seqAOTU, colsToUse);
-                    
-                    for (int k = 0; k < distOTU.size(); k++) {
-                        cout << "sampled seq2OTU dist = "  << distOTU[k] << endl;
-                    }
-                }
-            }
-            
-            delete distCalculator;
-        }
-		//sanity check the oldfasta and column file as well as add oldfasta sequences to alignDB
+		//sanity check the oldfasta and column file as well as add oldfasta sequences to db
         if ((oldfastafile != "") && (column != ""))  {	if (!(sanityCheck())) { return 0; }  }
 		
-		if (m->getControl_pressed()) { return 0; }
+        if (m->getControl_pressed()) { delete db; return 0; }
 		
-		numSeqs = alignDB.getNumSeqs();
+		numSeqs = db->getNumSeqs();
 		
-		if (!alignDB.sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting.\n");  return 0; }
+		if (!db->sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting.\n");  return 0; }
         if (numSeqs < 2) {  m->mothurOut("[ERROR]: you must have at least 2 sequences to calculate the distances, aborting.\n");  return 0; }
 
         
@@ -283,7 +218,7 @@ int DistanceCommand::execute(){
         m->mothurOut("\nSequence\tTime\tNum_Dists_Below_Cutoff\n");
                      
         createProcesses(outputFile);
-		
+        
 		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
 		ifstream fileHandle;
@@ -348,19 +283,30 @@ void driverColumn(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);               }
             }
         }
+            
         
         int startTime = time(NULL);
        
@@ -368,18 +314,23 @@ void driverColumn(distanceData* params){
         string buffer = "";
         for(int i=params->startLine;i<params->endLine;i++){
             
-            Sequence seqI = params->alignDB.get(i);
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->db->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->db->getSeq(i);     nameI = seqI.getName();     }
+            
             for(int j=0;j<i;j++){
                 
                 if (params->m->getControl_pressed()) { break;  }
                 
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
-                Sequence seqJ = params->alignDB.get(j);
-                double dist = distCalculator->calcDist(seqI, seqJ);
+                double dist = 1.0; string nameJ = "";
+                if (params->prot)   { Protein seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
+                
                 
                 if(dist <= params->cutoff){
-                    buffer += (seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n");
+                    buffer += (nameI + " " + nameJ + " " + toString(dist) + "\n");
                     params->count++;
                 }
             }
@@ -404,22 +355,32 @@ void driverLt(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         double cutoff = 1.0;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	}
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
         
         int startTime = time(NULL);
-        long long numSeqs = params->alignDB.getNumSeqs();
+        long long numSeqs = params->db->getNumSeqs();
         
         //column file
         ofstream outFile;
@@ -429,13 +390,15 @@ void driverLt(distanceData* params){
         
         if(params->startLine == 0){	outFile << numSeqs << endl;	}
         
-        
         params->count = 0;
         for(int i=params->startLine;i<params->endLine;i++){
             
-            string name = params->alignDB.get(i).getName();
-            if (name.length() < 10) {  while (name.length() < 10) {  name += " ";  } }
-            outFile << name;
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->db->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->db->getSeq(i);     nameI = seqI.getName();     }
+            
+            if (nameI.length() < 10) {  while (nameI.length() < 10) {  nameI += " ";  } }
+            outFile << nameI;
             
             for(int j=0;j<i;j++){
                 
@@ -443,7 +406,9 @@ void driverLt(distanceData* params){
                 
                 if ((i >= params->numNewFasta) && (j >= params->numNewFasta)) { break; }
                 
-                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
+                double dist = 1.0;
+                if (params->prot)   { Protein seqJP = params->db->getProt(j);  dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 if(dist <= params->cutoff){ params->count++; }
                 outFile  << '\t' << dist;
@@ -471,44 +436,60 @@ void driverSquare(distanceData* params){
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
         double cutoff = 1.0;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	    }
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(cutoff);	    }
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
+        
         int startTime = time(NULL);
         
         //column file
         ofstream outFile;
         params->util.openOutputFile(params->outputFileName, outFile);
-        outFile.setf(ios::fixed, ios::showpoint);
-        outFile << setprecision(4);
+        outFile.setf(ios::fixed, ios::showpoint); outFile << setprecision(4);
         
-        long long numSeqs = params->alignDB.getNumSeqs();
+        long long numSeqs = params->db->getNumSeqs();
         if(params->startLine == 0){	outFile << numSeqs << endl;	}
         
         params->count = 0;
         for(int i=params->startLine;i<params->endLine;i++){
             
-            string name = params->alignDB.get(i).getName();
-            //pad with spaces to make compatible
-            if (name.length() < 10) { while (name.length() < 10) {  name += " ";  } }
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->db->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->db->getSeq(i);     nameI = seqI.getName();     }
             
-            outFile << name << '\t';
+            if (nameI.length() < 10) {  while (nameI.length() < 10) {  nameI += " ";  } }
+            outFile << nameI << '\t';
             
             for(int j=0;j<numSeqs;j++){
                 
                 if (params->m->getControl_pressed()) { break; }
                 
-                double dist = distCalculator->calcDist(params->alignDB.get(i), params->alignDB.get(j));
+                double dist = 1.0;
+                if (i == j) { dist = 0.0000; }
+                else {
+                    if (params->prot)   { Protein seqJP = params->db->getProt(j);  dist = distCalculator->calcDist(seqIP, seqJP);   }
+                    else                { Sequence seqJ = params->db->getSeq(j);  dist = distCalculator->calcDist(seqI, seqJ);       }
+                }
                 
                 if(dist <= params->cutoff){ params->count++; }
                 
@@ -535,17 +516,27 @@ void driverFitCalc(distanceData* params){
     try {
         ValidCalculators validCalculator;
         DistCalc* distCalculator;
-        if (params->countends) {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
-                else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+        
+        if (!params->prot) {
+            if (params->countends) {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")			{	distCalculator = new ignoreGaps(params->cutoff);	}
+                    else if (params->calc == "eachgap")	{	distCalculator = new eachGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")		{	distCalculator = new oneGapDist(params->cutoff);	}
+                }
+            }else {
+                if (validCalculator.isValidCalculator("distance", params->calc) ) {
+                    if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
+                    else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
+                    else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+                }
             }
         }else {
-            if (validCalculator.isValidCalculator("distance", params->calc) ) {
-                if (params->calc == "nogaps")		{	distCalculator = new ignoreGaps(params->cutoff);					}
-                else if (params->calc == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist(params->cutoff);	}
-                else if (params->calc == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist(params->cutoff);		}
+            if (validCalculator.isValidCalculator("protdist", params->calc) ) {
+                if (params->calc == "jtt")        {    distCalculator = new JTT(params->cutoff);                    }
+                else if (params->calc == "pmb")        {    distCalculator = new PMB(params->cutoff);               }
+                else if (params->calc == "pam")        {    distCalculator = new PAM(params->cutoff);               }
+                else if (params->calc == "kimura")        {    distCalculator = new Kimura(params->cutoff);         }
             }
         }
         
@@ -554,16 +545,22 @@ void driverFitCalc(distanceData* params){
         string buffer = "";
         for(int i=params->startLine;i<params->endLine;i++){
             
-            Sequence seqI = params->oldFastaDB.get(i);
-            for(int j = 0; j < params->alignDB.getNumSeqs(); j++){
+            Sequence seqI; Protein seqIP; string nameI = "";
+            if (params->prot)   { seqIP = params->oldFastaDB->getProt(i);   nameI = seqIP.getName();    }
+            else                { seqI = params->oldFastaDB->getSeq(i);     nameI = seqI.getName();     }
+            
+            
+            for(int j = 0; j < params->db->getNumSeqs(); j++){
                 
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seqJ = params->alignDB.get(j);
-                double dist = distCalculator->calcDist(seqI, seqJ);
+                double dist = 1.0; string nameJ = "";
+                
+                if (params->prot)   { Protein seqJP = params->db->getProt(j); nameJ = seqJP.getName(); dist = distCalculator->calcDist(seqIP, seqJP);   }
+                else                { Sequence seqJ = params->db->getSeq(j);  nameJ = seqJ.getName(); dist = distCalculator->calcDist(seqI, seqJ);       }
                 
                 if(dist <= params->cutoff){
-                    buffer += seqI.getName() + " " + seqJ.getName() + " " + toString(dist) + "\n";
+                    buffer += nameI + " " + nameJ + " " + toString(dist) + "\n";
                     params->count++;
                 }
             }
@@ -586,7 +583,7 @@ void driverFitCalc(distanceData* params){
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
     try {
-        long long num = alignDB.getNumSeqs();
+        long long num = db->getNumSeqs();
         long long distsBelowCutoff = 0;
         time_t start, end;
         time(&start);
@@ -597,7 +594,7 @@ void DistanceCommand::createProcesses(string filename) {
         
         double numDists = 0;
         
-        if (output == "square") { numDists = numSeqs * numSeqs; }
+        if (output == "square") { numDists = numSeqs; }
         else { for(int i=0;i<numSeqs;i++){ for(int j=0;j<i;j++){ numDists++; if (numDists > processors) { break; } } } }
         if (numDists < processors) { processors = numDists; }
         
@@ -617,16 +614,16 @@ void DistanceCommand::createProcesses(string filename) {
         auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(filename);
         synchronizedOutputFile->setFixedShowPoint(); synchronizedOutputFile->setPrecision(4);
         
-        SequenceDB oldFastaDB;
+        StorageDatabase* oldFastaDB;
         if (fitCalc) {
-            ifstream inFASTA;
-            util.openInputFile(oldfastafile, inFASTA);
-            oldFastaDB = SequenceDB(inFASTA);
+            ifstream inFASTA; util.openInputFile(oldfastafile, inFASTA);
+            if (!prot) { oldFastaDB = new SequenceDB(inFASTA); }
+            else                    { oldFastaDB = new ProteinDB(inFASTA); }
             inFASTA.close();
             
             lines.clear();
-            if (processors > oldFastaDB.getNumSeqs()) { processors = oldFastaDB.getNumSeqs(); }
-            int remainingSeqs = oldFastaDB.getNumSeqs();
+            if (processors > oldFastaDB->getNumSeqs()) { processors = oldFastaDB->getNumSeqs(); }
+            int remainingSeqs = oldFastaDB->getNumSeqs();
             int startIndex = 0;
             for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
                 int numSeqsToFit = remainingSeqs; //case for last processor
@@ -646,7 +643,7 @@ void DistanceCommand::createProcesses(string filename) {
                 threadWriter = new OutputWriter(synchronizedOutputFile);
                 dataBundle = new distanceData(threadWriter);
             }else { dataBundle = new distanceData(filename+extension); }
-            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, alignDB, oldFastaDB, calc, numNewFasta, countends);
+            dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, db, oldFastaDB, calc, prot, numNewFasta, countends);
             data.push_back(dataBundle);
             
             std::thread* thisThread = NULL;
@@ -665,7 +662,7 @@ void DistanceCommand::createProcesses(string filename) {
             threadWriter = new OutputWriter(synchronizedOutputFile);
             dataBundle = new distanceData(threadWriter);
         }else { dataBundle = new distanceData(filename); }
-        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, alignDB, oldFastaDB, calc, numNewFasta, countends);
+        dataBundle->setVariables(lines[0].start, lines[0].end, cutoff, db, oldFastaDB, calc, prot, numNewFasta, countends);
         
         if (output == "column")     {
             if (fitCalc)    { driverFitCalc(dataBundle);    }
@@ -701,6 +698,7 @@ void DistanceCommand::createProcesses(string filename) {
 		exit(1);
 	}
 }
+
 /**************************************************************************************************/
 //its okay if the column file does not contain all the names in the fasta file, since some distance may have been above a cutoff,
 //but no sequences can be in the column file that are not in oldfasta. also, if a distance is above the cutoff given then remove it.
@@ -710,21 +708,30 @@ bool DistanceCommand::sanityCheck() {
 		bool good = true;
 		
 		//make sure the 2 fasta files have the same alignment length
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		int fastaAlignLength = 0;
-		if (in) { 
-			Sequence tempIn(in);
-			fastaAlignLength = tempIn.getAligned().length();
+        
+		if (in) {
+            if (!prot) {
+                Sequence tempIn(in);
+                fastaAlignLength = tempIn.getAligned().length();
+            }else {
+                Protein tempIn(in);
+                fastaAlignLength = tempIn.getAligned().size();
+            }
 		}
 		in.close();
 		
-		ifstream in2;
-		util.openInputFile(oldfastafile, in2);
+		ifstream in2; util.openInputFile(oldfastafile, in2);
 		int oldfastaAlignLength = 0;
-		if (in2) { 
-			Sequence tempIn2(in2);
-			oldfastaAlignLength = tempIn2.getAligned().length();
+		if (in2) {
+            if (!prot) {
+                Sequence tempIn(in2);
+                oldfastaAlignLength = tempIn.getAligned().length();
+            }else {
+                Protein tempIn(in2);
+                oldfastaAlignLength = tempIn.getAligned().size();
+            }
 		}
 		in2.close();
 		
@@ -733,17 +740,23 @@ bool DistanceCommand::sanityCheck() {
         //read fasta file and save names as well as adding them to the alignDB
         set<string> namesOldFasta;
         
-        ifstream inFasta;
-        util.openInputFile(oldfastafile, inFasta);
+        ifstream inFasta; util.openInputFile(oldfastafile, inFasta);
         
         while (!inFasta.eof()) {
             if (m->getControl_pressed()) {  inFasta.close(); return good;  }
             
-            Sequence temp(inFasta);  util.gobble(inFasta);
-            
-            if (temp.getName() != "") {
-                namesOldFasta.insert(temp.getName());  //save name
-                if (!fitCalc) { alignDB.push_back(temp);  }//add to DB
+            if (!prot) {
+                Sequence temp(inFasta);  util.gobble(inFasta);
+                if (temp.getName() != "") {
+                    namesOldFasta.insert(temp.getName());  //save name
+                    if (!fitCalc) { db->push_back(temp);  }//add to DB
+                }
+            }else {
+                Protein temp(inFasta);  util.gobble(inFasta);
+                if (temp.getName() != "") {
+                    namesOldFasta.insert(temp.getName());  //save name
+                    if (!fitCalc) { db->push_back(temp);  }//add to DB
+                }
             }
         }
         inFasta.close();

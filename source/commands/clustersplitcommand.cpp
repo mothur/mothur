@@ -181,12 +181,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters
 			file = validParameter.validFile(parameters, "file");
 			if (file == "not open") { file = ""; abort = true; }
 			else if (file == "not found") { file = ""; }
-            else { distfile = file; }
+            else { distfile = file; type = ""; }
             
             phylipfile = validParameter.validFile(parameters, "phylip");
 			if (phylipfile == "not open") { abort = true; }
@@ -201,12 +200,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; namefile = "";}	
 			else if (namefile == "not found") { namefile = "";  }
-			else { current->setNameFile(namefile); }
+            else { current->setNameFile(namefile); type = "name"; }
             
             countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = "";}	
 			else if (countfile == "not found") { countfile = "";  }
-			else { current->setCountFile(countfile); }
+            else { current->setCountFile(countfile); type = "count"; }
 			
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }	
@@ -246,17 +245,23 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (columnfile != "") {
 				if ((namefile == "") && (countfile == "")) { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
+                    if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n"); type = "name";  }
 					else { 
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); type = "count";  }
                         else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the column format.\n");  
+                            m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the column format.\n");
                             abort = true; 
                         }	
 					}	
 				}
 			}
+            
+            if (file != "") {
+                if ((namefile == "") && (countfile == "")) {
+                    m->mothurOut("\n[WARNING]: When using the file option, it is recommended you include the name or count file. Doing so will ensure the OTUs are printed by OTU size reflecting the redundant reads, instead of just the unique reads.\n");
+                }
+            }
 			
 			if (fastafile != "") {
 				if (taxFile == "") { 
@@ -270,10 +275,10 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				
 				if ((namefile == "") && (countfile == "")) { 
 					namefile = current->getNameFile(); 
-					if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  }
+                    if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n");  type = "name"; }
 					else { 
 						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n");  }
+                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); type = "count"; }
                         else { 
                             m->mothurOut("You need to provide a namefile or countfile if you are going to use the fasta file to generate the split.\n");  
                             abort = true; 
@@ -619,12 +624,12 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 			string firstCol, secondCol;
 			listSingle = new ListVector();
             
-            if (countfile != "") { util.getline(in); util.gobble(in); }
+            if (type == "count") { util.getline(in); util.gobble(in); }
             
 			while (!in.eof()) {
 				in >> firstCol >> secondCol;
                 util.getline(in);
-				if (countfile == "") { listSingle->push_back(secondCol); }
+                if (type == "name")  { listSingle->push_back(secondCol); }
                 else { listSingle->push_back(firstCol); }
                 util.gobble(in);
 			}
@@ -735,7 +740,6 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
         variables["[clustertag]"] = tag;
         string sabundFileName = getOutputFileName("sabund", variables);
         string rabundFileName = getOutputFileName("rabund", variables);
-        //if (countfile != "") { variables["[tag2]"] = "unique_list"; }
         string listFileName = getOutputFileName("list", variables);
         
         map<string, int> counts;
@@ -747,11 +751,9 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
             outputNames.push_back(rabundFileName); outputTypes["rabund"].push_back(rabundFileName);
             
         }else {
-            if (file == "") {
-                CountTable ct;
-                ct.readTable(countfile, false, false);
-                counts = ct.getNameMap();
-            }
+            CountTable ct;
+            ct.readTable(countfile, false, false);
+            counts = ct.getNameMap();
         }
         
 		util.openOutputFile(listFileName,	outList);
@@ -812,8 +814,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
             }
 
             completeList.setPrintedLabels(printHeaders);
-            if (countfile == "") { completeList.print(outList);  printHeaders = false; }
-            else if ((file == "") && (countfile != "")) { completeList.print(outList, counts);  printHeaders = false; }
+            if (countfile != "") { completeList.print(outList, counts);  printHeaders = false; }
             else { completeList.print(outList);  printHeaders = false; }
 			
 			if (rabund != NULL) { delete rabund; }
@@ -843,13 +844,13 @@ struct clusterData {
     bool showabund, classic, useName, useCount, deleteFiles, cutoffNotSet;
     double cutoff, stableMetric;
     ofstream outList, outRabund, outSabund;
-    string tag, method,  vsearchLocation, metricName, initialize, outputDir;
+    string tag, method,  vsearchLocation, metricName, initialize, outputDir, type;
     vector< map<string, string> > distNames;
     set<string> labels;
     vector<string> listFileNames;
     
     clusterData(){}
-    clusterData(bool showab, bool cla, bool df, vector< map<string, string> > dN, bool cns, double cu, int prec, int len, string meth, string opd, string vl) {
+    clusterData(bool showab, bool cla, bool df, vector< map<string, string> > dN, bool cns, double cu, int prec, int len, string meth, string opd, string vl, string ty) {
         showabund = showab;
         distNames = dN;
         cutoff = cu;
@@ -863,6 +864,7 @@ struct clusterData {
         cutoffNotSet = cns;
         m = MothurOut::getInstance();
         count = 0;
+        type = ty;
         useName = false;
         useCount = false;
         numSingletons = 0;
@@ -873,11 +875,11 @@ struct clusterData {
         maxIters = mxi;
         initialize = init;
     }
-    void setNamesCount(string nmf, string cnf) {
+    void setNamesCount(string cnf) {
         useName = false;
         useCount = false;
-        if (nmf != "") { useName = true;  }
-        if (cnf != "") { useCount = true; }
+        if (type == "name") { useName = true;  }
+        if (type == "count") { useCount = true; }
     }
 };
 //**********************************************************************************************************************
@@ -1012,8 +1014,7 @@ string runOptiCluster(string thisDistFile, string thisNamefile, double& smallest
     try {
         if (params->cutoffNotSet) {  params->m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); params->cutoff = 0.03;  }
         
-        string nameOrCount = "count";
-        if (params->useName) { nameOrCount = "name"; }
+        string nameOrCount = params->type;
         
         OptiMatrix matrix(thisDistFile, thisNamefile, nameOrCount, "column", params->cutoff, false);
         
@@ -1405,6 +1406,8 @@ void cluster(clusterData* params){
             string thisNamefile = params->distNames[i].begin()->second;
             string thisDistFile = params->distNames[i].begin()->first;
             
+            params->setNamesCount(thisNamefile);
+            
             string listFileName = "";
             if (params->classic)    {  listFileName = clusterClassicFile(thisDistFile, thisNamefile, smallestCutoff, params);   }
             else                    {  listFileName = clusterFile(thisDistFile, thisNamefile, smallestCutoff, params);          }
@@ -1479,18 +1482,16 @@ vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string>
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[i+1], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation);
+            clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[i+1], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation, type);
             dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
-            dataBundle->setNamesCount(namefile, countfile);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(cluster, dataBundle));
         }
         
         
-        clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[0], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation);
+        clusterData* dataBundle = new clusterData(showabund, classic, deleteFiles, dividedNames[0], cutoffNotSet, cutoff, precision, length, method, outputdir, vsearchLocation, type);
         dataBundle->setOptiOptions(metricName, stableMetric, initialize, maxIters);
-        dataBundle->setNamesCount(namefile, countfile);
         cluster(dataBundle);
         listFiles = dataBundle->listFileNames;
         tag = dataBundle->tag;
@@ -1644,7 +1645,7 @@ string ClusterSplitCommand::printFile(string singleton, vector< map<string, stri
 string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
     try {
         
-        string singleton, thiscolumn, thisname, type;
+        string singleton, thiscolumn, thisname;
         
         ifstream in;
         util.openInputFile(file, in);
@@ -1656,8 +1657,8 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
         
         in >> type; util.gobble(in);
         
-        if (type == "name") { namefile = "name"; }
-        else if (type == "count") { countfile = "count"; }
+        if (type == "name") { }
+        else if (type == "count") { }
         else {  m->mothurOut("[ERROR]: unknown file type. Are the files in column 2 of the file name files or count files? Please change unknown to name or count.\n"); m->setControl_pressed(true); }
         
         if (isList) {
