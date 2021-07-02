@@ -130,7 +130,7 @@ public:
     
     PMB(double c) : DistCalc(c) { name = "PMB (Henikoff/Tillier PMB matrix)"; }
 
-    double calcDist(Protein A, Protein B); //calc distance between 2 seqeunces
+    double calcDist(Protein A, Protein B) { return (makeDists(A, B, pmbeigs, pmbprobs)); } //calc distance between 2 seqeunces
     string getCitation() { return "https://evolution.gs.washington.edu/phylip/doc/protdist.html, https://evolution.genetics.washington.edu/phylip/credits.html"; }
     
 private:

@@ -117,8 +117,10 @@ protected:
     int setEndIgnoreTermGap(string, string, bool&);
     
     //used by protein calcs
+    double makeDists(Protein, Protein, double eigs[20], double probs[20][20]);
     void predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, double& d2p, double& tt, double eigs[20], double probs[20][20]);
     void fillNums(vector<int>& nb1, vector<int>& nb2, int, int);
+    
 };
 /**************************************************************************************************/
 

@@ -853,11 +853,8 @@
 		F4A866B8265BE7720010479A /* protein.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866B5265BE7720010479A /* protein.cpp */; };
 		F4A866BF265BE7EC0010479A /* aminoacid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866BD265BE7EC0010479A /* aminoacid.cpp */; };
 		F4A866C0265BE7EC0010479A /* aminoacid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866BD265BE7EC0010479A /* aminoacid.cpp */; };
-		F4A866CB265EBD270010479A /* jtt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866C9265EBD270010479A /* jtt.cpp */; };
-		F4A866CC265EBD270010479A /* jtt.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866C9265EBD270010479A /* jtt.cpp */; };
 		F4A866D1266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A866D2266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
-		F4A86701268B71A80010479A /* pmb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866FF268B71A80010479A /* pmb.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1829,13 +1826,12 @@
 		F4A866B6265BE7720010479A /* protein.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = protein.hpp; path = source/datastructures/protein.hpp; sourceTree = SOURCE_ROOT; };
 		F4A866BD265BE7EC0010479A /* aminoacid.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = aminoacid.cpp; sourceTree = "<group>"; };
 		F4A866BE265BE7EC0010479A /* aminoacid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = aminoacid.hpp; sourceTree = "<group>"; };
-		F4A866C9265EBD270010479A /* jtt.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = jtt.cpp; sourceTree = "<group>"; };
 		F4A866CA265EBD270010479A /* jtt.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = jtt.hpp; sourceTree = "<group>"; };
 		F4A866CF266912830010479A /* proteindb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = proteindb.cpp; sourceTree = "<group>"; };
 		F4A866D0266912830010479A /* proteindb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = proteindb.hpp; sourceTree = "<group>"; };
 		F4A866DA266946AB0010479A /* storagedatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = storagedatabase.hpp; sourceTree = "<group>"; };
-		F4A866FF268B71A80010479A /* pmb.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pmb.cpp; sourceTree = "<group>"; };
 		F4A86700268B71A80010479A /* pmb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pmb.hpp; sourceTree = "<group>"; };
+		F4A86707268E3AFA0010479A /* pam.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pam.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2349,7 +2345,6 @@
 				481E40DE244F619D0059C925 /* eachgapignore.cpp */,
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
 				481E40DC244F52460059C925 /* ignoregaps.cpp */,
-				F4A866C9265EBD270010479A /* jtt.cpp */,
 				F4A866CA265EBD270010479A /* jtt.hpp */,
 				F41A1B8F261257DE00144985 /* kmerdist.cpp */,
 				F41A1B90261257DE00144985 /* kmerdist.hpp */,
@@ -2357,7 +2352,7 @@
 				48998B68242E785100DBD0A9 /* onegapdist.cpp */,
 				A7E9B77412D37EC400DA6239 /* onegapignore.h */,
 				481E40DA244DFF5A0059C925 /* onegapignore.cpp */,
-				F4A866FF268B71A80010479A /* pmb.cpp */,
+				F4A86707268E3AFA0010479A /* pam.hpp */,
 				F4A86700268B71A80010479A /* pmb.hpp */,
 			);
 			name = distcalcs;
@@ -3314,7 +3309,6 @@
 				48C7286A1B69598400D40830 /* testmergegroupscommand.cpp in Sources */,
 				481FB62F1AC1B7EA0076CFF3 /* fastqread.cpp in Sources */,
 				481FB6901AC1BA9E0076CFF3 /* knn.cpp in Sources */,
-				F4A866CC265EBD270010479A /* jtt.cpp in Sources */,
 				48E5444A1E9C2BE100FF6AB8 /* specificity.cpp in Sources */,
 				481FB56C1AC1B6BE0076CFF3 /* sharedsorabund.cpp in Sources */,
 				481FB6411AC1B7EA0076CFF3 /* sequenceparser.cpp in Sources */,
@@ -3539,7 +3533,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */,
-				F4A86701268B71A80010479A /* pmb.cpp in Sources */,
 				A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */,
 				A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */,
 				A7E9B88412D37EC400DA6239 /* alignmentcell.cpp in Sources */,
@@ -3919,7 +3912,6 @@
 				A7E0243D15B4520A00A5F046 /* sparsedistancematrix.cpp in Sources */,
 				481E40E3244F6A050059C925 /* eachgapdist.cpp in Sources */,
 				A741FAD215D1688E0067BCC5 /* sequencecountparser.cpp in Sources */,
-				F4A866CB265EBD270010479A /* jtt.cpp in Sources */,
 				A7C7DAB915DA758B0059B0CF /* sffmultiplecommand.cpp in Sources */,
 				835FE03D19F00640005AA754 /* classifysvmsharedcommand.cpp in Sources */,
 				48E5444D1E9C2C8F00FF6AB8 /* tptn.cpp in Sources */,

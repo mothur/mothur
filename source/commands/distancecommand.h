@@ -25,6 +25,7 @@
 #include "sequencedb.h"
 #include "proteindb.hpp"
 #include "pmb.hpp"
+#include "pam.hpp"
 
 /**************************************************************************************************/
 struct distanceData {

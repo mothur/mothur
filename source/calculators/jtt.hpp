@@ -132,7 +132,7 @@ public:
     
     JTT(double c) : DistCalc(c) { name = "JTT (Jones-Taylor-Thornton matrix)"; }
 
-    double calcDist(Protein A, Protein B); //calc distance between 2 seqeunces
+    double calcDist(Protein A, Protein B) { return (makeDists(A, B, jtteigs, jttprobs));} //calc distance between 2 seqeunces
     string getCitation() { return "https://evolution.gs.washington.edu/phylip/doc/protdist.html, https://evolution.genetics.washington.edu/phylip/credits.html"; }
     
 private:

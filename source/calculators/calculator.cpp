@@ -314,6 +314,10 @@ void DistCalc::predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, 
               
                 double elambdat = exp(tt * eigs[l]);
                 
+               // printf("l = %ld, nb1 = %ld, nb2 = %ld\n", l, nb1[i], nb2[i]);
+               // printf("l = %ld, eig[m] = %f, prob[m][nb1 - 1] = %f, prob[m][nb2 - 1] = %f\n", l, eigs[l], probs[l][nb1[i] - 1], probs[l][nb2[i] - 1]);
+
+                
                 q = probs[l][nb1[i]-1] * probs[l][nb2[i]-1] * elambdat;
                 p += q;
                 
@@ -324,6 +328,9 @@ void DistCalc::predict(vector<int> nb1, vector<int> nb2, double& p, double& dp, 
                 d2p += TEMP * TEMP * q;
             }
         }
+        
+        //printf("p = %f, q = %f, tt = %f\n", p, q, tt);
+       // printf("dp = %f, d2p = %f\n", dp, d2p);
     }
     catch(exception& e) {
         m->errorOut(e,  "DistCalc", "predict");
@@ -390,6 +397,87 @@ void DistCalc::fillNums(vector<int>& numAs, vector<int>& numBs, int numA, int nu
     }
     catch(exception& e) {
         m->errorOut(e,  "DistCalc", "fillNums");
+        exit(1);
+    }
+}
+/***********************************************************************/
+double DistCalc::makeDists(Protein A, Protein B, double eigs[20], double probs[20][20]){
+    try {
+        int numBases = A.getAlignLength();
+        vector<AminoAcid> seqA = A.getAligned();
+        vector<AminoAcid> seqB = B.getAligned();
+        
+        bool inf = false; bool neginfinity = false; bool overlap = false;
+        double delta, lnlike, slope, curv, tt;
+        tt = 0.1; delta = tt / 2.0;
+        
+        for (int l = 0; l < 20; l++) {
+            
+            //reset for this attempt
+            lnlike = 0.0; slope = 0.0; curv = 0.0; neginfinity = false; overlap = false;
+            double oldweight = 1.0;
+            
+            if (m->getControl_pressed()) { break; }
+            
+            for (int i = 0; i < numBases; i++) {
+                int numA = seqA[i].getNum();
+                int numB = seqB[i].getNum();
+                
+                if (numA != stop && numA != del && numA != quest && numA != unk &&
+                    numB != stop && numB != del && numB != quest && numB != unk) {
+            
+                    double p = 0.0; double dp = 0.0; double d2p = 0.0; overlap = true;
+                    
+                    vector<int> numAs; vector<int> numBs;
+                    if (numA != asx && numA != glx && numB != asx && numB != glx) {
+                        if (numA < ser2) { numA++; }
+                        if (numB < ser2) { numB++; }
+                        numAs.push_back(numA); numBs.push_back(numB); //+1 avoid 0
+                    }else {
+                        fillNums(numAs, numBs, numA, numB);
+                    }
+                    
+                    predict(numAs, numBs, p, dp, d2p, tt, eigs, probs);
+                    
+                    if (p <= 0.0) {
+                        neginfinity = true;
+                    }else {
+                        slope += oldweight*dp / p;
+                        curv += oldweight*(d2p / p - dp * dp / (p * p));
+                        
+                        //printf("%ld:%ld, dp = %f, p = %f, d2p = %f\n", l, i, dp, p, d2p);
+
+                        //printf("%ld:%ld, slope = %f, curv = %f, oldweight[i] = %ld\n", l, i, slope, curv, oldweight);
+                    }
+                }//endif stop
+            }//endif bases
+            
+            if (!overlap) {
+                tt = -1.0; l += 20; inf = true;
+            }else if (!neginfinity) {
+                if (curv < 0.0) {
+                    tt -= slope / curv;
+                    if (tt > 10000.0) { tt = -1.0; l += 20; inf = true;  }
+                }else {
+                    if ((slope > 0.0 && delta < 0.0) || (slope < 0.0 && delta > 0.0)) { delta /= -2; }
+                    tt += delta;
+                }
+            }else {
+                delta /= -2;
+                tt += delta;
+            }
+            
+            if (tt < 0.00001 && !inf) { tt = 0.00001; }
+            
+        }//endif attempts
+        
+        dist = tt;
+        //exit(1);
+        
+        return dist;
+    }
+    catch(exception& e) {
+        m->errorOut(e,  "DistCalc", "makeDists");
         exit(1);
     }
 }
