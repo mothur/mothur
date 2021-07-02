@@ -855,6 +855,7 @@
 		F4A866C0265BE7EC0010479A /* aminoacid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866BD265BE7EC0010479A /* aminoacid.cpp */; };
 		F4A866D1266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A866D2266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
+		F4A86713268F5CCE0010479A /* kimura.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A86711268F5CCE0010479A /* kimura.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1832,6 +1833,8 @@
 		F4A866DA266946AB0010479A /* storagedatabase.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = storagedatabase.hpp; sourceTree = "<group>"; };
 		F4A86700268B71A80010479A /* pmb.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pmb.hpp; sourceTree = "<group>"; };
 		F4A86707268E3AFA0010479A /* pam.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pam.hpp; sourceTree = "<group>"; };
+		F4A86711268F5CCE0010479A /* kimura.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kimura.cpp; sourceTree = "<group>"; };
+		F4A86712268F5CCE0010479A /* kimura.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kimura.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2346,6 +2349,8 @@
 				A7E9B72A12D37EC400DA6239 /* ignoregaps.h */,
 				481E40DC244F52460059C925 /* ignoregaps.cpp */,
 				F4A866CA265EBD270010479A /* jtt.hpp */,
+				F4A86711268F5CCE0010479A /* kimura.cpp */,
+				F4A86712268F5CCE0010479A /* kimura.hpp */,
 				F41A1B8F261257DE00144985 /* kmerdist.cpp */,
 				F41A1B90261257DE00144985 /* kmerdist.hpp */,
 				A7E9B77312D37EC400DA6239 /* onegapdist.h */,
@@ -3932,6 +3937,7 @@
 				A799314B16CBD0CD0017E888 /* mergetaxsummarycommand.cpp in Sources */,
 				A7548FAD17142EBC00B1F05A /* getmetacommunitycommand.cpp in Sources */,
 				A7548FB0171440ED00B1F05A /* qFinderDMM.cpp in Sources */,
+				F4A86713268F5CCE0010479A /* kimura.cpp in Sources */,
 				A77B7185173D2240002163C2 /* sparcccommand.cpp in Sources */,
 				4815BEB8228DD18400677EE2 /* lsabundance.cpp in Sources */,
 				485B0E0E1F27C40500CA5F57 /* sharedrabundfloatvector.cpp in Sources */,

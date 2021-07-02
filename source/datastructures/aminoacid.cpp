@@ -179,8 +179,6 @@ void AminoAcid::fillCodons() {
     }
 }
  /******************************************************************************************************************/
-//TODO::resolve multi names issue
-//TODO::start and stop ???
 //ala(0), arg(1), asn(2), asp(3), cys(4), gln(5), glu(6), gly(7), his(8), ileu(9), leu(10), lys(11), met(12), phe(13), pro(14),
 //ser1(15), ser2(16), thr(17), trp(18), tyr(19), val(20), del(21), stop(22), asx(23), glx(24), ser(25), unk(26), quest(27)
  string AminoAcid::getName() {

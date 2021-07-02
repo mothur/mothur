@@ -26,6 +26,7 @@
 #include "proteindb.hpp"
 #include "pmb.hpp"
 #include "pam.hpp"
+#include "kimura.hpp"
 
 /**************************************************************************************************/
 struct distanceData {
