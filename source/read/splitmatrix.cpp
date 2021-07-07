@@ -11,23 +11,12 @@
 #include "phylotree.h"
 #include "distancecommand.h"
 #include "seqsummarycommand.h"
+#include "getseqscommand.h"
+#include "removeseqscommand.h"
 
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string distfile, string name, string count, string tax, float c, string t, bool l){
-	m = MothurOut::getInstance();
-	distFile = distfile;
-	cutoff = c;
-	namefile = name;
-	method = t;
-	taxFile = tax;
-    countfile = count;
-	large = l;
-    outputType = "distance";
-}
-/***********************************************************************/
-
-SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, string t, int p, bool cl, string output, string ot){
+SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, int p, bool cl, string output){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
 	namefile = name;
@@ -35,106 +24,58 @@ SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, fl
 	taxFile = tax;
 	cutoff = c;  //tax level cutoff
 	distCutoff = cu; //for fasta method if you are creating distance matrix you need a cutoff for that
-	method = t;
 	processors = p;
     classic = cl;
 	outputDir = output;
-    outputType = ot;
-}
-
-/***********************************************************************/
-
-int SplitMatrix::split(){
-	try {
-        
-		if (method == "distance") {  
-			splitDistance();
-		}else if ((method == "classify") || (method == "fasta") || (method == "vsearch")) {
-			splitClassify();
-		}else {
-			m->mothurOut("Unknown splitting method, aborting split.\n"); 
-			map<string, string> temp;
-			if (namefile != "") {  temp[distFile] = namefile; }
-            else { temp[distFile] = countfile; }
-			dists.push_back(temp);
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "split");
-		exit(1);
-	}
+    
+    splitClassify();
+   
 }
 /***********************************************************************/
-int SplitMatrix::splitDistance(){
-	try {
-        
-		if (large)	{ splitDistanceLarge(); }
-		else		{ splitDistanceRAM();	}
-		
-		return 0;
-			
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistance");
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-int SplitMatrix::splitClassify(){
+void SplitMatrix::splitClassify(){
 	try {
 		cutoff = int(cutoff);
-				
-		map<string, int> seqGroup;
-		map<string, int>::iterator it;
-		map<string, int>::iterator it2;
 		
-		int numGroups = 0;
-		
-		//build tree from users taxonomy file
-		PhyloTree* phylo = new PhyloTree();
-		
-        map<string, string> temp;
-        util.readTax(taxFile, temp, true);
+        map<string, string> temp; util.readTax(taxFile, temp, true);
         
+        PhyloTree phylo;
         for (map<string, string>::iterator itTemp = temp.begin(); itTemp != temp.end();) {
-            phylo->addSeqToTree(itTemp->first, itTemp->second);
+            
+            if (m->getControl_pressed()) { return; }
+            
+            phylo.addSeqToTree(itTemp->first, itTemp->second);
             temp.erase(itTemp++);
         }
 		
-		phylo->assignHeirarchyIDs(0);
+		phylo.assignHeirarchyIDs(0);
 
 		//make sure the cutoff is not greater than maxlevel
-		if (cutoff > phylo->getMaxLevel()) { m->mothurOut("splitcutoff is greater than the longest taxonomy, using " + toString(phylo->getMaxLevel())); m->mothurOutEndLine(); cutoff = phylo->getMaxLevel(); }
+		if (cutoff > phylo.getMaxLevel()) { m->mothurOut("splitcutoff is greater than the longest taxonomy, using " + toString(phylo.getMaxLevel())); m->mothurOutEndLine(); cutoff = phylo.getMaxLevel(); }
 	
+        vector<vector<string> > seqGroups; //seqFroups[0] -> vector of string containing names of seqs assigned to group 0
+        vector<string> taxGroupNames;
 		//for each node in tree
-		for (int i = 0; i < phylo->getNumNodes(); i++) {
+		for (int i = 0; i < phylo.getNumNodes(); i++) {
 		
+            if (m->getControl_pressed()) { return; }
+            
 			//is this node within the cutoff
-			TaxNode taxon = phylo->get(i);
+			TaxNode taxon = phylo.get(i);
 	
 			if (taxon.level == cutoff) {//if yes, then create group containing this nodes sequences
 				if (taxon.accessions.size() > 1) { //if this taxon just has one seq its a singleton
-					for (int j = 0; j < taxon.accessions.size(); j++) {
-						seqGroup[taxon.accessions[j]] = numGroups;
+                    vector<string> thisGroupsSeqs;
+                    for (int j = 0; j < taxon.accessions.size(); j++) {
+                        thisGroupsSeqs.push_back(taxon.accessions[j]);
 					}
-					numGroups++;
+                    seqGroups.push_back(thisGroupsSeqs);
+                    taxGroupNames.push_back(taxon.name);
 				}
 			}
 		}
-	
-		delete phylo;
 		
-		if (method == "classify") {
-			splitDistanceFileByTax(seqGroup, numGroups);
-		}else {
-			createDistanceFilesFromTax(seqGroup, numGroups);
-		}
+        createDistanceFilesFromTax(seqGroups, taxGroupNames);
 		
-		return 0;
-			
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitMatrix", "splitClassify");
@@ -142,87 +83,144 @@ int SplitMatrix::splitClassify(){
 	}
 }
 /***********************************************************************/
-int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numGroups){
+int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, vector<string> groupNames){
 	try {
         
-		map<string, int> copyGroups = seqGroup;
-		map<string, int>::iterator it;
-		set<string> names;
-				
-		ifstream in;
-		util.openInputFile(fastafile, in);
-
-		for (int i = 0; i < numGroups; i++) {  util.mothurRemove((fastafile + "." + toString(i) + ".temp")); }
-	
-		//parse fastafile
-		while (!in.eof()) {
-			Sequence query(in); util.gobble(in);
-			if (query.getName() != "") {
-		
-				it = seqGroup.find(query.getName());
-				
-				//save names in case no namefile is given
-				if ((namefile == "") && (countfile == "")) {  names.insert(query.getName()); }
-			
-				if (it != seqGroup.end()) { //not singleton
-                    ofstream outFile;
-                    util.openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
-                    query.printSequence(outFile);
-                    outFile.close();
-					copyGroups.erase(query.getName());
-				}
-			}
-		}
-		in.close();
+        int numGroups = seqGroups.size();
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string nonSingletonsFile = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "nonsingleton.accnos";
         
-        bool error = false;
-		//warn about sequence in groups that are not in fasta file
-		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
-			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate an error.\n"); 
-            error = true;
-		}
-		copyGroups.clear();
+        thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string tempAccnos = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "accnos.temp";
         
-        if (error) { exit(1); }
-        
-        if (outputType == "distance") { //create distance matrices for each fasta file
-            //process each distance file
-            for (int i = 0; i < numGroups; i++) {
+        //process each group
+        for (int i = 0; i < numGroups; i++) {
+            
+            util.printAccnos(tempAccnos, seqGroups[i]);
+            
+            //run get.seqs to select fasta and name or count files
+            string options = "fasta=" + fastafile + ", accnos=" + tempAccnos;
+            if (countfile != "") { options += ", count=" + countfile; }
+            else if (namefile != "") { options += ", name=" + namefile, + ", dups=T"; }
+            
+            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Selecting sequences for group " + groupNames[i] + ":\n\nRunning command: get.seqs(" + options + ")\n");
+            
+            Command* getCommand = new GetSeqsCommand(options);
+            getCommand->execute();
+            
+            map<string, vector<string> > filenames = getCommand->getOutputFiles();
+            
+            string thisGroupsFastaFile = filenames["fasta"][0];
+            string outName = "";
+            
+            if (namefile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                outName = thisOutputDir + util.getRootName(util.getSimpleName(namefile)) + toString(i) + ".name.temp";
+                util.renameFile(filenames["name"][0], outName);
+            }
+            
+            if (countfile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                outName = thisOutputDir + util.getRootName(util.getSimpleName(countfile)) + toString(i) + ".count.temp";
+                util.renameFile(filenames["count"][0], outName);
+            }
+            delete getCommand;
+            
+            m->mothurOut("/******************************************/\n");
+            
+            //run dist.seqs to calc the distances for each group
+            if (classic) { options = "fasta=" + thisGroupsFastaFile + ", processors=" + toString(processors) + ", output=lt"; }
+            else { options = "fasta=" + thisGroupsFastaFile + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
+            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Calculating distances for group " + groupNames[i] + ":\n\nRunning command: dist.seqs(" + options + ")\n");
+            Command* command = new DistanceCommand(options);
+            
+            m->mothurOut("/******************************************/\n");
+            
+            command->execute();
+            
+            filenames = command->getOutputFiles();
+            
+            string thisDistanceFile = "";
+            if (classic) { thisDistanceFile = filenames["phylip"][0]; }
+            else { thisDistanceFile = filenames["column"][0]; }
+            
+            delete command;
+            
+            util.mothurRemove(thisGroupsFastaFile);
+            
+            if (!util.isBlank(thisDistanceFile)) {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+                string outDist = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + toString(i) + ".disttemp";
+                util.renameFile(thisDistanceFile, outDist);
                 
-                string options = "";
-                if (classic) { options += "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", output=lt"; }
-                else { options += "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
-                if (outputDir != "") { options += ", outputdir=" + outputDir; }
+                map<string, string> thisFilePair; thisFilePair[outDist] = outName;
+                dists.push_back(thisFilePair);
                 
-                m->mothurOut("/******************************************/\n");
-                m->mothurOut("Running command: dist.seqs(" + options + ")\n");
-                Command* command = new DistanceCommand(options);
-                m->mothurOut("/******************************************/\n");
-                
-                command->execute();
-                delete command;
-                
-                util.mothurRemove((fastafile + "." + toString(i) + ".temp"));
-                
-                //remove old names files just in case
-                if (namefile != "") { util.mothurRemove((namefile + "." + toString(i) + ".temp")); }
-                else { util.mothurRemove((countfile + "." + toString(i) + ".temp")); }
+                util.appendFiles(tempAccnos, nonSingletonsFile);
+            }else {
+                util.mothurRemove(thisDistanceFile);
+                util.mothurRemove(outName);
             }
         }
-        
-        vector<string> tempDistFiles;    
-        for(int i=0;i<numGroups;i++){
-            if (outputDir == "") { outputDir = util.hasPath(fastafile); }
-            string tempDistFile = (fastafile + "." + toString(i) + ".temp");
-            if (outputType == "distance") {
-                if (classic) { tempDistFile =  outputDir + util.getRootName(util.getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "phylip.dist";}
-                else { tempDistFile = outputDir + util.getRootName(util.getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist"; }
+       
+        if (!util.isBlank(nonSingletonsFile)) { //there are non singletons, so remove them to find the singletons
+            //get singletons
+            //run remove.seqs to remove nonsingletons name or count files
+            string options = "accnos=" + nonSingletonsFile;
+            if (countfile != "") { options += ", count=" + countfile; }
+            else if (namefile != "") { options += ", name=" + namefile, + ", dups=T"; }
+            
+            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs(" + options + ")\n");
+            
+            Command* removeCommand = new RemoveSeqsCommand(options);
+            removeCommand->execute();
+            
+            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+            
+            string outName = "";
+            
+            if (namefile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
+                singleton = thisOutputDir + util.getRootName(util.getSimpleName(namefile)) + "singletons.temp";
+                util.renameFile(filenames["name"][0], singleton);
             }
-            tempDistFiles.push_back(tempDistFile);
+            
+            if (countfile != "") {
+                thisOutputDir = outputDir;
+                if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
+                singleton = thisOutputDir + util.getRootName(util.getSimpleName(countfile)) + "singletons.temp";
+                util.renameFile(filenames["count"][0], singleton);
+            }
+            delete removeCommand;
+            
+            m->mothurOut("/******************************************/\n");
+            
+        }else { //every seqs is a singleton
+            if (namefile != "") { singleton = namefile; }
+            else if (countfile != "") { singleton = countfile; }
         }
         
-        if (method == "vsearch")    {   splitNamesVsearch(seqGroup, numGroups, tempDistFiles);  }
-        else                        {   splitNames(seqGroup, numGroups, tempDistFiles);     }
+        util.mothurRemove(nonSingletonsFile);
+        
+        if (util.isBlank(singleton)) {
+            util.mothurRemove(singleton);
+            singleton = "none";
+        }
         
 		if (m->getControl_pressed())	 {  for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); }
 
@@ -233,299 +231,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		exit(1);
 	}
 }
-/***********************************************************************/
-int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroups){
-	try {
-		map<string, int>::iterator it;
-		map<string, int>::iterator it2;
-		
-        ofstream outFile;
-		ifstream dFile;
-		util.openInputFile(distFile, dFile);
-		
-		
-		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-			util.mothurRemove((distFile + "." + toString(i) + ".temp"));
-		}
-		
-		//for buffering the io to improve speed
-		 //allow for 10 dists to be stored, then output.
-		vector<string> outputs;  outputs.resize(numGroups, "");
-		vector<int> numOutputs;	 numOutputs.resize(numGroups, 0);	
-		
-		//you can have a group made, but their may be no distances in the file for this group if the taxonomy file and distance file don't match
-		//this can occur if we have converted the phylip to column, since we reduce the size at that step by using the cutoff value
-		vector<bool> validDistances;   validDistances.resize(numGroups, false); 
-		
-		//for each distance
-		while(dFile){
-			string seqA, seqB;
-			float dist;
-			
-			if (m->getControl_pressed()) { dFile.close(); for (int i = 0; i < numGroups; i++) { util.mothurRemove((distFile + "." + toString(i) + ".temp"));	} }
-			
-			dFile >> seqA >> seqB >> dist;  util.gobble(dFile);
-			
-			//if both sequences are in the same group then they are within the cutoff
-			it = seqGroup.find(seqA);
-			it2 = seqGroup.find(seqB);
-			
-			if ((it != seqGroup.end()) && (it2 != seqGroup.end())) { //they are both not singletons 
-				if (it->second == it2->second) { //they are from the same group so add the distance
-					if (numOutputs[it->second] > 30) {
-						util.openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
-						outFile << outputs[it->second] << seqA << '\t' << seqB << '\t' << dist << endl;
-						outFile.close();
-						outputs[it->second] = "";
-						numOutputs[it->second] = 0;
-						validDistances[it->second] = true;
-					}else{
-						outputs[it->second] += seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-						numOutputs[it->second]++;
-					}
-				}
-			}
-		}
-		dFile.close();
-        
-        string inputFile = namefile;
-        if (countfile != "") { inputFile = countfile; }
-        
-        vector<string> tempDistFiles;
-		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
-            string tempDistFile = distFile + "." + toString(i) + ".temp";
-            tempDistFiles.push_back(tempDistFile);
-			util.mothurRemove((inputFile + "." + toString(i) + ".temp"));
-			
-			//write out any remaining buffers
-			if (numOutputs[i] > 0) {
-				util.openOutputFileAppend((distFile + "." + toString(i) + ".temp"), outFile);
-				outFile << outputs[i];
-				outFile.close();
-				outputs[i] = "";
-				numOutputs[i] = 0;
-				validDistances[i] = true;
-			}
-		}
-		
-        splitNames(seqGroup, numGroups, tempDistFiles);
-        
-		if (m->getControl_pressed())	 {  
-			for (int i = 0; i < dists.size(); i++) { 
-				util.mothurRemove((dists[i].begin()->first));
-				util.mothurRemove((dists[i].begin()->second));
-			}
-			dists.clear();
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistanceFileByTax");
-		exit(1);
-	}
-}
-/***********************************************************************/
-int SplitMatrix::splitDistanceLarge(){
-	try {
-		vector<set<string> > groups;
-		
-		//for buffering the io to improve speed
-		 //allow for 30 dists to be stored, then output.
-		vector<string> outputs;
-		vector<int> numOutputs;
-		vector<bool> wroteOutPut;
-		
-		int numGroups = 0;
-
-		//ofstream outFile;
-		ifstream dFile;
-		util.openInputFile(distFile, dFile);
-	
-		while(dFile){
-			string seqA, seqB;
-			float dist;
-
-			dFile >> seqA >> seqB >> dist;
-			
-			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
-					
-			if(dist <= cutoff){
-				
-				int groupIDA = -1;
-				int groupIDB = -1;
-				int groupID = -1;
-				
-				for(int i=0;i<numGroups;i++){
-					set<string>::iterator aIt = groups[i].find(seqA);
-					set<string>::iterator bIt = groups[i].find(seqB);
-					
-					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
-						groups[i].insert(seqB);
-						groupIDA = i;
-						groupID = groupIDA;
-
-						
-					}
-					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
-						groups[i].insert(seqA);
-						groupIDB = i;
-						groupID = groupIDB;
-
-					
-					}
-				
-					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
-						if(groupIDA < groupIDB){
-						
-							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
-							groups[groupIDB].clear(); 
-							groupID = groupIDA;
-						}
-						else{
-						
-							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
-							groups[groupIDA].clear();  
-							groupID = groupIDB;
-						}
-						break;
-					}
-				}
-				
-	//windows is gonna gag on the reuse of outFile, will need to make it local...
-				
-				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
-					set<string> newGroup;
-					newGroup.insert(seqA);
-					newGroup.insert(seqB);
-					groups.push_back(newGroup);
-									
-					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
-					outputs.push_back(tempOut);
-					numOutputs.push_back(1);
-					wroteOutPut.push_back(false);
-					
-					numGroups++;
-				}
-				else{
-					string fileName = distFile + "." + toString(groupID) + ".temp";
-											
-					//have we reached the max buffer size
-					if (numOutputs[groupID] > 60) { //write out sequence
-                        ofstream outFile;
-						outFile.open(fileName.c_str(), ios::app);
-						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
-						outFile.close();
-						
-						outputs[groupID] = "";
-						numOutputs[groupID] = 0;
-						wroteOutPut[groupID] = true;
-					}else {
-						outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-						numOutputs[groupID]++;
-					}
-					
-					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
-						string row, column, distance;
-						if(groupIDA<groupIDB){
-							
-							//merge memory
-							numOutputs[groupID] += numOutputs[groupIDB];
-							outputs[groupID] += outputs[groupIDB];
-							
-							outputs[groupIDB] = "";
-							numOutputs[groupIDB] = 0;
-							
-							//if groupB is written to file it is above buffer size so read and write to new merged file
-							if (wroteOutPut[groupIDB]) {
-								string fileName2 = distFile + "." + toString(groupIDB) + ".temp";
-                                util.appendFiles(fileName2, fileName);
-								util.mothurRemove(fileName2);
-                        
-								
-								//write out the merged memory
-								if (numOutputs[groupID] > 60) {
-                                    ofstream tempOut;
-                                    util.openOutputFile(fileName, tempOut);
-									tempOut << outputs[groupID];
-									outputs[groupID] = "";
-									numOutputs[groupID] = 0;
-                                    tempOut.close();
-								}
-								
-								//outFile.close();
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDB] = false;
-							}else{ } //just merge b's memory with a's memory 
-						}
-						else{
-							numOutputs[groupID] += numOutputs[groupIDA];
-							outputs[groupID] += outputs[groupIDA];
-							
-							outputs[groupIDA] = "";
-							numOutputs[groupIDA] = 0;
-							
-							if (wroteOutPut[groupIDA]) {
-								string fileName2 = distFile + "." + toString(groupIDA) + ".temp";
-                                util.appendFiles(fileName2, fileName);
-								util.mothurRemove(fileName2);
-								
-								//write out the merged memory
-								if (numOutputs[groupID] > 60) {
-                                    ofstream tempOut;
-                                    util.openOutputFile(fileName, tempOut);
-									tempOut << outputs[groupID];
-									outputs[groupID] = "";
-									numOutputs[groupID] = 0;
-                                    tempOut.close();
-								}
-								
-								//outFile.close();
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDA] = false;
-							}else { } //just merge memory
-						}					
-					}
-				}
-			}
-			util.gobble(dFile);
-		}
-		dFile.close();
-        
-		vector<string> tempDistFiles;
-		for (int i = 0; i < numGroups; i++) {
-            string fileName = distFile + "." + toString(i) + ".temp";
-            tempDistFiles.push_back(fileName);
-            //remove old names files just in case
-			
-			if (numOutputs[i] > 0) {
-                ofstream outFile;
-				outFile.open(fileName.c_str(), ios::app);
-				outFile << outputs[i];
-				outFile.close();
-			}
-		}
-        
-        map<string, int> seqGroup;
-        for (int i = 0; i < groups.size(); i++) {
-            for (set<string>::iterator itNames = groups[i].begin(); itNames != groups[i].end();) {
-                seqGroup[*itNames] = i;
-                groups[i].erase(itNames++);
-            }
-        }
-        
-		splitNames(seqGroup, numGroups, tempDistFiles);
-				
-		return 0;			
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistanceLarge");
-		exit(1);
-	}
-}
-//********************************************************************************************************************
+/********************************************************************************************************************
 int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
 	try {
         ofstream outFile;
@@ -803,123 +509,7 @@ int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, ve
         m->errorOut(e, "SplitMatrix", "splitNamesTax");
         exit(1);
     }
-}
-//********************************************************************************************************************
-int SplitMatrix::splitDistanceRAM(){
-	try {
-		vector<set<string> > groups;
-		vector<string> outputs;
-		
-		int numGroups = 0;
-
-		ifstream dFile;
-		util.openInputFile(distFile, dFile);
-
-		while(dFile){
-			string seqA, seqB;
-			float dist;
-
-			dFile >> seqA >> seqB >> dist;
-			
-			if (m->getControl_pressed()) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  util.mothurRemove((distFile + "." + toString(i) + ".temp")); }  } return 0; }
-					
-			if(dist <= cutoff){
-				
-				int groupIDA = -1;
-				int groupIDB = -1;
-				int groupID = -1;
-				
-				for(int i=0;i<numGroups;i++){
-					set<string>::iterator aIt = groups[i].find(seqA);
-					set<string>::iterator bIt = groups[i].find(seqB);
-					
-					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
-						groups[i].insert(seqB);
-						groupIDA = i;
-						groupID = groupIDA;
-					}
-					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
-						groups[i].insert(seqA);
-						groupIDB = i;
-						groupID = groupIDB;
-					}
-				
-					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
-						if(groupIDA < groupIDB){
-						
-							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
-							groups[groupIDB].clear(); 
-							groupID = groupIDA;
-						}
-						else{
-							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
-							groups[groupIDA].clear();  
-							groupID = groupIDB;
-						}
-						break;
-					}
-				}
-								
-				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
-					set<string> newGroup;
-					newGroup.insert(seqA);
-					newGroup.insert(seqB);
-					groups.push_back(newGroup);
-									
-					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
-					outputs.push_back(tempOut);
-					numGroups++;
-				}
-				else{
-											
-					outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-					
-					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
-						string row, column, distance;
-						if(groupIDA<groupIDB){
-							//merge memory
-							outputs[groupID] += outputs[groupIDB];
-							outputs[groupIDB] = "";
-						}else{
-							outputs[groupID] += outputs[groupIDA];
-							outputs[groupIDA] = "";
-						}					
-					}
-				}
-			}
-			util.gobble(dFile);
-		}
-		dFile.close();
-		
-        vector<string> tempDistFiles;
-		for (int i = 0; i < numGroups; i++) {
-            string fileName = distFile + "." + toString(i) + ".temp";
-            tempDistFiles.push_back(fileName);
-			if (outputs[i] != "") {
-				ofstream outFile;
-				outFile.open(fileName.c_str(), ios::ate);
-				outFile << outputs[i];
-				outFile.close();
-			}
-		}
-        
-        map<string, int> seqGroup;
-        for (int i = 0; i < groups.size(); i++) {
-            for (set<string>::iterator itNames = groups[i].begin(); itNames != groups[i].end();) {
-                seqGroup[*itNames] = i;
-                groups[i].erase(itNames++);
-            }
-        }
-        
-		splitNames(seqGroup, numGroups, tempDistFiles);
-				
-		return 0;			
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitDistanceRAM");
-		exit(1);
-	}
-}
+}*/
 //********************************************************************************************************************
 //sorts biggest to smallest
 inline bool compareFileSizes(map<string, string> left, map<string, string> right){
@@ -968,7 +558,5 @@ vector< map< string, string> > SplitMatrix::getDistanceFiles(){
 		exit(1);
 	}
 }
-/***********************************************************************/
-SplitMatrix::~SplitMatrix(){}
 /***********************************************************************/
 

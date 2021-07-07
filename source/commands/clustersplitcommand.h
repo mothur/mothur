@@ -49,10 +49,10 @@ public:
 
 private:
 	vector<string> outputNames;
-	string file, method, fileroot, tag, phylipfile, columnfile, namefile, countfile, distfile, format, timing, splitmethod, taxFile, fastafile, inputDir, vsearchLocation, metricName, initialize, type;
+	string file, method, fileroot, tag, namefile, countfile, distfile, format, timing, taxFile, fastafile, inputDir, vsearchLocation, metricName, initialize, type;
 	double cutoff, splitcutoff, stableMetric;
 	int precision, length, processors, taxLevelCutoff, maxIters, numSingletons;
-	bool  abort, large, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist, runsensSpec, showabund; 
+	bool  abort, classic, runCluster, deleteFiles, isList, cutoffNotSet, makeDist, runsensSpec, showabund; 
 	
 	void printData(ListVector*);
 	vector<string> createProcesses(vector< map<string, string> >, set<string>&);

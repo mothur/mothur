@@ -30,14 +30,10 @@ vector<string> ClusterSplitCommand::setParameters(){
 	try {
         CommandParameter pfile("file", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","",false,false,true); parameters.push_back(pfile);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FastaTaxName","",false,false,true); parameters.push_back(ptaxonomy);
-		CommandParameter pphylip("phylip", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "none","list",false,false,true); parameters.push_back(pphylip);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "FastaTaxName","list",false,false,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "ColumnName-FastaTaxName","rabund-sabund",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount", "none", "","",false,false,true); parameters.push_back(pcount);
-		CommandParameter pcolumn("column", "InputTypes", "", "", "PhylipColumnFasta", "PhylipColumnFasta", "ColumnName","list",false,false,true); parameters.push_back(pcolumn);
 		CommandParameter ptaxlevel("taxlevel", "Number", "", "3", "", "", "","",false,false,true); parameters.push_back(ptaxlevel);
-		CommandParameter psplitmethod("splitmethod", "Multiple", "classify-fasta-distance", "distance", "", "", "","",false,false,true); parameters.push_back(psplitmethod);
-		CommandParameter plarge("large", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(plarge);
 		CommandParameter pshowabund("showabund", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pshowabund);
         CommandParameter prunspenspec("runsensspec", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prunspenspec);
         CommandParameter pcluster("cluster", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcluster);
@@ -82,19 +78,14 @@ vector<string> ClusterSplitCommand::setParameters(){
 string ClusterSplitCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The cluster.split command parameter options are file, fasta, phylip, column, name, count, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, large, cluster, iters, delta, initialize, dist, processors, runsensspec. Fasta or Phylip or column and name are required.\n";
-		helpString += "The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n";
-		helpString += "For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n";
-		helpString += "For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n";
-		helpString += "You will also need to set the taxlevel you want to split by. mothur will split the sequences into distinct taxonomy groups, and split the distance file based on those groups. \n";
-		helpString += "For the classification method using a fasta file, you need to provide your fasta file, names file and taxonomy file.  \n";
-		helpString += "You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n";
+		helpString += "The cluster.split command parameter options are file, fasta, name, count, cutoff, precision, method, taxonomy, taxlevel, showabund, timing, cluster, iters, delta, initialize, dist, processors, runsensspec. Fasta or file are required.\n";
+		helpString += "The cluster.split command splits your files by classification using a fasta file to generate distance matrices for each taxonomic group. \n";
         helpString += "The file option allows you to enter your file containing your list of column and names/count files as well as the singleton file.  This file is mothur generated, when you run cluster.split() with the cluster=f parameter.  This can be helpful when you have a large dataset that you may be able to use all your processors for the splitting step, but have to reduce them for the cluster step due to RAM constraints. For example: cluster.split(fasta=yourFasta, taxonomy=yourTax, count=yourCount, taxlevel=3, cluster=f, processors=8) then cluster.split(file=yourFile, processors=4).  This allows your to maximize your processors during the splitting step.  Also, if you are unsure if the cluster step will have RAM issue with multiple processors, you can avoid running the first part of the command multiple times.\n";
-		helpString += "The phylip and column parameter allow you to enter your distance file. \n";
 		helpString += "The fasta parameter allows you to enter your aligned fasta file. \n";
 		helpString += "The name parameter allows you to enter your name file. \n";
-        helpString += "The count parameter allows you to enter your count file. \n A count or name file is required if your distance file is in column format";
-        helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the distance matrix, default=t";
+        helpString += "The count parameter allows you to enter your count file.\n";
+        helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences. This is required unless you are running the command with the file option. \n";
+        helpString += "The cluster parameter allows you to indicate whether you want to run the clustering or just split the dataset into taxanomic matrices, default=t";
         helpString += "The dist parameter allows you to indicate whether you want a column formatted distance matrix outputted along with the list file. Default=F.";
 		helpString += "The cutoff parameter allow you to set the distance you want to cluster to, default is 0.03. \n";
 		helpString += "The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n";
@@ -104,16 +95,12 @@ string ClusterSplitCommand::getHelpString(){
         helpString += "The initialize parameter allows to select the initial randomization for the opticluster method. Options are singleton, meaning each sequence is randomly assigned to its own OTU, or oneotu meaning all sequences are assigned to one otu. Default=singleton.\n";
         helpString += "The runsensspec parameter allows to run the sens.spec command on the completed list file. Default=true.\n";
 		helpString += "The method parameter allows you to enter your clustering mothod. Options are furthest, nearest, average, weighted, agc, dgc and opti. Default=opti.  The agc and dgc methods require a fasta file.";
-		helpString += "The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n";
-		helpString += "The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n";
-		helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=3, meaning use the first taxon in each list. \n";
-		helpString += "The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n";
-        helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic.  It is only valid with splitmethod=fasta. Default=f.\n";
-        helpString += "The processors parameter allows you to specify the number of processors to use. The default is 1.\n";
+        helpString += "The taxlevel parameter allows you to specify the taxonomy level you want to use to split the dataset, default=3.\n";
+        helpString += "The classic parameter allows you to indicate that you want to run your files with cluster.classic. Default=f.\n";
+        helpString += "The processors parameter allows you to specify the number of processors to use. The default is all available.\n";
          helpString += "The vsearch parameter allows you to specify the name and location of your vsearch executable if using agc or dgc clustering methods. By default mothur will look in your path, mothur's executable and mothur tools locations.  You can set the vsearch location as follows, vsearch=/usr/bin/vsearch.\n";
 		helpString += "The cluster.split command should be in the following format: \n";
-		helpString += "cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
-		helpString += "Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=opti, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n";	
+		helpString += "cluster.split(fasta=yourFastaFile, count=yourCountFile, method=yourMethod, cutoff=yourCutoff, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -186,16 +173,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (file == "not open") { file = ""; abort = true; }
 			else if (file == "not found") { file = ""; }
             else { distfile = file; type = ""; }
-            
-            phylipfile = validParameter.validFile(parameters, "phylip");
-			if (phylipfile == "not open") { abort = true; }
-			else if (phylipfile == "not found") { phylipfile = ""; }
-			else {  distfile = phylipfile;  format = "phylip"; 	current->setPhylipFile(phylipfile); }
-			
-			columnfile = validParameter.validFile(parameters, "column");
-			if (columnfile == "not open") { abort = true; }	
-			else if (columnfile == "not found") { columnfile = ""; }
-			else {  distfile = columnfile; format = "column";	current->setColumnFile(columnfile); }
 			
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { abort = true; namefile = "";}	
@@ -210,52 +187,23 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }	
 			else if (fastafile == "not found") { fastafile = ""; }
-			else { distfile = fastafile;  splitmethod = "fasta";  current->setFastaFile(fastafile); }
+			else { distfile = fastafile;  current->setFastaFile(fastafile); }
 			
 			taxFile = validParameter.validFile(parameters, "taxonomy");
 			if (taxFile == "not open") { taxFile = ""; abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
-			else {
-                current->setTaxonomyFile(taxFile);
-                if (splitmethod != "fasta")         { splitmethod = "classify";     }
-            }
+			else { current->setTaxonomyFile(taxFile); }
 			
-			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (file == "")) {
-				//is there are current file available for either of these?
-				//give priority to column, then phylip, then fasta
-				columnfile = current->getColumnFile(); 
-				if (columnfile != "") {  format = "column"; m->mothurOut("Using " + columnfile + " as input file for the column parameter.\n");  }
-				else { 
-					phylipfile = current->getPhylipFile(); 
-					if (phylipfile != "") {  format = "phylip"; m->mothurOut("Using " + phylipfile + " as input file for the phylip parameter.\n");  }
-					else { 
-						fastafile = current->getFastaFile(); 
-						if (fastafile != "") {   m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
-						else { 
-							m->mothurOut("No valid current files. When executing a cluster.split command you must enter a file, phylip or a column or fastafile.\n"); 
-							abort = true; 
-						}
-					}
-				}
-			}
-			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "") && (file != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: file, fasta, phylip or column.\n");  abort = true; }
+            if ((fastafile == "") && (file == "")) {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") {   m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+                else {
+                    m->mothurOut("[ERROR]: No valid current files. When executing a cluster.split command you must enter a file file or fastafile.\n"); abort = true;
+                }
+            }
+			else if ((fastafile != "") && (file != "")) { m->mothurOut("[ERROR]: When executing a cluster.split command you must enter ONLY ONE of the following: file or fasta.\n");  abort = true; }
             
-            if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
-            
-			if (columnfile != "") {
-				if ((namefile == "") && (countfile == "")) { 
-					namefile = current->getNameFile(); 
-                    if (namefile != "") {  m->mothurOut("Using " + namefile + " as input file for the name parameter.\n"); type = "name";  }
-					else { 
-						countfile = current->getCountFile();
-                        if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); type = "count";  }
-                        else { 
-                            m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the column format.\n");
-                            abort = true; 
-                        }	
-					}	
-				}
-			}
+            if ((countfile != "") && (namefile != "")) { m->mothurOut("[ERROR]: When executing a cluster.split command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
             if (file != "") {
                 if ((namefile == "") && (countfile == "")) {
@@ -268,7 +216,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					taxFile = current->getTaxonomyFile(); 
 					if (taxFile != "") {  m->mothurOut("Using " + taxFile + " as input file for the taxonomy parameter.\n");  }
 					else { 
-						m->mothurOut("You need to provide a taxonomy file if you are if you are using a fasta file to generate the split.\n");  
+						m->mothurOut("[ERROR]: You need to provide a taxonomy file if you are if you are using a fasta file to generate the split.\n");
 						abort = true; 
 					}	
 				}
@@ -279,17 +227,13 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					else { 
 						countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); type = "count"; }
-                        else { 
-                            m->mothurOut("You need to provide a namefile or countfile if you are going to use the fasta file to generate the split.\n");  
-                            abort = true; 
+                        else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the fasta file to generate the split.\n");   abort = true;
                         }	
 					}	
 				}
 			}
 					
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			//get user cutoff and precision or use defaults
+			
 			string temp;
 			temp = validParameter.valid(parameters, "precision");
 			if (temp == "not found") { temp = "100"; }
@@ -297,17 +241,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			length = temp.length();
 			util.mothurConvert(temp, precision); 
 			
-			temp = validParameter.valid(parameters, "large");			if (temp == "not found") { temp = "F"; }
-			large = util.isTrue(temp);
-            
 			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
-			
-			temp = validParameter.valid(parameters, "splitmethod");
-			if ((splitmethod != "fasta") && (splitmethod != "classify")) {
-				if (temp == "not found")  { splitmethod = "distance"; }
-				else {  splitmethod = temp; }
-			}
 			
             temp = validParameter.valid(parameters, "classic");			if (temp == "not found") { temp = "F"; }
 			classic = util.isTrue(temp);
@@ -315,9 +250,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             temp = validParameter.valid(parameters, "runsensspec");			if (temp == "not found") { temp = "T"; }
             runsensSpec = util.isTrue(temp);
             
-            //not using file option and don't have fasta method with classic
-            if (((splitmethod != "fasta") && classic) && (file == "")) { m->mothurOut("[ERROR]: splitmethod must be fasta to use cluster.classic, or you must use the file option.\n"); abort=true; }
-			
 			temp = validParameter.valid(parameters, "taxlevel");		if (temp == "not found")  { temp = "3"; }
 			util.mothurConvert(temp, taxLevelCutoff);
             
@@ -379,11 +311,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             if (temp == "not found") { cutoffNotSet = true; if ((method == "opti") || (method == "agc") || (method == "dgc")) { temp = "0.03"; }else { temp = "0.15"; } }
             util.mothurConvert(temp, cutoff);
             
-			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
-			else { m->mothurOut("[ERROR]: " + splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta.\n");  abort = true; }
-			
-			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("[ERROR]: You need to provide a taxonomy file if you are going to use the classify splitmethod.\n");  abort = true;  }
-
 			temp = validParameter.valid(parameters, "showabund");
 			if (temp == "not found") { temp = "T"; }
             showabund = util.isTrue(temp);
@@ -398,14 +325,10 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
             makeDist = util.isTrue(temp);
             if (method == "opti") { makeDist = runsensSpec;  }
             
-            if (((phylipfile != "") || (columnfile != "")) && (method == "opti")) { makeDist = false; }
-            
-            if (((phylipfile != "") || (columnfile != "")) && makeDist) { m->mothurOut("[ERROR]: You already provided a distance matrix. Mothur will ignore the dist parameter.\n"); makeDist = false; }
             if (classic && makeDist) { m->mothurOut("[ERROR]: You cannot use the dist parameter with the classic parameter. Mothur will ignore the dist parameter.\n"); makeDist = false; }
 
 			timing = validParameter.valid(parameters, "timing");
 			if (timing == "not found") { timing = "F"; }
-			
 		}
 	}
 	catch(exception& e) {
@@ -453,65 +376,22 @@ int ClusterSplitCommand::execute(){
         }else {
 		          
             //****************** file prep work ******************************//
+            estart = time(NULL);
+            if ((method == "agc") || (method == "dgc")) {
+                if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
+            }
             
-                //if user gave a phylip file convert to column file
-                if (format == "phylip") {
-                    estart = time(NULL);
-                    m->mothurOut("Converting to column format...\n");
-                    
-                    ReadCluster* convert = new ReadCluster(distfile, cutoff, outputdir, false);
-                    
-                    NameAssignment* nameMap = NULL;
-                    convert->setFormat("phylip");
-                    convert->read(nameMap);
-                    
-                    if (m->getControl_pressed()) {  delete convert;  return 0;  }
-                    
-                    distfile = convert->getOutputFile();
-                    
-                    //if no names file given with phylip file, create it
-                    ListVector* listToMakeNameFile =  convert->getListVector();
-                    if ((namefile == "") && (countfile == "")) {  //you need to make a namefile for split matrix
-                        ofstream out;
-                        namefile = phylipfile + ".names";
-                        util.openOutputFile(namefile, out);
-                        for (int i = 0; i < listToMakeNameFile->getNumBins(); i++) {
-                            string bin = listToMakeNameFile->get(i);
-                            out << bin << '\t' << bin << endl;
-                        }
-                        out.close();
-                    }
-                    delete listToMakeNameFile;
-                    delete convert;
-                    
-                    m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file.\n"); 
-                }
-                if (m->getControl_pressed()) { return 0; }
-                
-                estart = time(NULL);
-                m->mothurOut("Splitting the file...\n"); 
-                current->setMothurCalling(true);
+            m->mothurOut("Splitting the file...\n");
+            current->setMothurCalling(true);
             
-                //split matrix into non-overlapping groups
-                SplitMatrix* split;
-                if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, cutoff, splitmethod, large);							}
-                else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, countfile, taxFile, taxLevelCutoff, splitmethod, large);					}
-                else if (splitmethod == "fasta")		{
-                    if ((method == "agc") || (method == "dgc")) {
-                        if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
-                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, "vsearch", processors, classic, outputdir, "fasta");
-                    }else{
-                        split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, classic, outputdir, "distance");
-                    }
-                }
-                else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta.\n");  return 0;		}
-                split->split();
-                if (fastafile != "") {  current->setFastaFile(fastafile);  }
+            //split matrix into non-overlapping groups
+            SplitMatrix* split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff,  processors, classic, outputdir);
 
-                if (m->getControl_pressed()) { delete split; return 0; }
+            if (fastafile != "") {  current->setFastaFile(fastafile);  }
+
+            if (m->getControl_pressed()) { delete split; return 0; }
                 
                 singletonName = split->getSingletonNames();
-                numSingletons = split->getNumSingleton();
                 distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
                 delete split;
                 current->setMothurCalling(false);
@@ -840,7 +720,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<double, int> u
 struct clusterData {
     MothurOut* m;
     Utils util;
-    int count, precision, length, numSingletons, maxIters;
+    int count, precision, length, maxIters; //numSingletons,
     bool showabund, classic, useName, useCount, deleteFiles, cutoffNotSet;
     double cutoff, stableMetric;
     ofstream outList, outRabund, outSabund;
@@ -867,7 +747,7 @@ struct clusterData {
         type = ty;
         useName = false;
         useCount = false;
-        numSingletons = 0;
+        //numSingletons = 0;
     }
     void setOptiOptions(string metn, double stabMet, string init, int mxi ) {
         metricName = metn;
@@ -1558,19 +1438,17 @@ int ClusterSplitCommand::runSensSpec() {
             if ((itTypes->second).size() != 0) { listFile = (itTypes->second)[0];  }
         }
         
-        string columnFile = ""; string phylipFile = "";
+        string columnFile = "";
         if (makeDist) {
             itTypes = outputTypes.find("column");
             if (itTypes != outputTypes.end()) {
                 if ((itTypes->second).size() != 0) { columnFile = (itTypes->second)[0];  }
             }
-        }else if (columnfile != "") { columnFile = columnfile; }
-        else { phylipFile = phylipfile; }
+        }
     
         string inputString = "cutoff=" + toString(cutoff) + ", list=" + listFile;
         if (columnFile != "") { inputString += ", column=" + columnFile;  }
-        else if (phylipfile != "")   { inputString += ", phylip=" + phylipfile; }
-        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a phylip or column file, skipping."); return 0;  }
+        else { m->mothurOut("[WARNING]: Cannot run sens.spec analysis without a column file, skipping."); return 0;  }
 
         if (namefile != "")         {  inputString += ", name=" + namefile; }
         else if (countfile != "")   { inputString += ", count=" + countfile; }
