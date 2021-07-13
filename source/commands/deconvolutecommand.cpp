@@ -17,6 +17,7 @@ vector<string> DeconvoluteCommand::setParameters(){
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
         CommandParameter pformat("format", "Multiple", "count-name", "name", "", "", "","",false,false, true); parameters.push_back(pformat);
+        CommandParameter poutput("output", "Multiple", "count-name", "name", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -110,10 +111,14 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("When executing a unique.seqs command you must enter ONLY ONE of the following: count or name.\n");  abort = true; }
 			
+            //allow format parameter to have two names - format or output
             format = validParameter.valid(parameters, "format");
             if(format == "not found"){
-                if (countfile != "") { format = "count";    }
-                else { format = "name";                     }
+                format = validParameter.valid(parameters, "output");
+                if(format == "not found"){
+                    if (countfile != "") { format = "count";    }
+                    else { format = "name";                     }
+                }
             }
             
             if ((format != "name") && (format != "count")) {
