@@ -397,14 +397,15 @@ int ClusterSplitCommand::execute(){
                 current->setMothurCalling(false);
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
                 
+                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file.\n");
+               
                 //output a merged distance file
                 if (makeDist)		{ createMergedDistanceFile(distName); }
 				
                 if (m->getControl_pressed()) { return 0; }
                 
-                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file.\n"); 
                 estart = time(NULL);
-
+                
                 if (!runCluster) {
                     string filename = printFile(singletonName, distName);
                     

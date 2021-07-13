@@ -22,7 +22,6 @@
 #include "onegapignore.h"
 #include "jtt.hpp"
 #include "writer.h"
-#include "sequencedb.h"
 #include "proteindb.hpp"
 #include "pmb.hpp"
 #include "pam.hpp"
@@ -68,6 +67,7 @@ class DistanceCommand : public Command {
 
 public:
     DistanceCommand(string);
+    DistanceCommand(StorageDatabase*&, string, double, string, int); //used by mothur's splitMatrix class to avoid rereading files
 	~DistanceCommand() {}
 	
 	vector<string> setParameters();

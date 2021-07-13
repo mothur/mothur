@@ -98,7 +98,34 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "GetSeqsCommand", "getOutputPattern");
+        m->errorOut(e, "RemoveSeqsCommand", "getOutputPattern");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dupsFileType, string output) {
+    try {
+        names = util.readAccnos(accnos);
+        dups = true;
+        outputdir = output;
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        if (dupsFile != "") {
+            if (dupsFileType == "count") {
+                countfile = dupsFile;
+                readCount();
+            }else { //names
+                namefile = dupsFile;
+                readName();
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand - mothurRun");
         exit(1);
     }
 }
@@ -206,7 +233,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
                 abort=true;
             }
 		}
-
+        
+        //get names you want to keep
+        if (!abort) { names = util.readAccnos(accnosfile); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
@@ -219,9 +248,6 @@ int RemoveSeqsCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		//get names you want to keep
-		names = util.readAccnos(accnosfile);
 		
 		if (m->getControl_pressed()) { return 0; }
         

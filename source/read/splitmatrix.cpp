@@ -90,32 +90,29 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         string nonSingletonsFile = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "nonsingleton.accnos";
-        
-        thisOutputDir = outputDir;
-        if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-        string tempAccnos = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "accnos.temp";
+        ofstream outNonSingleton; util.openOutputFile(nonSingletonsFile, outNonSingleton);
+       
+        ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
+        SequenceDB fullDB(inFASTA); inFASTA.close();
         
         //process each group
         for (int i = 0; i < numGroups; i++) {
             
-            util.printAccnos(tempAccnos, seqGroups[i]);
+            if (m->getControl_pressed()) { return 0; }
             
-            //run get.seqs to select fasta and name or count files
-            string options = "fasta=" + fastafile + ", accnos=" + tempAccnos;
-            if (countfile != "") { options += ", count=" + countfile; }
-            else if (namefile != "") { options += ", name=" + namefile, + ", dups=T"; }
-            
-            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Selecting sequences for group " + groupNames[i] + ":\n\nRunning command: get.seqs(" + options + ")\n");
+            m->mothurOut("Selecting sequences for group " + groupNames[i] + ":\n\n");
             
-            Command* getCommand = new GetSeqsCommand(options);
-            getCommand->execute();
+            string dupsFile = namefile; string dupsFormat = "name";
+            if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
+            
+            GetSeqsCommand* getCommand = new GetSeqsCommand(thisGroupsNames,dupsFile, dupsFormat, outputDir);
             
             map<string, vector<string> > filenames = getCommand->getOutputFiles();
             
-            string thisGroupsFastaFile = filenames["fasta"][0];
+            //string thisGroupsFastaFile = filenames["fasta"][0];
             string outName = "";
             
             if (namefile != "") {
@@ -133,21 +130,21 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             }
             delete getCommand;
             
-            m->mothurOut("/******************************************/\n");
-            
-            //run dist.seqs to calc the distances for each group
-            if (classic) { options = "fasta=" + thisGroupsFastaFile + ", processors=" + toString(processors) + ", output=lt"; }
-            else { options = "fasta=" + thisGroupsFastaFile + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff); }
-            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            //select fasta seqs
+            StorageDatabase* thisDB = new SequenceDB(fullDB, thisGroupsNames);
             
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Calculating distances for group " + groupNames[i] + ":\n\nRunning command: dist.seqs(" + options + ")\n");
-            Command* command = new DistanceCommand(options);
-            
+                  
             m->mothurOut("/******************************************/\n");
+            m->mothurOut("Calculating distances for group " + groupNames[i] + ":\n\n");
+            thisOutputDir = outputDir;
+            if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+            string outputFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "." + toString(i);
             
-            command->execute();
+            string outputformat = "column"; if (classic) { outputformat = "lt"; }
             
+            DistanceCommand* command = new DistanceCommand(thisDB, outputFileRoot, distCutoff, outputformat, processors);
+      
             filenames = command->getOutputFiles();
             
             string thisDistanceFile = "";
@@ -156,7 +153,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             
             delete command;
             
-            util.mothurRemove(thisGroupsFastaFile);
+            m->mothurOut("/******************************************/\n");
             
             if (!util.isBlank(thisDistanceFile)) {
                 thisOutputDir = outputDir;
@@ -167,27 +164,24 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
                 map<string, string> thisFilePair; thisFilePair[outDist] = outName;
                 dists.push_back(thisFilePair);
                 
-                util.appendFiles(tempAccnos, nonSingletonsFile);
+                for (int j = 0; j < thisDB->getNumSeqs(); j++) { outNonSingleton << thisDB->getSeq(j).getName() << endl; }
             }else {
                 util.mothurRemove(thisDistanceFile);
                 util.mothurRemove(outName);
             }
+            delete thisDB;
         }
-       
+        outNonSingleton.close();
+        
         if (!util.isBlank(nonSingletonsFile)) { //there are non singletons, so remove them to find the singletons
             //get singletons
-            //run remove.seqs to remove nonsingletons name or count files
-            string options = "accnos=" + nonSingletonsFile;
-            if (countfile != "") { options += ", count=" + countfile; }
-            else if (namefile != "") { options += ", name=" + namefile, + ", dups=T"; }
-            
-            if (outputDir != "") { options += ", outputdir=" + outputDir; }
+            string dupsFile = namefile; string dupsFormat = "name";
+            if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
             
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs(" + options + ")\n");
+            m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs()\n");
             
-            Command* removeCommand = new RemoveSeqsCommand(options);
-            removeCommand->execute();
+            RemoveSeqsCommand* removeCommand = new RemoveSeqsCommand(nonSingletonsFile, dupsFile, dupsFormat, outputDir);
             
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             

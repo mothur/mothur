@@ -159,6 +159,61 @@ DistanceCommand::DistanceCommand(string option) {
 	}
 }
 //**********************************************************************************************************************
+DistanceCommand::DistanceCommand(StorageDatabase*& storageDB, string outputFileRoot, double cut, string outputformat, int proc) {
+    try {
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["phylip"] = tempOutNames;
+        outputTypes["column"] = tempOutNames;
+        
+        calc = "onegap";
+        countends = true;
+        fitCalc = false;
+        cutoff = cut;
+        processors = proc;
+        compress = false;
+        output = outputformat;
+        prot = false; //not using protein sequences
+            
+        numDistsBelowCutoff = 0;
+        db = storageDB;
+        numNewFasta = db->getNumSeqs();
+        numSeqs = db->getNumSeqs();
+        
+        if (!db->sameLength()) {  m->mothurOut("[ERROR]: your sequences are not the same length, aborting.\n");  return; }
+        if (numSeqs < 2) {  m->mothurOut("[ERROR]: you must have at least 2 sequences to calculate the distances, aborting.\n");  return; }
+        
+        string outputFile;
+        map<string, string> variables;
+        variables["[filename]"] = outputFileRoot;
+        
+        if (output == "lt") { //does the user want lower triangle phylip formatted file
+            variables["[outputtag]"] = "phylip";
+            outputFile = getOutputFileName("phylip", variables);
+            util.mothurRemove(outputFile); outputTypes["phylip"].push_back(outputFile);
+            
+            //output numSeqs to phylip formatted dist file
+        }else if (output == "column") { //user wants column format
+            
+            outputFile = getOutputFileName("column", variables);
+            outputTypes["column"].push_back(outputFile);
+            util.mothurRemove(outputFile);
+        }
+       
+        
+        m->mothurOut("\nSequence\tTime\tNum_Dists_Below_Cutoff\n");
+                     
+        createProcesses(outputFile);
+        
+        m->mothurOut("\nOutput File Names:\n"); m->mothurOut(outputFile+"\n\n");
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistanceCommand", "DistanceCommand");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 
 int DistanceCommand::execute(){
 	try {
@@ -221,8 +276,7 @@ int DistanceCommand::execute(){
         
 		if (m->getControl_pressed()) { outputTypes.clear();  util.mothurRemove(outputFile); return 0; }
 		
-		ifstream fileHandle;
-		fileHandle.open(outputFile.c_str());
+		ifstream fileHandle; fileHandle.open(outputFile.c_str());
 		if(fileHandle) {
 			util.gobble(fileHandle);
 			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.\n"); }
@@ -312,6 +366,7 @@ void driverColumn(distanceData* params){
        
         params->count = 0;
         string buffer = "";
+        
         for(int i=params->startLine;i<params->endLine;i++){
             
             Sequence seqI; Protein seqIP; string nameI = "";
@@ -383,10 +438,8 @@ void driverLt(distanceData* params){
         long long numSeqs = params->db->getNumSeqs();
         
         //column file
-        ofstream outFile;
-        params->util.openOutputFile(params->outputFileName, outFile);
-        outFile.setf(ios::fixed, ios::showpoint);
-        outFile << setprecision(4);
+        ofstream outFile; params->util.openOutputFile(params->outputFileName, outFile);
+        outFile.setf(ios::fixed, ios::showpoint); outFile << setprecision(4);
         
         if(params->startLine == 0){	outFile << numSeqs << endl;	}
         

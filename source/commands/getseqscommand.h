@@ -11,12 +11,14 @@
  */
  
 #include "command.hpp"
+#include "sequencedb.h"
 
 class GetSeqsCommand : public Command {
 	
 	public:
 	
 		GetSeqsCommand(string);
+        GetSeqsCommand(set<string>, string dupsFile, string dupsFileType, string output);
 		~GetSeqsCommand(){}
 	
 		vector<string> setParameters();

@@ -23,10 +23,11 @@ public:
 	SequenceDB(int);           //makes data that size
 	SequenceDB(ifstream&);	   //reads file to fill data
 	SequenceDB(const SequenceDB& sdb) : data(sdb.data) {};
+    SequenceDB(const SequenceDB& sdb, set<string> names); //creates a new sequenceDB containing only the reads in names 
 	~SequenceDB();             //loops through data and delete each sequence
 
 	int getNumSeqs();
-    Sequence getSeq(int);         //returns sequence name at that location
+    Sequence getSeq(int);         //returns sequence at that location
 	void push_back(Sequence);  //adds unaligned sequence
 	bool sameLength() { return samelength; }
 		

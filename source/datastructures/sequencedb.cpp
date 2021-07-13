@@ -50,6 +50,28 @@ SequenceDB::SequenceDB(ifstream& filehandle) : StorageDatabase() {
 }
 /***********************************************************************/
 
+SequenceDB::SequenceDB(const SequenceDB& sdb, set<string> names) : StorageDatabase() {
+    try{
+       
+        int numSeqs = sdb.data.size();
+        
+        for (int i = 0; i < numSeqs; i++) {
+            
+            Sequence seqI = sdb.data[i];
+            if (names.count(seqI.getName()) != 0) {
+                if (length == 0) { length = seqI.getAligned().length(); }
+                if (length != seqI.getAligned().length()) { samelength = false;  }
+                data.push_back(seqI);
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceDB", "SequenceDB");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
 int SequenceDB::getNumSeqs() {
 	return data.size();
 }
