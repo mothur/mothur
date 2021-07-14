@@ -103,7 +103,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Selecting sequences for group " + groupNames[i] + ":\n\n");
+            m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i) + " of " + toString(numGroups) + "):\n\n");
             
             string dupsFile = namefile; string dupsFormat = "name";
             if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
@@ -133,13 +133,10 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             //select fasta seqs
             StorageDatabase* thisDB = new SequenceDB(fullDB, thisGroupsNames);
             
-            m->mothurOut("/******************************************/\n");
-                  
-            m->mothurOut("/******************************************/\n");
-            m->mothurOut("Calculating distances for group " + groupNames[i] + ":\n\n");
+            m->mothurOut("\nCalculating distances for group " + groupNames[i] + " (" + toString(i) + " of " + toString(numGroups) + "):\n");
             thisOutputDir = outputDir;
             if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-            string outputFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "." + toString(i);
+            string outputFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + toString(i) + ".";
             
             string outputformat = "column"; if (classic) { outputformat = "lt"; }
             

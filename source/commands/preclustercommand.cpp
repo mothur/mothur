@@ -996,8 +996,6 @@ int PreClusterCommand::execute(){
 
 void PreClusterCommand::printFasta(string newFastaFileName, string accnosFile){
     try {
-        
-        //run unique.seqs for deconvolute results
         string inputString = "fasta=" + fastafile + ", accnos=" + accnosFile;
         
         m->mothurOut("\n/******************************************/\n");
