@@ -365,21 +365,16 @@ int ClusterSplitCommand::execute(){
                     if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setListFile(currentName); }
                 }
                 
-                m->mothurOutEndLine();
-                m->mothurOut("Output File Names: \n"); 
-                for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
-                m->mothurOutEndLine();
+                m->mothurOut("\nOutput File Names: \n");
+                for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] + "\n");	} m->mothurOutEndLine();
                 
                 return 0;
             }
                     
         }else {
-		          
-            //****************** file prep work ******************************//
+            //splitting
             estart = time(NULL);
-            if ((method == "agc") || (method == "dgc")) {
-                if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; }
-            }
+            if ((method == "agc") || (method == "dgc")) { if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; } }
             
             m->mothurOut("Splitting the file...\n");
             current->setMothurCalling(true);
@@ -391,33 +386,34 @@ int ClusterSplitCommand::execute(){
 
             if (m->getControl_pressed()) { delete split; return 0; }
                 
-                singletonName = split->getSingletonNames();
-                distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
-                delete split;
-                current->setMothurCalling(false);
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
+            singletonName = split->getSingletonNames();
+            distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
+            delete split;
+            current->setMothurCalling(false);
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: distName.size() = " + toString(distName.size()) + ".\n"); }
+            
+            m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file.\n");
+            
+            //output a merged distance file
+            if (makeDist)		{ createMergedDistanceFile(distName); }
+            
+            if (m->getControl_pressed()) { return 0; }
+            
+            estart = time(NULL);
+            
+            if (!runCluster) {
+                string filename = printFile(singletonName, distName);
                 
-                m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file.\n");
-               
-                //output a merged distance file
-                if (makeDist)		{ createMergedDistanceFile(distName); }
-				
-                if (m->getControl_pressed()) { return 0; }
+                m->mothurOutEndLine();
+                m->mothurOut("Output File Names:\n\n"); m->mothurOut(filename); m->mothurOutEndLine();
+                for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
+                m->mothurOutEndLine();
                 
-                estart = time(NULL);
-                
-                if (!runCluster) {
-                    string filename = printFile(singletonName, distName);
-                    
-                    m->mothurOutEndLine();
-                    m->mothurOut("Output File Names:\n\n"); m->mothurOut(filename); m->mothurOutEndLine();
-                    for (int i = 0; i < distName.size(); i++) {	m->mothurOut(distName[i].begin()->first); m->mothurOutEndLine(); m->mothurOut(distName[i].begin()->second); m->mothurOutEndLine();	}
-                    m->mothurOutEndLine();
-
-                    return 0;
-                }
-                deleteFiles = true;
+                return 0;
             }
+            deleteFiles = true;
+        }
 		//****************** break up files between processes and cluster each file set ******************************//
 		
         listFileNames = createProcesses(distName, labels);

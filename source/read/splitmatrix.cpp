@@ -98,7 +98,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
         //process each group
         for (int i = 0; i < numGroups; i++) {
             
-            if (m->getControl_pressed()) { return 0; }
+            if (m->getControl_pressed()) { for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
             set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
