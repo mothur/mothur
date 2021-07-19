@@ -425,8 +425,10 @@ int driverColumn(pairwiseData* params){
         
         //double maxDist = -10;
         //double minDist = MOTHURMAX;
-        params->kmerCutoff = params->cutoff - 0.25;
-        if (params->kmerCutoff >= 0) { params->kmerCutoff = -0.01; }
+        //params->kmerCutoff = params->cutoff - 0.25;
+        //if (params->kmerCutoff >= 0) { params->kmerCutoff = -0.01; }
+        
+        params->kmerCutoff = -2.0;
         
         for(int i=params->start;i<params->end;i++){
             
@@ -445,10 +447,7 @@ int driverColumn(pairwiseData* params){
                 
                 vector<double> kmerDist = kmerDistCalculator.calcDist(seqA, seqB, length);
                 
-                string kmerString = toString(kmerDist[0]);
-                //if (!params->util.isEqual(kmerDist[0], kmerDist[1])) { cout << "diff kmerDist = " << kmerDist[0] << '\t' << kmerDist[1] << endl; }
-                
-               // if (kmerDist <= params->kmerCutoff) {
+                if (kmerDist[0] <= params->kmerCutoff) {
                     Sequence seqI = seq;
                     Sequence seqJ = params->alignDB.get(j);
                     
@@ -461,15 +460,8 @@ int driverColumn(pairwiseData* params){
                     
                     double dist = distCalculator->calcDist(seqI, seqJ);
                 
-                
-                    params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(kmerDist[0]) + ' ' + toString(dist) + "\n");
-                    
-                    //if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + seqI.getName() + '\t' +  alignment->getSeqAAln() + '\n' + seqJ.getName() + alignment->getSeqBAln() + "\n distance = " + toString(dist) + "\n"); }
-                    
-                    //if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n");
-                        
-                    //}
-                /*}else{
+                    if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n"); }
+                }else{
                     Sequence seqI = seq;
                     Sequence seqJ = params->alignDB.get(j);
                     
@@ -482,13 +474,13 @@ int driverColumn(pairwiseData* params){
                     double dist = distCalculator->calcDist(seqI, seqJ);
 
                     if(dist <= params->cutoff){ params->distSkipped++;
-                        cout << "skipped " << kmerDist << '\t' << dist << endl;
+                        cout << "skipped " << kmerDist[0] << '\t' << dist << endl;
                     }
                     else {
                         //cout << "saved " << kmerDist << '\t' << dist << endl;
                         params->calcSaved++;
                     }
-                }*/
+                }
             }
             if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + " - ending at " + toString(params->end) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
             }
@@ -862,6 +854,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             delete workerThreads[i];
         }
         
+        cout << "kmerDist cutoff = " << dataBundle->kmerCutoff << endl;
         cout << "dists skipped = " << dataBundle->distSkipped << endl;
         cout << "calc saved = " << dataBundle->calcSaved << endl;
         
