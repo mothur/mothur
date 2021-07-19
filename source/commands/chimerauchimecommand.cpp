@@ -107,6 +107,27 @@ string ChimeraUchimeCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string ChimeraUchimeCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string issue = "... uchime file does not exist. mothur requires the uchime executable."; issues.push_back(issue);
+        string ianswer = "\tThe chimera.uchime command is a wrapper for the uchime program, http://drive5.com/usearch/manual/uchime_algo.html. We distribute the uchime executable with the executable versions of mothur. By default, mothur will look for uchime in the same location mothur's executable is as well as looking in your $PATH variable.\n"; ianswers.push_back(ianswer);
+        
+        string howto = "How do I use the dereplicate parameter?"; howtos.push_back(howto);
+        string hanswer = "\tThe dereplicate parameter can be used when checking for chimeras by group. If the dereplicate parameter is false, then if one group finds the sequence to be chimeric, then all groups find it to be chimeric, default=f. If you set dereplicate=t, and then when a sequence is found to be chimeric it is removed from it’s group, not the entire dataset.\n\nNote: When you set dereplicate=t, mothur generates a new count table with the chimeras removed and counts adjusted by sample. It is important to note if you set dereplicate=true, do NOT include the count file with the remove.seqs command. For a detailed example, please reference https://mothur.org/wiki/chimera_dereplicate_example/\n"; hanswers.push_back(hanswer);
+        
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+        
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChimeraUchimeCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 string ChimeraUchimeCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
