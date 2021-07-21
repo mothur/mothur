@@ -196,7 +196,7 @@ int PairwiseSeqsCommand::execute(){
         time_t start, end;
         time(&start);
 
-        if (true) {
+        if (false) {
             SplitKmerDistance split(fastaFileName, outputdir, cutoff, 8);
             
             vector<string> splitFastaFiles = split.getFastaFileNames();
