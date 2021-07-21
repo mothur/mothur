@@ -58,8 +58,7 @@ private:
     bool abort, countends, compress, fitCalc;
 	string fastaFileName, align, calc,  output, oldfastafile, column;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
-    double kmerCutoff;
-	int processors, longestBase, numDistsBelowCutoff, kmerSize;
+	int processors, longestBase, numDistsBelowCutoff;
 	vector<string> Estimators, outputNames;
     
     vector< vector< int > > kmerDB; //kmerDB[0] = vector<int> maxKmers long, contains kmer counts
