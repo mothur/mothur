@@ -339,21 +339,22 @@ int PairwiseSeqsCommand::execute(){
 /**************************************************************************************************/
 struct pairwiseData {
     string align, distcalcType, outputFileName;
-    unsigned long long start;
-    unsigned long long end;
+    unsigned long long start, end;
     long long count;
-    MothurOut* m;
     float match, misMatch, gapOpen, gapExtend, cutoff;
     int longestBase, kmerSize;
     bool countends;
-    SequenceDB alignDB;
-    SequenceDB oldFastaDB;
-    OutputWriter* threadWriter;
-    Utils util;
+    
     vector< vector< int > > kmerDB; //kmerDB[0] = vector<int> maxKmers long, contains kmer counts
     vector< vector< int > > oldkmerDB; //kmerDB[0] = vector<int> maxKmers long, contains kmer counts
     vector< int > lengths;
     vector< int > oldlengths;
+    
+    SequenceDB alignDB;
+    SequenceDB oldFastaDB;
+    OutputWriter* threadWriter;
+    MothurOut* m;
+    Utils util;
     
     pairwiseData(){}
     pairwiseData(OutputWriter* ofn) {
@@ -540,7 +541,7 @@ int driverFitCalc(pairwiseData* params){
                 
                 vector<int> seqB = params->kmerDB[j];
                 
-                int length = min(params->lengths[i], params->lengths[j]);
+                int length = min(params->oldlengths[i], params->lengths[j]);
                 
                 vector<double> kmerDist = kmerDistCalculator.calcDist(seqA, seqB, length);
                 
