@@ -4,8 +4,8 @@
  *
  *  Created by westcott on 5/19/10.
  *  Copyright 2010 Schloss Lab. All rights reserved.
- *
  */
+
 
 #include "splitmatrix.h"
 #include "phylotree.h"
@@ -14,8 +14,7 @@
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
 
-/***********************************************************************/
-
+ /***********************************************************************/
 SplitMatrix::SplitMatrix(string ffile, string name, string count, string tax, float c, float cu, int p, bool cl, string output){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
@@ -84,14 +83,14 @@ void SplitMatrix::splitClassify(){
 }
 /***********************************************************************/
 int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, vector<string> groupNames){
-	try {
+    try {
         
         int numGroups = seqGroups.size();
         string thisOutputDir = outputDir;
         if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         string nonSingletonsFile = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "nonsingleton.accnos";
         ofstream outNonSingleton; util.openOutputFile(nonSingletonsFile, outNonSingleton);
-       
+        
         ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
         SequenceDB fullDB(inFASTA); inFASTA.close();
         
@@ -141,7 +140,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             string outputformat = "column"; if (classic) { outputformat = "lt"; }
             
             DistanceCommand* command = new DistanceCommand(thisDB, outputFileRoot, distCutoff, outputformat, processors);
-      
+            
             filenames = command->getOutputFiles();
             
             string thisDistanceFile = "";
@@ -165,6 +164,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             }else {
                 util.mothurRemove(thisDistanceFile);
                 util.mothurRemove(outName);
+                
             }
             delete thisDB;
         }
@@ -213,295 +213,16 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             singleton = "none";
         }
         
-		if (m->getControl_pressed())	 {  for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); }
-
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "createDistanceFilesFromTax");
-		exit(1);
-	}
-}
-/********************************************************************************************************************
-int SplitMatrix::splitNames(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
-	try {
-        ofstream outFile;
-        map<string, int>::iterator it;
-        
-        string inputFile = namefile;
-        if (countfile != "") { inputFile = countfile; }
-        
-        for(int i=0;i<numGroups;i++){  util.mothurRemove((inputFile + "." + toString(i) + ".temp")); }
-
-        singleton = inputFile + ".extra.temp";
-        ofstream remainingNames;
-        util.openOutputFile(singleton, remainingNames);
-        
-        bool wroteExtra = false;
-        
-        //grab header line
-        string defaultCountTableHeaders = "";
-        if (countfile != "") {
-            map<string, int> ctMap;
-            CountTable ct; ct.readTable(countfile, false, true); ctMap = ct.getNameMap();
-            vector<string> headers = ct.getHardCodedHeaders();
-            defaultCountTableHeaders = util.getStringFromVector(headers, "\t");
-            for (map<string, int>::iterator itCtMap = ctMap.begin(); itCtMap != ctMap.end(); itCtMap++) {
-                string name = itCtMap->first;
-                int abundance = itCtMap->second;
-                
-                //did this sequence get assigned a group
-                it = seqGroup.find(name);
-                
-                if (it != seqGroup.end()) {
-                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                    outFile << name << '\t' << abundance << endl;
-                    outFile.close();
-                }else{
-                    wroteExtra = true;
-                    remainingNames << name << '\t' << abundance << endl;
-                    numSingleton++;
-                }
-            }
-        }else {
-            ifstream bigNameFile;
-            util.openInputFile(inputFile, bigNameFile);
-            
-            string name, nameList;
-            numSingleton = 0;
-            while(!bigNameFile.eof()){
-                bigNameFile >> name; util.gobble(bigNameFile); bigNameFile >> nameList; util.gobble(bigNameFile);
-                
-                //did this sequence get assigned a group
-                it = seqGroup.find(name);
-                
-                if (it != seqGroup.end()) {
-                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                    outFile << name << '\t' << nameList << endl;
-                    outFile.close();
-                }else{
-                    wroteExtra = true;
-                    remainingNames << name << '\t' << nameList << endl;
-                    numSingleton++;
-                }
-            }
-            bigNameFile.close();
-        }
-        
-        
-		for(int i=0;i<numGroups;i++){
-			string tempNameFile = inputFile + "." + toString(i) + ".temp";
-			string tempDistFile = tempDistFiles[i];
-            
-            //if there are valid distances
-            ifstream fileHandle;
-            fileHandle.open(tempDistFile.c_str());
-            
-            bool removeDist = false;
-            if(fileHandle) 	{
-                util.gobble(fileHandle);
-                if (!fileHandle.eof()) {  //check
-                    map<string, string> temp;
-                    if (countfile != "") {
-                        //add header
-                        ofstream out;
-                        string newtempNameFile = tempNameFile + "2";
-                        util.openOutputFile(newtempNameFile, out);
-                        out << defaultCountTableHeaders << endl;
-                        out.close();
-                        util.appendFiles(tempNameFile, newtempNameFile);
-                        util.mothurRemove(tempNameFile);
-                        util.renameFile(newtempNameFile, tempNameFile);
-                    }
-                    temp[tempDistFile] = tempNameFile;
-                    dists.push_back(temp);
-                }else{
-                    ifstream in;
-                    util.openInputFile(tempNameFile, in);
-                    
-                    string name, nameList;
-                    while(!in.eof()) {
-                        in >> name >> nameList;  util.gobble(in);
-                        wroteExtra = true;
-                        remainingNames << name << '\t' << nameList << endl;
-                        numSingleton++;
-                    }
-                    in.close();
-                    util.mothurRemove(tempNameFile);
-                    removeDist = true;
-                }
-            }
-            fileHandle.close();
-            if (removeDist) { util.mothurRemove(tempDistFile); }
-		}
-		
-		remainingNames.close();
-		
-		if (!wroteExtra) { 
-			util.mothurRemove(singleton);
-			singleton = "none";
-            numSingleton = 0;
-		}else if (countfile != "") {
-            //add header
-            ofstream out;
-            string newtempNameFile = singleton + "2";
-            util.openOutputFile(newtempNameFile, out);
-            out << defaultCountTableHeaders << endl;
-            out.close();
-            util.appendFiles(singleton, newtempNameFile);
-            util.mothurRemove(singleton);
-            util.renameFile(newtempNameFile, singleton);
-        }
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitNames");
-		exit(1);
-	}
-}
-//********************************************************************************************************************
-int SplitMatrix::splitNamesVsearch(map<string, int>& seqGroup, int numGroups, vector<string>& tempDistFiles){
-    try {
-        ofstream outFile;
-        map<string, int>::iterator it;
-        
-        string inputFile = namefile;
-        if (countfile != "") { inputFile = countfile; }
-        
-        for(int i=0;i<numGroups;i++){  util.mothurRemove((inputFile + "." + toString(i) + ".temp")); }
-        
-        singleton = inputFile + ".extra.temp";
-        ofstream remainingNames;
-        util.openOutputFile(singleton, remainingNames);
-        
-        bool wroteExtra = false;
-        string errorMessage = "name";
-        
-       
-        
-        //grab header line
-        string name, nameList;
-        string defaultCountTableHeaders = "";
-        numSingleton = 0;
-        string headers = ""; bool hasGroups = false;
-        if (countfile != "") {
-            errorMessage = "count"; map<string, int> ctMap;
-            CountTable ct; ct.readTable(countfile, true, true); ctMap = ct.getNameMap();
-            hasGroups = ct.hasGroupInfo();
-            vector<string> headers = ct.getHardCodedHeaders();
-            defaultCountTableHeaders = util.getStringFromVector(headers, "\t");
-            
-            for (map<string, int>::iterator itCtMap = ctMap.begin(); itCtMap != ctMap.end(); itCtMap++) {
-                string name = itCtMap->first;
-                int abundance = itCtMap->second;
-                
-                //did this sequence get assigned a group
-                it = seqGroup.find(name);
-                
-                if (it != seqGroup.end()) {
-                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                    outFile << name << '\t' << abundance << endl;
-                    outFile.close();
-                }else{
-                    wroteExtra = true;
-                    remainingNames << name << '\t' << abundance << endl;
-                    numSingleton++;
-                }
-                
-            }
-        }else {
-            ifstream bigNameFile;
-            util.openInputFile(inputFile, bigNameFile);
-            
-            while(!bigNameFile.eof()){
-                bigNameFile >> name >> nameList; util.gobble(bigNameFile);
-                if (hasGroups) { util.getline(bigNameFile); util.gobble(bigNameFile);  }
-                
-                //did this sequence get assigned a group
-                it = seqGroup.find(name);
-                
-                if (it != seqGroup.end()) {
-                    util.openOutputFileAppend((inputFile + "." + toString(it->second) + ".temp"), outFile);
-                    outFile << name << '\t' << nameList << endl;
-                    outFile.close();
-                }else{
-                    wroteExtra = true;
-                    remainingNames << name << '\t' << nameList << endl;
-                    numSingleton++;
-                }
-            }
-            bigNameFile.close();
-
-        }
-
-        for(int i=0;i<numGroups;i++){
-            string tempNameFile = inputFile + "." + toString(i) + ".temp";
-            string tempDistFile = tempDistFiles[i];
-            
-            //if there are valid distances
-            ifstream fileHandle;
-            fileHandle.open(tempDistFile.c_str());
-            if(fileHandle) 	{
-                util.gobble(fileHandle);
-                if (!fileHandle.eof()) {  //check
-                    map<string, string> temp;
-                    if (countfile != "") {
-                        //add header
-                        ofstream out;
-                        string newtempNameFile = tempNameFile + "2";
-                        util.openOutputFile(newtempNameFile, out);
-                        out << defaultCountTableHeaders << endl;
-                        out.close();
-                        util.appendFiles(tempNameFile, newtempNameFile);
-                        util.mothurRemove(tempNameFile);
-                        util.renameFile(newtempNameFile, tempNameFile);
-                    }
-                    temp[tempDistFile] = tempNameFile;
-                    dists.push_back(temp);
-                }else{
-                    ifstream in;
-                    util.openInputFile(tempNameFile, in);
-                    
-                    while(!in.eof()) {
-                        in >> name >> nameList;  util.gobble(in);
-                        wroteExtra = true;
-                        remainingNames << name << '\t' << nameList << endl;
-                        numSingleton++;
-                    }
-                    in.close();
-                    util.mothurRemove(tempNameFile);
-                }
-            }
-            fileHandle.close();
-        }
-        
-        remainingNames.close();
-        
-        if (!wroteExtra) {
-            util.mothurRemove(singleton);
-            singleton = "none";
-            numSingleton = 0;
-        }else if (countfile != "") {
-            //add header
-            ofstream out;
-            string newtempNameFile = singleton + "2";
-            util.openOutputFile(newtempNameFile, out);
-            out << defaultCountTableHeaders << endl;
-            out.close();
-            util.appendFiles(singleton, newtempNameFile);
-            util.mothurRemove(singleton);
-            util.renameFile(newtempNameFile, singleton);
-        }
+        if (m->getControl_pressed())     {  for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); }
         
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "SplitMatrix", "splitNamesTax");
+        m->errorOut(e, "SplitMatrix", "createDistanceFilesFromTax");
         exit(1);
     }
-}*/
-//********************************************************************************************************************
+}
+/********************************************************************************************************************/
 //sorts biggest to smallest
 inline bool compareFileSizes(map<string, string> left, map<string, string> right){
 	
@@ -549,5 +270,6 @@ vector< map< string, string> > SplitMatrix::getDistanceFiles(){
 		exit(1);
 	}
 }
-/***********************************************************************/
+//********************************************************************************************************************/
+
 

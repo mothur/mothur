@@ -55,12 +55,16 @@ private:
 	void createProcesses(string);
     bool sanityCheck();
     
+    bool abort, countends, compress, fitCalc;
 	string fastaFileName, align, calc,  output, oldfastafile, column;
 	float match, misMatch, gapOpen, gapExtend, cutoff;
 	int processors, longestBase, numDistsBelowCutoff;
 	vector<string> Estimators, outputNames;
+    
+    vector< vector< int > > kmerDB; //kmerDB[0] = vector<int> maxKmers long, contains kmer counts
+    vector< int > lengths;
 	
-	bool abort, countends, compress, fitCalc;
+	
 };
 
 #endif

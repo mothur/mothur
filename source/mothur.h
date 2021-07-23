@@ -356,6 +356,14 @@ struct item {
 };
 
 
+struct kmerCount {
+    int kmerNumber;
+    int kCount;
+    
+    kmerCount(int kmer, int count) : kmerNumber(kmer), kCount(count) {}
+    
+};
+
 struct weightedSeq {
     long long name;
     long long weight;

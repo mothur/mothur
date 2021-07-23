@@ -92,6 +92,10 @@ string ChimeraVsearchCommand::getCommonQuestions(){
         string issue = "... vsearch file does not exist. mothur requires the vsearch executable."; issues.push_back(issue);
         string ianswer = "\tThe chimera.vsearch command is a wrapper for the vsearch program, https://github.com/torognes/vsearch. We distribute the vsearch executable with the executable versions of mothur. By default, mothur will look for vsearch in the same location mothur's executable is as well as looking in your $PATH variable.\n"; ianswers.push_back(ianswer);
         
+        string howto = "How do I use the dereplicate parameter?"; howtos.push_back(howto);
+        string hanswer = "\tThe dereplicate parameter can be used when checking for chimeras by group. If the dereplicate parameter is false, then if one group finds the sequence to be chimeric, then all groups find it to be chimeric, default=f. If you set dereplicate=t, and then when a sequence is found to be chimeric it is removed from it’s group, not the entire dataset.\n\nNote: When you set dereplicate=t, mothur generates a new count table with the chimeras removed and counts adjusted by sample. It is important to note if you set dereplicate=true, do NOT include the count file with the remove.seqs command. For a detailed example, please reference https://mothur.org/wiki/chimera_dereplicate_example/\n"; hanswers.push_back(hanswer);
+        
+    
         string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
         
         return commonQuestions;

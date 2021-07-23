@@ -38,10 +38,8 @@ class SplitMatrix  {
 		float cutoff, distCutoff;
 		bool classic;
         int processors;
-				
+
 		void splitClassify();
-		int splitNames(map<string, int>& groups, int, vector<string>&);
-        int splitNamesVsearch(map<string, int>& groups, int, vector<string>&);
 		int createDistanceFilesFromTax(vector<vector<string> >&, vector<string>);
 };
 

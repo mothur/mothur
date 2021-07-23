@@ -65,7 +65,6 @@ void AlignReport::fillHeaders() {
         reportHeaders.push_back("AlignmentMethod");
         reportHeaders.push_back("QueryStart"); reportHeaders.push_back("QueryEnd");
         reportHeaders.push_back("TemplateStart"); reportHeaders.push_back("TemplateEnd");
-        reportHeaders.push_back("SearchMethod"); reportHeaders.push_back("SearchScore");
 
         reportHeaders.push_back("PairwiseAlignmentLength");
         reportHeaders.push_back("GapsInQuery"); reportHeaders.push_back("GapsInTemplate");
