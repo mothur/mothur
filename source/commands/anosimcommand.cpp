@@ -127,7 +127,7 @@ int AnosimCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		designMap = new DesignMap(designFileName);
+        designMap = new DesignMap(designFileName); if (m->getControl_pressed()) { delete designMap; return 0; }
 		
 		if (outputdir == "") { outputdir = util.hasPath(phylipFileName); }
 		

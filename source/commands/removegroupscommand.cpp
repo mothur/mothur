@@ -769,7 +769,7 @@ void RemoveGroupsCommand::readDesign(){
         variables["[extension]"] = util.getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile);  if (m->getControl_pressed()) {  return ; }
         
         vector<string> groupsToKeep;
         vector<string> allGroups = designMap.getNamesGroups();
@@ -1091,7 +1091,7 @@ void RemoveGroupsCommand::fillNames(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::fillGroupsFromDesign(){
     try {
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile);  if (m->getControl_pressed()) {  return ; }
         Groups = designMap.getNamesGroups(Sets);
     }
     catch(exception& e) {

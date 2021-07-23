@@ -194,7 +194,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
         DesignMap* designMap = NULL;
         vector<string> namesOfGroups = lookup->getNamesGroups();
         if (designfile != "") {
-            designMap = new DesignMap(designfile);
+            designMap = new DesignMap(designfile);  if (m->getControl_pressed()) { out.close(); delete designMap; return 0; }
             vector<string> categories = designMap->getNamesOfCategories();
             
             if (categories.size() > 3) {  m->mothurOut("\n[NOTE]: LEfSe input files allow for a class, subclass and subject.  More than 3 categories can cause formatting errors.\n\n"); }

@@ -367,7 +367,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     Groups = lookup->getNamesGroups();
 
     DesignMap designMap;
-    designMap.read(designFilePath);
+    designMap.read(designFilePath); if (m->getControl_pressed()) { return ; }
 
     while ( lookup != NULL ) {
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();

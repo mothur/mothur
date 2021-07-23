@@ -154,6 +154,8 @@ int AmovaCommand::execute(){
 		
 		//read design file
 		designMap = new DesignMap(designFileName);
+        
+        if (m->getControl_pressed()) { delete designMap; return 0; }
 
 		if (outputdir == "") { outputdir = util.hasPath(phylipFileName); }
 						

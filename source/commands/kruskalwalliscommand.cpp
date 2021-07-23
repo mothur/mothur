@@ -127,7 +127,7 @@ int KruskalWallisCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile); if (m->getControl_pressed()) { return 0; }
         
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); }

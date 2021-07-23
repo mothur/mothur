@@ -720,7 +720,7 @@ void GetGroupsCommand::readDesign(){
         variables["[extension]"] = util.getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile); if (m->getControl_pressed()) { return ; }
         
         bool wroteSomething = false;
         
@@ -1025,7 +1025,7 @@ void GetGroupsCommand::fillNames(){
 //**********************************************************************************************************************
 void GetGroupsCommand::fillGroupsFromDesign(){
     try {
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile); if (m->getControl_pressed()) { return ; }
         Groups = designMap.getNamesGroups(Sets);
     }
     catch(exception& e) {
