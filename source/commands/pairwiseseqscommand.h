@@ -34,7 +34,8 @@
 class PairwiseSeqsCommand : public Command {
 	
 public:
-	PairwiseSeqsCommand(string);	
+	PairwiseSeqsCommand(string);
+    PairwiseSeqsCommand(StorageDatabase*&, vector< vector< int > > kmerDB, vector< int > lengths, string, double, string, int); //used by mothur's splitMatrix class to avoid rereading files
 	~PairwiseSeqsCommand() {}
 	
 	vector<string> setParameters();
@@ -50,7 +51,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	SequenceDB alignDB;
+    StorageDatabase* alignDB;
 	
 	void createProcesses(string);
     bool sanityCheck();
@@ -59,7 +60,7 @@ private:
 	string fastaFileName, align, calc,  output, oldfastafile, column;
 	float match, misMatch, gapOpen, gapExtend, cutoff, kmerCutoff;
 	int processors, longestBase, numDistsBelowCutoff, kmerSize;
-	vector<string> Estimators, outputNames;
+	vector<string> outputNames;
     
     vector< vector< int > > kmerDB; //kmerDB[0] = vector<int> maxKmers long, contains kmer counts
     vector< int > lengths;

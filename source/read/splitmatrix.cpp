@@ -10,6 +10,7 @@
 #include "splitmatrix.h"
 #include "phylotree.h"
 #include "distancecommand.h"
+#include "pairwiseseqscommand.h"
 #include "seqsummarycommand.h"
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
@@ -94,15 +95,17 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
         ifstream inFASTA; util.openInputFile(fastafile, inFASTA);
         SequenceDB fullDB(inFASTA); inFASTA.close();
         
+        if (m->getDebug()) { for (int i = 0; i < numGroups; i++) { m->mothurOut("[DEBUG]: Number of unique sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + "): " + toString(seqGroups[i].size()) + "\n\n"); } }
+        
         //process each group
         for (int i = 0; i < numGroups; i++) {
             
-            if (m->getControl_pressed()) { for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
+            if (m->getControl_pressed()) { outNonSingleton.close(); util.mothurRemove(nonSingletonsFile); for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
             set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
-            m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i) + " of " + toString(numGroups) + "):\n\n");
+            m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + ")\nNumber of unique sequences: " + toString(seqGroups[i].size()) + "\n\n");
             
             string dupsFile = namefile; string dupsFormat = "name";
             if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
@@ -129,17 +132,24 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             }
             delete getCommand;
             
-            //select fasta seqs
-            StorageDatabase* thisDB = new SequenceDB(fullDB, thisGroupsNames);
-            
-            m->mothurOut("\nCalculating distances for group " + groupNames[i] + " (" + toString(i) + " of " + toString(numGroups) + "):\n");
+            m->mothurOut("\nCalculating distances for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + "):\n");
             thisOutputDir = outputDir;
             if (outputDir == "") {  thisOutputDir += util.hasPath(fastafile);  }
             string outputFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + toString(i) + ".";
             
             string outputformat = "column"; if (classic) { outputformat = "lt"; }
             
-            DistanceCommand* command = new DistanceCommand(thisDB, outputFileRoot, distCutoff, outputformat, processors);
+            Command* command; StorageDatabase* thisDB;
+            vector< vector< int > > kmerDB; vector< int > lengths;
+            
+            if (fullDB.sameLength()) {
+                thisDB = new SequenceDB(fullDB, thisGroupsNames);
+                command = new DistanceCommand(thisDB, outputFileRoot, distCutoff, outputformat, processors);
+            }
+            else {
+                thisDB = new SequenceDB(fullDB, thisGroupsNames, 7, kmerDB, lengths);
+                command = new PairwiseSeqsCommand(thisDB, kmerDB, lengths, outputFileRoot, distCutoff, outputformat, processors);
+            }
             
             filenames = command->getOutputFiles();
             
