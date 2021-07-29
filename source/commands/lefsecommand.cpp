@@ -33,17 +33,8 @@ vector<string> LefseCommand::setParameters(){
         CommandParameter pstrict("strict", "Multiple", "0-1-2", "0", "", "", "","",false,false); parameters.push_back(pstrict);
         CommandParameter pminc("minc", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminc);
         CommandParameter pmulticlass_strat("multiclass", "Multiple", "onevone-onevall", "onevall", "", "", "","",false,false); parameters.push_back(pmulticlass_strat);
-        //CommandParameter psubject("subject", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psubject);
-
-
-        //not used in their current code, but in parameters
-        //CommandParameter pnlogs("nlogs", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pnlogs);
-        //CommandParameter pranktec("ranktec", "Multiple", "lda-svm", "lda", "", "", "","",false,false); parameters.push_back(pranktec); // svm not implemented in their source yet.
-        //CommandParameter psvmnorm("svmnorm", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(psvmnorm); //not used because svm not implemented yet.
-
-        
-        //every command must have inputdir and outputdir.  This allows mothur users to redirect input and output files.
-		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter ppairwise("pairwise", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(ppairwise);
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
@@ -66,7 +57,7 @@ string LefseCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The lefse command allows you to ....\n";
-		helpString += "The lefse command parameters are: shared, design, class, subclass, label, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
+		helpString += "The lefse command parameters are: shared, design, class, subclass, label, pairwise, walpha, aalpha, lda, wilc, iters, curv, fboots, strict, minc, multiclass and norm.\n";
 		helpString += "The class parameter is used to indicate the which category you would like used for the Kruskal Wallis analysis. If none is provided first category is used.\n";
         helpString += "The subclass parameter is used to indicate the .....If none is provided, second category is used, or if only one category subclass is ignored. \n";
         helpString += "The aalpha parameter is used to set the alpha value for the Krukal Wallis Anova test Default=0.05. \n";
@@ -76,13 +67,13 @@ string LefseCommand::getHelpString(){
         helpString += "The iters parameter is used to set the number of bootstrap iteration for LDA. Default=30. \n";
         //helpString += "The wilcsamename parameter is used to indicate whether perform the wilcoxon test only among the subclasses with the same name. Default=F. \n";
         helpString += "The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile.\n";
+        helpString += "The pairwise parameter allows you to run all pairwise comparisons of the sets in your design file. Default=f.\n";
         helpString += "The curv parameter is used to set whether perform the wilcoxon testing the Curtis's approach [BETA VERSION] Default=F. \n";
         helpString += "The norm parameter is used to multiply relative abundances by 1000000. Recommended when very low values are present. Default=T. \n";
         helpString += "The fboots parameter is used to set the subsampling fraction value for each bootstrap iteration. Default=0.67. \n";
         helpString += "The strict parameter is used to set the multiple testing correction options. 0 no correction (more strict, default), 1 correction for independent comparisons, 2 correction for independent comparison. Options = 0,1,2. Default=0. \n";
         helpString += "The minc parameter is used to minimum number of samples per subclass for performing wilcoxon test. Default=10. \n";
         helpString += "The multiclass parameter is used to (for multiclass tasks) set whether the test is performed in a one-against-one ( onevone - more strict!) or in a one-against-all setting ( onevall - less strict). Default=onevall. \n";
-        //helpString += "The classes parameter is used to indicate the classes you would like to use. Classes should be inputted in the following format: classes=label<value1|value2|value3>-label<value1|value2>. For example to include groups from treatment with value early or late and age= young or old.  class=treatment<Early|Late>-age<young|old>.\n";
         helpString += "The label parameter is used to indicate which distances in the shared file you would like to use. labels are separated by dashes.\n";
 		helpString += "The lefse command should be in the following format: lefse(shared=final.an.shared, design=final.design, class=treatment, subclass=age).\n";
         return helpString;
@@ -97,7 +88,7 @@ string LefseCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "summary") {  pattern = "[filename],[distance],lefse_summary"; }
+        if (type == "summary") {  pattern = "[filename],[distance],lefse_summary-[filename],[distance],[combo],lefse_summary"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -211,6 +202,9 @@ LefseCommand::LefseCommand(string option)  {
                 util.splitAtDash(sets, Sets);
             }
             
+            temp = validParameter.valid(parameters, "pairwise");    if(temp == "not found"){    temp = "F";    }
+            pairwise = util.isTrue(temp);
+            
             multiClassStrat = validParameter.valid(parameters, "multiclass");
             if (multiClassStrat == "not found"){	multiClassStrat = "onevall";		}
 			if ((multiClassStrat != "onevall") && (multiClassStrat != "onevone")) { m->mothurOut("Invalid multiclass option: choices are onevone or onevall.\n");  abort=true; }
@@ -257,11 +251,13 @@ int LefseCommand::execute(){
             
             if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
             
-            process(lookup, clr, designMap);
+            process(lookup, clr, designMap, "");
             
             if (format == "sharedfile") { delete lookup; lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel); }
         }
 		
+        if (pairwise) { runPairwiseAnalysis(designMap); }
+        
         //output files created by command
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -275,7 +271,54 @@ int LefseCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap) {
+void LefseCommand::runPairwiseAnalysis(DesignMap& designMap) {
+    try {
+        designMap.setDefaultClass(mclass);
+        Sets = designMap.getCategory();
+        int numGroups = (int)Sets.size();
+        
+        if (numGroups < 2)    { m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete pairwise analysis.\n");  m->setControl_pressed(true); return; }
+        
+        for (int a=0; a<numGroups; a++) {
+            for (int l = 0; l < a; l++) {
+               
+                string combo = Sets[a] + "-" + Sets[l];
+                
+                m->mothurOut("\nComparing " + combo + ":\n");
+                
+                vector<string> thisSetPair; thisSetPair.push_back(Sets[a]); thisSetPair.push_back(Sets[l]);
+                vector<string> Groups = designMap.getNamesGroups(thisSetPair);
+            
+                InputData input(inputfile, format, Groups);
+                set<string> processedLabels;
+                set<string> userLabels = labels;
+                string lastLabel = "";
+                
+                SharedRAbundFloatVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
+                
+                if (format == "sharedfile") {
+                    lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+                    Groups = lookup->getNamesGroups();
+                }
+                
+                while ((lookup != NULL) || (clr != NULL)){
+                    
+                    if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
+                    
+                    process(lookup, clr, designMap, combo);
+                    
+                    if (format == "sharedfile") { delete lookup; lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel); }
+                }
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "LefseCommand", "runPairwiseAnalysis");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap, string combo) {
 	try {
         vector<string> classes;
         vector<string> subclasses;
@@ -333,7 +376,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& 
         
         //check for subclass
         string wilcoxString = "";
-        if ((subclass != "") && wilc) {  significantOtuLabels = runWilcoxon(lookup, clr, designMap, significantOtuLabels, class2SubClasses, subClass2GroupIndex, subclass2Class);  wilcoxString += " ( " + toString(numSigBeforeWilcox) + " ) before internal wilcoxon"; }
+        if ((subclass != "") && wilc) {  significantOtuLabels = runWilcoxon(lookup, clr, significantOtuLabels, class2SubClasses, subClass2GroupIndex, subclass2Class);  wilcoxString += " ( " + toString(numSigBeforeWilcox) + " ) before internal wilcoxon"; }
         
         int numSigAfterWilcox = significantOtuLabels.size();
         
@@ -355,7 +398,7 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& 
         if (lookup != NULL) {   label = lookup->getLabel();  otuNames = lookup->getOTUNames(); }
         else                {   label = clr->getLabel();  otuNames = clr->getOTUNames();       }
         
-        printResults(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames);
+        printResults(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames, combo);
         
         return 0;
     }
@@ -458,7 +501,7 @@ map<int, double> LefseCommand::runKruskalWallis(SharedRAbundFloatVectors*& looku
 }
 //**********************************************************************************************************************
 //assumes not neccessarily paired
-map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, DesignMap& designMap, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
+map<int, double> LefseCommand::runWilcoxon(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& clr, map<int, double> bins, map<string, set<string> >& class2SubClasses, map<string, vector<int> >& subClass2GroupIndex, map<string, string> subclass2Class) {
     try {
         map<int, double> significantOtuLabels;
         map<int, double>::iterator it;
@@ -962,39 +1005,54 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
     }
 }
 //**********************************************************************************************************************
-int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels) {
+int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels, string comboName) {
     try {
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
         variables["[distance]"] = label;
+        if (pairwise) { variables["[combo]"] = comboName; }
         string outputFileName = getOutputFileName("summary",variables);
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
         
         //output headers
-        out << "OTU\tLogMaxMean\tClass\tLDA\tpValue\n";
+        out << "OTU\tLogMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
         
-        for (int i = 0; i < means.size(); i++) { //[numOTUs][classes]
+        for (int i = 0; i < means.size(); i++) { //[numOTUs]
             //find max mean of classes
-            double maxMean = -1.0; string maxClass = "none";
-            for (int j = 0; j < means[i].size(); j++) {   if (means[i][j] > maxMean) { maxMean = means[i][j]; maxClass = classes[j]; } }
+            double maxMean = -1.0; int maxClassIndex = 0;
+            for (int j = 0; j < means[i].size(); j++) {   if (means[i][j] > maxMean) { maxMean = means[i][j]; maxClassIndex = j; } }
             
             //str(math.log(max(max(v),1.0),10.0))
             double logMaxMean = 1.0;
             if (maxMean > logMaxMean) { logMaxMean = maxMean; }
             logMaxMean = log10(logMaxMean);
             
-            out << currentLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
-            
+            //print maximum first
+            out << currentLabels[i] << '\t' << logMaxMean << '\t' << classes[maxClassIndex] << '\t';
+            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t' + classes[maxClassIndex] + '\t'; }
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
-                out << maxClass << '\t' << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look
-                if (m->getDebug()) { temp += maxClass + '\t' + toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
-            }else { out << '-' << endl; }
+                out << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look
+                if (m->getDebug()) { temp += toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
+            }else { out << "NA\tNA" << endl; }
+            
+            //double maxMean = -1.0; string maxClass = "none";
+            for (int j = 0; j < means[i].size(); j++) { //[classes]
+                
+                if (j != maxClassIndex) {
+                    //str(math.log(max(max(v),1.0),10.0))
+                    double logMean = 1.0;
+                    if (means[i][j] > logMean) { logMean = means[i][j]; }
+                    logMean = log10(logMean);
+                    
+                    out << currentLabels[i] << '\t' << logMean << '\t' << classes[j] << "\tNA\tNA" << endl;;
+                    if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMean) + '\t' + classes[j] + "\tNA\tNA\n"; }
+                }
+            }
         }
         
         out.close();
