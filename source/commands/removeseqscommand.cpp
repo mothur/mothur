@@ -130,7 +130,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dups
     }
 }
 //**********************************************************************************************************************
-RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
+RemoveSeqsCommand::RemoveSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

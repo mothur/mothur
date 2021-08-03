@@ -66,7 +66,7 @@ string KruskalWallisCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-KruskalWallisCommand::KruskalWallisCommand(string option)  {
+KruskalWallisCommand::KruskalWallisCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

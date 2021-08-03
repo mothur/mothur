@@ -165,7 +165,7 @@ string MakeBiomCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeBiomCommand::MakeBiomCommand(string option) {
+MakeBiomCommand::MakeBiomCommand(string option) : Command() {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

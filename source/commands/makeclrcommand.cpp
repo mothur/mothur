@@ -70,7 +70,7 @@ string MakeCLRCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-MakeCLRCommand::MakeCLRCommand(string option) {
+MakeCLRCommand::MakeCLRCommand(string option) : Command() {
     try {
 
         if(option == "help") { help(); abort = true; calledHelp = true; }

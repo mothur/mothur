@@ -87,7 +87,7 @@ string LibShuffCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-LibShuffCommand::LibShuffCommand(string option)  {
+LibShuffCommand::LibShuffCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

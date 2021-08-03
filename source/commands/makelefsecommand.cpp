@@ -74,7 +74,7 @@ string MakeLefseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeLefseCommand::MakeLefseCommand(string option)  {
+MakeLefseCommand::MakeLefseCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

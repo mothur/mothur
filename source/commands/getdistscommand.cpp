@@ -65,7 +65,7 @@ string GetDistsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetDistsCommand::GetDistsCommand(string option)  {
+GetDistsCommand::GetDistsCommand(string option) : Command()  {
 	try {
 		
 		if(option == "help") { help(); abort = true; calledHelp = true; }

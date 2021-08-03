@@ -73,7 +73,7 @@ string MergeOTUsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeOTUsCommand::MergeOTUsCommand(string option)  {
+MergeOTUsCommand::MergeOTUsCommand(string option) : Command()  {
     try {
         if(option == "help") {  help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}

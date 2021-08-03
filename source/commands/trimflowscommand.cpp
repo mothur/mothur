@@ -94,7 +94,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-TrimFlowsCommand::TrimFlowsCommand(string option)  {
+TrimFlowsCommand::TrimFlowsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

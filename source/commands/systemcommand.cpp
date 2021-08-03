@@ -28,7 +28,7 @@ vector<string> SystemCommand::setParameters(){
 	}
 }
 //**********************************************************************************************************************
-SystemCommand::SystemCommand(string option)  {
+SystemCommand::SystemCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

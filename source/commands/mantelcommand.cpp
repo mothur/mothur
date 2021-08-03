@@ -70,7 +70,7 @@ string MantelCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MantelCommand::MantelCommand(string option)  {
+MantelCommand::MantelCommand(string option) : Command()  {
 	try {
 		
 		if(option == "help") { help(); abort = true; calledHelp = true; }

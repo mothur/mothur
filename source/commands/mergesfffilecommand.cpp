@@ -72,7 +72,7 @@ string MergeSfffilesCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************
-MergeSfffilesCommand::MergeSfffilesCommand(string option)  {
+MergeSfffilesCommand::MergeSfffilesCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

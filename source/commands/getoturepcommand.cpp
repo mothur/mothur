@@ -117,7 +117,7 @@ string GetOTURepCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetOTURepCommand::GetOTURepCommand(string option)  {
+GetOTURepCommand::GetOTURepCommand(string option) : Command()  {
 	try{
 		//allow user to run help
 		if (option == "help") { 

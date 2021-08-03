@@ -198,7 +198,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeContigsCommand::MakeContigsCommand(string option)  {
+MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

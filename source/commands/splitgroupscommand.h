@@ -90,7 +90,7 @@ struct splitGroupsStruct {
 };
 //**********************************************************************************************************************
 struct splitGroups2Struct {
-    string groupfile, countfile, namefile, fastafile, listfile;
+    string groupfile, countfile, namefile, fastafile, listfile, outputDir;
     int start, end;
     vector<string> Groups;
     map<string, vector<string> > group2Files; //GroupName -> files(fasta, list, count) or  GroupName -> files(fasta, list, group, name) 
@@ -104,9 +104,10 @@ struct splitGroups2Struct {
         for (int i = st; i < en; i++) { Groups.push_back(g[i]); }
     }
     
-    void setFiles(string fasta, string list, string outputDir) {
+    void setFiles(string fasta, string list, string outd) {
         fastafile = fasta;
         listfile = list;
+        outputDir = outd;
         
         string fastaFileRoot = outputDir + util.getRootName(util.getSimpleName(fastafile));
         string listFileRoot = outputDir + util.getRootName(util.getSimpleName(listfile));

@@ -80,7 +80,7 @@ string FilterSeqsCommand::getOutputPattern(string type) {
     }
 }
 /**************************************************************************************/
-FilterSeqsCommand::FilterSeqsCommand(string option)  {
+FilterSeqsCommand::FilterSeqsCommand(string option) : Command()  {
 	try {
 		recalced = false; filterFileName = "";
 		

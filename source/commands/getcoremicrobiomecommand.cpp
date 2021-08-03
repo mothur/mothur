@@ -74,7 +74,7 @@ string GetCoreMicroBiomeCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option)  {
+GetCoreMicroBiomeCommand::GetCoreMicroBiomeCommand(string option) : Command()  {
 	try {
 		allLines = true;
 		

@@ -87,7 +87,7 @@ string GetSharedOTUCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
+GetSharedOTUCommand::GetSharedOTUCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

@@ -71,7 +71,7 @@ string CooccurrenceCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CooccurrenceCommand::CooccurrenceCommand(string option) {
+CooccurrenceCommand::CooccurrenceCommand(string option) : Command() {
 	try {
 		allLines = true;
 				

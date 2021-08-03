@@ -107,7 +107,7 @@ string SffInfoCommand::getOutputPattern(string type) {
     }
 }
 //*******************************************************************************
-SffInfoCommand::SffInfoCommand(string option)  {
+SffInfoCommand::SffInfoCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

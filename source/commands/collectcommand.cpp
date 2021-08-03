@@ -155,7 +155,7 @@ string CollectCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CollectCommand::CollectCommand(string option)  {
+CollectCommand::CollectCommand(string option) : Command()  {
 	try {
 		allLines = true;
 		

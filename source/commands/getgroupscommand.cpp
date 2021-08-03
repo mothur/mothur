@@ -103,7 +103,7 @@ string GetGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetGroupsCommand::GetGroupsCommand(string option)  {
+GetGroupsCommand::GetGroupsCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

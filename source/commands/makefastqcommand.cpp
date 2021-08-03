@@ -70,7 +70,7 @@ string MakeFastQCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeFastQCommand::MakeFastQCommand(string option)  {
+MakeFastQCommand::MakeFastQCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

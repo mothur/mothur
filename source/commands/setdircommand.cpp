@@ -67,7 +67,7 @@ string SetDirectoryCommand::getHelpString(){
 }
 //**********************************************************************************************************************
 
-SetDirectoryCommand::SetDirectoryCommand(string option)  {
+SetDirectoryCommand::SetDirectoryCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

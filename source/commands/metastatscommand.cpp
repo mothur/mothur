@@ -84,7 +84,7 @@ string MetaStatsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MetaStatsCommand::MetaStatsCommand(string option) {
+MetaStatsCommand::MetaStatsCommand(string option) : Command() {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

@@ -84,7 +84,7 @@ string HeatMapCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-HeatMapCommand::HeatMapCommand(string option) {
+HeatMapCommand::HeatMapCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

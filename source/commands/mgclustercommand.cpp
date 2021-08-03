@@ -98,7 +98,7 @@ string MGClusterCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MGClusterCommand::MGClusterCommand(string option) {
+MGClusterCommand::MGClusterCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

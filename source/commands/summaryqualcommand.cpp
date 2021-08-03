@@ -68,7 +68,7 @@ string SummaryQualCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-SummaryQualCommand::SummaryQualCommand(string option)  {
+SummaryQualCommand::SummaryQualCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

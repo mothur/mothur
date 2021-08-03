@@ -77,7 +77,7 @@ string SRAInfoCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-SRAInfoCommand::SRAInfoCommand(string option)  {
+SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
     try {
         if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}

@@ -110,7 +110,7 @@ string SummaryCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SummaryCommand::SummaryCommand(string option)  {
+SummaryCommand::SummaryCommand(string option) : Command()  {
 	try {
 		if(option == "help") {  help();  abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

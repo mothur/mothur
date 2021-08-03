@@ -72,7 +72,7 @@ string AnosimCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-AnosimCommand::AnosimCommand(string option) {
+AnosimCommand::AnosimCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

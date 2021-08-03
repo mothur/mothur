@@ -82,7 +82,7 @@ string SensSpecCommand::getOutputPattern(string type) {
 }
 //***************************************************************************************************************
 
-SensSpecCommand::SensSpecCommand(string option)  {
+SensSpecCommand::SensSpecCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

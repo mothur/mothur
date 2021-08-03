@@ -90,7 +90,7 @@ string RemoveRareCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-RemoveRareCommand::RemoveRareCommand(string option)  {
+RemoveRareCommand::RemoveRareCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

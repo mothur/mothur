@@ -82,7 +82,7 @@ string ConsensusSeqsCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
+ConsensusSeqsCommand::ConsensusSeqsCommand(string option) : Command()  {
 	try {
 		allLines = true;
 		

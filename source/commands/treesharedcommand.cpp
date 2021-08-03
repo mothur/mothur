@@ -93,7 +93,7 @@ string TreeSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-TreeSharedCommand::TreeSharedCommand(string option)  {
+TreeSharedCommand::TreeSharedCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

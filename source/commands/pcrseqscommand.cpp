@@ -96,7 +96,7 @@ string PcrSeqsCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-PcrSeqsCommand::PcrSeqsCommand(string option)  {
+PcrSeqsCommand::PcrSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

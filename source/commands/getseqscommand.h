@@ -18,7 +18,7 @@ class GetSeqsCommand : public Command {
 	public:
 	
 		GetSeqsCommand(string);
-        GetSeqsCommand(set<string>, string dupsFile, string dupsFileType, string output);
+        GetSeqsCommand(set<string>, string fasta, string list, string dupsFile, string dupsFileType, string output);
 		~GetSeqsCommand(){}
 	
 		vector<string> setParameters();

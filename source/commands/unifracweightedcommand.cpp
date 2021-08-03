@@ -95,7 +95,7 @@ string UnifracWeightedCommand::getOutputPattern(string type) {
     }
 }
 /***********************************************************/
-UnifracWeightedCommand::UnifracWeightedCommand(string option) {
+UnifracWeightedCommand::UnifracWeightedCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

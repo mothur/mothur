@@ -153,7 +153,7 @@ string ClusterSplitCommand::getCommonQuestions(){
 }
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
-ClusterSplitCommand::ClusterSplitCommand(string option)  {
+ClusterSplitCommand::ClusterSplitCommand(string option) : Command()  {
 	try{
 		format = "";
 		

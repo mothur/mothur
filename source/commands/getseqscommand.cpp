@@ -107,16 +107,19 @@ string GetSeqsCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(set<string> n, string dupsFile, string dupsFileType, string output) {
+GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
     try {
         names = n;
         dups = true;
         outputdir = output;
+        fastafile = ffile;
+        listfile = lfile;
         
         abort = false; calledHelp = false;
         vector<string> tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
         
         if (dupsFile != "") {
             if (dupsFileType == "count") {
@@ -127,6 +130,10 @@ GetSeqsCommand::GetSeqsCommand(set<string> n, string dupsFile, string dupsFileTy
                 readName();
             }
         }
+        
+        if (fastafile != "")            {        readFasta();        }
+        if (listfile != "")             {        readList();         }
+        
     }
     catch(exception& e) {
         m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand - mothurRun");
@@ -135,7 +142,7 @@ GetSeqsCommand::GetSeqsCommand(set<string> n, string dupsFile, string dupsFileTy
 }
 
 //**********************************************************************************************************************
-GetSeqsCommand::GetSeqsCommand(string option)  {
+GetSeqsCommand::GetSeqsCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

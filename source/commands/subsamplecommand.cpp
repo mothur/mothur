@@ -112,7 +112,7 @@ string SubSampleCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SubSampleCommand::SubSampleCommand(string option) {
+SubSampleCommand::SubSampleCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

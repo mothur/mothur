@@ -126,7 +126,7 @@ string AlignCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-AlignCommand::AlignCommand(string option)  {
+AlignCommand::AlignCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}

@@ -102,7 +102,7 @@ string GetLineageCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetLineageCommand::GetLineageCommand(string option)  {
+GetLineageCommand::GetLineageCommand(string option) : Command()  {
 	try {
         if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

@@ -84,7 +84,7 @@ string ChimeraPintailCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
+ChimeraPintailCommand::ChimeraPintailCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

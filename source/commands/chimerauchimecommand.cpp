@@ -146,7 +146,7 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ChimeraUchimeCommand::ChimeraUchimeCommand(string option)  {
+ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
 	try {
 		hasCount=false;
 		

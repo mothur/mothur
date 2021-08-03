@@ -93,7 +93,7 @@ string AmovaCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-AmovaCommand::AmovaCommand(string option) {
+AmovaCommand::AmovaCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

@@ -72,7 +72,7 @@ string GetRAbundCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetRAbundCommand::GetRAbundCommand(string option)  {
+GetRAbundCommand::GetRAbundCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

@@ -85,7 +85,7 @@ string MergeGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeGroupsCommand::MergeGroupsCommand(string option) {
+MergeGroupsCommand::MergeGroupsCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

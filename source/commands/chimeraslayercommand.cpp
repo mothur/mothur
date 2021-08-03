@@ -121,7 +121,7 @@ string ChimeraSlayerCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
+ChimeraSlayerCommand::ChimeraSlayerCommand(string option) : Command()  {
 	try {
         hasCount = false;
 		

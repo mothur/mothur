@@ -104,7 +104,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
+RemoveGroupsCommand::RemoveGroupsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

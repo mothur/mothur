@@ -201,7 +201,7 @@ string CollectSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CollectSharedCommand::CollectSharedCommand(string option)  {
+CollectSharedCommand::CollectSharedCommand(string option) : Command()  {
 	try {
 		allLines = true;
 		

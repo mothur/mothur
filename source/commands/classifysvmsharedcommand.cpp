@@ -111,7 +111,7 @@ string ClassifySvmSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
+ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) : Command() {
     try {
         allLines = true;
 

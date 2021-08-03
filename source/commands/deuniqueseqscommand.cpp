@@ -70,7 +70,7 @@ string DeUniqueSeqsCommand::getOutputPattern(string type) {
     }
 }
 /**************************************************************************************/
-DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {	
+DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option) : Command()  {	
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

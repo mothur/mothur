@@ -110,7 +110,7 @@ string PreClusterCommand::getOutputPattern(string type) {
     }
 }
 //**************************************************************************************************
-PreClusterCommand::PreClusterCommand(string option) {
+PreClusterCommand::PreClusterCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -799,7 +799,7 @@ void print(string newfasta, string newname, preClusterData* params){
         params->m->mothurOut("/******************************************/\n");
         params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
         
-        GetSeqsCommand* getCommand = new GetSeqsCommand(inputString);
+        Command* getCommand = new GetSeqsCommand(inputString);
         getCommand->execute();
         
         map<string, vector<string> > filenames = getCommand->getOutputFiles();

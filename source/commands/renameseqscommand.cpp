@@ -111,7 +111,7 @@ string RenameSeqsCommand::getOutputPattern(string type) {
     }
 }
 /**************************************************************************************/
-RenameSeqsCommand::RenameSeqsCommand(string option)  {
+RenameSeqsCommand::RenameSeqsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

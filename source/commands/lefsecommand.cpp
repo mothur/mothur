@@ -99,7 +99,7 @@ string LefseCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-LefseCommand::LefseCommand(string option)  {
+LefseCommand::LefseCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

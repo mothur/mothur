@@ -125,7 +125,7 @@ string ChimeraVsearchCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command() {
+ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
     try {
         hasCount=false;
         
