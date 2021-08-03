@@ -1017,7 +1017,7 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
 		outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
         
         //output headers
-        out << "OTU\tLogMean\tClass\tLDA\tpValue\n";
+        out << "OTU\tlogMaxMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
         
@@ -1039,20 +1039,6 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
                 out << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look
                 if (m->getDebug()) { temp += toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
             }else { out << "NA\tNA" << endl; }
-            
-            //double maxMean = -1.0; string maxClass = "none";
-            for (int j = 0; j < means[i].size(); j++) { //[classes]
-                
-                if (j != maxClassIndex) {
-                    //str(math.log(max(max(v),1.0),10.0))
-                    double logMean = 1.0;
-                    if (means[i][j] > logMean) { logMean = means[i][j]; }
-                    logMean = log10(logMean);
-                    
-                    out << currentLabels[i] << '\t' << logMean << '\t' << classes[j] << "\tNA\tNA" << endl;;
-                    if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMean) + '\t' + classes[j] + "\tNA\tNA\n"; }
-                }
-            }
         }
         
         out.close();

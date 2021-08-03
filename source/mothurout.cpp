@@ -47,7 +47,6 @@ void MothurOut::setLogFileName(string filename, bool append)  {
                 if (!opendLog) { control_pressed = true; }
             }
         }
-        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -58,6 +57,10 @@ void MothurOut::setLogFileName(string filename, bool append)  {
 void MothurOut::closeLog()  {
 	try {
         if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
+        
+        string outputLogName = "Logfile : " + logFileName + "\n\n";
+        if (!silenceLog) { mothurOut(outputLogName); }
+            
         if (numErrors != 0) {
             if (!silenceLog) {
                 out << "\n\n************************************************************\n";
@@ -95,6 +98,7 @@ void MothurOut::closeLog()  {
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
         }
+        
         
 		out.close();
 	}

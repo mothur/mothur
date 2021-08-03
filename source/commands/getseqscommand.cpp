@@ -387,11 +387,9 @@ void GetSeqsCommand::readFasta(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
