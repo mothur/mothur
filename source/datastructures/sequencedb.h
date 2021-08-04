@@ -32,6 +32,7 @@ public:
     Sequence getSeq(int);         //returns sequence at that location
 	void push_back(Sequence);  //adds unaligned sequence
 	bool sameLength() { return samelength; }
+    void print(string);  //prints fasta file containing sequences in this db
 		
 private:
 	vector<Sequence> data;

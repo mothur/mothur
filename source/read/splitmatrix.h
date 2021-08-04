@@ -21,7 +21,7 @@ class SplitMatrix  {
 	
 	public:
 
-		SplitMatrix(string, string, string, string, float, float, int, bool, string); //fastafile, namefile, countfile, taxFile, taxcutoff, cutoff, processors, classic, outputDir
+		SplitMatrix(string, string, string, string, float, float, int, bool, string, bool); //fastafile, namefile, countfile, taxFile, taxcutoff, cutoff, processors, classic, outputDir, usingVsearchToCLuster
 		
         ~SplitMatrix() {}
     
@@ -36,11 +36,12 @@ class SplitMatrix  {
 		string distFile, namefile, singleton,  taxFile, fastafile, outputDir, countfile;
 		vector< map< string, string> > dists;
 		float cutoff, distCutoff;
-		bool classic;
+		bool classic, usingVsearchToCLuster; 
         int processors;
 
 		void splitClassify();
 		int createDistanceFilesFromTax(vector<vector<string> >&, vector<string>);
+        int createFastaFilesFromTax(vector<vector<string> >&, vector<string>);
 };
 
 /******************************************************/

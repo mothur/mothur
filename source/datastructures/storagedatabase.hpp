@@ -21,6 +21,7 @@ public:
     virtual ~StorageDatabase() {}             //loops through data and delete each sequence
 
     virtual int getNumSeqs() = 0;
+    virtual void print(string) = 0;
     virtual bool sameLength() { return samelength; }
        
     virtual Sequence getSeq(int) { Sequence s; return s; }

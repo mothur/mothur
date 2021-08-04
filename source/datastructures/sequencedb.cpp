@@ -187,6 +187,22 @@ void SequenceDB::push_back(Sequence newSequence) {
 		exit(1);
 	}
 }
+/***********************************************************************/
+
+void SequenceDB::print(string outputFileName) {
+    try {
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        for (int i = 0; i < data.size(); i++) {
+            data[i].printSequence(out);
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SequenceDB", "print");
+        exit(1);
+    }
+}
 
 /***********************************************************************/
 

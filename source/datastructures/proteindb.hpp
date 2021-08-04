@@ -24,7 +24,7 @@ public:
 
     Protein getProt(int);         //returns sequence name at that location
     void push_back(Protein);  //adds unaligned sequence
-    
+    void print(string);  //prints fasta file containing sequences in this db
     int getNumSeqs();
     
 private:

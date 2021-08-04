@@ -515,8 +515,7 @@ int driverColumn(pairwiseData* params){
                     if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n"); }
                 }
             }
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
-            }
+            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
         }
         params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
         
@@ -596,7 +595,7 @@ int driverFitCalc(pairwiseData* params){
                 }
             }
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
+            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
         }
         params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
         

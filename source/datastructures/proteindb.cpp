@@ -66,6 +66,21 @@ void ProteinDB::push_back(Protein newProteinSequence) {
         exit(1);
     }
 }
+/***********************************************************************/
 
+void ProteinDB::print(string outputFileName) {
+    try {
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        for (int i = 0; i < data.size(); i++) {
+            data[i].printProtein(out);
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ProteinDB", "print");
+        exit(1);
+    }
+}
 /***********************************************************************/
 

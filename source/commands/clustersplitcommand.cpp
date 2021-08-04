@@ -373,14 +373,14 @@ int ClusterSplitCommand::execute(){
                     
         }else {
             //splitting
-            estart = time(NULL);
-            if ((method == "agc") || (method == "dgc")) { if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; } }
+            estart = time(NULL); bool usingVsearchToCLuster = false;
+            if ((method == "agc") || (method == "dgc")) { usingVsearchToCLuster = true; if (cutoffNotSet) {  m->mothurOut("\nYou did not set a cutoff, using 0.03.\n"); cutoff = 0.03; } }
             
             m->mothurOut("Splitting the file...\n");
             current->setMothurCalling(true);
             
             //split matrix into non-overlapping groups
-            SplitMatrix* split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff,  processors, classic, outputdir);
+            SplitMatrix* split = new SplitMatrix(fastafile, namefile, countfile, taxFile, taxLevelCutoff, cutoff,  processors, classic, outputdir, usingVsearchToCLuster);
 
             if (fastafile != "") {  current->setFastaFile(fastafile);  }
 
@@ -1325,7 +1325,7 @@ void printData(ListVector* oldList, clusterData* params){
 	}
 }
 //**********************************************************************************************************************
-vector<string>  ClusterSplitCommand::createProcesses(vector< map<string, string> > distName, set<string>& labels){
+vector<string> ClusterSplitCommand::createProcesses(vector< map<string, string> > distName, set<string>& labels){
 	try {
         //sanity check
         if (processors > distName.size()) { processors = distName.size(); }
