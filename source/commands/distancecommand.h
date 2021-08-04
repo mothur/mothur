@@ -86,12 +86,12 @@ public:
 private:
 	
     StorageDatabase* db;
-	string output, fastafile, calc,  oldfastafile, column, compress;
+	string output, fastafile, calc,  oldfastafile, column;
     int processors;
     long long numNewFasta, numSeqs, numDistsBelowCutoff;
 	float cutoff;
 	
-	bool abort, countends, fitCalc, prot;
+	bool abort, countends, fitCalc, prot, compress;
 	vector<string> outputNames; 
 	
 	void createProcesses(string);

@@ -135,7 +135,7 @@ DistanceCommand::DistanceCommand(string option) : Command() {
 			processors = current->setProcessors(temp);
 			
 			temp = validParameter.valid(parameters, "compress");		if(temp == "not found"){  temp = "F"; }
-			convert(temp, compress);
+            compress = util.isTrue(temp);
 
 			output = validParameter.valid(parameters, "output");		if(output == "not found"){	output = "column"; }
             if (output == "phylip") { output = "lt";  }
@@ -159,7 +159,7 @@ DistanceCommand::DistanceCommand(string option) : Command() {
 	}
 }
 //**********************************************************************************************************************
-DistanceCommand::DistanceCommand(StorageDatabase*& storageDB, string outputFileRoot, double cut, string outputformat, int proc) {
+DistanceCommand::DistanceCommand(StorageDatabase*& storageDB, string outputFileRoot, double cut, string outputformat, int proc) : Command() {
     try {
         abort = false; calledHelp = false;
         vector<string> tempOutNames;
@@ -317,7 +317,7 @@ int DistanceCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n");
 		m->mothurOut(outputFile+"\n\n");
 		
-		if (util.isTrue(compress)) {
+		if (compress) {
 			m->mothurOut("Compressing...\n"); 
 			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)\n"); 
 			system(("gzip -v " + outputFile).c_str());
