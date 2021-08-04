@@ -438,7 +438,7 @@ int driverRunCount(splitGroups2Struct* params){
                 params->outputNames.push_back(files[1]); params->outputTypes["list"].push_back(files[1]);
             }
         
-            params->m->mothurOut("/******************************************/\nDone.\n");
+            params->m->mothurOut("/******************************************/\n\n");
             
             if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} break; }
         }

@@ -110,7 +110,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             string dupsFile = namefile; string dupsFormat = "name";
             if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
             
-            GetSeqsCommand* getCommand = new GetSeqsCommand(thisGroupsNames,dupsFile, dupsFormat, outputDir);
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, "", "", dupsFile, dupsFormat, outputDir);
             
             map<string, vector<string> > filenames = getCommand->getOutputFiles();
             
@@ -188,7 +188,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs()\n");
             
-            RemoveSeqsCommand* removeCommand = new RemoveSeqsCommand(nonSingletonsFile, dupsFile, dupsFormat, outputDir);
+            Command* removeCommand = new RemoveSeqsCommand(nonSingletonsFile, dupsFile, dupsFormat, outputDir);
             
             map<string, vector<string> > filenames = removeCommand->getOutputFiles();
             

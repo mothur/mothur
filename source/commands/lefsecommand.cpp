@@ -38,7 +38,7 @@ vector<string> LefseCommand::setParameters(){
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
-        abort = false; calledHelp = false; allLines = true;
+        abort = false; calledHelp = false; allLines = true; runAll = true;
         
         vector<string> tempOutNames;
         outputTypes["summary"] = tempOutNames;
@@ -277,6 +277,8 @@ void LefseCommand::runPairwiseAnalysis(DesignMap& designMap) {
         Sets = designMap.getCategory();
         int numGroups = (int)Sets.size();
         
+        runAll = false;
+        
         if (numGroups < 2)    { m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete pairwise analysis.\n");  m->setControl_pressed(true); return; }
         
         for (int a=0; a<numGroups; a++) {
@@ -398,7 +400,8 @@ int LefseCommand::process(SharedRAbundFloatVectors*& lookup, SharedCLRVectors*& 
         if (lookup != NULL) {   label = lookup->getLabel();  otuNames = lookup->getOTUNames(); }
         else                {   label = clr->getLabel();  otuNames = clr->getOTUNames();       }
         
-        printResults(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames, combo);
+        if (runAll) { printResultsAll(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames, combo);    }
+        else        { printResults(means, significantOtuLabels, sigOTUSLDA, label, classes, otuNames, combo);       }
         
         return 0;
     }
@@ -1005,7 +1008,7 @@ bool LefseCommand::contastWithinClassesOrFewPerClass(vector< vector<double> >& l
     }
 }
 //**********************************************************************************************************************
-int LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels, string comboName) {
+void LefseCommand::printResults(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels, string comboName) {
     try {
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
@@ -1041,12 +1044,57 @@ int LefseCommand::printResults(vector< vector<double> > means, map<int, double> 
             }else { out << "NA\tNA" << endl; }
         }
         
-        out.close();
+        out.close(); 
         
-        return 0;
+        return;
     }
     catch(exception& e) {
         m->errorOut(e, "LefseCommand", "printResults");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void LefseCommand::printResultsAll(vector< vector<double> > means, map<int, double> sigKW, map<int, double> sigLDA, string label, vector<string> classes, vector<string> currentLabels, string comboName) {
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
+        variables["[distance]"] = label;
+        if (pairwise) { variables["[combo]"] = comboName; }
+        string outputFileName = getOutputFileName("summary",variables);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
+        
+        //output headers
+        out << "OTU\tlogMaxMean\tLDA\tpValue\n";
+        
+        string temp = "";
+        
+        for (int i = 0; i < means.size(); i++) { //[numOTUs]
+            //find max mean of classes
+            double maxMean = -1.0;
+            for (int j = 0; j < means[i].size(); j++) {   if (means[i][j] > maxMean) { maxMean = means[i][j]; } }
+            
+            //str(math.log(max(max(v),1.0),10.0))
+            double logMaxMean = 1.0;
+            if (maxMean > logMaxMean) { logMaxMean = maxMean; }
+            logMaxMean = log10(logMaxMean);
+            
+            //print maximum first
+            out << currentLabels[i] << '\t' << logMaxMean << '\t';
+            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
+            map<int, double>::iterator it = sigLDA.find(i);
+            if (it != sigLDA.end()) {
+                out << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look
+                if (m->getDebug()) { temp += toString(it->second) + '\t' + toString(sigKW[i]) + '\n'; m->mothurOut(temp); temp = ""; }
+            }else { out << "NA\tNA" << endl; }
+        }
+        
+        out.close();
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "LefseCommand", "printResultsAll");
         exit(1);
     }
 }

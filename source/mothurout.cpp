@@ -37,7 +37,10 @@ void MothurOut::setLogFileName(string filename, bool append)  {
         if ((filename == "silent")) { silenceLog = true; }
         else {
             logFileName = filename;
-            if (outLog != NULL) { closeLog(); }
+            if (outLog != NULL) {
+                closeLog();
+                delete outLog; outLog = NULL;
+            }
             outLog = new ofstream();
             silenceLog = false;
             if (append)     {
@@ -99,7 +102,6 @@ void MothurOut::closeLog()  {
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
         }
-        
         
         outLog->close();
 	}

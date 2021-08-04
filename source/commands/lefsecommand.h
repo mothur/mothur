@@ -48,7 +48,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion, pairwise;
+    bool abort, allLines, wilc, wilcsamename, curv, subject, normMillion, pairwise, runAll;
     string  sharedfile, designfile, mclass, subclass, rankTec, multiClassStrat, sets, inputfile, clrfile, format;
     vector<string> outputNames, Sets;
     set<string> labels;
@@ -65,7 +65,8 @@ private:
     bool contastWithinClassesOrFewPerClass(vector< vector<double> >&, vector<int> rands, int minCl, map<string, vector<int> > class2GroupIndex,  map<int, string> indexToClass);
     vector< vector<double> > lda(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<int, string>& indexToClass, vector<string>);
     bool testOTUWilcoxon(map<string, set<string> >& class2SubClasses, vector<float> abunds, map<string, vector<int> >& subClass2GroupIndex, map<string, string>);
-    int printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>, vector<string>, string);
+    void printResults(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>, vector<string>, string);
+    void printResultsAll(vector< vector<double> >, map<int, double>, map<int, double>, string, vector<string>, vector<string>, string);
     
     //for testing
     bool printToCoutForRTesting(vector< vector<double> >& adjustedLookup, vector<int> rand_s, map<string, vector<int> >& class2GroupIndex, map<int, double> bins, map<string, vector<int> >&, vector<string>, vector<string>);
