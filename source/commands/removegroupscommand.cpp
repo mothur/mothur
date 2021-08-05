@@ -104,7 +104,7 @@ string RemoveGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-RemoveGroupsCommand::RemoveGroupsCommand(string option)  {
+RemoveGroupsCommand::RemoveGroupsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -769,7 +769,7 @@ void RemoveGroupsCommand::readDesign(){
         variables["[extension]"] = util.getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile);  if (m->getControl_pressed()) {  return ; }
         
         vector<string> groupsToKeep;
         vector<string> allGroups = designMap.getNamesGroups();
@@ -866,7 +866,7 @@ void RemoveGroupsCommand::readPhylip(){
         util.openInputFile(phylipfile, in);
         
         float distance;
-        int square, nseqs;
+        int square, nseqs; square = 0;
         string name;
         unsigned int row;
         set<unsigned int> rows; //converts names in names to a index
@@ -1091,7 +1091,7 @@ void RemoveGroupsCommand::fillNames(){
 //**********************************************************************************************************************
 void RemoveGroupsCommand::fillGroupsFromDesign(){
     try {
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile);  if (m->getControl_pressed()) {  return ; }
         Groups = designMap.getNamesGroups(Sets);
     }
     catch(exception& e) {

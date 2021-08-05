@@ -81,7 +81,7 @@ string PhylotypeCommand::getOutputPattern(string type) {
     }
 }
 /**********************************************************************************************************************/
-PhylotypeCommand::PhylotypeCommand(string option)  {
+PhylotypeCommand::PhylotypeCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

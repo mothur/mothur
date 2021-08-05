@@ -68,7 +68,7 @@ string ReverseSeqsCommand::getOutputPattern(string type) {
 }
 //***************************************************************************************************************
 
-ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
+ReverseSeqsCommand::ReverseSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

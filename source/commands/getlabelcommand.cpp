@@ -48,7 +48,7 @@ string GetlabelCommand::getHelpString(){
 }
 //**********************************************************************************************************************
 
-GetlabelCommand::GetlabelCommand(string option)  {
+GetlabelCommand::GetlabelCommand(string option) : Command()  {
 	try {
     
 		//allow user to run help

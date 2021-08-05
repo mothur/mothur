@@ -92,7 +92,7 @@ string NewCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-NewCommand::NewCommand(string option)  {
+NewCommand::NewCommand(string option) : Command()  {
 	try {
 ////////////////////////////////////////////////////////
 /////////////////// start leave alone block ////////////

@@ -111,7 +111,7 @@ string ClassifySvmSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) {
+ClassifySvmSharedCommand::ClassifySvmSharedCommand(string option) : Command() {
     try {
         allLines = true;
 
@@ -367,7 +367,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     Groups = lookup->getNamesGroups();
 
     DesignMap designMap;
-    designMap.read(designFilePath);
+    designMap.read(designFilePath); if (m->getControl_pressed()) { return ; }
 
     while ( lookup != NULL ) {
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();

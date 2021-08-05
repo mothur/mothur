@@ -98,12 +98,39 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
         return pattern;
     }
     catch(exception& e) {
-        m->errorOut(e, "GetSeqsCommand", "getOutputPattern");
+        m->errorOut(e, "RemoveSeqsCommand", "getOutputPattern");
         exit(1);
     }
 }
 //**********************************************************************************************************************
-RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
+
+RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dupsFileType, string output) {
+    try {
+        names = util.readAccnos(accnos);
+        dups = true;
+        outputdir = output;
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        if (dupsFile != "") {
+            if (dupsFileType == "count") {
+                countfile = dupsFile;
+                readCount();
+            }else { //names
+                namefile = dupsFile;
+                readName();
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+RemoveSeqsCommand::RemoveSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -206,7 +233,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
                 abort=true;
             }
 		}
-
+        
+        //get names you want to keep
+        if (!abort) { names = util.readAccnos(accnosfile); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
@@ -220,14 +249,11 @@ int RemoveSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//get names you want to keep
-		names = util.readAccnos(accnosfile);
-		
 		if (m->getControl_pressed()) { return 0; }
         
         if (countfile != "") {
-            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
-                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
+            if (fastafile != "") {
+                m->mothurOut("\n[WARNING]: Are you run the remove.seqs command after running a chimera command with dereplicate=t? If so, the count file has already been modified to remove all chimeras and adjust group counts. Including the count file here will cause downstream file mismatches.\n\n");
             }
         }
 		

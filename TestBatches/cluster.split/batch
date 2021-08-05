@@ -1,0 +1,17 @@
+#cluster.split
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# testCluster.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.fasta from MiSeq_SOP
+# testCluster.count is , count=stability.trim.contigs.good.unique.good.filter.unique.precluster.denovo.vsearch.pick.pick.pick.count_table from MiSeq_SOP
+# testCluster.taxonomy is , taxonomy=stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pds.wang.pick.pick.taxonomy from MiSeq_SOP
+# test different cluster methods and seaches
+#set.dir(input=./TestFiles, output=./TestResults/cluster.split, tempdefault=./TestReferences)
+set.dir(input=/Users/swestcott/Desktop/release)
+set.logfile(name=clustersplit.logfile)
+cluster.split(fasta=testCluster.fasta, count=testCluster.count_table, taxonomy=testCluster.taxonomy, taxlevel=4, cutoff=0.03)
+cluster.split(fasta=testCluster.fasta, count=testCluster.count_table, taxonomy=testCluster.taxonomy, taxlevel=4, cutoff=0.03, method=agc)
+cluster.split(fasta=testCluster.fasta, count=testCluster.count_table, taxonomy=testCluster.taxonomy, taxlevel=4, cutoff=0.03, method=dgc)
+cluster.split(fasta=testCluster.fasta, count=testCluster.count_table, taxonomy=testCluster.taxonomy, taxlevel=4, cutoff=0.03, cluster=f)
+cluster.split(file=current)
+cluster.split(fasta=UNITEv6_sh_97.fasta, count=UNITEv6_sh_97.count_table, taxonomy=UNITEv6_sh_97.tax, cutoff=0.03)
+quit()
+

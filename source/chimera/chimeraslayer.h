@@ -42,8 +42,8 @@ class ChimeraSlayer : public MothurChimera {
 		Sequence querySeq;
 		Sequence trimQuery;
 		DeCalculator decalc;
-		Database* databaseRight;
-		Database* databaseLeft;
+        SearchDatabase* databaseRight;
+        SearchDatabase* databaseLeft;
 		map<string, int> priority; //for template=self, seqname, seqAligned, abundance
 		set<string> chimericSeqs; //for template=self, so we don't add chimeric sequences to the userTemplate set
 		int numNoParents, threadID;

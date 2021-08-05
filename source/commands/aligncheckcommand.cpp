@@ -70,7 +70,7 @@ string AlignCheckCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-AlignCheckCommand::AlignCheckCommand(string option)  {
+AlignCheckCommand::AlignCheckCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

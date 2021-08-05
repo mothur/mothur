@@ -84,7 +84,7 @@ string MetaStatsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MetaStatsCommand::MetaStatsCommand(string option) {
+MetaStatsCommand::MetaStatsCommand(string option) : Command() {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -183,7 +183,7 @@ int MetaStatsCommand::execute(){
 	
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-		DesignMap* designMap = new DesignMap(designfile);
+        DesignMap* designMap = new DesignMap(designfile);  if (m->getControl_pressed()) { delete designMap; return 0; }
 
 		InputData input(inputfile, format, Groups);
 		set<string> processedLabels;

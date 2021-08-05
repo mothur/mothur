@@ -154,7 +154,7 @@
 
 //**********************************************************************************************************************
 
-HelpCommand::HelpCommand(string option)  {	
+HelpCommand::HelpCommand(string option) : Command()  {	
 	validCommands = CommandFactory::getInstance();
     
     abort = false; calledHelp = false;

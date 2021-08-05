@@ -57,7 +57,7 @@ string MimarksAttributesCommand::getHelpString(){
     }
 }
 //**********************************************************************************************************************
-MimarksAttributesCommand::MimarksAttributesCommand(string option)  {
+MimarksAttributesCommand::MimarksAttributesCommand(string option) : Command()  {
     try {
 
         if(option == "help") { help(); abort = true; calledHelp = true; }

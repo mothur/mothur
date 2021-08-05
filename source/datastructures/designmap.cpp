@@ -23,36 +23,33 @@ DesignMap::DesignMap(string file) {
 /************************************************************/
 int DesignMap::read(string file) {
     try {
-        ifstream in;
-        util.openInputFile(file, in);
-        
-        string temp = "";
-        in >> temp; util.gobble(in);
-        
-        vector<string> columnHeaders;
-        vector<string> tempColumnHeaders;
-        if ((temp == "group") || (temp == "Group")) {
-            string headers = util.getline(in); util.gobble(in);
-            columnHeaders = util.splitWhiteSpace(headers);
-            columnHeaders.insert(columnHeaders.begin(), "group");
-        }else {
-            string headers = util.getline(in); util.gobble(in);
-            tempColumnHeaders = util.splitWhiteSpace(headers);
-            int num = tempColumnHeaders.size();
-            columnHeaders.push_back("group");
-            for (int i = 0; i < num; i++) { columnHeaders.push_back("value" + toString(i)); }
-        }
-        
         namesOfCategories.clear();
         indexCategoryMap.clear();
         indexGroupNameMap.clear();
         designMap.clear();
+        
+        ifstream in; util.openInputFile(file, in);
+        
+        string temp = "";
+        string headers = util.getline(in); util.gobble(in);
+        vector<string> tempColumnHeaders = util.splitWhiteSpace(headers);
+        if (tempColumnHeaders.size() != 0) { temp = tempColumnHeaders[0]; }
+        else { m->setControl_pressed(true); return 0; }
+        
+        vector<string> columnHeaders;
+        if ((temp == "group") || (temp == "Group")) {
+            columnHeaders.push_back("group");
+            for (int i = 1; i < tempColumnHeaders.size(); i++) { columnHeaders.push_back(tempColumnHeaders[i]); }
+        }else {
+            m->mothurOut("\n[ERROR]: Expected 'group' and found '" + temp + "'. Mothur expects the design file to have column headers. The first column header should be 'group'.\n\nSomething like: group\ttreatment\tmetadata.\n\nWithout the headers, mothur is unable to determine if the first row is group information or a header of the wrong name. This can result in a dummy group or missing group which will results in errors. Quitting, please correct.\n\n");
+            m->setControl_pressed(true); in.close(); return 0;
+        }
+        
+        
         map<int, string> originalGroupIndexes;
         for (int i = 1; i < columnHeaders.size(); i++) {  namesOfCategories.push_back(columnHeaders[i]);  originalGroupIndexes[i-1] = columnHeaders[i]; }
         if (columnHeaders.size() > 1) { defaultClass = columnHeaders[1]; }
-        else {
-            m->mothurOut("[ERROR]: Your design file contains only one column. Please correct.\n");  m->setControl_pressed(true);
-        }
+        else { m->mothurOut("[ERROR]: Your design file contains only one column. Please correct.\n");  m->setControl_pressed(true); }
         
         //sort groups to keep consistent with how we store the groups in groupmap
         sort(namesOfCategories.begin(), namesOfCategories.end());
@@ -64,48 +61,12 @@ int DesignMap::read(string file) {
         totalCategories.resize(numCategories);
         int count = 0;
         
-        //file without headers, fix it
-        if ((temp != "group") && (temp != "Group")){
-            group = temp;
-            util.checkGroupName(group);
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
-            
-            //if group info, then read it
-            vector<string> categoryValues; categoryValues.resize(numCategories, "not found");
-            for (int i = 0; i < numCategories; i++) {
-                int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
-                string temp = tempColumnHeaders[i];
-                util.checkGroupName(temp);
-                categoryValues[thisIndex] = temp;
-            
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }
-                
-                //do we have this value for this category already
-                map<string, int>::iterator it = totalCategories[thisIndex].find(temp);
-                if (it == totalCategories[thisIndex].end()) { totalCategories[thisIndex][temp] = 1; }
-                else {  totalCategories[thisIndex][temp]++; }
-            }
-            
-            
-            map<string, int>::iterator it = indexGroupNameMap.find(group);
-            if (it == indexGroupNameMap.end()) {
-                groups.push_back(group);
-                indexGroupNameMap[group] = count;
-                designMap.push_back(categoryValues);
-                count++;
-            }else {
-                error = true;
-                m->mothurOut("[ERROR]: Your design file contains more than 1 group named " + group + ", group names must be unique. Please correct.\n"); 
-            }
-        }
-        
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
             in >> group; util.gobble(in);
-            util.checkGroupName(group);
-            if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
+            util.checkGroupName(group);  if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
             vector<string> categoryValues; categoryValues.resize(numCategories, "not found");

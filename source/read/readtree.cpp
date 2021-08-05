@@ -98,7 +98,7 @@ float ReadTree::readBranchLength(istream& f) {
 int ReadNewickTree::read(CountTable* ct) {
 	try {
 		holder = "";
-		int error;
+        int error = 0;
 		int comment = 0;
         char c;
 		

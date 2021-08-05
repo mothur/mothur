@@ -89,7 +89,7 @@ string ChimeraPerseusCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-ChimeraPerseusCommand::ChimeraPerseusCommand(string option)  {
+ChimeraPerseusCommand::ChimeraPerseusCommand(string option) : Command()  {
 	try {
         hasCount = false;
 		

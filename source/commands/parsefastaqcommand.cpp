@@ -95,7 +95,7 @@ string ParseFastaQCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ParseFastaQCommand::ParseFastaQCommand(string option){
+ParseFastaQCommand::ParseFastaQCommand(string option) : Command(){
 	try {
 
 		if(option == "help") {	help(); abort = true; calledHelp = true; }

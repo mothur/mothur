@@ -69,7 +69,7 @@ string PCOACommand::getOutputPattern(string type) {
 }
 
 //**********************************************************************************************************************
-PCOACommand::PCOACommand(string option)  {
+PCOACommand::PCOACommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

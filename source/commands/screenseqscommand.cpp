@@ -159,7 +159,7 @@ string ScreenSeqsCommand::getOutputPattern(string type) {
 }
 //***************************************************************************************************************
 
-ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
+ScreenSeqsCommand::ScreenSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

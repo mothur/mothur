@@ -130,7 +130,7 @@ string ClusterFitCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
-ClusterFitCommand::ClusterFitCommand(string option)  {
+ClusterFitCommand::ClusterFitCommand(string option) : Command()  {
     try{
         //allow user to run help
         if(option == "help") { help(); abort = true; calledHelp = true; }

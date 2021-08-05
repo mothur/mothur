@@ -94,7 +94,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-TrimFlowsCommand::TrimFlowsCommand(string option)  {
+TrimFlowsCommand::TrimFlowsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -629,7 +629,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		filePos.push_back(0);
 					
 		FILE * pFile;
-		double size;
+		double size = 0.0;
 		
 		//get num bytes in file
         flowFileName = util.getFullPathName(flowFileName);

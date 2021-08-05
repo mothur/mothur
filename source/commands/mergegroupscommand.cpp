@@ -85,7 +85,7 @@ string MergeGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MergeGroupsCommand::MergeGroupsCommand(string option) {
+MergeGroupsCommand::MergeGroupsCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -195,7 +195,7 @@ int MergeGroupsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
-		designMap = new DesignMap(designfile);
+        designMap = new DesignMap(designfile);  if (m->getControl_pressed()) { delete designMap; return 0; }
         
         if (method != "sum") {
             string defaultClass = designMap->getDefaultClass();

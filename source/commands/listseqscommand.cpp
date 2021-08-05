@@ -75,7 +75,7 @@ string ListSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ListSeqsCommand::ListSeqsCommand(string option)  {
+ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

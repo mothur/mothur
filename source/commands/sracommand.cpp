@@ -106,7 +106,7 @@ string SRACommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SRACommand::SRACommand(string option)  {
+SRACommand::SRACommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

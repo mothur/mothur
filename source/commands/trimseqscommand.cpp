@@ -133,7 +133,7 @@ string TrimSeqsCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-TrimSeqsCommand::TrimSeqsCommand(string option)  {
+TrimSeqsCommand::TrimSeqsCommand(string option) : Command()  {
     try {
 
         if(option == "help") { help(); abort = true; calledHelp = true; }

@@ -34,7 +34,7 @@ ClusterClassic::ClusterClassic(float c, string f, bool s) : method(f),  nseqs(0)
 void ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 	try {
 		double distance;
-		bool square;
+		bool square = false;
 		string name;
 		vector<string> matrixNames;
 		
@@ -218,7 +218,7 @@ void ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 void ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
 	try {
 		double distance;
-		bool square;
+		bool square = false;
 		string name;
 		vector<string> matrixNames;
 		
@@ -484,7 +484,7 @@ void ClusterClassic::update(double& cutOFF){
         				
 		for(int i=0;i<nseqs;i++){
 			if(i != r && i != c){
-				double distRow, distCol, newDist;
+                double distRow, distCol, newDist; newDist = 1.0;
 				if (i > r) { distRow = dMatrix[i][r]; }
 				else { distRow =  dMatrix[r][i]; }
 

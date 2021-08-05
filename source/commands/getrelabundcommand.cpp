@@ -70,7 +70,7 @@ string GetRelAbundCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetRelAbundCommand::GetRelAbundCommand(string option) {
+GetRelAbundCommand::GetRelAbundCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

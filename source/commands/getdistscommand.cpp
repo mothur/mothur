@@ -65,7 +65,7 @@ string GetDistsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetDistsCommand::GetDistsCommand(string option)  {
+GetDistsCommand::GetDistsCommand(string option) : Command()  {
 	try {
 		
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -182,7 +182,7 @@ int GetDistsCommand::readPhylip(){
         util.openInputFile(phylipfile, in);
         
         float distance;
-        int square, nseqs; 
+        int square, nseqs; square = 0;
         string name;
         unsigned int row;
         set<unsigned int> rows; //converts names in names to a index

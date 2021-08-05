@@ -69,7 +69,7 @@ string ListOtusCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ListOtusCommand::ListOtusCommand(string option)  {
+ListOtusCommand::ListOtusCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

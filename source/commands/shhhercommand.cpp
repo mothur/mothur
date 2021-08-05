@@ -79,7 +79,7 @@ string ShhherCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ShhherCommand::ShhherCommand(string option) {
+ShhherCommand::ShhherCommand(string option) : Command() {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

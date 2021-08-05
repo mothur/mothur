@@ -90,11 +90,12 @@ class MothurOut {
             logFileName = "";
             buffer = "";
             homePath = "";
+            outLog = NULL;
             seed = std::chrono::system_clock::now().time_since_epoch().count();
 		}
 		~MothurOut();
 		
-		ofstream out;
+		ofstream* outLog;
         unsigned seed;
         int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
         string logFileName, buffer, homePath;

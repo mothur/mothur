@@ -78,8 +78,10 @@
 #include "sharedjsd.h"
 #include "sharedrjsd.h"
 #include "shannonrange.h"
-
-
+#include "jtt.hpp"
+#include "pmb.hpp"
+#include "pam.hpp"
+#include "kimura.hpp"
 
 /********************************************************************/
 ValidCalculators::ValidCalculators() {
@@ -96,6 +98,7 @@ ValidCalculators::ValidCalculators() {
 		initialVennShared();
 		initialTreeGroups();
 		initialDistance();
+        initialProtDistance();
 		initialMatrix();
 		initialHeat();
         initialEstimators();
@@ -112,6 +115,7 @@ ValidCalculators::ValidCalculators() {
 		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(*it); }
 		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(*it); }
 		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(*it); }
+        for(it = protdistance.begin(); it != protdistance.end(); it++) { allCalcs.insert(*it); }
         for(it = estimators.begin(); it != estimators.end(); it++) { allCalcs.insert(*it); }
 		
 	}
@@ -212,6 +216,10 @@ void ValidCalculators::printCitations(vector<string> Estimators) {
 				}else if (Estimators[i] == "kulczynski") { Calculator* temp = new Kulczynski(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "jsd") { Calculator* temp = new JSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
                 }else if (Estimators[i] == "rjsd") { Calculator* temp = new RJSD(); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "jtt") { DistCalc* temp = new JTT(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "pmb") { DistCalc* temp = new PMB(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "pam") { DistCalc* temp = new PAM(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
+                }else if (Estimators[i] == "kimura") { DistCalc* temp = new Kimura(10.0); m->mothurOut(temp->getName() + ": "); temp->citation(); delete temp;
 				}else { m->mothurOut("[ERROR]: Missing else if for " + Estimators[i] + " in printCitations.\n");  }
 			}else { m->mothurOut(Estimators[i] + " is not a valid calculator, no citation will be given.\n");  }
 		}
@@ -321,6 +329,13 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
             if ((distance.find(calculator)) != (distance.end())) { return true; }
             else {
                 m->mothurOut(calculator + " is not a valid estimator for the distance command and will be disregarded. Valid estimators are " + util.getStringFromSet(distance, ",") + ".\n");
+                return false;
+            }
+        }else if (parameter == "protdist") {
+            //is it valid
+            if ((protdistance.find(calculator)) != (protdistance.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the distance command and will be disregarded. Valid estimators are " + util.getStringFromSet(protdistance, ",") + ".\n");
                 return false;
             }
 		//not a valid parameter
@@ -743,6 +758,19 @@ void ValidCalculators::initialDistance() {
 		m->errorOut(e, "ValidCalculator", "initialDistance");
 		exit(1);
 	}
+}
+/********************************************************************/
+void ValidCalculators::initialProtDistance() {
+    try {
+        protdistance.insert("jtt");
+        protdistance.insert("pmb");
+        protdistance.insert("pam");
+        protdistance.insert("kimura");
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidCalculator", "initialProtDistance");
+        exit(1);
+    }
 }
 
 /********************************************************************/

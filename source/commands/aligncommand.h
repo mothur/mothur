@@ -10,7 +10,7 @@
  */
 
 #include "command.hpp"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "alignment.hpp"
 #include "alignmentdb.h"
 #include "sequence.hpp"

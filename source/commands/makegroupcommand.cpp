@@ -68,7 +68,7 @@ string MakeGroupCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeGroupCommand::MakeGroupCommand(string option)  {
+MakeGroupCommand::MakeGroupCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

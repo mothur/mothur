@@ -47,7 +47,7 @@ string SetLogFileCommand::getHelpString(){
 }
 //**********************************************************************************************************************
 
-SetLogFileCommand::SetLogFileCommand(string option)  {
+SetLogFileCommand::SetLogFileCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

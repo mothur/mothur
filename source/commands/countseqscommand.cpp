@@ -72,7 +72,7 @@ string CountSeqsCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-CountSeqsCommand::CountSeqsCommand(string option)  {
+CountSeqsCommand::CountSeqsCommand(string option) : Command()  {
 	try {
         allLines = true;
 		

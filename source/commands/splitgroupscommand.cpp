@@ -92,7 +92,7 @@ string SplitGroupCommand::getOutputPattern(string type) {
 }
 
 //**********************************************************************************************************************
-SplitGroupCommand::SplitGroupCommand(string option)  {
+SplitGroupCommand::SplitGroupCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -297,8 +297,7 @@ int driverRunNameGroup(splitGroups2Struct* params){
 	try {
 		if (params->m->getControl_pressed()) { return 0; }
         
-        GroupMap groupMap;
-        groupMap.readMap(params->groupfile, params->Groups);
+        GroupMap groupMap; groupMap.readMap(params->groupfile, params->Groups);
 		vector<string> namesGroups = groupMap.getNamesOfGroups();
         if (params->Groups.size() == 0) { params->Groups = namesGroups; }
 		
@@ -389,13 +388,20 @@ int driverRunNameGroup(splitGroups2Struct* params){
 //**********************************************************************************************************************
 int driverRunCount(splitGroups2Struct* params){
     try {
-        CountTable ct;
-        ct.readTable(params->countfile, true, false, params->Groups);
+        CountTable ct; ct.readTable(params->countfile, true, false, params->Groups);
         if (!ct.hasGroupInfo()) { params->m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); params->m->setControl_pressed(true); }
         
         if (params->m->getControl_pressed()) { return 0; }
         
         params->Groups = ct.getNamesOfGroups();
+        
+        string processTag = toString(params->start) + "_" + toString(params->end);
+        string uniqueFasta = params->fastafile+processTag;
+        string uniqueList = params->listfile+processTag;
+        
+        if (params->fastafile != "") { params->util.copyFile(params->fastafile, uniqueFasta); }else{ uniqueFasta = ""; }
+        if (params->listfile != "")  { params->util.copyFile(params->listfile, uniqueList); }else{ uniqueList = ""; }
+
         //GroupName -> files(fasta, list, count)
         for (int i = 0; i < params->Groups.size(); i++) { //Groups only contains the samples assigned to this process
            
@@ -411,55 +417,39 @@ int driverRunCount(splitGroups2Struct* params){
             params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
             vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
             
-            ofstream outAccnos;
-            params->util.openOutputFile(newCountFile+".accnos", outAccnos);
-            for (long long j = 0; j < namesOfSeqsInGroup.size(); j++) { outAccnos << namesOfSeqsInGroup[j] << endl; }
-            outAccnos.close();
-            
-            //use unique.seqs to create new name and fastafile
-            string uniqueFasta = params->fastafile+params->Groups[i];
-            string uniqueList = params->listfile+params->Groups[i];
-            
-            string inputString = "dups=f, accnos=" + newCountFile +".accnos";
-            if (params->fastafile != "") {
-                inputString += ", fasta=" + uniqueFasta;
-                params->util.copyFile(params->fastafile, uniqueFasta);
-            }
-            if (params->listfile != "")  {
-                inputString += ", list=" + uniqueList;
-                params->util.copyFile(params->listfile, uniqueList);
-            }
+            //params->util.printAccnos(newCountFile+".accnos", namesOfSeqsInGroup);
+            set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
             
             params->m->mothurOut("/******************************************/\n");
-            params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
+            params->m->mothurOut("Selecting sequences for group " + params->Groups[i] + "\n\n");
             
-            GetSeqsCommand getCommand(inputString);
-            getCommand.execute();
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, uniqueFasta, uniqueList, "", "", params->outputDir);
             
-            map<string, vector<string> > filenames = getCommand.getOutputFiles();
+            map<string, vector<string> > filenames = getCommand->getOutputFiles();
+            
+            delete getCommand;
             
             if (params->fastafile != "") {
                 params->util.renameFile(filenames["fasta"][0], files[0]);
                 params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]);
-                params->util.mothurRemove(uniqueFasta);
             }
             if (params->listfile != "") {
                 params->util.renameFile(filenames["list"][0], files[1]);
                 params->outputNames.push_back(files[1]); params->outputTypes["list"].push_back(files[1]);
-                params->util.mothurRemove(uniqueList);
             }
         
-            params->m->mothurOut("/******************************************/\nDone.\n");
+            params->m->mothurOut("/******************************************/\n\n");
             
-            params->util.mothurRemove(newCountFile+".accnos");
-            
-            if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} return 0; }
+            if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} break; }
         }
+        
+        if (params->fastafile != "") { params->util.mothurRemove(uniqueFasta); }
+        if (params->listfile != "") { params->util.mothurRemove(uniqueList);   }
         
         return 0;
     }
     catch(exception& e) {
-        params->m->errorOut(e, "SplitGroupCommand", "runCount");
+        params->m->errorOut(e, "SplitGroupCommand", "driverRunCount");
         exit(1);
     }
 }

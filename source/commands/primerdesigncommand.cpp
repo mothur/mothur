@@ -88,7 +88,7 @@ string PrimerDesignCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-PrimerDesignCommand::PrimerDesignCommand(string option)  {
+PrimerDesignCommand::PrimerDesignCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

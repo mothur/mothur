@@ -94,7 +94,7 @@ string ChopSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ChopSeqsCommand::ChopSeqsCommand(string option)  {
+ChopSeqsCommand::ChopSeqsCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

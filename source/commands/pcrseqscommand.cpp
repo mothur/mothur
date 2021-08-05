@@ -17,6 +17,7 @@ vector<string> PcrSeqsCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","count",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","group",false,false,true); parameters.push_back(pgroup);
         CommandParameter ptax("taxonomy", "InputTypes", "", "", "none", "none", "none","taxonomy",false,false,true); parameters.push_back(ptax);
+        CommandParameter preorient("checkorient", "Boolean", "", "T", "", "", "","",false,false,true); parameters.push_back(preorient);
         CommandParameter pecoli("ecoli", "InputTypes", "", "", "ecolioligos", "none", "none","",false,false); parameters.push_back(pecoli);
 		CommandParameter pstart("start", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pstart);
 		CommandParameter pend("end", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pend);
@@ -59,6 +60,7 @@ string PcrSeqsCommand::getHelpString(){
         helpString += "The start parameter allows you to provide a starting position to trim to.\n";
         helpString += "The end parameter allows you to provide a ending position to trim from.\n";
         helpString += "The nomatch parameter allows you to decide what to do with sequences where the primer is not found. Default=reject, meaning remove from fasta file.  if nomatch=true, then do nothing to sequence.\n";
+        helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is true.\n";
         helpString += "The processors parameter allows you to use multiple processors.\n";
         helpString += "The keepprimer parameter allows you to keep the primer, default=false.\n";
         helpString += "The keepdots parameter allows you to keep the leading and trailing .'s, default=true.\n";
@@ -94,7 +96,7 @@ string PcrSeqsCommand::getOutputPattern(string type) {
     }
 }
 //***************************************************************************************************************
-PcrSeqsCommand::PcrSeqsCommand(string option)  {
+PcrSeqsCommand::PcrSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}
@@ -177,6 +179,9 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             temp = validParameter.valid(parameters, "rdiffs");		if (temp == "not found") { temp = "0"; }
             util.mothurConvert(temp, rdiffs);
 			
+            temp = validParameter.valid(parameters, "checkorient");        if (temp == "not found") { temp = "T"; }
+            reorient = util.isTrue(temp);
+            
             nomatch = validParameter.valid(parameters, "nomatch");	if (nomatch == "not found") { nomatch = "reject"; }
 			
             if ((nomatch != "reject") && (nomatch != "keep")) { m->mothurOut("[ERROR]: " + nomatch + " is not a valid entry for nomatch. Choices are reject and keep.\n");  abort = true; }
@@ -196,7 +201,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option)  {
             if ((oligosfile != "") && (ecolifile != "")) {
                  m->mothurOut("[ERROR]: You can not use an ecoli file at the same time as an oligos file.\n"); abort = true;
             }
-			
+            
 			//check to make sure you didn't forget the name file by mistake			
 			if (countfile == "") { 
                 if (namefile == "") {
@@ -421,13 +426,13 @@ struct pcrData {
     int numFPrimers, numRPrimers;
     MothurOut* m;
     set<string> badSeqNames;
-    bool keepprimer, keepdots, fileAligned, adjustNeeded;
+    bool keepprimer, keepdots, fileAligned, adjustNeeded, reorient;
     Utils util;
     map<string, vector<int> > locations;
     Sequence ecoli;
     
     pcrData(){}
-    pcrData(string f, string ol, OutputWriter* gf, OutputWriter* bfn, Sequence ec, string nm, bool kp, bool kd, int pd, int rd, unsigned long long fst, unsigned long long fen, int st, int en) {
+    pcrData(string f, string ol, OutputWriter* gf, OutputWriter* bfn, Sequence ec, string nm, bool kp, bool kd, int pd, int rd, bool re, unsigned long long fst, unsigned long long fen, int st, int en) {
         filename = f;
         goodFasta = gf;
         badFasta = bfn;
@@ -436,6 +441,7 @@ struct pcrData {
         start = st;
         end = en;
         ecoli = ec;
+        reorient = re;
         if (ecoli.getName() != "filler") {
             length = ecoli.getAligned().length();
             start = ecoli.getStartPos();
@@ -455,42 +461,271 @@ struct pcrData {
         pend = -1;
     }
 };
-//**********************************************************************************************************************
-int driverPcr(pcrData* params){
+/**************************************************************************************************/
+vector<TrimOligos*> fillTrims(pcrData* params, bool& pairedOligos) {
     try {
-        ifstream inFASTA;
-        params->util.openInputFile(params->filename, inFASTA);
         
-        inFASTA.seekg(params->fstart);
-        
-        bool done = false;
-        params->count = 0;
-        set<int> lengths;
-        set<int> startLocations; //locations[0] = beginning locations,
-        set<int> endLocations;
-        
-        Oligos oligos;
-        params->numFPrimers = 0; params->numRPrimers = 0;
-        map<string, int> primers;
-        map<string, int> barcodes; //not used
-        vector<string> revPrimer;
-        bool pairedOligos = false;
+        vector<TrimOligos*> trims;
         
         if (params->oligosfile != "") {
+            
+            Oligos oligos;
+            params->numFPrimers = 0; params->numRPrimers = 0;
+            map<string, int> barcodes; //not used
+            
             readOligos(oligos, params->oligosfile, pairedOligos, params->numFPrimers, params->numRPrimers, params->m);
+            
             if (pairedOligos) {
+                map<string, int> primers; vector<string> revPrimer;
                 map<int, oligosPair> primerPairs = oligos.getPairedPrimers();
                 for (map<int, oligosPair>::iterator it = primerPairs.begin(); it != primerPairs.end(); it++) {
                     primers[(it->second).forward] = it->first;
                     revPrimer.push_back((it->second).reverse);
                 }
+                
+                //standard
+                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+
             }else{
+                map<string, int> primers; vector<string> revPrimer;
                 primers = oligos.getPrimers();
                 revPrimer = oligos.getReversePrimers();
+                
+                //standard
+                trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+            }
+            
+                
+            if (params->reorient) {
+                
+                //reoriented
+                if (pairedOligos) {
+                    map<string, int> primers; vector<string> revPrimer;
+                    map<int, oligosPair> rprimerPairs = oligos.getReorientedPairedPrimers();
+                    for (map<int, oligosPair>::iterator it = rprimerPairs.begin(); it != rprimerPairs.end(); it++) {
+                        primers[(it->second).forward] = it->first;
+                        revPrimer.push_back((it->second).reverse);
+                    }
+                    
+                    //reoriented
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                    primers.clear(); revPrimer.clear();
+                    
+                    map<int, oligosPair> revprimerPairs = oligos.getReversedPairedPrimers();
+                    for (map<int, oligosPair>::iterator it = revprimerPairs.begin(); it != revprimerPairs.end(); it++) {
+                        primers[(it->second).forward] = it->first;
+                        revPrimer.push_back((it->second).reverse);
+                    }
+                    
+                    //reversed
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                }else{
+                    map<string, int> primers; vector<string> revPrimer;
+                    
+                    primers = oligos.getReorientedPrimers();
+                    revPrimer = oligos.getReorientedReversePrimers();
+                    
+                    //reoriented
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                    
+                    primers.clear(); revPrimer.clear();
+                    
+                    primers = oligos.getReversedPrimers();
+                    revPrimer = oligos.getReversedReversePrimers();
+                    
+                    //reversed
+                    trims.push_back(new TrimOligos(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer));
+                }
             }
         }
         
-        TrimOligos trim(params->pdiffs, params->rdiffs, 0, primers, barcodes, revPrimer);
+        return trims;
+        
+    }catch(exception& e) {
+        params->m->errorOut(e, "PcrSeqsCommand", "fillTrims");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+bool trimStartEnd(Sequence& seq, pcrData* params) {
+    try {
+        bool good = true;
+        
+        //make sure the seqs are aligned
+        if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); good = false; }
+        else {
+            string alignedString = seq.getAligned();
+            
+            if ((seq.getStartPos() > params->start) || (seq.getEndPos() < params->end)) {
+                good = false;
+                if (params->m->getDebug()) {
+                    params->m->mothurOut("[DEBUG]: " + seq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
+                    
+                }
+            }
+            else {
+                if (params->end != -1) {
+                    if (params->end > seq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + seq.getName() + " length of " +toString(seq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); good = false; }
+                    else {
+                        if (params->keepdots)   { seq.filterFromPos(params->end); }
+                        else {
+                            string seqString = seq.getAligned().substr(0, (params->end));
+                            seq.setAligned(seqString);
+                        }
+                    }
+                }
+                
+                if (params->start != -1) {
+                    if (params->keepdots)   {  seq.filterToPos(params->start-1);  }
+                    else {
+                        string seqString = seq.getAligned().substr(params->start);
+                        seq.setAligned(seqString);
+                    }
+                }
+            }
+        }
+        
+        return good;
+        
+    }catch(exception& e) {
+        params->m->errorOut(e, "PcrSeqsCommand", "trimStartEnd");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>& thisSeqsLocations, int& thisPStart, int& thisPEnd, pcrData* params) {
+    try {
+        
+        vector<string> codes; codes.resize(2, "");
+    
+        for (int i = 0; i < trims.size(); i++) {
+            Sequence savedSeq(seq.getName(), seq.getAligned());
+            
+            map<int, int> mapAligned;
+            bool aligned = isAligned(savedSeq.getAligned(), mapAligned);
+            
+            string trashCode = ""; string commentString = "";
+            int currentSeqsDiffs = 0; int reverseIndex = 0; int primerIndex = 0;
+            bool goodSeq = true;
+            
+            if(params->numFPrimers != 0){
+                int primerStart = 0; int primerEnd = 0;
+                vector<int> results = trims[i]->findForward(savedSeq, primerStart, primerEnd);
+                bool good = true;
+                if (results[0] > params->pdiffs) { good = false; }
+                currentSeqsDiffs += results[0];
+                commentString += "fpdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], params->pdiffs) + ") ";
+                
+                if(!good){    if (params->nomatch == "reject") { goodSeq = false; } trashCode += "f";    }
+                else{
+                    //are you aligned
+                    if (aligned) {
+                        if (!params->keepprimer)    {
+                            if (params->keepdots)   { savedSeq.filterToPos(mapAligned[primerEnd-1]+1);   } //mapAligned[primerEnd-1] is the location of the last base in the primer. we want to trim to the space just after that.  The -1 & +1 ensures if the primer is followed by gaps they are not trimmed causing an aligned sequence dataset to become unaligned.
+                            else{
+                                savedSeq.setAligned(savedSeq.getAligned().substr(mapAligned[primerEnd-1]+1));
+                                if (params->fileAligned) {
+                                    thisPStart = mapAligned[primerEnd-1]+1; //locations[0].insert(mapAligned[primerEnd-1]+1);
+                                    thisSeqsLocations.push_back(thisPStart);
+                                }
+                            }
+                        }else                {
+                            if (params->keepdots)   { savedSeq.filterToPos(mapAligned[primerStart]);  }
+                            else            {
+                                savedSeq.setAligned(savedSeq.getAligned().substr(mapAligned[primerStart]));
+                                if (params->fileAligned) {
+                                    thisPStart = mapAligned[primerStart]; //locations[0].insert(mapAligned[primerStart]);
+                                    thisSeqsLocations.push_back(thisPStart);
+                                }
+                            }
+                        }
+                        isAligned(savedSeq.getAligned(), mapAligned);
+                    }else {
+                        if (!params->keepprimer)    { savedSeq.setAligned(savedSeq.getUnaligned().substr(primerEnd));     }
+                        else                        { savedSeq.setAligned(savedSeq.getUnaligned().substr(primerStart));   }
+                    }
+                }
+            }
+            
+            if(params->numRPrimers != 0){
+                int primerStart = 0; int primerEnd = 0;
+                vector<int> results = trims[i]->findReverse(savedSeq, primerStart, primerEnd);
+                bool good = true;
+                if (results[0] > params->rdiffs) { good = false; }
+                currentSeqsDiffs += results[0];
+                commentString += "rpdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], params->rdiffs) + ") ";
+                
+                if(!good){    if (params->nomatch == "reject") { goodSeq = false; } trashCode += "r";    }
+                else{
+                    //are you aligned
+                    if (aligned) {
+                        if (!params->keepprimer)    {
+                            if (params->keepdots)   { savedSeq.filterFromPos(mapAligned[primerStart]); }
+                            else            {
+                                savedSeq.setAligned(savedSeq.getAligned().substr(0, mapAligned[primerStart]));
+                                if (params->fileAligned) {
+                                    thisPEnd = mapAligned[primerStart]; //locations[1].insert(mapAligned[primerStart]);
+                                    thisSeqsLocations.push_back(thisPEnd);
+                                }
+                            }
+                        }
+                        else                {
+                            if (params->keepdots)   { savedSeq.filterFromPos(mapAligned[primerEnd-1]+1); }
+                            else            {
+                                savedSeq.setAligned(savedSeq.getAligned().substr(0, mapAligned[primerEnd-1]+1));
+                                if (params->fileAligned) {
+                                    thisPEnd = mapAligned[primerEnd-1]+1; //locations[1].insert(mapAligned[primerEnd-1]+1);
+                                    thisSeqsLocations.push_back(thisPEnd);
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (!params->keepprimer)    { savedSeq.setAligned(savedSeq.getUnaligned().substr(0, primerStart));   }
+                        else                { savedSeq.setAligned(savedSeq.getUnaligned().substr(0, primerEnd));     }
+                    }
+                }
+            }
+            
+            if (currentSeqsDiffs > (params->pdiffs + params->rdiffs))    {    trashCode += 't';   }
+            
+            if (trashCode == "") {
+                codes[0] = "";
+                codes[1] = commentString;
+               
+                if (i > 0) { //checkOrient trimOligos - reoriented and reversed
+                    savedSeq.reverseComplement();
+                }
+                seq.setAligned(savedSeq.getAligned());
+                break;
+            }else {
+                if (codes[0] == "") { codes[0] = trashCode;                 }
+                else                { codes[0] += "(" + trashCode + ")";    }
+                
+                codes[1] = commentString;
+            }
+        }
+        
+        return codes;
+
+    }catch(exception& e) {
+        params->m->errorOut(e, "PcrSeqsCommand", "trimPrimers");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int driverPcr(pcrData* params){
+    try {
+        ifstream inFASTA; params->util.openInputFile(params->filename, inFASTA);
+        inFASTA.seekg(params->fstart);
+        
+        bool done = false; params->count = 0;
+        set<int> lengths; set<int> startLocations;  set<int> endLocations;
+        
+        bool pairedOligos = false;
+        vector<TrimOligos*> trims = fillTrims(params, pairedOligos); //standard, if reorient parameter then (reorient & reverse) as well
         
         while (!done) {
             
@@ -502,15 +737,11 @@ int driverPcr(pcrData* params){
                 lengths.insert(currSeq.getAligned().length());
                 if (lengths.size() > 1) { params->fileAligned = false; }
             }
-            
-            string trashCode = "";
-            //string locationsString = "";
-            int thisPStart = -1;
-            int thisPEnd = -1;
-            int totalDiffs = 0;
-            string commentString = "";
-            
+        
             if (params->m->getControl_pressed()) {  break; }
+            
+            string trashCode = ""; string commentString = "";
+            int thisPStart = -1; int thisPEnd = -1;
             
             if (currSeq.getName() != "") {
                 
@@ -518,91 +749,20 @@ int driverPcr(pcrData* params){
                 
                 bool goodSeq = true;
                 vector<int> thisSeqsLocations;
-                if (params->oligosfile != "") {
-                    map<int, int> mapAligned;
-                    bool aligned = isAligned(currSeq.getAligned(), mapAligned);
+                
+                if (params->oligosfile != "") { //removing primers
                     
+                    vector<string> results = trimPrimers(currSeq, trims,  thisSeqsLocations, thisPStart, thisPEnd, params);
                     
-                    //process primers
-                    if (primers.size() != 0) {
-                        int primerStart = 0; int primerEnd = 0;
-                        vector<int> results = trim.findForward(currSeq, primerStart, primerEnd);
-                        bool good = true;
-                        if (results[0] > params->pdiffs) { good = false; }
-                        totalDiffs += results[0];
-                        commentString += "fpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], params->pdiffs) + ") ";
-                        
-                        if(!good){	if (params->nomatch == "reject") { goodSeq = false; } trashCode += "f";	}
-                        else{
-                            //are you aligned
-                            if (aligned) {
-                                if (!params->keepprimer)    {
-                                    if (params->keepdots)   { currSeq.filterToPos(mapAligned[primerEnd-1]+1);   } //mapAligned[primerEnd-1] is the location of the last base in the primer. we want to trim to the space just after that.  The -1 & +1 ensures if the primer is followed by gaps they are not trimmed causing an aligned sequence dataset to become unaligned.
-                                    else{
-                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerEnd-1]+1));
-                                        if (params->fileAligned) {
-                                            thisPStart = mapAligned[primerEnd-1]+1; //locations[0].insert(mapAligned[primerEnd-1]+1);
-                                            thisSeqsLocations.push_back(thisPStart);
-                                        }
-                                    }
-                                }else                {
-                                    if (params->keepdots)   { currSeq.filterToPos(mapAligned[primerStart]);  }
-                                    else            {
-                                        currSeq.setAligned(currSeq.getAligned().substr(mapAligned[primerStart]));
-                                        if (params->fileAligned) {
-                                            thisPStart = mapAligned[primerStart]; //locations[0].insert(mapAligned[primerStart]);
-                                            thisSeqsLocations.push_back(thisPStart);
-                                        }
-                                    }
-                                }
-                                isAligned(currSeq.getAligned(), mapAligned);
-                            }else {
-                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(primerEnd));     }
-                                else                        { currSeq.setAligned(currSeq.getUnaligned().substr(primerStart));   }
-                            }
-                        }
+                    trashCode = results[0]; commentString = results[1];
+                    
+                    if (commentString != "") {
+                        string seqComment = currSeq.getComment();
+                        currSeq.setComment("\t" + commentString + "\t" + seqComment);
                     }
                     
-                    //process reverse primers
-                    if (revPrimer.size() != 0) {
-                        int primerStart = 0; int primerEnd = 0;
-                        vector<int> results = trim.findReverse(currSeq, primerStart, primerEnd);
-                        bool good = true;
-                        if (results[0] > params->rdiffs) { good = false; }
-                        totalDiffs += results[0];
-                        commentString += "rpdiffs=" + toString(results[0]) + "(" + trim.getCodeValue(results[1], params->rdiffs) + ") ";
-                        
-                        if(!good){	if (params->nomatch == "reject") { goodSeq = false; } trashCode += "r";	}
-                        else{
-                            //are you aligned
-                            if (aligned) {
-                                if (!params->keepprimer)    {
-                                    if (params->keepdots)   { currSeq.filterFromPos(mapAligned[primerStart]); }
-                                    else            {
-                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerStart]));
-                                        if (params->fileAligned) {
-                                            thisPEnd = mapAligned[primerStart]; //locations[1].insert(mapAligned[primerStart]);
-                                            thisSeqsLocations.push_back(thisPEnd);
-                                        }
-                                    }
-                                }
-                                else                {
-                                    if (params->keepdots)   { currSeq.filterFromPos(mapAligned[primerEnd-1]+1); }
-                                    else            {
-                                        currSeq.setAligned(currSeq.getAligned().substr(0, mapAligned[primerEnd-1]+1));
-                                        if (params->fileAligned) {
-                                            thisPEnd = mapAligned[primerEnd-1]+1; //locations[1].insert(mapAligned[primerEnd-1]+1);
-                                            thisSeqsLocations.push_back(thisPEnd);
-                                        }
-                                    }
-                                }
-                            }
-                            else {
-                                if (!params->keepprimer)    { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerStart));   }
-                                else                { currSeq.setAligned(currSeq.getUnaligned().substr(0, primerEnd));     }
-                            }
-                        }
-                    }
+                    if (trashCode != "") { goodSeq = false; }
+     
                 }else if (params->ecoli.getName() != "filler") {
                     //make sure the seqs are aligned
                     if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); break; }
@@ -619,48 +779,8 @@ int driverPcr(pcrData* params){
                         }
                     }
                 }else{ //using start and end to trim
-                    //make sure the seqs are aligned
-                    if (!params->fileAligned) { params->m->mothurOut("[ERROR]: seqs are not aligned. When using start and end your sequences must be aligned.\n"); params->m->setControl_pressed(true); break; }
-                    else {
-                        string alignedString = currSeq.getAligned();
-                        //cout << currSeq.getName() << '\t' << alignedString[params->start] << '\t' << alignedString[params->end] << endl;
-                        if ((currSeq.getStartPos() > params->start) || (currSeq.getEndPos() < params->end)) {
-                            goodSeq = false;
-                            if (params->m->getDebug()) {
-                                params->m->mothurOut("[DEBUG]: " + currSeq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
-                                
-                            }
-                        }
-                        else {
-                            if (params->end != -1) {
-                                if (params->end > currSeq.getAligned().length()) {  params->m->mothurOut("[ERROR]: end of " +toString(params->end)  + " is longer than " + currSeq.getName() + " length of " +toString(currSeq.getAligned().length()) + ", aborting.\n"); params->m->setControl_pressed(true); break; }
-                                else {
-                                    if (params->keepdots)   { currSeq.filterFromPos(params->end); }
-                                    else {
-                                        string seqString = currSeq.getAligned().substr(0, (params->end));
-                                        currSeq.setAligned(seqString);
-                                    }
-                                }
-                            }
-                            
-                            if (params->start != -1) {
-                                if (params->keepdots)   {  currSeq.filterToPos(params->start-1);  }
-                                else {
-                                    string seqString = currSeq.getAligned().substr(params->start);
-                                    currSeq.setAligned(seqString);
-                                }
-                            }
-                       
-                        }
-                    }
+                    goodSeq = trimStartEnd(currSeq, params); //error message if seqs unaligned
                 }
-                
-                if (commentString != "") {
-                    string seqComment = currSeq.getComment();
-                    currSeq.setComment("\t" + commentString + "\t" + seqComment);
-                }
-                
-                if (totalDiffs > (params->pdiffs + params->rdiffs)) { trashCode += "t"; goodSeq = false; }
                 
                 //remove super short reads
                 if (currSeq.getUnaligned() == "") { goodSeq = false;  currSeq.setAligned("NNNNNNN"); }
@@ -693,17 +813,18 @@ int driverPcr(pcrData* params){
         if((params->count) % 1000 != 0){	params->m->mothurOutJustToScreen(toString(params->count)+"\n"); 	}
         
         inFASTA.close();
+        for (int i = 0; i < trims.size(); i++) { delete trims[i]; }
         
         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: fileAligned = " + toString(params->fileAligned) +'\n'); }
         
         if (params->fileAligned && !params->keepdots) { //print out smallest start value and largest end value
             if (startLocations.size() > 1)  { params->adjustNeeded = true; }
             if (endLocations.size() > 1)    { params->adjustNeeded = true; }
-            if (primers.size() != 0)        {
+            if (params->numFPrimers != 0)        {
                 set<int>::iterator it = startLocations.begin();  params->pstart = *it;
                 if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(startLocations, " ")+"\n"); }
             }
-            if (revPrimer.size() != 0)      {
+            if (params->numRPrimers != 0)      {
                 set<int>::reverse_iterator it = endLocations.rbegin();  params->pend = *it;
                 if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(endLocations, " ")+"\n"); }
             }
@@ -756,7 +877,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
             OutputWriter* threadFastaWriter = new OutputWriter(synchronizedGoodFastaFile);
             OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedBadFastaFile);
             
-            pcrData* dataBundle = new pcrData(filename, oligosfile, threadFastaWriter, threadFastaScrapWriter, ecoliSeq, nomatch, keepprimer, keepdots, pdiffs, rdiffs, lines[i+1].start, lines[i+1].end, start, end);
+            pcrData* dataBundle = new pcrData(filename, oligosfile, threadFastaWriter, threadFastaScrapWriter, ecoliSeq, nomatch, keepprimer, keepdots, pdiffs, rdiffs, reorient, lines[i+1].start, lines[i+1].end, start, end);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverPcr, dataBundle));
@@ -765,7 +886,7 @@ long long PcrSeqsCommand::createProcesses(string filename, string goodFileName, 
         OutputWriter* threadFastaWriter = new OutputWriter(synchronizedGoodFastaFile);
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedBadFastaFile);
         
-        pcrData* dataBundle = new pcrData(filename, oligosfile, threadFastaWriter, threadFastaScrapWriter, ecoliSeq, nomatch, keepprimer, keepdots, pdiffs, rdiffs, lines[0].start, lines[0].end, start, end);
+        pcrData* dataBundle = new pcrData(filename, oligosfile, threadFastaWriter, threadFastaScrapWriter, ecoliSeq, nomatch, keepprimer, keepdots, pdiffs, rdiffs, reorient, lines[0].start, lines[0].end, start, end);
         
         driverPcr(dataBundle);
         numFastaSeqs = dataBundle->count;
@@ -909,15 +1030,14 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
 //***************************************************************************************************************
 Sequence PcrSeqsCommand::readEcoli(){
 	try {
-		ifstream in;
-		util.openInputFile(ecolifile, in);
+		ifstream in; util.openInputFile(ecolifile, in);
 		
         //read seq
         Sequence result;
         if (!in.eof()){ 
             Sequence ecoli(in);
             result.setName(ecoli.getName()); result.setAligned(ecoli.getAligned());
-        }else { in.close(); m->setControl_pressed(true); return result; }
+        }else {  m->setControl_pressed(true);  }
         in.close();    
 			
         return result;

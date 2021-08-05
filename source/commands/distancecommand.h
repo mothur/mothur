@@ -20,18 +20,23 @@
 #include "eachgapignore.h"
 #include "onegapdist.h"
 #include "onegapignore.h"
+#include "jtt.hpp"
 #include "writer.h"
+#include "proteindb.hpp"
+#include "pmb.hpp"
+#include "pam.hpp"
+#include "kimura.hpp"
 
 /**************************************************************************************************/
 struct distanceData {
     long long startLine, endLine, numNewFasta, count;
 	float cutoff;
-    SequenceDB alignDB;
-    SequenceDB oldFastaDB;
+    StorageDatabase* db;
+    StorageDatabase* oldFastaDB;
 	MothurOut* m;
 	OutputWriter* threadWriter;
     string outputFileName, calc;
-	bool countends;
+	bool countends, prot;
     Utils util;
 	
 	distanceData(){}
@@ -44,13 +49,14 @@ struct distanceData {
         outputFileName = ofn;
         m = MothurOut::getInstance();
     }
-	void setVariables(int s, int e,  float c, SequenceDB db, SequenceDB oldfn, string Est, long long num, bool cnt) {
+	void setVariables(int s, int e,  float c, StorageDatabase*& dbsp, StorageDatabase*& oldfn, string Est, bool met, long long num, bool cnt) {
 		startLine = s;
 		endLine = e;
 		cutoff = c;
-		alignDB = db;
+		db = dbsp;
         oldFastaDB = oldfn;
 		calc = Est;
+        prot = met;
 		numNewFasta = num;
 		countends = cnt;
         count = 0;
@@ -61,6 +67,7 @@ class DistanceCommand : public Command {
 
 public:
     DistanceCommand(string);
+    DistanceCommand(StorageDatabase*&, string, double, string, int); //used by mothur's splitMatrix class to avoid rereading files
 	~DistanceCommand() {}
 	
 	vector<string> setParameters();
@@ -78,13 +85,13 @@ public:
 	
 private:
 	
-    SequenceDB alignDB;
-	string output, fastafile, calc,  oldfastafile, column, compress;
+    StorageDatabase* db;
+	string output, fastafile, calc,  oldfastafile, column;
     int processors;
     long long numNewFasta, numSeqs, numDistsBelowCutoff;
 	float cutoff;
 	
-	bool abort, countends, fitCalc;
+	bool abort, countends, fitCalc, prot, compress;
 	vector<string> outputNames; 
 	
 	void createProcesses(string);

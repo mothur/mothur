@@ -70,7 +70,7 @@ string MakeFileCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeFileCommand::MakeFileCommand(string option)  {
+MakeFileCommand::MakeFileCommand(string option) : Command()  {
     try {
          if(option == "help") { help(); abort = true; calledHelp = true; }
         else if(option == "citation") { citation(); abort = true; calledHelp = true;}

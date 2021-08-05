@@ -63,7 +63,7 @@ string GetCurrentCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetCurrentCommand::GetCurrentCommand(string option)  {
+GetCurrentCommand::GetCurrentCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

@@ -76,7 +76,7 @@ string CorrAxesCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-CorrAxesCommand::CorrAxesCommand(string option)  {
+CorrAxesCommand::CorrAxesCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

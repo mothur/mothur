@@ -68,7 +68,7 @@ string GetSAbundCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetSAbundCommand::GetSAbundCommand(string option)  {
+GetSAbundCommand::GetSAbundCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

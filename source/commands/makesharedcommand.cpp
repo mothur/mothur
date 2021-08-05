@@ -85,7 +85,7 @@ string SharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SharedCommand::SharedCommand(string option)  {
+SharedCommand::SharedCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

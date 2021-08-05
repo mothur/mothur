@@ -84,7 +84,7 @@ string DistSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-DistSharedCommand::DistSharedCommand(string option)  {
+DistSharedCommand::DistSharedCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") {  help(); abort = true; calledHelp = true; }

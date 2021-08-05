@@ -32,22 +32,25 @@ void MothurOut::appendLogBuffer(string partialLog)  {
 /*********************************************************************************************/
 void MothurOut::setLogFileName(string filename, bool append)  {
 	try {
-        logFileName = filename;
         silenceWarnings = false;
         Utils util;
         if ((filename == "silent")) { silenceLog = true; }
         else {
-            if (out.is_open()) { closeLog(); }
+            logFileName = filename;
+            if (outLog != NULL) {
+                closeLog();
+                delete outLog; outLog = NULL;
+            }
+            outLog = new ofstream();
             silenceLog = false;
             if (append)     {
-                util.openOutputFileAppend(filename, out);
-                out << "\n\n************************************************************\n\n\n";
+                util.openOutputFileAppend(filename, *outLog);
+                *outLog << "\n\n************************************************************\n\n\n";
             }else            {
-                bool opendLog = util.openOutputFile(filename, out);
+                bool opendLog = util.openOutputFile(filename, *outLog);
                 if (!opendLog) { control_pressed = true; }
             }
         }
-        
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -58,15 +61,19 @@ void MothurOut::setLogFileName(string filename, bool append)  {
 void MothurOut::closeLog()  {
 	try {
         if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
+        
+        string outputLogName = "Logfile : " + logFileName + "\n\n";
+        if (!silenceLog) { mothurOut(outputLogName); }
+            
         if (numErrors != 0) {
             if (!silenceLog) {
-                out << "\n\n************************************************************\n";
-                out << "************************************************************\n";
-                out << "************************************************************\n";
-                out << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
-                out << "************************************************************\n";
-                out << "************************************************************\n";
-                out << "************************************************************\n";
+                *outLog << "\n\n************************************************************\n";
+                *outLog << "************************************************************\n";
+                *outLog << "************************************************************\n";
+                *outLog << "Detected " + toString(numErrors) + " [ERROR] messages, please review.\n";
+                *outLog << "************************************************************\n";
+                *outLog << "************************************************************\n";
+                *outLog << "************************************************************\n";
             }
             logger() << "\n\n************************************************************\n";
             logger() << "************************************************************\n";
@@ -79,13 +86,13 @@ void MothurOut::closeLog()  {
         
         if (numWarnings != 0) {
             if (!silenceLog) {
-                out << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-                out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-                out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-                out << "Detected " + toString(numWarnings) + " [WARNING] messages, please review.\n";
-                out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-                out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
-                out << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "Detected " + toString(numWarnings) + " [WARNING] messages, please review.\n";
+                *outLog << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+                *outLog << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
             }
             logger() << "\n\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
@@ -96,7 +103,7 @@ void MothurOut::closeLog()  {
             logger() << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<^>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
         }
         
-		out.close();
+        outLog->close();
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "closeLog");
@@ -141,7 +148,7 @@ void MothurOut::mothurOut(string output) {
             if (numCommandWarnings > maxCommandWarnings) {
                 if (!silenceWarnings) {
                     logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
                 }
                 silenceWarnings = true; // write to cout, don't add to logfile
             }
@@ -150,13 +157,13 @@ void MothurOut::mothurOut(string output) {
         if (!quietMode) {
             if (!silenceLog) {
                 if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { out << output;  }
+                else { *outLog << output;  }
             }
             logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!silenceLog) { out << output; }
+                if (!silenceLog) { *outLog << output; }
                 logger() << output;
             }
         }
@@ -206,7 +213,7 @@ void MothurOut::mothurOutJustToScreen(string output) {
 void MothurOut::mothurOutEndLine() {
 	try {
 		if (!quietMode) {
-            if (!silenceLog) { out << buffer << endl; }
+            if (!silenceLog) { *outLog << buffer << endl; }
             logger() << buffer << endl;
         }
         buffer = "";
@@ -234,7 +241,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
             if (numCommandWarnings > maxCommandWarnings) {
                 if (!silenceWarnings) {
                     logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
                 }
                 silenceWarnings = true; // write to cout, don't add to logfile
             }
@@ -243,13 +250,13 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
         if (!quietMode) {
             if (!silenceLog) {
                 if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { out << output; outputFile << output;  }
+                else { *outLog << output; outputFile << output;  }
             }
             logger() << output;
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!silenceLog) { out << output; }
+                if (!silenceLog) { *outLog << output; }
                 outputFile << output;
                 logger() << output;
             }
@@ -266,7 +273,7 @@ void MothurOut::mothurOut(string output, ofstream& outputFile) {
 void MothurOut::mothurOutEndLine(ofstream& outputFile) {
 	try {
         if (!quietMode) {
-            if (!silenceLog) { out << buffer << endl; }
+            if (!silenceLog) { *outLog << buffer << endl; }
             logger() << buffer << endl;
             outputFile << buffer << endl;
         }
@@ -296,7 +303,7 @@ void MothurOut::mothurOutJustToLog(string output) {
             if (numCommandWarnings > maxCommandWarnings) {
                 if (!silenceWarnings) {
                     logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    out << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
+                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
                 }
                 silenceWarnings = true; // write to cout, don't add to logfile
             }
@@ -305,12 +312,12 @@ void MothurOut::mothurOutJustToLog(string output) {
         if (!quietMode) {
             if (!silenceLog) {
                 if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { out << output; }
+                else { *outLog << output; }
             }
         }else {
             //check for this being an error
             if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!silenceLog) { out << output; }
+                if (!silenceLog) { *outLog << output; }
             }
         }
         silenceLog = savedSilenceLog;

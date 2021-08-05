@@ -97,7 +97,7 @@ string ClassifyOtuCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
+ClassifyOtuCommand::ClassifyOtuCommand(string option) : Command()  {
 	try{
 		allLines = true;
 				

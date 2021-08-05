@@ -14,7 +14,7 @@
 /* This class is a parent to bayesian, knn.  */
 
 #include "mothur.h"
-#include "database.hpp"
+#include "searchdatabase.hpp"
 #include "phylotree.h"
 
 class Sequence;
@@ -38,7 +38,7 @@ protected:
 	map<string, string> taxonomy;  //name maps to taxonomy
 	map<string, int>::iterator itTax;
 	map<string, string>::iterator it;
-	Database* database;
+    SearchDatabase* database;
 	PhyloTree* phyloTree;
 	
 	string taxFile, templateFile;

@@ -140,7 +140,7 @@ string EstimatorSingleCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-EstimatorSingleCommand::EstimatorSingleCommand(string option)  {
+EstimatorSingleCommand::EstimatorSingleCommand(string option) : Command()  {
     try {
         allLines = true;
         

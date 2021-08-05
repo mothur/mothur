@@ -47,7 +47,7 @@ string MergeTaxSummaryCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
-MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option)  {
+MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help();  abort = true; calledHelp = true;    }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;   }

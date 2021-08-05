@@ -73,7 +73,7 @@ string GetMIMarksPackageCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option)  {
+GetMIMarksPackageCommand::GetMIMarksPackageCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

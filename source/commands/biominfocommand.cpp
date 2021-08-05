@@ -104,7 +104,7 @@ string BiomInfoCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-BiomInfoCommand::BiomInfoCommand(string option)  {
+BiomInfoCommand::BiomInfoCommand(string option) : Command()  {
     try {
         maxLevel = 0;
         

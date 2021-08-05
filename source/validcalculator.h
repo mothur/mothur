@@ -41,6 +41,7 @@ class ValidCalculators {
 		set<string> matrix;
 		set<string> heat;
 		set<string> distance;
+        set<string> protdistance;
 		set<string>::iterator it;
 		set<string> allCalcs;
 		
@@ -55,6 +56,7 @@ class ValidCalculators {
 		void initialTreeGroups();
 		void initialMatrix();
 		void initialDistance();
+        void initialProtDistance();
 		void initialHeat();
         void initialEstimators();
     

@@ -80,7 +80,7 @@ string ShhhSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ShhhSeqsCommand::ShhhSeqsCommand(string option) {
+ShhhSeqsCommand::ShhhSeqsCommand(string option) : Command() {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }

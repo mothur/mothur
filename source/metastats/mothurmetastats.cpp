@@ -280,7 +280,7 @@ vector<double> MothurMetastats::permuted_pvalues(vector< vector<double> >& Imatr
                 //number of cleanedpermuted_ttests greater than tstat[i]
                 int numGreater = 0;
                 for (int j = 0; j < numPermutations; j++) {
-                    for (int k = 0; k < hfc; k++) {
+                    for (int k = 0; k < cleanedpermuted_ttests[j].size(); k++) {
                         if (cleanedpermuted_ttests[j][k] > abs(tstats[i])) { numGreater++; }
                     }
                 }

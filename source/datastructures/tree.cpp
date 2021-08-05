@@ -166,7 +166,7 @@ Tree::Tree(CountTable* t, vector< vector<double> >& sims, vector<string>& Tnames
 			
 			if (m->getControl_pressed()) { break; }
 			
-			int row, column;
+            int row, column; row = 1; column = 0;
 			//find largest value in sims matrix by searching lower triangle
 			for (int j = 1; j < sims.size(); j++) {
 				for (int k = 0; k < j; k++) {

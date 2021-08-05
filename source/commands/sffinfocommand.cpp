@@ -107,7 +107,7 @@ string SffInfoCommand::getOutputPattern(string type) {
     }
 }
 //*******************************************************************************
-SffInfoCommand::SffInfoCommand(string option)  {
+SffInfoCommand::SffInfoCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -467,7 +467,7 @@ int SffInfoCommand::adjustCommonHeader(SffCommonHeader*& header){
 void SffInfoCommand::assignToSample(SffRead*& read, TrimOligos*& trimOligos, TrimOligos*& rtrimOligos){
     try {
         
-        int barcodeIndex, primerIndex, trashCodeLength;
+        int barcodeIndex, primerIndex, trashCodeLength; trashCodeLength = 0; primerIndex = 0; barcodeIndex = 0;
         
         if (hasOligos)      {  trashCodeLength = findGroup(read, barcodeIndex, primerIndex, trimOligos, rtrimOligos);                }
         else if (hasGroup)  {  trashCodeLength = findGroup(read, barcodeIndex, primerIndex, "groupMode");   }
@@ -755,7 +755,7 @@ int SffInfoCommand::parseSffTxt() {
 //*****************************************************************************
 int SffInfoCommand::parseHeaderLineToInt(ifstream& file){
 	try {
-		int number;
+		int number = 0;
 		
 		while (!file.eof())	{
 			char c = file.get(); 

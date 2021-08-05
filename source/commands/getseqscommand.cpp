@@ -106,7 +106,43 @@ string GetSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetSeqsCommand::GetSeqsCommand(string option)  {
+
+GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
+    try {
+        names = n;
+        dups = true;
+        outputdir = output;
+        fastafile = ffile;
+        listfile = lfile;
+        
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        
+        if (dupsFile != "") {
+            if (dupsFileType == "count") {
+                countfile = dupsFile;
+                readCount();
+            }else { //names
+                namefile = dupsFile;
+                readName();
+            }
+        }
+        
+        if (fastafile != "")            {        readFasta();        }
+        if (listfile != "")             {        readList();         }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+GetSeqsCommand::GetSeqsCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -205,6 +241,9 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
             }
 			
 			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, contigsreport, taxonomy, quality, fastq or listfile.\n");  abort = true; }
+            
+            //read accnos file
+            if (!abort) { names = util.readAccnos(accnosfile);  } 
 		}
 	}
 	catch(exception& e) {
@@ -218,18 +257,7 @@ int GetSeqsCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-		//get names you want to keep
-		names = util.readAccnos(accnosfile);
-		
-		if (m->getControl_pressed()) { return 0; }
         
-        if (countfile != "") {
-            if ((fastafile != "") || (listfile != "") || (taxfile != "")) { 
-                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
-            }
-        }
-		
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			    {		readName();			}
 		if (fastafile != "")		    {		readFasta();		}
@@ -305,8 +333,7 @@ void GetSeqsCommand::readFastq(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
         
-		ifstream in;
-		util.openInputFile(fastqfile, in);
+		ifstream in; util.openInputFile(fastqfile, in);
 		
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
@@ -367,11 +394,9 @@ void GetSeqsCommand::readFasta(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -627,12 +652,9 @@ void GetSeqsCommand::readName(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
 		
-
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ifstream in; util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -726,8 +748,7 @@ void GetSeqsCommand::readName(){
                 }
 			}
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);

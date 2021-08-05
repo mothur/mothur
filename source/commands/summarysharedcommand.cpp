@@ -88,7 +88,7 @@ string SummarySharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-SummarySharedCommand::SummarySharedCommand(string option)  {
+SummarySharedCommand::SummarySharedCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") {  help(); abort = true; calledHelp = true; }

@@ -10,7 +10,7 @@
 #include "quitcommand.h"
 
 //**********************************************************************************************************************
-QuitCommand::QuitCommand(string option) {
+QuitCommand::QuitCommand(string option) : Command() {
 		abort = false; calledHelp = false;   
 		
 		//allow user to run help

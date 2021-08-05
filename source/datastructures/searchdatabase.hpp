@@ -2,7 +2,7 @@
 #define DATABASE_HPP
 
 /*
- *  database.hpp
+ *  searchdatabase.hpp
  *  
  *
  *  Created by Pat Schloss on 12/16/08.
@@ -44,12 +44,12 @@ inline bool compareSeqMatchesReverse (seqMatch member, seqMatch member2){ //sort
 }
 
 /**************************************************************************************************/
-class Database {
+class SearchDatabase {
 
 public:
-    Database(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance();  }
+    SearchDatabase(){ longest = 0; numSeqs = 0; m = MothurOut::getInstance();  }
     
-    virtual ~Database(){};
+    virtual ~SearchDatabase(){};
     virtual void generateDB() = 0;
     virtual void readDB(ifstream&){};
     virtual void addSequence(Sequence) = 0;  //add sequence to search engine

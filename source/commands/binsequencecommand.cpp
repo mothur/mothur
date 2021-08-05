@@ -74,7 +74,7 @@ string BinSeqCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-BinSeqCommand::BinSeqCommand(string option) {
+BinSeqCommand::BinSeqCommand(string option) : Command() {
 	try {
 		allLines = true;
 		

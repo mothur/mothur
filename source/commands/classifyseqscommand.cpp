@@ -142,7 +142,7 @@ string ClassifySeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
+ClassifySeqsCommand::ClassifySeqsCommand(string option) : Command()  {
 	try {
 		hasName = false; hasCount=false;
 		

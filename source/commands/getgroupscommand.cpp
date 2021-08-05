@@ -103,7 +103,7 @@ string GetGroupsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetGroupsCommand::GetGroupsCommand(string option)  {
+GetGroupsCommand::GetGroupsCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -720,7 +720,7 @@ void GetGroupsCommand::readDesign(){
         variables["[extension]"] = util.getExtension(designfile);
 		string outputFileName = getOutputFileName("design", variables);
 		
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile); if (m->getControl_pressed()) { return ; }
         
         bool wroteSomething = false;
         
@@ -811,7 +811,7 @@ void GetGroupsCommand::readPhylip(){
         util.openInputFile(phylipfile, in);
         
         float distance;
-        int square, nseqs;
+        int square, nseqs; square = 0;
         string name;
         unsigned int row;
         set<unsigned int> rows; //converts names in names to a index
@@ -1025,7 +1025,7 @@ void GetGroupsCommand::fillNames(){
 //**********************************************************************************************************************
 void GetGroupsCommand::fillGroupsFromDesign(){
     try {
-        DesignMap designMap(designfile);
+        DesignMap designMap(designfile); if (m->getControl_pressed()) { return ; }
         Groups = designMap.getNamesGroups(Sets);
     }
     catch(exception& e) {

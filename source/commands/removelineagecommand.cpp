@@ -105,7 +105,7 @@ string RemoveLineageCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-RemoveLineageCommand::RemoveLineageCommand(string option)  {
+RemoveLineageCommand::RemoveLineageCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

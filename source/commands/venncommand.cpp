@@ -90,7 +90,7 @@ string VennCommand::getOutputPattern(string type) {
 }
 
 //**********************************************************************************************************************
-VennCommand::VennCommand(string option)  {
+VennCommand::VennCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

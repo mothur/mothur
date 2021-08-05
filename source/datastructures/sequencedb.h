@@ -13,30 +13,31 @@
 
 /* This class is a container to store the sequences. */
 
-
+#include "storagedatabase.hpp"
 #include "sequence.hpp"
-#include "calculator.h"
 
-
-class SequenceDB {
+class SequenceDB : public StorageDatabase {
 	
 public:
 	SequenceDB();
 	SequenceDB(int);           //makes data that size
 	SequenceDB(ifstream&);	   //reads file to fill data
+    SequenceDB(ifstream&, int, vector< vector< int > >&, vector< int >&); //filehandle, kmersize, kmerdb, lengths
 	SequenceDB(const SequenceDB& sdb) : data(sdb.data) {};
+    SequenceDB(const SequenceDB& sdb, set<string> names); //creates a new sequenceDB containing only the reads in names
+    SequenceDB(const SequenceDB& sdb, set<string> names, int kmerSize, vector< vector< int > >& kmerDB, vector< int >& lengths);
 	~SequenceDB();             //loops through data and delete each sequence
 
 	int getNumSeqs();
-    Sequence get(int);         //returns sequence name at that location
+    Sequence getSeq(int);         //returns sequence at that location
 	void push_back(Sequence);  //adds unaligned sequence
 	bool sameLength() { return samelength; }
+    void print(string);  //prints fasta file containing sequences in this db
 		
 private:
 	vector<Sequence> data;
-	MothurOut* m;
-	bool samelength;
-	int length;
+	
+	
 
 };
 

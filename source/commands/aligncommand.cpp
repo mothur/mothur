@@ -126,7 +126,7 @@ string AlignCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-AlignCommand::AlignCommand(string option)  {
+AlignCommand::AlignCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}
@@ -334,9 +334,7 @@ void alignDriver(alignStruct* params) {
 	try {
         AlignReport report;
 		
-		ifstream inFASTA;
-		params->util.openInputFile(params->inputFilename, inFASTA);
-
+		ifstream inFASTA; params->util.openInputFile(params->inputFilename, inFASTA);
 		inFASTA.seekg(params->filePos.start);
 
 		bool done = false;
@@ -492,8 +490,7 @@ long long AlignCommand::createProcesses(string alignFileName, string reportFileN
         time_t start, end;
         time(&start);
         
-        AlignReport nast;
-        ofstream out; util.openOutputFile(reportFileName, out);
+        AlignReport nast; ofstream out; util.openOutputFile(reportFileName, out);
         nast.printHeaders(out); out.close();
         
         auto synchronizedOutputAlignFile = std::make_shared<SynchronizedOutputFile>(alignFileName);

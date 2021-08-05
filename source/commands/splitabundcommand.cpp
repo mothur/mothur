@@ -89,7 +89,7 @@ string SplitAbundCommand::getOutputPattern(string type) {
 }
 
 //**********************************************************************************************************************
-SplitAbundCommand::SplitAbundCommand(string option)  {
+SplitAbundCommand::SplitAbundCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

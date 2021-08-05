@@ -77,7 +77,7 @@ public:
     bool mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS);
     bool anyLabelsToProcess(string, set<string>&, string);
     bool appendBinaryFiles(string, string);
-    int appendFiles(string, string);
+    int appendFiles(string first, string second); //first is appending to the end of second. 
     void appendFiles(string, ofstream&);
     int appendFilesFront(string, string);
     int appendFilesWithoutHeaders(string, string);
@@ -232,7 +232,7 @@ public:
     string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     set<string> getSetFromList(ListVector*&, vector< vector<string> >&); 
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
-    string trimString(string, int); //string, number of chars to remove from end.
+    string trimStringEnd(string, int); //string, number of chars to remove from end.
     
     bool inUsersGroups(vector<string>, vector<string>); //returns true if any of the strings in first vector are in second vector
     bool inUsersGroups(vector<int>, vector< vector<int> >);

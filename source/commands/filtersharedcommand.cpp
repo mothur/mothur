@@ -88,7 +88,7 @@ string FilterSharedCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-FilterSharedCommand::FilterSharedCommand(string option) {
+FilterSharedCommand::FilterSharedCommand(string option) : Command() {
 	try {
 		allLines = true;
 		

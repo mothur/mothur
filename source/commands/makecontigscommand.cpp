@@ -7,7 +7,6 @@
 //
 
 #include "makecontigscommand.h"
-#include "renameseqscommand.h"
 #include "contigsreport.hpp"
 
 //**************************************************************************************************
@@ -199,7 +198,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-MakeContigsCommand::MakeContigsCommand(string option)  {
+MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
 	try {
 
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -2639,6 +2638,35 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
             rpairedBarcodes = oligos.getReorientedPairedBarcodes();
             revpairedBarcodes = oligos.getReversedPairedBarcodes();
             barcodeNames = oligos.getBarcodeNames();
+            
+            if (m->getDebug()) {
+                map<int, oligosPair>::iterator it;
+                m->mothurOut("\n[DEBUG]: paired primers - \n");
+                for (it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + primerNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+                m->mothurOut("\n[DEBUG]: paired reoriented primers - \n");
+                for (it = rpairedPrimers.begin(); it != rpairedPrimers.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + primerNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+                m->mothurOut("\n[DEBUG]: paired reversed primers - \n");
+                for (it = revpairedPrimers.begin(); it != revpairedPrimers.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + primerNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+                
+                m->mothurOut("\n[DEBUG]: paired barcodes - \n");
+                for (it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + barcodeNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+                m->mothurOut("\n[DEBUG]: paired reoriented barcodes - \n");
+                for (it = rpairedBarcodes.begin(); it != rpairedBarcodes.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + barcodeNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+                m->mothurOut("\n[DEBUG]: paired reversed barcodes - \n");
+                for (it = revpairedBarcodes.begin(); it != revpairedBarcodes.end(); it++) {
+                    m->mothurOut("[DEBUG]: " + barcodeNames[it->first] + "\t" + it->second.forward + "\t" + it->second.reverse + "\n");
+                }
+            }
         }else {
             m->mothurOut("[ERROR]: make.contigs requires paired barcodes and primers. You can set one end to NONE if you are using an index file.\n"); m->setControl_pressed(true);
         }

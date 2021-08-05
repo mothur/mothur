@@ -73,12 +73,18 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f, string l, string g, int n) :
         group = g;
         data.assign(numBins, 0);
         
-        int inputData;
-        for(int i=0;i<numBins;i++){
-            f >> inputData;
-            set(i, inputData);
-        }
+        string otuCountsData = util.getline(f);
         
+        vector<string> o = util.splitWhiteSpace(otuCountsData);
+        
+        if (o.size() != n) { m->mothurOut("[ERROR] : group " + group + " contains otu data for " + toString(o.size()) + " otus, but your sharedfile indicates you have " + toString(n) + " otus. Please correct.\n");  m->setControl_pressed(true);  }
+        else {
+            int inputData;
+            for(int i=0;i<o.size();i++){
+                util.mothurConvert(o[i], inputData);
+                set(i, inputData);
+            }
+        }
     }
     catch(exception& e) {
         m->errorOut(e, "SharedRAbundVector", "SharedRAbundVector");

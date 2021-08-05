@@ -69,7 +69,7 @@ string OtuHierarchyCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-OtuHierarchyCommand::OtuHierarchyCommand(string option) {
+OtuHierarchyCommand::OtuHierarchyCommand(string option) : Command() {
 	try {
 		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		else if(option == "citation") { citation(); abort = true; calledHelp = true;}

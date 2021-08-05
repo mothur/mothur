@@ -81,7 +81,7 @@ string IndicatorCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-IndicatorCommand::IndicatorCommand(string option)  {
+IndicatorCommand::IndicatorCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -180,7 +180,7 @@ int IndicatorCommand::execute(){
 		//read designfile if given and set up groups for read of sharedfiles
         vector<string> allGroups;
 		if (designfile != "") {
-			designMap = new DesignMap(designfile);
+            designMap = new DesignMap(designfile); if (m->getControl_pressed()) { delete designMap; return 0; }
 			
             if (Groups.size() == 0) { Groups = designMap->getCategory(); }
             allGroups = designMap->getCategory();

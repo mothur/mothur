@@ -75,7 +75,7 @@ string HomovaCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-HomovaCommand::HomovaCommand(string option) {
+HomovaCommand::HomovaCommand(string option) : Command() {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }
@@ -138,7 +138,7 @@ int HomovaCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read design file
-		DesignMap* designMap = new DesignMap(designFileName);
+        DesignMap* designMap = new DesignMap(designFileName); if (m->getControl_pressed()) { delete designMap; return 0; }
 		
 		//read in distance matrix and square it
 		ReadPhylipVector readMatrix(phylipFileName);

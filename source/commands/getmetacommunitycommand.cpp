@@ -93,7 +93,7 @@ string GetMetaCommunityCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
-GetMetaCommunityCommand::GetMetaCommunityCommand(string option)  {
+GetMetaCommunityCommand::GetMetaCommunityCommand(string option) : Command()  {
 	try {
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true; }

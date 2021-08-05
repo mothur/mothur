@@ -32,7 +32,8 @@ int OptiMatrix::readPhylip(){
     try {
         nameMap.clear();
         float distance;
-        long long square, nseqs;
+        long long nseqs;
+        bool square = false;
         string name;
         map<long long, long long> singletonIndexSwap;
         
@@ -50,13 +51,13 @@ int OptiMatrix::readPhylip(){
         //square test
         char d;
         while((d=fileHandle.get()) != EOF){
-            if(isalnum(d)){ square = 1; fileHandle.putback(d); for(int i=0;i<nseqs;i++){ fileHandle >> distance;  } break; }
-            if(d == '\n'){ square = 0; break; }
+            if(isalnum(d)){ square = true; fileHandle.putback(d); for(int i=0;i<nseqs;i++){ fileHandle >> distance;  } break; }
+            if(d == '\n'){ square = false; break; }
         }
         
         vector<bool> singleton; singleton.resize(nseqs, true);
         ///////////////////// Read to eliminate singletons ///////////////////////
-        if(square == 0){
+        if(square){
             
             for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
@@ -125,7 +126,7 @@ int OptiMatrix::readPhylip(){
         nameMap[singletonIndexSwap[0]] = name;
         
         string line = "";
-        if(square == 0){
+        if(square){
             
             int index = 0;
             
@@ -183,10 +184,7 @@ int OptiMatrix::readPhylip(){
         }
         in.close();
         
-        
-
         return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "OptiMatrix", "readPhylip");
