@@ -336,7 +336,7 @@ int HeatMapSimCommand::runCommandDist() {
 			//determine if matrix is square or lower triangle
 			//if it is square read the distances for the first sequence
 			char d;
-			bool square;
+			bool square = false;
 			while((d=in.get()) != EOF){
 				
 				//is d a number meaning its square

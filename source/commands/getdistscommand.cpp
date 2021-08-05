@@ -182,7 +182,7 @@ int GetDistsCommand::readPhylip(){
         util.openInputFile(phylipfile, in);
         
         float distance;
-        int square, nseqs; 
+        int square, nseqs; square = 0;
         string name;
         unsigned int row;
         set<unsigned int> rows; //converts names in names to a index

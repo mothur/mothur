@@ -151,18 +151,15 @@ ListVector* InputData::getListVector(string label, bool resetFP){
                          else { list->setLabels(currentLabels);  }
                      }
 					
-					//if you are at the last label
-					if (nextDistanceLabel == label) {  break;  }
-					//so you don't loose this memory
-					else {	delete list;	}
+					//if you are at the label you want
+                    if (nextDistanceLabel == label) {  return list;  }
+					else {	delete list;	} //so you don't loose this memory
 				}
-			}else{ list = NULL;  }
-		
-			return list;
+                
+			}else{ return NULL;   }
 		}
-		else{
-			return NULL;
-		}
+        
+        return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "getListVector");

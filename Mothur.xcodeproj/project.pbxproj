@@ -3995,10 +3995,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
+					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libboost_filesystem.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libboost_iostreams.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libgsl.a",
-					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libgslcblas.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl_cpp.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_cpp.a",
@@ -4047,10 +4047,10 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lreadline",
+					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libboost_filesystem.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libboost_iostreams.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libgsl.a",
-					"${SRCROOT}/mothur_resources_10.14/libs/libz.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libgslcblas.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_hl_cpp.a",
 					"${SRCROOT}/mothur_resources_10.14/libs/libhdf5_cpp.a",

@@ -77,7 +77,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		util.openOutputFile(tempFile, out);
 		
 		float distance;
-		int square, nseqs;
+        int square, nseqs; square = 0;
 		string name;
 		vector<string> matrixNames;
 		

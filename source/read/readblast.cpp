@@ -39,13 +39,12 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		
 		if (m->getControl_pressed()) { return 0; }
 
-		ifstream fileHandle;
-		util.openInputFile(blastfile, fileHandle);
+		ifstream fileHandle; util.openInputFile(blastfile, fileHandle);
 		
 		string firstName, secondName, eScore, currentRow;
 		string repeatName = "";
 		int count = 1;
-		float distance, thisoverlap, refScore;
+        float distance, thisoverlap, refScore; refScore = 0.0;
 		float percentId; 
 		float numBases, mismatch, gap, startQuery, endQuery, startRef, endRef, score, lengthThisSeq;
 		

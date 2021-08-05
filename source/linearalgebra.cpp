@@ -1807,7 +1807,7 @@ void LinearAlgebra::ludcmp(vector<vector<double> >& A, vector<int>& index, doubl
         
         int n = (int)A.size();
         vector<double> vv(n, 0.0);
-        int imax;
+        int imax = 0;
         
         d = 1.0;
         
@@ -1913,7 +1913,7 @@ void LinearAlgebra::ludcmp(vector<vector<float> >& A, vector<int>& index, float&
         
         int n = (int)A.size();
         vector<float> vv(n, 0.0);
-        int imax;
+        int imax = 0;
         
         d = 1.0;
         

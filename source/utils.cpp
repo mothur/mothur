@@ -5279,7 +5279,7 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  return NULL; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
@@ -5355,7 +5355,7 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {   return NULL; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();
@@ -5431,7 +5431,7 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  return NULL; }
             
             //get next line to process
             lookup = input.getSharedCLRVectors();
@@ -5507,7 +5507,7 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
             //prevent memory leak
             delete list;
             
-            if (m->getControl_pressed()) {  delete list;  return NULL; }
+            if (m->getControl_pressed()) {   return NULL; }
             
             //get next line to process
             list = input.getListVector();
@@ -5583,7 +5583,7 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete rabund;
             
-            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            if (m->getControl_pressed()) {  return NULL; }
             
             //get next line to process
             rabund = input.getRAbundVector();
@@ -5659,7 +5659,7 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete sabund;
             
-            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            if (m->getControl_pressed()) {  return NULL; }
             
             //get next line to process
             sabund = input.getSAbundVector();
@@ -5735,7 +5735,7 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {   return NULL; }
             
             //get next line to process
             order = input.getOrderVector();
@@ -5811,7 +5811,7 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {   return NULL; }
             
             //get next line to process
             order = input.getSharedOrderVector();

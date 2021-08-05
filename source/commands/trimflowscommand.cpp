@@ -629,7 +629,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		filePos.push_back(0);
 					
 		FILE * pFile;
-		double size;
+		double size = 0.0;
 		
 		//get num bytes in file
         flowFileName = util.getFullPathName(flowFileName);
