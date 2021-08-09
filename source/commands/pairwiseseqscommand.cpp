@@ -196,6 +196,9 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option) : Command()  {
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
+        
+            if ((calc != "nogaps") && (calc != "eachgap") && (calc != "onegap")) { m->mothurOut(calc + " is not a valid calculator for pairwise.seqs. Options are onegap, eachgap and nogaps. I will use onegap.\n");  calc = "onegap"; }
+            
 		}
 		
 	}
@@ -281,13 +284,6 @@ int PairwiseSeqsCommand::execute(){
 		
         time_t start, end; time(&start);
 
-        if (false) {
-            SplitKmerDistance split(fastaFileName, outputdir, cutoff, 8);
-            
-            vector<string> splitFastaFiles = split.getFastaFileNames();
-            
-            exit(1);
-        }
 		longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
         numDistsBelowCutoff = 0;
 

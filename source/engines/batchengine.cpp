@@ -76,15 +76,15 @@ bool BatchEngine::getInput(){
         while(quitCommandCalled != 1){
             
             string input = getNextCommand(inputBatchFile);
+
+            CommandOptionParser parser(input);
+            string commandName = parser.getCommandString();
+            string options = parser.getOptionString();
             
             if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
             else                    { m->mothurOut("\nmothur > " + input + "\n");       }
                 
             if (m->getControl_pressed()) { input = "quit()"; }
-
-            CommandOptionParser parser(input);
-            string commandName = parser.getCommandString();
-            string options = parser.getOptionString();
                                         
             if (commandName != "") {
                 numCommandsRun++;

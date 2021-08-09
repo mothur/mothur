@@ -48,15 +48,15 @@ bool ScriptEngine::getInput(){
             
             if (input == "") { input = "quit()"; }
             
+            CommandOptionParser parser(input);
+            commandName = parser.getCommandString();
+            options = parser.getOptionString();
+            
             if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
             else                    { m->mothurOut("\nmothur > " + input + "\n");       }
         
             if (m->getControl_pressed()) { input = "quit()"; }
 
-            CommandOptionParser parser(input);
-            commandName = parser.getCommandString();
-            options = parser.getOptionString();
-                                        
             if (commandName != "") {
                 numCommandsRun++;
                 m->setExecuting(true);
@@ -116,7 +116,7 @@ string ScriptEngine::getNextCommand(string& commandString) {
         if (commandString.length() > 0) {
             while (commandString[0] == ' ') {
                 commandString = commandString.substr(1,commandString.length());
-                if (commandString.length() == 0) {  break;  }
+                if (commandString.length() == 0) { break;  }
             }
         }
         
