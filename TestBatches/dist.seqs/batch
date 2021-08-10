@@ -1,0 +1,17 @@
+#dist.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# dist.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.fasta from MiSeq_SOP
+#
+# test different classification methods and seaches
+#set.dir(input=./TestFiles, output=./TestResults/dist.seqs, tempdefault=./TestReferences)
+set.logfile(name=distseqs.logfile)
+dist.seqs(fasta=dist.fasta, calc=jtt, cutoff=0.05)
+dist.seqs(fasta=dist.fasta, calc=pmb, cutoff=0.03)
+dist.seqs(fasta=dist.fasta, calc=pam, cutoff=0.03)
+dist.seqs(fasta=dist.fasta, calc=kimura, cutoff=0.03)
+dist.seqs(fasta=dist.fasta, calc=onegap, cutoff=0.03)
+dist.seqs(fasta=dist.fasta, calc=nogaps, cutoff=0.10)
+dist.seqs(fasta=dist.fasta, calc=eachgap, cutoff=0.15)
+quit()
+
+

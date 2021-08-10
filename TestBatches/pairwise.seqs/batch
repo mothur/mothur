@@ -3,7 +3,7 @@
 # pairwise.fasta is stability.trim.contigs.good.unique.good.filter.unique.precluster.pick.pick.pick.fasta from MiSeq_SOP
 #
 # test different classification methods and seaches
-#set.dir(input=./TestFiles, output=./TestResults/pairwise.seqs, tempdefault=./TestReferences)
+set.dir(input=./TestFiles, output=./TestResults/pairwise.seqs, tempdefault=./TestReferences)
 set.logfile(name=pairwiseseqs.logfile)
 pairwise.seqs(fasta=pairwise.fasta, kmercutoff=-0.5, cutoff=0.05)
 pairwise.seqs(fasta=pairwise.fasta, calc=onegap, cutoff=0.03)
