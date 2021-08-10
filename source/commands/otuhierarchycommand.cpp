@@ -15,12 +15,15 @@ vector<string> OtuHierarchyCommand::setParameters(){
 	try {
 		CommandParameter poutput("output", "Multiple", "name-otulabel", "name", "", "", "","",false,false); parameters.push_back(poutput);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "none","otuheirarchy",false,true,true); parameters.push_back(plist);
+        CommandParameter palist("asvlist", "InputTypes", "", "", "none", "none", "none","otuheirarchy",false,true,true); parameters.push_back(palist);
+        CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "none","constaxonomy",false,true,true); parameters.push_back(ptaxonomy);
+        CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
-        abort = false; calledHelp = false;
+        abort = false; calledHelp = false; asv = false;
         
         vector<string> tempOutNames;
         outputTypes["otuheirarchy"] = tempOutNames;
@@ -38,10 +41,11 @@ vector<string> OtuHierarchyCommand::setParameters(){
 string OtuHierarchyCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The otu.hierarchy command is used to see how otus relate at two distances. \n";
-		helpString += "The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n";
+		helpString += "The otu.hierarchy command is used to see how otus relate at two distances, or to see how ASVs relate to OTUs. \n";
+		helpString += "The otu.hierarchy command parameters are list, asvlist, count, taxonomy, label and output.  list and label parameters are required for relating OTUs at different distances. asvlist, list, taxonomy and count are required for ASV to OTU relation. \n";
 		helpString += "The output parameter allows you to output the names of the sequence in the OTUs or the OTU labels. Options are name and otulabel, default is name. \n";
 		helpString += "The otu.hierarchy command should be in the following format: \n";
+        helpString += "otu.hierarchy(list=yourListFile, asvlist=yourAsvListFile, taxonomy=yourTaxonomyFile, count=yourCountFile, label=yourLabels).\n";
 		helpString += "otu.hierarchy(list=yourListFile, label=yourLabels).\n";
 		helpString += "Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n";
 		helpString += "The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n";
@@ -76,7 +80,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) : Command() {
         else if(option == "category") {  abort = true; calledHelp = true;  }
 		
 		else {
-				OptionParser parser(option, setParameters());
+            OptionParser parser(option, setParameters());
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
@@ -90,20 +94,35 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) : Command() {
 				}
 			}else if (listFile == "not open") { abort = true; }	
 			else { current->setListFile(listFile); }
+            
+            asvlistFile = validParameter.validFile(parameters, "asvlist");
+            if (asvlistFile == "not found") { asvlistFile = ""; }
+            else if (asvlistFile == "not open") { asvlistFile = ""; abort = true; }
+            else { asv = true; }
 			
+            countfile = validParameter.validFile(parameters, "count");
+            if (countfile == "not open") { countfile = ""; abort = true; }
+            else if (countfile == "not found") { countfile = "";  }
+            else { current->setCountFile(countfile); }
+            
+            taxfile = validParameter.validFile(parameters, "taxonomy");
+            if (taxfile == "not found") { taxfile = "";  }
+            else if (taxfile == "not open") { taxfile = "";  abort = true; }
+            else { current->setTaxonomyFile(taxfile); }
+            
             if (outputdir == ""){	 outputdir += util.hasPath(listFile);  }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
-			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command.\n");  abort = true; }
-			else { 
-				util.splitAtDash(label, mylabels);
-				if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels.\n");  abort = true; }
+			if (label == "not found") {
+                if (!asv) {m->mothurOut("[ERROR]: label is a required parameter for the otu.hierarchy command, please correct.\n");  abort = true; } }
+			else {
+                util.splitAtDash(label, mylabels);
+                if (!asv) {    if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels.\n");  abort = true;  }  }
 			}	
 			
 			output = validParameter.valid(parameters, "output");			if (output == "not found") { output = "name"; }
-			
 			if ((output != "name") && (output != "otulabel")) { m->mothurOut("output options are name and otulabel. I will use name.\n");  output = "name"; }
 		}
 		

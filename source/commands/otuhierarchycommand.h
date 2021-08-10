@@ -35,9 +35,9 @@ public:
 	
 	
 private:
-	bool abort;
+	bool abort, asv;
 	set<string> mylabels; //holds labels to be used
-	string label, listFile,  output, list1Label, list2Label;
+	string label, listFile, asvlistFile, taxfile, countfile, output, list1Label, list2Label;
 	vector<string> outputNames;
 	
 	vector< vector<string> > getListVectors();
