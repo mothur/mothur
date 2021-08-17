@@ -27,6 +27,7 @@ vector<string> OtuHierarchyCommand::setParameters(){
         
         vector<string> tempOutNames;
         outputTypes["otuheirarchy"] = tempOutNames;
+        outputTypes["asvconstaxonomy"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -58,11 +59,39 @@ string OtuHierarchyCommand::getHelpString(){
 	}
 }
 //**********************************************************************************************************************
+string OtuHierarchyCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+       // string issue = "...template is not aligned, aborting. What do I do?"; issues.push_back(issue);
+        //string ianswer = "\tMothur requires the reference file to be aligned to generate aligned sequences. You can download mothur's aligned silva references here, https://mothur.org/wiki/Silva_reference_files. For ITS sequences, see 'how to' below.\n"; ianswers.push_back(ianswer);
+        
+        //issue = "...xxx of your sequences generated alignments that eliminated too many bases... What does this mean?"; issues.push_back(issue);
+        //ianswer = "\tBy default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n"; ianswers.push_back(ianswer);
+        
+        
+       // string howto = "How do I 'align' ITS sequences?"; howtos.push_back(howto);
+       // string hanswer = "\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences.\n"; hanswers.push_back(hanswer);
+        
+       // howto = "How do I create a custom reference for the region I am studying?"; howtos.push_back(howto);
+       // hanswer = "\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/.\n"; hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OtuHierarchyCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 string OtuHierarchyCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "otuheirarchy") {  pattern = "[filename],[distance1],[tag],[distance2],otu.hierarchy"; } 
+        if (type == "otuheirarchy") {  pattern = "[filename],[distance1],[tag],[distance2],otu.hierarchy"; }
+        if (type == "asvconstaxonomy") {  pattern = "[filename],[tag],asv.cons.taxonomy"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -116,8 +145,11 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) : Command() {
 			// ...at some point should added some additional type checking...
 			label = validParameter.valid(parameters, "label");			
 			if (label == "not found") {
-                if (!asv) {m->mothurOut("[ERROR]: label is a required parameter for the otu.hierarchy command, please correct.\n");  abort = true; } }
-			else {
+                if (!asv) { m->mothurOut("[ERROR]: label is a required parameter for the otu.hierarchy command, please correct.\n");  abort = true; }
+                else {  m->mothurOut("\nNo label provided, I will use the first label in the list file.\n"); }
+            
+            
+            }else {
                 util.splitAtDash(label, mylabels);
                 if (!asv) {    if (mylabels.size() != 2) { m->mothurOut("You must provide 2 labels.\n");  abort = true;  }  }
 			}	
@@ -139,85 +171,14 @@ int OtuHierarchyCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
-		vector< vector<string> > lists = getListVectors();
+        if (asv)    { processASV();             }
+        else        { processHierarchy();       }
+        
+        if (m->getControl_pressed()) { outputTypes.clear();   for (int j = 0; j < outputNames.size(); j++) {    util.mothurRemove(outputNames[j]);    }  return 0; }
 		
-		if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
-		
-		//determine which is little and which is big, putting little first
-		if (lists.size() == 4) {
-			//if big is first swap them
-			if (lists[0].size() < lists[2].size()) {
-				vector< vector<string> > tempLists;
-                tempLists.push_back(lists[2]);
-                tempLists.push_back(lists[3]);
-                tempLists.push_back(lists[0]);
-                tempLists.push_back(lists[1]);
-                lists = tempLists;
-                string tempLabel = list2Label;
-                list2Label = list1Label;
-                list1Label = tempLabel;
-			}
-		}else{
-			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs.\n");  return 0;
-		}
-		
-		//map sequences to bin number in the "little" otu
-		map<string, int> littleBins;
-        vector<string> binLabels0 = lists[0];
-		for (int i = 0; i < lists[0].size(); i++) {
-		
-			if (m->getControl_pressed()) {  return 0; }
-			string bin = lists[1][i];
-            vector<string> names; util.splitAtComma(bin, names);
-			for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
-        }
-		
-		ofstream out;
-        map<string, string> variables; 
-        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
-        variables["[distance1]"] = list1Label;
-        variables["[tag]"] = "-"; 
-        variables["[distance2]"] = list2Label;
-		string outputFileName = getOutputFileName("otuheirarchy",variables);
-		util.openOutputFile(outputFileName, out);
-		
-		//go through each bin in "big" otu and output the bins in "little" otu which created it
-        vector<string> binLabels1 = lists[2];
-		for (int i = 0; i < lists[2].size(); i++) {
-		
-			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(outputFileName); return 0; }
-			
-			string binnames = lists[3][i];
-            vector<string> names; util.splitAtComma(binnames, names);
-			
-			//output column 1
-			if (output == "name")	{   out << binnames << '\t';	}
-			else					{	out << binLabels1[i] << '\t';		}
-			
-			map<int, int> bins; //bin numbers in little that are in this bin in big
-			map<int, int>::iterator it;
-			
-			//parse bin
-			for (int j = 0; j < names.size(); j++) { bins[littleBins[names[j]]] = littleBins[names[j]];   }
-			
-			string col2 = "";
-			for (it = bins.begin(); it != bins.end(); it++) {
-				if (output == "name")	{   col2 += lists[1][it->first] + "\t";	}
-				else					{	col2 += binLabels0[it->first] + "\t";		}
-			}
-			
-			//output column 2
-			out << col2 << endl;
-		}
-		
-		out.close();
-		
-		if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outputFileName); return 0; }
-		
-		m->mothurOut("\nOutput File Names: \n"); 
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["otuheirarchy"].push_back(outputFileName); 
-		m->mothurOutEndLine();
+        m->mothurOut("\nOutput File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
+        m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -226,7 +187,185 @@ int OtuHierarchyCommand::execute(){
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+void OtuHierarchyCommand::processASV() {
+    try {
+        set<string> labels;
+        if (mylabels.size() != 0) { labels.insert(*mylabels.begin()); }
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
+    
+        //read otu list file
+        InputData inputOTU(listFile, "list", nullVector);
+        ListVector* list = util.getNextList(inputOTU, false, userLabels, processedLabels, lastLabel);
+        string otuListLable = list->getLabel();
+      
+        //read taxonomy file
+        map<string, string> taxMap; map<string, string>::iterator itTax;
+        util.readTax(taxfile, taxMap, true);
+        
+        //append OTU label to taxonomy
+        for (int i = 0; i < list->getNumBins(); i++) {
+            
+            if (m->getControl_pressed()) {  return;  }
+            
+            string binnames = list->get(i);
+            string otuLabel = list->getOTUName(i);
+            
+            //parse names in bin
+            vector<string> names; util.splitAtComma(binnames, names);
+            
+            for (int j = 0; j < names.size(); j++) {
+                
+                itTax = taxMap.find(names[j]);
+                
+                if (itTax != taxMap.end()) {
+                    itTax->second += otuLabel + ";";
+                    
+                }else{ m->mothurOut("\n[ERROR]: " + names[j] + " is missing from your taxonomy file, please correct.\n"); m->setControl_pressed(true); }
+            }
+        }
+        delete list;
+        
+        //add redundant counts
+        CountTable ct; bool hasCount = false;
+        if (countfile != "") { ct.readTable(countfile, true, false); hasCount = true; }
+        
+        if (m->getControl_pressed()) {  return;  }
+        
+        //read asvlist file
+        labels.clear(); processedLabels.clear(); lastLabel = "";
+        userLabels = labels;
+        
+        InputData input(asvlistFile, "list", nullVector);
+        ListVector* asvlist = util.getNextList(input, false, userLabels, processedLabels, lastLabel);
+        string asvLabel = asvlist->getLabel();
+        
+        if (m->getControl_pressed()) {  return;  }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
+        variables["[tag]"] = asvLabel + "-" + otuListLable;
+        string outputFileName = getOutputFileName("asvconstaxonomy",variables);
+        outputNames.push_back(outputFileName); outputTypes["asvconstaxonomy"].push_back(outputFileName);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        out << "ASV_OTULabel\tASV_Abundance\tTaxonomy_Clustered_OTULabel\n";
+        
+        for (int i = 0; i < asvlist->getNumBins(); i++) {
+            
+            if (m->getControl_pressed()) {  break;  }
+            
+            string binnames = asvlist->get(i);
+            string asvOtuLabel = asvlist->getOTUName(i);
+            
+            //parse names in bin
+            vector<string> names; util.splitAtComma(binnames, names);
+            
+            for (int j = 0; j < names.size(); j++) {
+                
+                itTax = taxMap.find(names[j]);
+                
+                int abund = 1;
+                if (itTax != taxMap.end()) {
+                    if (hasCount) { abund = ct.getNumSeqs(names[j]); }
+                    
+                    out << asvOtuLabel << '\t' << abund << '\t' << itTax->second << endl;
+                    
+                }else{ m->mothurOut("\n[ERROR]: " + names[j] + " is missing from your taxonomy file, please correct.\n"); m->setControl_pressed(true); }
+            }
+        }
+        out.close();
+        
+        delete asvlist;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OtuHierarchyCommand", "processASV");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void OtuHierarchyCommand::processHierarchy() {
+    try {
+        //get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
+        vector< vector<string> > lists = getListVectors();
+        
+        if (m->getControl_pressed()) { return; }
+        
+        //determine which is little and which is big, putting little first
+        if (lists.size() == 4) {
+            //if big is first swap them
+            if (lists[0].size() < lists[2].size()) {
+                vector< vector<string> > tempLists;
+                tempLists.push_back(lists[2]);
+                tempLists.push_back(lists[3]);
+                tempLists.push_back(lists[0]);
+                tempLists.push_back(lists[1]);
+                lists = tempLists;
+                string tempLabel = list2Label;
+                list2Label = list1Label;
+                list1Label = tempLabel;
+            }
+        }else{  m->mothurOut("[ERROR]: error getting listvectors, unable to read 2 different vectors, check your label inputs.\n");  return; }
+        
+        //map sequences to bin number in the "little" otu
+        map<string, int> littleBins;
+        vector<string> binLabels0 = lists[0];
+        for (int i = 0; i < lists[0].size(); i++) {
+        
+            if (m->getControl_pressed()) {  return; }
+            string bin = lists[1][i];
+            vector<string> names; util.splitAtComma(bin, names);
+            for (int j = 0; j < names.size(); j++) { littleBins[names[j]] = i; }
+        }
+        
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(listFile));
+        variables["[distance1]"] = list1Label;
+        variables["[tag]"] = "-";
+        variables["[distance2]"] = list2Label;
+        string outputFileName = getOutputFileName("otuheirarchy",variables);
+        outputNames.push_back(outputFileName); outputTypes["otuheirarchy"].push_back(outputFileName);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        //go through each bin in "big" otu and output the bins in "little" otu which created it
+        vector<string> binLabels1 = lists[2];
+        for (int i = 0; i < lists[2].size(); i++) {
+        
+            if (m->getControl_pressed()) {  break; }
+            
+            string binnames = lists[3][i];
+            vector<string> names; util.splitAtComma(binnames, names);
+            
+            //output column 1
+            if (output == "name")    {   out << binnames << '\t';    }
+            else                    {    out << binLabels1[i] << '\t';        }
+            
+            map<int, int> bins; //bin numbers in little that are in this bin in big
+            map<int, int>::iterator it;
+            
+            //parse bin
+            for (int j = 0; j < names.size(); j++) { bins[littleBins[names[j]]] = littleBins[names[j]];   }
+            
+            string col2 = "";
+            for (it = bins.begin(); it != bins.end(); it++) {
+                if (output == "name")    {   col2 += lists[1][it->first] + "\t";    }
+                else                    {    col2 += binLabels0[it->first] + "\t";        }
+            }
+            
+            //output column 2
+            out << col2 << endl;
+        }
+        
+        out.close();
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OtuHierarchyCommand", "processHierarchy");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 //returns a vector of listVectors where "little" vector is first
 vector< vector<string> > OtuHierarchyCommand::getListVectors() { //return value [0] -> otulabelsFirstLabel [1] -> binsFirstLabel [2] -> otulabelsSecondLabel [3] -> binsSecondLabel
@@ -258,80 +397,29 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
 	try {
         vector< vector<string> > myList;
         
-		InputData input(listFile, "list", nullVector);
-		ListVector* list = input.getListVector();
-		string lastLabel = list->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> labels; labels.insert(label);
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {  return myList;  }
-			
-			if(labels.count(list->getLabel()) == 1){
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				break;
-			}
-			
-			if ((util.anyLabelsToProcess(list->getLabel(), userLabels, "") ) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
-				
-				delete list;
-				list = input.getListVector(lastLabel);
-				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				//list->setLabel(saveLabel);
-				break;
-			}
-			
-			lastLabel = list->getLabel();
-			
-			//get next line to process
-			//prevent memory leak
-			delete list;
-			list = input.getListVector();
-		}
-		
-		
-		if (m->getControl_pressed()) {  return myList;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {
-			m->mothurOut("Your file does not include the label " + *it);
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + ".\n"); 
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + ".\n"); 
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun )  {
-			delete list;
-			list = input.getListVector(lastLabel);
-		}
-		
-        //at this point the list vector has the right distance
-        myList.push_back(list->getLabels());
-        vector<string> bins;
-        for (int i = 0; i < list->getNumBins(); i++) {
-            if (m->getControl_pressed()) {  return myList;  }
-            bins.push_back(list->get(i));
-        }
-        myList.push_back(bins);
-        realLabel = list->getLabel();
+        InputData input(listFile, "list", nullVector);
+        set<string> labels; labels.insert(label);
+        set<string> processedLabels;
+        set<string> userLabels = labels;
+        string lastLabel = "";
         
-        delete list;
+        ListVector* list = util.getNextList(input, false, userLabels, processedLabels, lastLabel);
+               
+        if (list != NULL) {
+                   
+            //at this point the list vector has the right distance
+            vector<string> bins, listlabels;
+            for (int i = 0; i < list->getNumBins(); i++) {
+                if (m->getControl_pressed()) {  return myList;  }
+                bins.push_back(list->get(i));
+                listlabels.push_back(list->getOTUName(i));
+            }
+            myList.push_back(listlabels);
+            myList.push_back(bins);
+            realLabel = list->getLabel();
+            
+            delete list;
+        }
         
 		return myList;
 	}
