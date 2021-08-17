@@ -443,31 +443,22 @@ int SharedCommand::createSharedFromCount() {
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
         variables["[distance]"] = label;
-        string sharedFilename = getOutputFileName("shared",variables);
-        outputNames.push_back(sharedFilename); outputTypes["shared"].push_back(sharedFilename);
-        
-        ofstream out; bool printHeaders = true;
-        util.openOutputFile(sharedFilename, out);
-        
-        CountTable ct;  ct.readTable(countfile, true, false);
-        
-        map<string, string> seqNameToOtuName;
-        SharedRAbundVectors* lookup = ct.getShared(Groups, seqNameToOtuName);
-        lookup->setLabels(label);
-        lookup->print(out, printHeaders);
-        out.close();
-        delete lookup;
-        
         string listFilename = getOutputFileName("list",variables);
         outputNames.push_back(listFilename); outputTypes["list"].push_back(listFilename);
-        ofstream outlist;
-        util.openOutputFile(listFilename, outlist);
+        ofstream outlist; util.openOutputFile(listFilename, outlist);
+        
+        CountTable ct;  ct.readTable(countfile, true, false);
+        map<string, int> counts = ct.getNameMap();
         
         ListVector list = ct.getListVector();
         list.setLabel(label);
-        list.print(outlist);
+        list.print(outlist, counts);
         outlist.close();
         
+        listfile = listFilename;
+        
+        createSharedFromListGroup();
+       
         return 0;
     }
     catch(exception& e) {
