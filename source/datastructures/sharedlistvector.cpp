@@ -15,14 +15,6 @@
 
 
 /***********************************************************************/
-
-//SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; fillGroups = true; }
-
-/***********************************************************************/
-
-//SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){ groupmap = NULL; countTable = NULL; fillGroups = true;  }
-
-/***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups, string& previousLabel, string& labelTag) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
         Utils util;
@@ -381,7 +373,7 @@ SharedRAbundVectors* SharedListVector::getSharedRAbundVector() {
 			}
 		}
         
-        SharedRAbundVectors* shared = new SharedRAbundVectors();
+        SharedRAbundVectors* shared = new SharedRAbundVectors(otuTag);
         for (int j = 0; j < lookup.size(); j++) {  shared->push_back(lookup[j]);  }
         shared->setOTUNames(binLabels);
         shared->eliminateZeroOTUS();
@@ -398,7 +390,7 @@ SharedRAbundFloatVectors* SharedListVector::getSharedRAbundFloatVector() {
     try {
         SharedRAbundVectors* shared = getSharedRAbundVector();
         vector<SharedRAbundFloatVector*> thisLookup = shared->getSharedRAbundFloatVectors();
-        SharedRAbundFloatVectors* sharedFloat = new SharedRAbundFloatVectors();
+        SharedRAbundFloatVectors* sharedFloat = new SharedRAbundFloatVectors(otuTag);
         for (int j = 0; j < thisLookup.size(); j++) {  sharedFloat->push_back(thisLookup[j]);  }
         return sharedFloat;
     }

@@ -26,6 +26,7 @@ class SharedRAbundVectors : public DataVector {
     
 public:
     SharedRAbundVectors() : DataVector() {  label = ""; numBins = 0; otuTag = "Otu";  }
+    SharedRAbundVectors(string oTag) : DataVector() {  label = ""; numBins = 0; otuTag = oTag;  }
     SharedRAbundVectors(ifstream&, vector<string>& userGroups, string&, string&);
     SharedRAbundVectors(SharedRAbundVectors& bv) : DataVector(bv), numBins(bv.numBins), otuTag(bv.otuTag) {
         vector<SharedRAbundVector*> data = bv.getSharedRAbundVectors();

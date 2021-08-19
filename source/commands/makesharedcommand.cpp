@@ -442,7 +442,7 @@ int SharedCommand::createSharedFromCount() {
         
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
-        variables["[distance]"] = label;
+        variables["[distance]"] = "asv";
         string listFilename = getOutputFileName("list",variables);
         outputNames.push_back(listFilename); outputTypes["list"].push_back(listFilename);
         ofstream outlist; util.openOutputFile(listFilename, outlist);

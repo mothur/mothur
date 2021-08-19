@@ -1863,7 +1863,7 @@ int CountTable::getNumSeqsSmallestGroup() {
 //create ListVector from uniques
 ListVector CountTable::getListVector() {
     try {
-        ListVector list(indexNameMap.size());
+        ListVector list(indexNameMap.size(), "ASV");
         for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) {
             if (m->getControl_pressed()) { break; }
             list.set(it->second, it->first);

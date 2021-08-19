@@ -251,7 +251,7 @@ void OtuHierarchyCommand::processASV() {
         outputNames.push_back(outputFileName); outputTypes["asvconstaxonomy"].push_back(outputFileName);
         ofstream out; util.openOutputFile(outputFileName, out);
         
-        out << "ASV_OTULabel\tASV_Abundance\tTaxonomy_Clustered_OTULabel\n";
+        out << "ASVLabel\tASV_Abundance\tTaxonomy_OTULabel\n";
         
         for (int i = 0; i < asvlist->getNumBins(); i++) {
             

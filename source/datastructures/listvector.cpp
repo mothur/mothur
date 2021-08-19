@@ -49,10 +49,16 @@ inline bool abundNamesSort2(listCt left, listCt right){
 /***********************************************************************/
 
 ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true) {}
+/***********************************************************************/
+
+ListVector::ListVector(string oTag) : DataVector(), maxRank(0), numBins(0), numSeqs(0), otuTag(oTag), printListHeaders(true) {}
 
 /***********************************************************************/
 
 ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0), otuTag("Otu"), printListHeaders(true){}
+/***********************************************************************/
+
+ListVector::ListVector(int n, string oTag):    DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0), otuTag(oTag), printListHeaders(true){}
 
 /***********************************************************************/
 

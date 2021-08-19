@@ -403,7 +403,7 @@ void SharedRAbundFloatVectors::printHeaders(ostream& output, bool& printSharedHe
         if (printSharedHeaders) {
             getOTUNames();
         
-            output << "label\tGroup\tnumOtus";
+            output << "label\tGroup\tnum" + otuTag + "s"; 
             for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
         
             printSharedHeaders = false;
