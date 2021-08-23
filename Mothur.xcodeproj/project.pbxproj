@@ -3979,7 +3979,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
-					"VERSION=\"\\\"1.45.0\\\"\"",
+					"VERSION=\"\\\"1.46.0\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
@@ -4031,7 +4031,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
-					"VERSION=\"\\\"1.45.0\\\"\"",
+					"VERSION=\"\\\"1.46.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
