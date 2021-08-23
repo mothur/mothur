@@ -51,6 +51,8 @@ string OtuHierarchyCommand::getHelpString(){
 		helpString += "Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n";
 		helpString += "The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n";
 		
+        getCommonQuestions();
+        
 		return helpString;
 	}
 	catch(exception& e) {
@@ -70,8 +72,8 @@ string OtuHierarchyCommand::getCommonQuestions(){
         //ianswer = "\tBy default, mothur will align the reverse compliment of your sequences when the alignment process removes more than 50% of the bases indicating the read may be flipped. This process assembles the best possible alignment, and downstream analysis will remove any poor quality reads remaining.\n"; ianswers.push_back(ianswer);
         
         
-       // string howto = "How do I 'align' ITS sequences?"; howtos.push_back(howto);
-       // string hanswer = "\tYou really can't do an alignment because there isn't positional homology. You can use the pre.cluster and pairwise.seqs commands to generate a distance matrix from unaligned sequences.\n"; hanswers.push_back(hanswer);
+        string howto = "How do I find the OTUs and taxonomies my ASVs are clustered in?"; howtos.push_back(howto);
+        string hanswer = "\tYou can use the otu.hierarchy command to create a *.cons.taxonomy file. The first column is the ASVLabel, the second column is the abundance of the ASV, and the third column is the ASVs taxonomy with the OTULabel appended.\n\nmothur > otu.hierarchy(list=final.opti_mcc.list, asvlist=final.asv.list, taxonomy=final.taxonomy, count=final.count_table)\n"; hanswers.push_back(hanswer);
         
        // howto = "How do I create a custom reference for the region I am studying?"; howtos.push_back(howto);
        // hanswer = "\tYou can tailor your reference using this method: http://blog.mothur.org/2016/07/07/Customization-for-your-region/.\n"; hanswers.push_back(hanswer);
