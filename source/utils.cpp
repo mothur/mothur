@@ -5211,6 +5211,10 @@ string Utils::getTag(string filename) {
         string tag = "Otu";
         int pos = filename.find_first_of(".tx.");
         if (pos != string::npos) { tag = "Phylo"; }
+        
+        int pos2 = filename.find_first_of(".asv.");
+        if (pos2 != string::npos) { tag = "ASV"; }
+        
         return tag;
     }
     catch(exception& e) {

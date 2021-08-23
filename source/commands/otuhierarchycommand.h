@@ -24,7 +24,8 @@ public:
 	string getCommandName()			{ return "otu.hierarchy";			}
 	string getCommandCategory()		{ return "OTU-Based Approaches";	}
 	
-	string getHelpString();	
+	string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);	
 	string getCitation() { return "http://www.mothur.org/wiki/Otu.hierarchy"; }
 	string getDescription()		{ return "relates OTUs at different distances"; }
@@ -35,11 +36,13 @@ public:
 	
 	
 private:
-	bool abort;
+	bool abort, asv;
 	set<string> mylabels; //holds labels to be used
-	string label, listFile,  output, list1Label, list2Label;
+	string label, listFile, asvlistFile, taxfile, countfile, output, list1Label, list2Label;
 	vector<string> outputNames;
 	
+    void processHierarchy();
+    void processASV();
 	vector< vector<string> > getListVectors();
     vector< vector<string> > getListVector(string, string&);
 		

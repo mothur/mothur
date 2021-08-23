@@ -17,7 +17,9 @@ class ListVector : public DataVector {
     
 public:
     ListVector();
+    ListVector(string);
     ListVector(int);
+    ListVector(int, string);
     ListVector(string, vector<string>, string&);
     ListVector(const ListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), otuTag(lv.otuTag), printListHeaders(lv.printListHeaders) {};
     ListVector(ifstream&, string&, string&);

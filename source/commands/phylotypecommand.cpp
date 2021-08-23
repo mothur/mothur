@@ -217,8 +217,7 @@ int PhylotypeCommand::execute(){
 				//output level
 				m->mothurOut(level); m->mothurOutEndLine();
 				
-				ListVector list;
-				list.setLabel(level);
+				ListVector list("Phylo"); list.setLabel(level);
                 
 				//go through nodes and build listvector 
 				for (itCurrent = currentNodes.begin(); itCurrent != currentNodes.end(); itCurrent++) {

@@ -1,0 +1,12 @@
+#pcr.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# silva.bacteria.fasta from MISeq_SOP
+set.dir(input=./TestFiles, output=./TestResults/pcr.seqs, tempdefault=./TestReferences)
+set.logfile(name=pcrseqs.logfile)
+#trim to v4
+pcr.seqs(fasta=silva.bacteria.fasta, start=11894, end=25319, keepdots=F)
+pcr.seqs(fasta=silva.bacteria.fasta, oligos=pcr.oligos, pdiffs=2, rdiffs=2)
+pcr.seqs(fasta=silva.bacteria.fasta, oligos=pcr.oligos, pdiffs=2, rdiffs=1, checkorient=t)
+quit()
+
+

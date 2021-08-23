@@ -1258,55 +1258,7 @@ int CountTable::printSeq(ofstream& out, string seqName) {
 		exit(1);
 	}
 }
-/************************************************************/
-SharedRAbundVectors* CountTable::getShared(vector<string> selected, map<string, string>& seqNameToOtuName) {
-    try {
-        
-        if (selected.size() == 0) {}
-        else { setNamesOfGroups(selected); }
-        
-        return getShared(seqNameToOtuName);
-    }
-    catch(exception& e) {
-        m->errorOut(e, "CountTable", "getShared");
-        exit(1);
-    }
-}
-/************************************************************/
-SharedRAbundVectors* CountTable::getShared(map<string, string>& seqNameToOtuName) {
-    try {
-        SharedRAbundVectors* lookup = new SharedRAbundVectors();
-        
-        if (hasGroups) {
-            for (int i = 0; i < groups.size(); i++) { //create blank rabunds for each group
-                SharedRAbundVector* thisGroupsRabund = new SharedRAbundVector();
-                thisGroupsRabund->setGroup(groups[i]);
-                lookup->push_back(thisGroupsRabund);
-            }
-            
-            //generate OTULabels
-            vector<string> otuNames;
-            util.getOTUNames(otuNames, counts.size(), "Otu");
-            
-            //create name map for seq -> otuName for use by other commands with associated files
-            for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) { seqNameToOtuName[it->first] = otuNames[it->second]; }
-            
-            //add each "otu"
-            for (int i = 0; i < counts.size(); i++) {
-                vector<int> abunds = expandAbunds(i);
-                lookup->push_back(abunds, otuNames[i]);
-            }
-            
-        }else{  m->mothurOut("[ERROR]: Your count table does not have group info. Please correct.\n");  m->setControl_pressed(true); }
-        
 
-        return lookup;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "CountTable", "getShared");
-        exit(1);
-    }
-}
 /************************************************************/
 //group counts for a seq
 vector<int> CountTable::getGroupCounts(string seqName) {
@@ -1911,7 +1863,7 @@ int CountTable::getNumSeqsSmallestGroup() {
 //create ListVector from uniques
 ListVector CountTable::getListVector() {
     try {
-        ListVector list(indexNameMap.size());
+        ListVector list(indexNameMap.size(), "ASV");
         for (map<string, int>::iterator it = indexNameMap.begin(); it != indexNameMap.end(); it++) {
             if (m->getControl_pressed()) { break; }
             list.set(it->second, it->first);

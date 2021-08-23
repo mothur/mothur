@@ -250,7 +250,7 @@ void SharedRAbundVectors::printHeaders(ostream& output, bool& printSharedHeaders
         if (printSharedHeaders) {
             getOTUNames();
         
-            output << "label\tGroup\tnumOtus";
+            output << "label\tGroup\tnum" + otuTag + "s"; 
             for (int i = 0; i < numBins; i++) { output  << '\t' << currentLabels[i]; } output << endl;
         
             printSharedHeaders = false;
