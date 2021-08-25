@@ -227,7 +227,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option) : Command()  {
 					else { 
 						countfile = current->getCountFile();
                         if (countfile != "") {  m->mothurOut("Using " + countfile + " as input file for the count parameter.\n"); type = "count"; }
-                        else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile if you are going to use the fasta file to generate the split.\n");   abort = true;
+                        else {  m->mothurOut("[ERROR]: You need to provide a namefile or countfile.\n");   abort = true;
                         }	
 					}	
 				}

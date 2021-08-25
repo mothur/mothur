@@ -93,7 +93,7 @@ string OtuHierarchyCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "otuheirarchy") {  pattern = "[filename],[distance1],[tag],[distance2],otu.hierarchy"; }
-        if (type == "asvconstaxonomy") {  pattern = "[filename],[tag],asv.cons.taxonomy"; }
+        else if (type == "asvconstaxonomy") {  pattern = "[filename],[tag],asv.cons.taxonomy"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
