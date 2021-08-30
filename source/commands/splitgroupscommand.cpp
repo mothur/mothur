@@ -312,28 +312,28 @@ int driverRunNameGroup(splitGroups2Struct* params){
 			
 			params->m->mothurOut("Processing group: " + params->Groups[i] + "\n");
 			
-			string newFasta = files[0];
-            string newList = files[1];
-            string newGroup = files[2];
-			string newName = files[3];
+			//string newFasta = files[0];
+           // string newList = files[1];
+           // string newGroup = files[2];//
+			//string newName = files[3];
             
             vector<string> namesSeqsInThisGroup = groupMap.getNamesSeqs(params->Groups[i]);
             ofstream outGroup, outAccnos;
-            params->util.openOutputFile(newGroup, outGroup);
-            params->util.openOutputFile(newGroup+".accnos", outAccnos);
+            params->util.openOutputFile(files[2], outGroup);
+            params->util.openOutputFile(files[2]+".accnos", outAccnos);
             for (long long j = 0; j < namesSeqsInThisGroup.size(); j++) {
                 outGroup << namesSeqsInThisGroup[j] << '\t' << params->Groups[i] << endl;
                 outAccnos << namesSeqsInThisGroup[j] << endl;
             }
             outGroup.close(); outAccnos.close();
-            params->outputNames.push_back(newGroup); params->outputTypes["group"].push_back(newGroup);
+            params->outputNames.push_back(files[2]); params->outputTypes["group"].push_back(files[2]);
             
             //use unique.seqs to create new name and fastafile
             string uniqueFasta = params->fastafile+params->Groups[i];
             string uniqueName = params->namefile+params->Groups[i];
             string uniqueList = params->listfile+params->Groups[i];
             
-            string inputString = "dups=f, accnos=" + newGroup+".accnos";
+            string inputString = "dups=f, accnos=" + files[2]+".accnos";
             if (params->namefile != "") {
                 inputString += ", name=" + uniqueName;
                 params->util.copyFile(params->namefile, uniqueName);
@@ -356,23 +356,23 @@ int driverRunNameGroup(splitGroups2Struct* params){
             delete getCommand;
             
             if (params->fastafile != "") {
-                params->util.renameFile(filenames["fasta"][0], newFasta);
-                params->outputNames.push_back(newFasta); params->outputTypes["fasta"].push_back(newFasta);
+                params->util.renameFile(filenames["fasta"][0], files[0]);
+                params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]);
                 params->util.mothurRemove(uniqueFasta);
             }
             if (params->listfile != "") {
-                params->util.renameFile(filenames["list"][0], newList);
-                params->outputNames.push_back(newList); params->outputTypes["list"].push_back(newList);
+                params->util.renameFile(filenames["list"][0], files[1]);
+                params->outputNames.push_back(files[1]); params->outputTypes["list"].push_back(files[1]);
                 params->util.mothurRemove(uniqueList);
             }
             if (params->namefile != "") {
-                params->util.renameFile(filenames["name"][0], newName);
-                params->outputNames.push_back(newName); params->outputTypes["name"].push_back(newName);
+                params->util.renameFile(filenames["name"][0], files[3]);
+                params->outputNames.push_back(files[3]); params->outputTypes["name"].push_back(files[3]);
             }
             
             params->m->mothurOut("/******************************************/\nDone.\n");
             
-            params->util.mothurRemove(newGroup+".accnos");
+            params->util.mothurRemove(files[2]+".accnos");
             params->util.mothurRemove(uniqueName);
 			
 			if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} return 0; }
@@ -416,8 +416,6 @@ int driverRunCount(splitGroups2Struct* params){
             ct.printCompressedTable(newCountFile, tempGroups);
             params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
             vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
-            
-            //params->util.printAccnos(newCountFile+".accnos", namesOfSeqsInGroup);
             set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
             
             params->m->mothurOut("/******************************************/\n");
