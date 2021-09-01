@@ -311,11 +311,6 @@ int driverRunNameGroup(splitGroups2Struct* params){
             else { params->m->mothurOut("[ERROR]: Can find group " + params->Groups[i] + ", quitting.\n"); params->m->setControl_pressed(true); break; }
 			
 			params->m->mothurOut("Processing group: " + params->Groups[i] + "\n");
-			
-			//string newFasta = files[0];
-           // string newList = files[1];
-           // string newGroup = files[2];//
-			//string newName = files[3];
             
             vector<string> namesSeqsInThisGroup = groupMap.getNamesSeqs(params->Groups[i]);
             ofstream outGroup, outAccnos;
