@@ -466,11 +466,11 @@ vector<TrimOligos*> fillTrims(pcrData* params, bool& pairedOligos) {
     try {
         
         vector<TrimOligos*> trims;
+        params->numFPrimers = 0; params->numRPrimers = 0;
         
         if (params->oligosfile != "") {
             
-            Oligos oligos;
-            params->numFPrimers = 0; params->numRPrimers = 0;
+            Oligos oligos; //params->numFPrimers = 0; params->numRPrimers = 0;
             map<string, int> barcodes; //not used
             
             readOligos(oligos, params->oligosfile, pairedOligos, params->numFPrimers, params->numRPrimers, params->m);
