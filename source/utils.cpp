@@ -2399,11 +2399,8 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
 vector<double> Utils::setFilePosFasta(string filename, long long& num) {
     try {
         vector<double> positions;
-        ifstream inFASTA;
-        //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
-        //inFASTA.open(completeFileName.c_str(), ios::binary);
-        openInputFileBinary(completeFileName, inFASTA);
+        ifstream inFASTA; openInputFileBinary(completeFileName, inFASTA);
         
         string input;
         double count = 0;

@@ -15,6 +15,7 @@
 #include "sequence.hpp"
 #include "qualityscores.h"
 #include "writer.h"
+#include "fastqread.h"
 
 class ChopSeqsCommand : public Command {
 	
@@ -36,11 +37,14 @@ class ChopSeqsCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }		
 	
 	private:
-		string fastafile, keep, namefile, groupfile, countfile, qualfile;
+		string fastafile, fastqfile, keep, namefile, groupfile, countfile, qualfile, format;
 		bool abort, countGaps, Short, keepN;
 		int numbases, processors;
 		vector<string> outputNames;
 		
+        bool runChopFasta(string&);
+        bool runChopFastq(string&);
+        bool getFastqChopped(FastqRead&);
         bool createProcesses(string, string, string, string);
         int processQual(string, string);
 };

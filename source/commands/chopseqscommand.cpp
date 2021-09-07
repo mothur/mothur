@@ -8,12 +8,12 @@
  */
 
 #include "chopseqscommand.h"
-#include "sequence.hpp"
 #include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChopSeqsCommand::setParameters(){	
 	try {
+        CommandParameter pfastq("fastq", "InputTypes", "", "", "none", "none", "none","fastq",false,true,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta",false,true,true); parameters.push_back(pfasta);
         CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "none","qfile",false,false,true); parameters.push_back(pqfile);
         CommandParameter pname("name", "InputTypes", "", "", "NameCount", "none", "none","name",false,false,true); parameters.push_back(pname);
@@ -24,6 +24,7 @@ vector<string> ChopSeqsCommand::setParameters(){
 		CommandParameter pcountgaps("countgaps", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pcountgaps);
 		CommandParameter pshort("short", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshort);
 		CommandParameter pkeep("keep", "Multiple", "front-back", "front", "", "", "","",false,false); parameters.push_back(pkeep);
+        CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pkeepn("keepn", "Boolean", "", "f", "", "", "","",false,false); parameters.push_back(pkeepn);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -33,6 +34,7 @@ vector<string> ChopSeqsCommand::setParameters(){
         
         vector<string> tempOutNames;
         outputTypes["fasta"] = tempOutNames;
+        outputTypes["fastq"] = tempOutNames;
         outputTypes["qfile"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
@@ -52,8 +54,8 @@ vector<string> ChopSeqsCommand::setParameters(){
 string ChopSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences. Note: If a sequence is completely 'chopped', an accnos file will be created with the names of the sequences removed. \n";
-		helpString += "The chop.seqs command parameters are fasta, name, group, count, numbases, countgaps and keep. fasta is required unless you have a valid current fasta file. numbases is required.\n";
+		helpString += "The chop.seqs command reads a fasta or fastq file and outputs a *.chop.* file containing the trimmed sequences. Note: If a sequence is completely 'chopped', an accnos file will be created with the names of the sequences removed. \n";
+		helpString += "The chop.seqs command parameters are fasta, fastq, qfile, name, group, count, numbases, countgaps and keep. fasta or fastq is required unless you have a valid current fasta file. numbases is required.\n";
 		helpString += "The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n";
         helpString += "If you provide a name, group or count file any sequences removed from the fasta file will also be removed from those files.\n";
         helpString += "The qfile parameter allows you to provide a quality file associated with the fastafile.\n";
@@ -79,6 +81,7 @@ string ChopSeqsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],chop.fasta"; }
+        else if (type == "fastq") {  pattern = "[filename],chop.fastq"; }
         else if (type == "qfile") {  pattern = "[filename],chop.qual"; }
         else if (type == "name") {  pattern = "[filename],chop.names"; }
         else if (type == "group") {  pattern = "[filename],chop.groups"; }
@@ -109,12 +112,13 @@ ChopSeqsCommand::ChopSeqsCommand(string option) : Command()  {
             ValidParameters validParameter;
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  				//if there is a current fasta file, use it
-				fastafile = current->getFastaFile(); 
-				if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
-				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
-			}else { current->setFastaFile(fastafile); } 	
+            else if (fastafile == "not found") {  fastafile = ""; }
+            else { current->setFastaFile(fastafile); }
 			
+            fastqfile = validParameter.validFile(parameters, "fastq");
+            if (fastqfile == "not open") { fastqfile = ""; abort = true; }
+            else if (fastqfile == "not found") { fastqfile = ""; }
+            
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }
@@ -142,7 +146,13 @@ ChopSeqsCommand::ChopSeqsCommand(string option) : Command()  {
             if ((groupfile != "") && (countfile != "")) {
                 m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
             }
-
+            
+            if ((fastqfile == "") && (fastafile == "")) {
+                fastafile = current->getFastaFile();
+                if (fastafile != "") { m->mothurOut("Using " + fastafile + " as input file for the fasta parameter.\n");  }
+                else {     m->mothurOut("[ERROR]: You have no current fastafile and did not provide a fastqfile. The fasta or fastq parameter is required to run the chop.seqs command.\n");  abort = true; }
+            }
+            
 			string temp = validParameter.valid(parameters, "numbases");	if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, numbases);   
 			
@@ -157,6 +167,8 @@ ChopSeqsCommand::ChopSeqsCommand(string option) : Command()  {
             
             temp = validParameter.valid(parameters, "keepn");	if (temp == "not found") { if (qualfile!= "") { temp = "t"; }else { temp = "f"; } }
             keepN = util.isTrue(temp);
+            
+            format = validParameter.valid(parameters, "format");        if (format == "not found"){    format = "illumina1.8+";    }
             
             if (((!keepN) && (qualfile != "")) || ((countGaps) && (qualfile != ""))){ m->mothurOut("[ERROR]: You cannot set keepn=false with a quality file, or set countgaps to true.\n");  abort = true;  }
 		
@@ -177,35 +189,15 @@ int ChopSeqsCommand::execute(){
 	try {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
-		
-        map<string, string> variables;
-        string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
-        string outputFileName = getOutputFileName("fasta", variables);
-        outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
-        string outputFileNameAccnos = getOutputFileName("accnos", variables);
         
-        string fastafileTemp = "";
-        if (qualfile != "") {  fastafileTemp = outputFileName + ".qualFile.Positions.temp"; }
-        
-        bool wroteAccnos = createProcesses(fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);
-        if (m->getControl_pressed()) {  return 0; }
-        
-        if (qualfile != "") {
-            thisOutputDir = outputdir;
-            if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
-            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
-            string outputQualFileName = getOutputFileName("qfile", variables);
-            outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
-            
-            processQual(outputQualFileName, fastafileTemp);
-            util.mothurRemove(fastafileTemp);
-        }
+        bool wroteAccnos = true; string outputFileNameAccnos = "";
+        if (fastafile != "")    {  wroteAccnos = runChopFasta(outputFileNameAccnos);  }
+        else                    {  wroteAccnos = runChopFastq(outputFileNameAccnos);  }
 		
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
         
         if (wroteAccnos) {
+            map<string, string> variables;
             outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos);
             
              //use remove.seqs to create new name, group and count file
@@ -232,7 +224,7 @@ int ChopSeqsCommand::execute(){
                 m->mothurOut("/******************************************/\n"); 
                 
                 if (groupfile != "") {
-                    thisOutputDir = outputdir;
+                    string thisOutputDir = outputdir;
                     if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
                     string outGroup = getOutputFileName("group", variables);
@@ -241,7 +233,7 @@ int ChopSeqsCommand::execute(){
                 }
                 
                 if (namefile != "") {
-                    thisOutputDir = outputdir;
+                    string thisOutputDir = outputdir;
                     if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
                     string outName = getOutputFileName("name", variables);
@@ -250,7 +242,7 @@ int ChopSeqsCommand::execute(){
                 }
                 
                 if (countfile != "") {
-                    thisOutputDir = outputdir;
+                    string thisOutputDir = outputdir;
                     if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
                     variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
                     string outCount = getOutputFileName("count", variables);
@@ -292,8 +284,6 @@ int ChopSeqsCommand::execute(){
             }
 		}
         
-        
-		
         m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
@@ -304,6 +294,172 @@ int ChopSeqsCommand::execute(){
 		m->errorOut(e, "ChopSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+
+bool ChopSeqsCommand::runChopFasta(string& outputFileNameAccnos){
+    try {
+        
+        map<string, string> variables;
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        string outputFileName = getOutputFileName("fasta", variables);
+        outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
+        outputFileNameAccnos = getOutputFileName("accnos", variables);
+        
+        string fastafileTemp = "";
+        if (qualfile != "") {  fastafileTemp = outputFileName + ".qualFile.Positions.temp"; }
+        
+        bool wroteAccnos = createProcesses(fastafile, outputFileName, outputFileNameAccnos, fastafileTemp);
+        
+        if (m->getControl_pressed()) {  return wroteAccnos; }
+        
+        if (qualfile != "") {
+            thisOutputDir = outputdir;
+            if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
+            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
+            string outputQualFileName = getOutputFileName("qfile", variables);
+            outputNames.push_back(outputQualFileName); outputTypes["qfile"].push_back(outputQualFileName);
+            
+            processQual(outputQualFileName, fastafileTemp);
+            util.mothurRemove(fastafileTemp);
+        }
+        
+        return wroteAccnos;
+        
+    }catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "runChopFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+bool ChopSeqsCommand::runChopFastq(string& outputFileNameAccnos){
+    try {
+        
+        map<string, string> variables;
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        string outputFileName = getOutputFileName("fastq", variables);
+        outputNames.push_back(outputFileName); outputTypes["fastq"].push_back(outputFileName);
+        outputFileNameAccnos = getOutputFileName("accnos", variables);
+        
+        ifstream in; util.openInputFile(fastqfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ofstream outAccnos; util.openOutputFile(outputFileNameAccnos, outAccnos);
+
+        bool wroteAccnos = false; long long count = 0;
+        while (!in.eof()) {
+            
+            if (m->getControl_pressed()) {  break;  }
+            
+            bool ignore;
+            FastqRead seq(in, ignore, format); util.gobble(in);
+
+            if (seq.getName() != "") {
+                bool isGood = getFastqChopped(seq);
+                
+                //output trimmed sequence
+                if (isGood) { seq.printFastq(out); }
+                else{
+                    outAccnos << seq.getName() << endl;
+                    wroteAccnos = true;
+                }
+                count++;
+            }
+
+            //report progress
+            if((count) % 10000 == 0){    m->mothurOut(toString(count)+"\n");         }
+            
+        }
+        //report progress
+        if((count) % 10000 != 0){    m->mothurOut(toString(count)+"\n");         }
+        
+        in.close();
+        out.close();
+        outAccnos.close();
+        
+        return wroteAccnos;
+        
+    }catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "runChopFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+bool ChopSeqsCommand::getFastqChopped(FastqRead& seq) {
+    try {
+        string temp = seq.getSeq();
+        vector<int> scores = seq.getScores();
+        
+        //if needed trim sequence
+        if (keep == "front") {//you want to keep the beginning
+            int tempLength = temp.length();
+            
+            if (tempLength > numbases) { //you have enough bases to remove some
+                
+                int stopSpot = 0;
+                int numBasesCounted = 0;
+                
+                for (int i = 0; i < temp.length(); i++) {
+                    
+                    numBasesCounted++;
+                    
+                    if (numBasesCounted >= numbases) { stopSpot = i; break; }
+                }
+                
+                if (stopSpot == 0) { temp = ""; scores.clear(); }
+                else {
+                    temp = temp.substr(0, stopSpot+1);
+                    if(scores.size() >= stopSpot+1){
+                        scores.resize((stopSpot+1));
+                    }
+                }
+                
+            }else {
+                if (!Short) { temp = ""; scores.clear(); } //sequence too short
+            }
+        }else { //you are keeping the back
+            int tempLength = temp.length();
+            if (tempLength > numbases) { //you have enough bases to remove some
+                
+                int stopSpot = 0;
+                int numBasesCounted = 0;
+                
+                for (int i = (temp.length()-1); i >= 0; i--) {
+                    
+                    numBasesCounted++;
+                    
+                    if (numBasesCounted >= numbases) { stopSpot = i; break; }
+                }
+                
+                if (stopSpot == 0) { temp = ""; }
+                else {
+                    temp = temp.substr(stopSpot);
+                    if(scores.size() >= stopSpot){
+                        
+                        vector<int> scores2;
+                        for (int h = stopSpot; h < scores.size(); h++) { scores2.push_back(scores[h]); }
+                        scores.clear(); scores = scores2;
+                    }
+                }
+            }else {
+                if (!Short) { temp = ""; scores.clear(); } //sequence too short
+            }
+        }
+
+        seq.setSeq(temp); seq.setScores(scores);
+        
+        if (temp != "") { return true; }
+        
+        return false;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ChopSeqsCommand", "getFastqChopped");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 //custom data structure for threads to use.
@@ -324,7 +480,7 @@ struct chopData {
     Sequence thisSeq;
     
     chopData(){}
-    chopData(string f, unsigned long long st, unsigned long long en, OutputWriter* wo, OutputWriter* wa, string qv) { //InputReader* i
+    chopData(string f, unsigned long long st, unsigned long long en, OutputWriter* wo, OutputWriter* wa, string qv) {
         m = MothurOut::getInstance();
         filename = f;
         threadWriterOutput = wo;
@@ -339,7 +495,6 @@ struct chopData {
         Short = false;
         keepN = false; if (qv!="") { keepN = true; }
         wroteAccnos = false;
-        
     }
     void setVariables(string k, bool cGaps, int nbases, bool S, bool kn) {
         keep = k;
