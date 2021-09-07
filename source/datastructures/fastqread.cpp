@@ -292,6 +292,30 @@ string FastqRead::convertQual(vector<int> qual) {
     }
 }
 //**********************************************************************************************************************
+void FastqRead::setScores(vector<int> qual) {
+    try {
+        scoreString = "";
+        scores = qual;
+        
+        for (int i = 0; i < qual.size(); i++) {
+            int controlChar = int('!');
+            if (format == "illumina") {  controlChar = int('@');  }
+
+            int temp = qual[i] + controlChar;
+            
+            if (format == "solexa") { temp = convertBackTable[temp];  }
+            
+            char qualChar = (char) temp;
+            
+            scoreString += qualChar;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "FastqRead", "setScores");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 Sequence FastqRead::getSequence() {
     try {
         Sequence temp(name, sequence);
