@@ -580,7 +580,7 @@ bool trimStartEnd(Sequence& seq, pcrData* params) {
                 if (params->start != -1) {
                     if (params->keepdots)   {  seq.filterToPos(params->start-1);  }
                     else {
-                        string seqString = seq.getAligned().substr(params->start);
+                        string seqString = seq.getAligned().substr(params->start-1);
                         seq.setAligned(seqString);
                     }
                 }
