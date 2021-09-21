@@ -790,6 +790,8 @@ void RemoveGroupsCommand::readDesign(){
         
         out.close();
 		
+        names.clear(); names = util.mothurConvert(Groups);
+        
         int removedCount = allGroups.size() - numGroupsFound;
         
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only groups from the groups you wish to remove.\n");   }
@@ -862,8 +864,7 @@ void RemoveGroupsCommand::readPhylip(){
         variables["[extension]"] = util.getExtension(phylipfile);
         string outputFileName = getOutputFileName("phylip", variables);
         
-        ifstream in;
-        util.openInputFile(phylipfile, in);
+        ifstream in; util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; square = 0;

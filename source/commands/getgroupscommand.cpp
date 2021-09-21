@@ -807,8 +807,7 @@ void GetGroupsCommand::readPhylip(){
         variables["[extension]"] = util.getExtension(phylipfile);
         string outputFileName = getOutputFileName("phylip", variables);
         
-        ifstream in;
-        util.openInputFile(phylipfile, in);
+        ifstream in; util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; square = 0;
@@ -873,8 +872,7 @@ void GetGroupsCommand::readPhylip(){
         if (m->getControl_pressed()) {  return; }
         
         //read through file only printing rows and columns of seqs in names
-        ifstream inPhylip;
-        util.openInputFile(phylipfile, inPhylip);
+        ifstream inPhylip; util.openInputFile(phylipfile, inPhylip);
         
         inPhylip >> numTest;
         
