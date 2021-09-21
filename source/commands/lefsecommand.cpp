@@ -229,33 +229,38 @@ int LefseCommand::execute(){
         //if user did not select class use first column
         if (mclass == "") {  mclass = designMap.getDefaultClass(); m->mothurOut("\nYou did not provide a class, using " + mclass +".\n\n"); if (subclass == "") { subclass = mclass; } }
         
-        vector<string> Groups;
+        vector<string> Groups; int numSets = Sets.size();
         if (Sets.size() != 0) { //user has picked sets find groups to include from lookup
             designMap.setDefaultClass(mclass);
             Groups = designMap.getNamesGroups(Sets);
+        }else {
+            vector<string> thisSets = designMap.getCategory();
+            numSets = (int)thisSets.size();
         }
         
-        InputData input(inputfile, format, Groups);
-        set<string> processedLabels;
-        set<string> userLabels = labels;
-        string lastLabel = "";
-        
-        SharedRAbundFloatVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
-        
-        if (format == "sharedfile") {
-            lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
-            Groups = lookup->getNamesGroups();
-        }
-        
-        while ((lookup != NULL) || (clr != NULL)){
+        if (numSets != 2) { //for 2 sets just run pairwise
+            InputData input(inputfile, format, Groups);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
             
-            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
+            SharedRAbundFloatVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
             
-            process(lookup, clr, designMap, "");
+            if (format == "sharedfile") {
+                lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+                Groups = lookup->getNamesGroups();
+            }
             
-            if (format == "sharedfile") { delete lookup; lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel); }
-        }
-		
+            while ((lookup != NULL) || (clr != NULL)){
+                
+                if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
+                
+                process(lookup, clr, designMap, "");
+                
+                if (format == "sharedfile") { delete lookup; lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel); }
+            }
+        }else { runPairwiseAnalysis(designMap); }
+        
         if (pairwise) { runPairwiseAnalysis(designMap); }
         
         //output files created by command
