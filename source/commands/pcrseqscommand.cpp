@@ -201,14 +201,6 @@ PcrSeqsCommand::PcrSeqsCommand(string option) : Command()  {
             if ((oligosfile != "") && (ecolifile != "")) {
                  m->mothurOut("[ERROR]: You can not use an ecoli file at the same time as an oligos file.\n"); abort = true;
             }
-            
-			//check to make sure you didn't forget the name file by mistake			
-			if (countfile == "") { 
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
         
 	}

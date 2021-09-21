@@ -195,12 +195,6 @@ RenameSeqsCommand::RenameSeqsCommand(string option) : Command()  {
             
             delim = validParameter.valid(parameters, "delim");			if (delim == "not found") { delim = "_"; }
             
-            if (countfile == "") {
-                if (nameFile == "")  {
-                    vector<string> files; files.push_back(fastaFile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
         
 	}

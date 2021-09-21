@@ -219,12 +219,6 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option) : Command()  {
 			
 			if ((fastqfile == "") && (countfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, count, taxonomy, quality, alignreport, contigsreport, fastq or list.\n");  abort = true; }
 			
-            if (countfile == "") {
-                if ((fastafile != "") && (namefile == "")) {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
             
             format = validParameter.valid(parameters, "format");		if (format == "not found"){	format = "illumina1.8+";	}
             

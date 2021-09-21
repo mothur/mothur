@@ -207,13 +207,6 @@ GetLineageCommand::GetLineageCommand(string option) : Command()  {
                 label = validParameter.valid(parameters, "label");
                 if (label == "not found") { label = ""; m->mothurOut("[WARNING]: You did not provide a label, I will use the first label in your inputfile.\n");  }
             }
-            
-            if (countfile == "") {
-                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 
 	}

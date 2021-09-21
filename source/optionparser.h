@@ -26,7 +26,7 @@ public:
     OptionParser(string, map<string, string>&);
 	~OptionParser() {}
 	map<string, string> getParameters(); //adds inputdir to parameters if indicated
-	bool getNameFile(vector<string>);
+	
 private:
 	map<string, string> parameters;
 	MothurOut* m;

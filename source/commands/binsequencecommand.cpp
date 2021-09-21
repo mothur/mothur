@@ -180,13 +180,6 @@ BinSeqCommand::BinSeqCommand(string option) : Command() {
             }
             }
 			
-            if (countfile == "") {
-                if (namesfile == ""){
-                    vector<string> files; files.push_back(fastafile); 
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
-			
 		}
 	}
 	catch(exception& e) {

@@ -245,12 +245,7 @@ SubSampleCommand::SubSampleCommand(string option) : Command() {
 			if (((groupfile != "") || (countfile != "")) && ((fastafile != "") && (listfile != ""))) { 
 				m->mothurOut("A new group or count file can only be made from the subsample of a list file or fasta file, not both. Please correct.\n"); abort = true; }
 			
-            if (countfile == "") {
-                if ((fastafile != "") && (namefile == "")) {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
+            
 		}
 
 	}

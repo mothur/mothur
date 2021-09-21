@@ -105,16 +105,7 @@ AlignCheckCommand::AlignCheckCommand(string option) : Command()  {
 			
             if ((countfile != "") && (namefile != "")) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or name.\n");  abort = true; }
             
-            if (outputdir == "") {
-                outputdir += util.hasPath(fastafile); 
-            }
-            
-            if (countfile == "") {
-                if ((namefile == "") && (fastafile != "")){
-                    vector<string> files; files.push_back(fastafile); 
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
+            if (outputdir == "") { outputdir += util.hasPath(fastafile);  }
 		}
 
 	}

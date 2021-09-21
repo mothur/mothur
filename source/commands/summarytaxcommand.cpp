@@ -135,12 +135,7 @@ SummaryTaxCommand::SummaryTaxCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "threshold");			if (temp == "not found") { temp = "0"; }
             util.mothurConvert(temp, threshold);
             
-            if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-			}
+            
 		}
 	}
 	catch(exception& e) {

@@ -238,13 +238,6 @@ GetGroupsCommand::GetGroupsCommand(string option) : Command()  {
 			
 			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("[ERROR]: You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list.\n");  abort = true; }
 			if (((groupfile == "") && (countfile == "")) && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("[ERROR]: If using a fasta, name, taxonomy, group or list, then you must provide a group or count file.\n");  abort = true; }
-            
-            if (countfile == "") {
-                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 		
 	}

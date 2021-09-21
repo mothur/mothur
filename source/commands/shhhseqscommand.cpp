@@ -127,10 +127,6 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) : Command() {
 			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
                     
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-			}
 		}
 	}
 	catch(exception& e) {

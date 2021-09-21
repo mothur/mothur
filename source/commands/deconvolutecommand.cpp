@@ -126,13 +126,6 @@ DeconvoluteCommand::DeconvoluteCommand(string option) : Command()  {
                 if (countfile == "") { m->mothurOut("I will use name.\n"); format = "name"; }
                 else {  m->mothurOut("I will use count.\n"); format = "count"; }
             }
-            
-			if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 			
 		}
 

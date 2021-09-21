@@ -169,11 +169,6 @@ SeqErrorCommand::SeqErrorCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "aligned");			if (temp == "not found"){	temp = "t";				}
 			aligned = util.isTrue(temp); 
 
-			if ((namesFileName == "") && (queryFileName != "")){
-				vector<string> files; files.push_back(queryFileName); 
-				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-			}
-
             if(aligned ){
                 if((reportFileName != "" && qualFileName == "") || (reportFileName == "" && qualFileName != "")){
                     m->mothurOut("if you use either a qual file or a report file, you have to have both.");

@@ -258,13 +258,6 @@ PreClusterCommand::PreClusterCommand(string option) : Command() {
                     countfile = outputFileName;
                 }
             }
-            
-            if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
         }
     }
     catch(exception& e) {

@@ -276,17 +276,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option) : Command()  {
                     m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";
                 }
             }
-            
-            if (!abort) {
-                if (!hasCount) {
-                    if (namefile == ""){
-                        if (fastafile != "") {
-                            vector<string> files; files.push_back(fastafile);
-                            if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                        }
-                    }
-                }
-            }
         }
 	}
 	catch(exception& e) {

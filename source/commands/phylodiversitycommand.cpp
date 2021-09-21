@@ -179,13 +179,6 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option) : Command()  {
 			}
 			
 			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default.\n");  abort=true; }
-			
-			if (countfile=="") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(treefile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                } 
-            }
 		}
 		
 	}

@@ -324,12 +324,6 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "criteria");	if (temp == "not found"){	temp = "90";				}
 			util.mothurConvert(temp, criteria); 
 			
-			if (countfile == "") { 
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 
 	}

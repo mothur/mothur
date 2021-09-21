@@ -104,12 +104,7 @@ SummaryQualCommand::SummaryQualCommand(string option) : Command()  {
 			string temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
             
-			if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(qualfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
+			
 		}
 	}
 	catch(exception& e) {

@@ -129,11 +129,6 @@ SortSeqsCommand::SortSeqsCommand(string option) : Command()  {
             
 			if ((fastafile == "") && (namefile == "") && (taxfile == "") && (flowfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, taxonomy, flow or quality.\n"); abort = true; }
 			
-            
-            if ((fastafile != "") && (namefile == "")) {
-                vector<string> files; files.push_back(fastafile);
-                if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-            }
 		}
         
 	}

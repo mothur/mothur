@@ -268,12 +268,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option) : Command()  {
                 abort = true;
             }
             
-            if (countfile == "") {
-                if (nameFile == "") {
-                    vector<string> files; files.push_back(fastaFile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
+            
         }
         
         pairedOligos = false;

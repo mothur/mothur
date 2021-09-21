@@ -128,13 +128,6 @@ PhylotypeCommand::PhylotypeCommand(string option) : Command()  {
 				if(label != "all") {  util.splitAtDash(label, labels);  allLines = false;  }
 				else { allLines = true;  }
 			}
-			
-            if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(taxonomyFileName);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-			}
 		}
 	}
 	catch(exception& e) {

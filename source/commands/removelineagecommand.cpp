@@ -219,12 +219,6 @@ RemoveLineageCommand::RemoveLineageCommand(string option) : Command()  {
 		
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option.\n");   abort = true; }			
 			
-			if (countfile == "") {
-                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 	}
 	catch(exception& e) {
