@@ -8,6 +8,7 @@
 
 #include "makecontigscommand.h"
 #include "contigsreport.hpp"
+#include "counttable.h"
 
 //**************************************************************************************************
 
@@ -126,7 +127,7 @@ vector<string> MakeContigsCommand::setParameters(){
         outputTypes["fasta"] = tempOutNames;
         outputTypes["qfile"] = tempOutNames;
         outputTypes["report"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
         
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -142,7 +143,7 @@ string MakeContigsCommand::getHelpString(){
 	try {
 		string helpString = "";
 		helpString += "The make.contigs command reads a file, forward fastq file and a reverse fastq file or forward fasta and reverse fasta files and outputs a fasta file. \n";
-        helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a group file will be created.\n";
+        helpString += "If an oligos file is provided barcodes and primers will be trimmed, and a count file will be created.\n";
         helpString += "If a forward index or reverse index file is provided barcodes be trimmed, and a group file will be created. The oligos parameter is required if an index file is given.\n";
 		helpString += "The make.contigs command parameters are file, ffastq, rfastq, ffasta, rfasta, fqfile, rqfile, oligos, findex, rindex, qfile, format, tdiffs, bdiffs, pdiffs, align, match, mismatch, gapopen, gapextend, insert, deltaq, maxee, allfiles and processors.\n";
 		helpString += "The ffastq and rfastq, file, or ffasta and rfasta parameters are required.\n";
@@ -186,7 +187,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
 
         if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; }
         else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; }
-        else if (type == "group") {  pattern = "[filename],[tag],contigs.groups"; }
+        else if (type == "count") {  pattern = "[filename],[tag],contigs.count_table"; }
         else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
 
@@ -349,9 +350,6 @@ MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
 
             temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "T"; }
 			reorient = util.isTrue(temp);
-
-
-            if (allFiles && (oligosfile == "")) { m->mothurOut("[ERROR]: You can only use the allfiles option with an oligos file.\n"); abort = true; }
         }
 
 	}
@@ -387,9 +385,9 @@ int MakeContigsCommand::execute(){
             map<string, string> vars;
             vars["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
             vars["[tag]"] = "";
-            string outputGroupFileName = getOutputFileName("group",vars);
-            outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
-            createGroupFile(outputGroupFileName, outFastaFile);
+            string outputCountFileName = getOutputFileName("count",vars);
+            outputNames.push_back(outputCountFileName); outputTypes["count"].push_back(outputCountFileName);
+            createCountFile(outputCountFileName, outFastaFile);
         }
 
         //add headers to mismatch file
@@ -437,18 +435,16 @@ int MakeContigsCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFastafile) {
+int MakeContigsCommand::createCountFile(string outputGroupFile, string resultFastafile) {
     try {
-        ofstream outGroup; util.openOutputFile(outputGroupFile, outGroup);
-        for (map<string, string>::iterator itGroup = groupMap.begin(); itGroup != groupMap.end(); itGroup++) {
-            outGroup << itGroup->first << '\t' << itGroup->second << endl; //print group file
-        }
-        outGroup.close();
-
+        
+        CountTable ct; ct.createTable(groupMap);
+        ct.printCompressedTable(outputGroupFile);
+        
         if(allFiles){
             //run split.groups command
             //use unique.seqs to create new name and fastafile
-            string inputString = "fasta=" + resultFastafile + ", group=" + outputGroupFile;
+            string inputString = "fasta=" + resultFastafile + ", count=" + outputGroupFile;
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Generating allfiles... Running command: split.groups(" + inputString + ")\n");
             current->setMothurCalling(true);
@@ -466,7 +462,7 @@ int MakeContigsCommand::createGroupFile(string outputGroupFile, string resultFas
         return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "createGroupFile");
+        m->errorOut(e, "MakeContigsCommand", "createCountFile");
         exit(1);
     }
 }
@@ -2679,7 +2675,7 @@ bool MakeContigsCommand::getOligos(map<int, oligosPair>& pairedPrimers, map<int,
         if (numSpacers != 0) { m->mothurOut("[WARNING]: make.contigs is not setup to remove spacers, ignoring.\n"); }
 
         vector<string> groupNames = oligos.getGroupNames();
-        if (groupNames.size() == 0) { allFiles = 0; allBlank = true;  }
+        if (groupNames.size() == 0) { allFiles = false; allBlank = true;  }
 
         if (allBlank) {
             m->mothurOut("[WARNING]: your oligos file does not contain any group names.  mothur will not create a groupfile.\n"); 
