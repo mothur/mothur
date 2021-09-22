@@ -16,8 +16,8 @@ vector<string> DeconvoluteCommand::setParameters(){
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","fasta-name",false,true,true); parameters.push_back(pfasta);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","name",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","count",false,false,true); parameters.push_back(pcount);
-        CommandParameter pformat("format", "Multiple", "count-name", "name", "", "", "","",false,false, true); parameters.push_back(pformat);
-        CommandParameter poutput("output", "Multiple", "count-name", "name", "", "", "","",false,false, true); parameters.push_back(poutput);
+        CommandParameter pformat("format", "Multiple", "count-name", "count", "", "", "","",false,false, true); parameters.push_back(pformat);
+        CommandParameter poutput("output", "Multiple", "count-name", "count", "", "", "","",false,false, true); parameters.push_back(poutput);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -46,7 +46,7 @@ string DeconvoluteCommand::getHelpString(){
 		helpString += "The unique.seqs command parameters are fasta, name, count and format.  fasta is required, unless there is a valid current fasta file.\n";
         helpString += "The name parameter is used to provide an existing name file associated with the fasta file. \n";
         helpString += "The count parameter is used to provide an existing count file associated with the fasta file. \n";
-        helpString += "The format parameter is used to indicate what type of file you want outputted.  Choices are name and count, default=name unless count file used then default=count.\n";
+        helpString += "The format parameter is used to indicate what type of file you want outputted.  Choices are name and count, default=count unless name file used then default=name.\n";
 		helpString += "The unique.seqs command should be in the following format: \n";
 		helpString += "unique.seqs(fasta=yourFastaFile) \n";	
 		return helpString;
@@ -94,10 +94,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option) : Command()  {
 				else { 	m->mothurOut("You have no current fastafile and the fasta parameter is required.\n");  abort = true; }
 			}else { current->setFastaFile(fastafile); }
 			
-			 
-            if (outputdir == ""){
-				outputdir += util.hasPath(fastafile); 
-			}
+            if (outputdir == ""){ outputdir += util.hasPath(fastafile);  }
 			
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not open") { namefile = ""; abort = true; }
@@ -116,14 +113,14 @@ DeconvoluteCommand::DeconvoluteCommand(string option) : Command()  {
             if(format == "not found"){
                 format = validParameter.valid(parameters, "output");
                 if(format == "not found"){
-                    if (countfile != "") { format = "count";    }
-                    else { format = "name";                     }
+                    if (namefile != "") { format = "name";    }
+                    else { format = "count";                  }
                 }
             }
             
             if ((format != "name") && (format != "count")) {
                 m->mothurOut(format + " is not a valid format option. Options are count or name.");
-                if (countfile == "") { m->mothurOut("I will use name.\n"); format = "name"; }
+                if (countfile == "") { m->mothurOut("I will use count.\n"); format = "count"; }
                 else {  m->mothurOut("I will use count.\n"); format = "count"; }
             }
 			
@@ -174,11 +171,8 @@ int DeconvoluteCommand::execute() {
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		ifstream in; 
-		util.openInputFile(fastafile, in);
-		
-		ofstream outFasta;
-		util.openOutputFile(outFastaFile, outFasta);
+		ifstream in;  util.openInputFile(fastafile, in);
+		ofstream outFasta; util.openOutputFile(outFastaFile, outFasta);
 		
 		map<string, string> sequenceStrings; //sequenceString -> list of names.  "atgc...." -> seq1,seq2,seq3.
 		map<string, string>::iterator itStrings;
@@ -277,7 +271,7 @@ int DeconvoluteCommand::execute() {
         else { util.openOutputFile(outCountFile, outNames); outputTypes["count"].push_back(outCountFile); outputNames.push_back(outCountFile);                }
         
         if ((countfile != "") && (format == "count")) { ct.printHeaders(outNames); }
-        else if ((countfile == "") && (format == "count")) { newCt.printHeaders(outNames); }
+        else if ((countfile == "") && (format == "count")) { newCt.printCompressedHeaders(outNames); }
 		
 		for (int i = 0; i < nameFileOrder.size(); i++) {
 			if (m->getControl_pressed()) { outputTypes.clear(); util.mothurRemove(outFastaFile); outNames.close(); for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); } return 0; }
@@ -296,7 +290,7 @@ int DeconvoluteCommand::execute() {
                     }
                 }else {
                     if (countfile != "") {  ct.printSeq(outNames, itStrings->second);  }
-                    else if (format == "count")  {  newCt.printSeq(outNames, itStrings->second);  }
+                    else if (format == "count")  {  newCt.printCompressedSeq(outNames, itStrings->second);  }
                 }
 			}else{ m->mothurOut("[ERROR]: mismatch in namefile print.\n");  m->setControl_pressed(true); }
 		}

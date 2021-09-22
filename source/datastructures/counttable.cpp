@@ -7,7 +7,30 @@
 //
 
 #include "counttable.h"
+#include "groupmap.h"
 
+/************************************************************/
+//used by tree commands
+int CountTable::createTable(map<string, string>& g) {
+    try {
+        set<string> names; set<string> groups;
+        
+        for (map<string, string>::iterator it = g.begin(); it != g.end(); it++) {
+            
+            if (m->getControl_pressed()) { break; }
+            
+            names.insert(it->first);
+            groups.insert(it->second);
+        }
+        
+        createTable(names, g, groups);
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "createTable");
+        exit(1);
+    }
+}
 /************************************************************/
 //used by tree commands
 int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>& gs) {
@@ -962,45 +985,15 @@ vector<string> CountTable::printTable(string file, bool compressedFormat) {
 //zeroed seqs are not printed
 vector<string> CountTable::printCompressedTable(string file, vector<string> groupsToPrint) {
     try {
-        ofstream out;
-        util.openOutputFile(file, out);
+        ofstream out; util.openOutputFile(file, out);
         
         vector<string> namesInTable;
-        
         bool pickedGroups = false;
-        set<int> selectedGroupsIndicies;
         if (groupsToPrint.size() != 0) { if (hasGroups) { pickedGroups = true; } } //if no groups selected, print all groups
         
+        set<int> selectedGroupsIndicies = printCompressedHeaders(out, groupsToPrint);
+        
         if (total != 0) {
-            if (hasGroups) {
-                
-                map<int, string> reverse;
-                for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) { reverse[it->second] = it->first; }
-                
-                map<int, string>::iterator it = reverse.begin();
-                string group1Name = it->second;
-                if (pickedGroups) { //find selected groups indicies
-                    for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
-                        if (util.inUsersGroups(it->second, groupsToPrint)) { group1Name = it->second; break; }
-                    }
-                }
-                
-                out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group " + group1Name + "." << endl;
-                out << "#";
-                
-                for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
-                    if (pickedGroups) { //find selected groups indicies
-                        if (util.inUsersGroups(it->second, groupsToPrint)) {
-                            selectedGroupsIndicies.insert(it->first);
-                            
-                            out << it->first+1 << "," << it->second << "\t";
-                        }
-                    }else { out << it->first+1 << "," << it->second << "\t"; }
-                }
-                out << endl;
-            }
-            
-            printHeaders(out, groupsToPrint);
             
             map<int, string> reverse; //use this to preserve order
             for (map<string, int>::iterator it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
@@ -1237,6 +1230,52 @@ int CountTable::printHeaders(ofstream& out, vector<string> selectedGroups) {
 	}
 }
 /************************************************************/
+set<int> CountTable::printCompressedHeaders(ofstream& out, vector<string> groupsToPrint) {
+    try {
+        bool pickedGroups = false;
+        set<int> selectedGroupsIndicies;
+        if (groupsToPrint.size() != 0) { if (hasGroups) { pickedGroups = true; } } //if no groups selected, print all groups
+        
+        if (total != 0) {
+            if (hasGroups) {
+                
+                map<int, string> reverse;
+                for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) { reverse[it->second] = it->first; }
+                
+                map<int, string>::iterator it = reverse.begin();
+                string group1Name = it->second;
+                if (pickedGroups) { //find selected groups indicies
+                    for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
+                        if (util.inUsersGroups(it->second, groupsToPrint)) { group1Name = it->second; break; }
+                    }
+                }
+                
+                out << "#Compressed Format: groupIndex,abundance. For example 1,6 would mean the read has an abundance of 6 for group " + group1Name + "." << endl;
+                out << "#";
+                
+                for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
+                    if (pickedGroups) { //find selected groups indicies
+                        if (util.inUsersGroups(it->second, groupsToPrint)) {
+                            selectedGroupsIndicies.insert(it->first);
+                            
+                            out << it->first+1 << "," << it->second << "\t";
+                        }
+                    }else { out << it->first+1 << "," << it->second << "\t"; }
+                }
+                out << endl;
+            }
+            
+            printHeaders(out, groupsToPrint);
+        }
+        
+        return selectedGroupsIndicies;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printCompressedHeaders");
+        exit(1);
+    }
+}
+/************************************************************/
 int CountTable::printSeq(ofstream& out, string seqName) {
     try {
 		map<string, int>::iterator it = indexNameMap.find(seqName);
@@ -1258,7 +1297,67 @@ int CountTable::printSeq(ofstream& out, string seqName) {
 		exit(1);
 	}
 }
-
+/************************************************************/
+int CountTable::printCompressedSeq(ofstream& out, string seqName, vector<string> groupsToPrint) {
+    try {
+        map<string, int>::iterator itName = indexNameMap.find(seqName);
+        if (itName == indexNameMap.end()) {
+            m->mothurOut("[ERROR]: " + seqName + " is not in your count table. Please correct.\n"); m->setControl_pressed(true);
+        }else {
+            int i = itName->second;
+            if (totals[i] != 0) {
+                
+                if (hasGroups) {
+                    bool pickedGroups = false;
+                    if (groupsToPrint.size() != 0) { if (hasGroups) { pickedGroups = true; } } //if no groups selected, print all groups
+             
+                    if (pickedGroups) {
+                        
+                        map<int, string> reverse; //index to group
+                        for (map<string, int>::iterator it = indexGroupMap.begin(); it !=indexGroupMap.end(); it++) { reverse[it->second] = it->first; }
+                        
+                        set<int> selectedGroupsIndicies;
+                        for (map<int, string>::iterator it = reverse.begin(); it != reverse.end(); it++) {
+                            if (pickedGroups) { //find selected groups indicies
+                                if (util.inUsersGroups(it->second, groupsToPrint)) {
+                                    selectedGroupsIndicies.insert(it->first);
+                                }
+                            }
+                        }
+                        
+                        string groupOutput = "";
+                        long long thisTotal = 0;
+                        for (int j = 0; j < counts[i].size(); j++) {
+                            
+                            if (selectedGroupsIndicies.count(counts[i][j].group) != 0) { //this is a group we want
+                                groupOutput += '\t' + toString(counts[i][j].group+1) + ',' + toString(counts[i][j].abund);
+                                thisTotal += counts[i][j].abund;
+                            }
+                        }
+                        
+                        if (thisTotal != 0) {
+                            out << itName->first << '\t' << thisTotal << groupOutput << endl;
+                        }
+                    }
+                    else {
+                        out << itName->first << '\t' << totals[i];
+                        
+                        for (int j = 0; j < counts[i].size(); j++) {
+                            out  << '\t' << counts[i][j].group+1 << ',' << counts[i][j].abund;
+                        }
+                    }
+                }else { out << itName->first << '\t' << totals[i]; }
+                
+                out << endl;
+            }
+        }
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CountTable", "printCompressedSeq");
+        exit(1);
+    }
+}
 /************************************************************/
 //group counts for a seq
 vector<int> CountTable::getGroupCounts(string seqName) {
