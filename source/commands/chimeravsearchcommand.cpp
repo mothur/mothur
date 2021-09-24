@@ -329,7 +329,7 @@ void driver(vsearchData* params){
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--db"));
-            cPara.push_back(params->util.mothurConvert(params->templatefile));
+            cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--uchime_ref"));
