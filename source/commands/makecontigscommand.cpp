@@ -115,7 +115,11 @@ vector<string> MakeContigsCommand::setParameters(){
 				CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pformat("format", "Multiple", "sanger-illumina-solexa-illumina1.8+", "illumina1.8+", "", "", "","",false,false,true); parameters.push_back(pformat);
         CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
-		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
+        CommandParameter pmaxambig("maxambig", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxambig);
+        CommandParameter pmaxhomop("maxhomop", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxhomop);
+        CommandParameter pmaxlength("maxlength", "Number", "", "-1", "", "", "","",false,false); parameters.push_back(pmaxlength);
+
+        CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 
@@ -171,6 +175,9 @@ string MakeContigsCommand::getHelpString(){
         helpString += "The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n";
 
         helpString += "The trimoverlap parameter allows you to trim the sequences to only the overlapping section. The default is F.\n";
+        helpString += "The maxambig parameter allows you to set the maximum number of ambiguous bases allowed. The default is -1, meaning ignore.\n";
+        helpString += "The maxhomop parameter allows you to set a maximum homopolymer length. The default is -1, meaning ignore.\n";
+        helpString += "The maxlength parameter allows you to set a maximum length of your sequences. The default is -1, meaning ignore.\n";
         helpString += "The make.contigs command should be in the following format: \n";
 		helpString += "make.contigs(ffastq=yourForwardFastqFile, rfastq=yourReverseFastqFile, align=yourAlignmentMethod) \n";
 		return helpString;
@@ -350,6 +357,18 @@ MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
 
             temp = validParameter.valid(parameters, "checkorient");		if (temp == "not found") { temp = "T"; }
 			reorient = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "maxambig");        if (temp == "not found") { temp = "-1"; }
+            util.mothurConvert(temp, maxAmbig);
+
+            temp = validParameter.valid(parameters, "maxhomop");        if (temp == "not found") { temp = "-1"; }
+            util.mothurConvert(temp, maxHomoP);
+
+            temp = validParameter.valid(parameters, "maxlength");    if (temp == "not found") { temp = "-1"; }
+            util.mothurConvert(temp, maxLength);
+            
+            if ((maxLength == -1) && (maxLength == -1) && (maxLength == -1)) { screenSequences = false; }
+            else { screenSequences = true; }
         }
 
 	}
@@ -401,9 +420,9 @@ int MakeContigsCommand::execute(){
         itTypes = outputTypes.find("fasta");
         if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; current->setFastaFile(currentFasta); } }
 
-        string currentGroup = "";
-        itTypes = outputTypes.find("group");
-        if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentGroup = (itTypes->second)[0]; current->setGroupFile(currentGroup); } }
+        string currentCount = "";
+        itTypes = outputTypes.find("count");
+        if (itTypes != outputTypes.end()) { if ((itTypes->second).size() != 0) { currentCount = (itTypes->second)[0]; current->setCountFile(currentCount); } }
 
         string currentQual = "";
         itTypes = outputTypes.find("qfile");
@@ -680,9 +699,9 @@ struct contigsData {
     OutputWriter* misMatchesFile;
     string align, group, format;
     float match, misMatch, gapOpen, gapExtend;
-    bool gz, reorient, trimOverlap, createGroupFromOligos, createGroupFromFilePairs, makeQualFile;
+    bool gz, reorient, trimOverlap, createGroupFromOligos, createGroupFromFilePairs, makeQualFile, screenSequences;
     char delim;
-    int nameType, offByOneTrimLength, pdiffs, bdiffs, tdiffs, kmerSize, insert, deltaq, maxee;
+    int nameType, offByOneTrimLength, pdiffs, bdiffs, tdiffs, kmerSize, insert, deltaq, maxee, maxAmbig, maxHomoP, maxLength;
     vector<string> inputFiles, qualOrIndexFiles, outputNames;
     set<string> badNames;
     linePair linesInput;
@@ -730,7 +749,7 @@ struct contigsData {
         makeQualFile = true;
         if (trimQFileName == NULL) { makeQualFile = false; }
     }
-    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, map<int, oligosPair> repbr, map<int, oligosPair> reppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, bool cgff, string gp) {
+    void setVariables(bool isgz, char de, int nt, int offby, map<int, oligosPair> pbr, map<int, oligosPair> ppr, map<int, oligosPair> rpbr, map<int, oligosPair> rppr, map<int, oligosPair> repbr, map<int, oligosPair> reppr, vector<string> priNameVector, vector<string> barNameVector, bool ro, int pdf, int bdf, int tdf, string al, float ma, float misMa, float gapO, float gapE, int thr, int delt, double maxe, int km, string form, bool to, bool cfg, bool cgff, string gp, bool screen, int maxH, int maxL, int maxAm) {
         gz = isgz;
         delim = de;
         nameType = nt;
@@ -761,6 +780,10 @@ struct contigsData {
         maxee = maxe;
         format = form;
         trimOverlap = to;
+        screenSequences = screen;
+        maxHomoP = maxH;
+        maxLength = maxL;
+        maxAmbig = maxAm;
     }
     void copyVariables(contigsData* copy) {
         gz = copy->gz;
@@ -793,6 +816,10 @@ struct contigsData {
         maxee = copy->maxee;
         format = copy->format;
         trimOverlap = copy->trimOverlap;
+        screenSequences = copy->screenSequences;
+        maxHomoP = copy->maxHomoP;
+        maxLength = copy->maxLength;
+        maxAmbig = copy->maxAmbig;
     }
 };
 /**************************************************************************************************/
@@ -1383,6 +1410,27 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
     }
 }
 /**************************************************************************************************/
+void screenSequence(string& contig, string& trashCode, contigsData* params) {
+    try {
+        //if you failed before screening, don't bother screening
+        if (trashCode.length() != 0) { return; }
+        else {
+            bool goodSeq = true;        //    innocent until proven guilty
+            
+            Sequence currSeq("dummy", contig);
+            
+            if(params->maxAmbig != -1 && params->maxAmbig <    currSeq.getAmbigBases())        {    goodSeq = false;    trashCode += "ambig|";  }
+            if(params->maxHomoP != -1 && params->maxHomoP < currSeq.getLongHomoPolymer())    {    goodSeq = false;    trashCode += "homop|";  }
+            if(params->maxLength != -1 && params->maxLength < currSeq.getNumBases())        {    goodSeq = false;    trashCode += ">length|";}
+        }
+        
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "MakeContigsCommand", "screenSequence");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 #ifdef USE_BOOST
 //ignore = read(fSeq, rSeq, fQual, rQual, savedFQual, savedRQual, findexBarcode, rindexBarcode, delim,  inFF, inRF, inFQ, inRQ);
 bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*& rQual, Sequence& findexBarcode, Sequence& rindexBarcode, char delim, boost::iostreams::filtering_istream& inFF, boost::iostreams::filtering_istream& inRF, boost::iostreams::filtering_istream& inFQ, boost::iostreams::filtering_istream& inRQ, string thisfqualindexfile, string thisrqualindexfile, string format, int nameType, int offByOneTrimLength, MothurOut* m) {
@@ -1793,6 +1841,8 @@ void driverContigs(contigsData* params){
 								}
 
 								if(expected_errors > params->maxee) { trashCode += 'e' ;}
+                
+                if (params->screenSequences) { screenSequence(contig, trashCode, params); }
 
                 if(trashCode.length() == 0){
                     string thisGroup = params->group; //group from file file
@@ -1981,7 +2031,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
 
             int spot = (i+1)*2;
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter, fileInputs, qualOrIndexFiles, lines[spot], lines[spot+1], qLines[spot], qLines[spot+1]);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group);
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group, screenSequences, maxHomoP, maxLength, maxAmbig);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new std::thread(driverContigs, dataBundle));
@@ -1997,7 +2047,7 @@ unsigned long long MakeContigsCommand::createProcesses(vector<string> fileInputs
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter, fileInputs, qualOrIndexFiles, lines[0], lines[1], qLines[0], qLines[1]);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group);
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, group, screenSequences, maxHomoP, maxLength, maxAmbig);
 
         driverContigs(dataBundle);
 
@@ -2186,7 +2236,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             }
 
             contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMismatchWriter);
-            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "");
+            dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "", screenSequences, maxHomoP, maxLength, maxAmbig);
             groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[i+1].start, startEndIndexes[i+1].end, dataBundle, file2Groups);
             data.push_back(groupDataBundle);
 
@@ -2203,7 +2253,7 @@ unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<stri
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
         }
         contigsData* dataBundle = new contigsData(threadFastaTrimWriter, threadFastaScrapWriter, threadQTrimWriter, threadQScrapWriter, threadMisMatchWriter);
-        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "");
+        dataBundle->setVariables(gz, delim, nameType, offByOneTrimLength, pairedBarcodes, pairedPrimers, rpairedBarcodes, rpairedPrimers, revpairedBarcodes, revpairedPrimers, primerNames, barcodeNames, reorient, pdiffs, bdiffs, tdiffs, align, match, misMatch, gapOpen, gapExtend, insert, deltaq, maxee, kmerSize, format, trimOverlap, createOligosGroup, createFileGroup, "", screenSequences, maxHomoP, maxLength, maxAmbig);
         groupContigsData* groupDataBundle = new groupContigsData(fileInputs, startEndIndexes[0].start, startEndIndexes[0].end, dataBundle, file2Groups);
         driverContigsGroups(groupDataBundle);
 

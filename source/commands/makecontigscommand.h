@@ -65,10 +65,10 @@ private:
 #define offByOne  3
 
     char delim;
-    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz, makeQualFile;
+    bool abort, allFiles, trimOverlap, createFileGroup, createOligosGroup, makeCount, noneOk, reorient, gz, makeQualFile, screenSequences;
     string  ffastqfile, rfastqfile, align, oligosfile, rfastafile, ffastafile, rqualfile, fqualfile, findexfile, rindexfile, file, format, inputDir;
 	float match, misMatch, gapOpen, gapExtend, maxee;
-	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, nameType, offByOneTrimLength;
+	int processors, longestBase, insert, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, deltaq, kmerSize, nameType, offByOneTrimLength, maxAmbig, maxHomoP, maxLength;
     vector<string> outputNames;
     set<string> badNames;
 	map<string, int> groupCounts;
