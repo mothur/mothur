@@ -28,8 +28,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
         //bool aligned = false;
         int tempLength = 0;
         
-        ifstream fastaFile;
-        util.openInputFile(fastaFileName, fastaFile);
+        ifstream fastaFile; util.openInputFile(fastaFileName, fastaFile);
         
         while (!fastaFile.eof()) {
             Sequence temp(fastaFile);  util.gobble(fastaFile);

@@ -120,6 +120,7 @@ GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         outputTypes["fasta"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
         
         if (dupsFile != "") {
             if (dupsFileType == "count") {
