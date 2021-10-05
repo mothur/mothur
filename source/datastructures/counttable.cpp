@@ -23,7 +23,7 @@ int CountTable::createTable(map<string, string>& g) {
             groups.insert(it->second);
         }
         
-        createTable(names, g, groups);
+        return (createTable(names, g, groups));
         
     }
     catch(exception& e) {

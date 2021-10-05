@@ -7,6 +7,7 @@
 //
 
 #include "pcrseqscommand.h"
+#include "sortseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> PcrSeqsCommand::setParameters(){	
@@ -216,8 +217,7 @@ int PcrSeqsCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
-        fileAligned = true; pairedOligos = false;
+        long start = time(NULL); fileAligned = true; pairedOligos = false;
         
         string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -317,6 +317,11 @@ int PcrSeqsCommand::execute(){
         }
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { preserveOrder((itTypes->second)[0]);  }
+        }
+            
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
         
 		m->mothurOut("\nOutput File Names: \n");
@@ -1018,6 +1023,55 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
         m->errorOut(e, "PcrSeqsCommand", "adjustDots");
         exit(1);
     }
+}
+//***************************************************************************************************************
+void PcrSeqsCommand::preserveOrder(string outputfile){
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        string orderAccnosFile = thisOutputDir + util.getRootName(util.getSimpleName(fastafile)) + "order.accnos";
+        
+        ofstream out; util.openOutputFile(orderAccnosFile, out);
+        ifstream in; util.openInputFile(fastafile, in);
+        
+        while (!in.eof()) {
+            if (m->getControl_pressed()) { break; }
+            
+            Sequence seq(in); util.gobble(in);
+            
+            if (seq.getName() != "") {
+                out << seq.getName() << endl;
+            }
+        }
+        in.close();
+        out.close();
+        
+        //run sort.seqs
+        string inputString = "fasta=" + outputfile + ", accnos=" + orderAccnosFile;
+        
+        m->mothurOut("/******************************************/\n");
+        m->mothurOut("\nRunning command: sort.seqs(" + inputString + ")\n");
+        current->setMothurCalling(true);
+        
+        Command* sortSeqsCommand = new SortSeqsCommand(inputString);
+        sortSeqsCommand->execute();
+        
+        string tempFastafile = sortSeqsCommand->getOutputFiles()["fasta"][0];
+        util.mothurRemove(outputfile);
+        util.renameFile(tempFastafile, outputfile);
+        util.mothurRemove(orderAccnosFile);
+        
+        delete sortSeqsCommand;
+        current->setMothurCalling(false);
+        
+        m->mothurOut("/******************************************/\n");
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "PcrSeqsCommand", "preserveOrder");
+        exit(1);
+    }
+    
 }
 //***************************************************************************************************************
 Sequence PcrSeqsCommand::readEcoli(){

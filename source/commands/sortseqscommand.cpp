@@ -149,7 +149,7 @@ int SortSeqsCommand::execute(){
             vector<string> temp;
             util.readAccnos(accnosfile, temp);
             for (int i = 0; i < temp.size(); i++) {  names[temp[i]] = i;  }
-            m->mothurOut("\nUsing " + accnosfile + " to determine the order. It contains " + toString(temp.size()) + " representative sequences.\n");	
+            m->mothurOut("\nUsing " + accnosfile + " to determine the order. It contains " + toString(temp.size()) + " sequences.\n");	
         }
         
 		if (fastafile != "")		{		readFasta();	}
