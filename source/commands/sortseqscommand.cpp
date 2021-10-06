@@ -214,11 +214,8 @@ int SortSeqsCommand::readFasta(){
 		string outputFileName = getOutputFileName("fasta", variables);
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(fastafile, in);
 		string name;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -326,7 +323,9 @@ int SortSeqsCommand::readFasta(){
                     if (name != "") {
                         map<string, int>::iterator it = names.find(name);
                         if (it != names.end()) { //we found it, so put it in the vector in the right place.
-                            seqs[it->second] = currSeq;  
+                            if (it->second > (seqs.size()-1)) {
+                                m->mothurOut("[WARNING]: Ignoring " + name + ". Could you have duplicate names in your fasta file?\n");
+                            }else { seqs[it->second] = currSeq;  }
                         }else { //if we cant find it then add it to the end
                             names[name] = seqs.size();
                             seqs.push_back(currSeq);
