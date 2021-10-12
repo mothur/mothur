@@ -92,8 +92,8 @@ class CurrentFile {
         string getProcessors()		{ lock_guard<std::mutex> guard(currentProtector); return processors;		}
         int setProcessors(string p);
         string getProgramPath()     { lock_guard<std::mutex> guard(currentProtector); return mothurProgramPath;  }
-        string getDefaultPath() { lock_guard<std::mutex> guard(currentProtector); return defaultPath; }
-        void setDefaultPath(string);
+        vector<string> getDefaultPath() { lock_guard<std::mutex> guard(currentProtector); return defaultPath; }
+        void setDefaultPath(vector<string>);
         string getTestFilePath() { lock_guard<std::mutex> guard(currentProtector); return testFilePath; }
         void setTestFilePath(string);
         string getBlastPath() { lock_guard<std::mutex> guard(currentProtector); return blastPath; }
@@ -113,7 +113,7 @@ class CurrentFile {
         void setReleaseDate(string r) { lock_guard<std::mutex> guard(currentProtector); releaseDate = r; }
         string getVersion() { lock_guard<std::mutex> guard(currentProtector); return version; }
         void setVersion(string r) { lock_guard<std::mutex> guard(currentProtector); version = r; }
-        vector<string> getLocations() { lock_guard<std::mutex> guard(currentProtector); vector<string> locations; locations.push_back(inputDir); locations.push_back(outputDir); locations.push_back(defaultPath); locations.push_back(mothurProgramPath); locations.push_back(toolsPath); return locations; }
+        vector<string> getLocations() { lock_guard<std::mutex> guard(currentProtector); vector<string> locations; locations.push_back(inputDir); locations.push_back(outputDir); locations.push_back(mothurProgramPath); locations.push_back(toolsPath); for (int i = 0; i < defaultPath.size(); i++) { locations.push_back(defaultPath[i]); }  return locations; }
     
 
         bool getMothurCalling()                         { lock_guard<std::mutex> guard(currentProtector); return mothurCalling;             }
@@ -133,14 +133,14 @@ class CurrentFile {
 		MothurOut* m;
         Utils util;
         
-        vector<string> paths; //paths stored in PATH environment variables
+        vector<string> paths, defaultPath; //paths stored in PATH environment variables
         string logFileName, mothurProgramPath, homePath;
-        string defaultPath, outputDir, blastPath, inputDir;
+        string outputDir, blastPath, inputDir;
         string releaseDate, version;
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, clrfile;
         string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile, toolsPath;
-    bool mothurCalling;
+        bool mothurCalling;
 		
         void setGroupMode(string t)                     { groupMode = t;                    }
     
@@ -151,7 +151,7 @@ class CurrentFile {
         std::mutex currentProtector;
 		CurrentFile() {
             m = MothurOut::getInstance();
-            defaultPath=""; blastPath=""; toolsPath=""; testFilePath = "";
+            blastPath=""; toolsPath=""; testFilePath = "";
             inputDir = ""; outputDir= "";
             accnosfile = "";
             filefile = "";

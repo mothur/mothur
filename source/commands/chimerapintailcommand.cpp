@@ -149,7 +149,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option) : Command()  {
 						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time.\n"); consfile = tempConsFile;  FileTest.close();
 					}
 				}else {
-					string tempConsFile = current->getDefaultPath() + util.getRootName(util.getSimpleName(templatefile)) + "freq";
+					string tempConsFile = current->getDefaultPath()[0] + util.getRootName(util.getSimpleName(templatefile)) + "freq";
 					ifstream FileTest2(tempConsFile.c_str());
 					if(FileTest2){
                         string line = util.getline(FileTest2);
@@ -307,7 +307,7 @@ int ChimeraPintailCommand::lookForShortcutFiles(string baseName){
                 m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time.\n"); quanfile = tempQuan;  FileTest.close();
             }
         }else {
-            string tryPath = current->getDefaultPath();
+            string tryPath = current->getDefaultPath()[0];
             string tempQuan = "";
             if ((!filter) && (maskfile == "")) {
                 tempQuan = tryPath + util.getRootName(util.getSimpleName(baseName)) + "pintail.quan";

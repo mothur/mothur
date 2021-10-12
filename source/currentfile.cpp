@@ -238,15 +238,19 @@ int CurrentFile::setProcessors(string p)  {
     }
 }
 /*********************************************************************************************/
-void CurrentFile::setDefaultPath(string pathname)  {
+void CurrentFile::setDefaultPath(vector<string> pathnames)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);
         
-        if (pathname != "") { //add / to name if needed
-            string lastChar = pathname.substr(pathname.length()-1);
-            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        defaultPath.clear();
+        for (int i = 0; i < pathnames.size(); i++) {
+            string pathname = pathnames[i];
+            if (pathname != "") { //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            defaultPath.push_back(util.getFullPathName(pathname));
         }
-        defaultPath = util.getFullPathName(pathname);
     }
     catch(exception& e) {
         m->errorOut(e, "CurrentFile", "setDefaultPath");

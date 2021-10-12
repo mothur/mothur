@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> SetDirectoryCommand::setParameters(){	
 	try {
-		CommandParameter ptempdefault("tempdefault", "String", "", "", "", "", "","",false,false); parameters.push_back(ptempdefault);
+		CommandParameter ptempdefault("mothurfiles", "String", "", "", "", "", "","",false,false); parameters.push_back(ptempdefault);
         CommandParameter pblast("blastdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pblast);
         CommandParameter ptools("tools", "String", "", "", "", "", "","",false,false); parameters.push_back(ptools);
         CommandParameter pdebug("debug", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdebug);
@@ -46,7 +46,7 @@ string SetDirectoryCommand::getHelpString(){
         helpString += "The set.dir command can also be used to run mothur in debug mode.\n";
         helpString += "The set.dir command can also be used to seed random.\n";
         helpString += "The set.dir command can also be used to set the modifynames parameter. Default=t, meaning if your sequence names contain ':' change them to '_' to avoid issues while making trees.  modifynames=F will leave sequence names as they are.\n";
-		helpString += "The set.dir command parameters are input, output, tempdefault and debug and one is required.\n";
+		helpString += "The set.dir command parameters are input, output, mothurfiles and debug and one is required.\n";
         helpString += "To run mothur in debug mode set debug=true. Default debug=false.\n";
         helpString += "To seed random set seed=yourRandomValue. By default mothur seeds random with the start time.\n";
 		helpString += "To return the output to the same directory as the input files you may enter: output=clear.\n";
@@ -54,8 +54,8 @@ string SetDirectoryCommand::getHelpString(){
         helpString += "To set the blast location to the directory where the blast executables are located you may enter: blastdir=yourBlastLocation.\n";
 		helpString += "To set the output to the directory where mothur.exe is located you may enter: output=default.\n";
 		helpString += "To set the input to the directory where mothur.exe is located you may enter: input=default.\n";
-		helpString += "To return the tempdefault to the default you provided at compile time you may enter: tempdefault=clear.\n";
-		helpString += "To set the tempdefault to the directory where mothur.exe is located you may enter: tempdefault=default.\n";
+		helpString += "To return the mothurfiles location to the default you provided at compile time you may enter:  mothurfiles=clear.\n";
+		helpString += "To set the tempdefault to the directory where mothur.exe is located you may enter: mothurfiles=default.\n";
 		helpString += "The set.dir command should be in the following format: set.dir(output=yourOutputDirectory, input=yourInputDirectory, tempdefault=yourTempDefault).\n";
 		helpString += "Example set.outdir(output=/Users/lab/desktop/outputs, input=/Users/lab/desktop/inputs).\n";
 		return helpString;
@@ -84,7 +84,7 @@ SetDirectoryCommand::SetDirectoryCommand(string option) : Command()  {
 			input = validParameter.validPath(parameters, "input");
 			if (input == "not found") {  input = "";  }
 			
-			tempdefault = validParameter.validPath(parameters, "tempdefault");
+			tempdefault = validParameter.validPath(parameters, "mothurfiles");
 			if (tempdefault == "not found") {  tempdefault = "";  }
             
             blastLocation = validParameter.validPath(parameters, "blastdir");
@@ -175,32 +175,70 @@ int SetDirectoryCommand::execute(){
             //set default
             if (tempdefault == "clear") {
 #ifdef MOTHUR_FILES
-				string temp = MOTHUR_FILES;
-				m->mothurOut("tempDefault=" + temp+ "\n");
-				current->setDefaultPath(temp);
+				string defaultPath = MOTHUR_FILES;
+                vector<string> defaultPaths;
+                vector<string> temp; util.splitAtChar(defaultPath, temp, ';');
+                
+                for (int i = 0; i < temp.size(); i++) {
+                    string defaultPath = util.removeQuotes(temp[i]);
+                    //add / to name if needed
+                    string lastChar = defaultPath.substr(defaultPath.length()-1);
+                    if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            
+                    defaultPath = util.getFullPathName(defaultPath);
+                    defaultPaths.push_back(defaultPath);
+                }
+                
+                if (defaultPaths.size() != 0) {
+                    m->mothurOut("mothurfiles=\n");
+                    for (int i = 0; i < defaultPaths.size(); i++) {
+                        m->mothurOut("\t" + defaultPaths[i] + "\n");
+                    }
+                    m->mothurOutEndLine();
+                }
+
+				current->setDefaultPath(defaultPaths);
 #else
-				string temp = "";
 				m->mothurOut("No default directory defined at compile time.\n"); 
-				current->setDefaultPath(temp);
+				current->setDefaultPath(nullVector);
 #endif
             }else if (tempdefault == "") {  //do nothing
             }else if (tempdefault == "default") {
                 string tempdefault = current->getProgramPath();
-                //tempdefault = exepath.substr(0, (exepath.find_last_of('m')));
                 
-                m->mothurOut("tempDefault=" + tempdefault+ "\n");
-                current->setDefaultPath(tempdefault);
+                m->mothurOut("mothurfiles=" + tempdefault+ "\n");
+                vector<string> temp; temp.push_back(tempdefault);
+                current->setDefaultPath(temp);
             }else {
                 tempdefault = util.removeQuotes(tempdefault);
-                if (util.mkDir(tempdefault)) {
-                    m->mothurOut("tempDefault=" + tempdefault+ "\n");
-                    current->setDefaultPath(tempdefault);
+                vector<string> defaultPaths;
+                vector<string> temp; util.splitAtChar(tempdefault, temp, ';');
+                
+                for (int i = 0; i < temp.size(); i++) {
+                    string defaultPath = util.removeQuotes(temp[i]);
+                    //add / to name if needed
+                    string lastChar = defaultPath.substr(defaultPath.length()-1);
+                    if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            
+                    defaultPath = util.getFullPathName(defaultPath);
+                    
+                    if (util.mkDir(defaultPath)) { defaultPaths.push_back(defaultPath); }
+                }
+            
+                
+                if (defaultPaths.size() != 0) {
+                    m->mothurOut("mothurfiles=\n");
+                    for (int i = 0; i < defaultPaths.size(); i++) {
+                        m->mothurOut("\t" + defaultPaths[i] + "\n");
+                    }
+                    m->mothurOutEndLine();
+                    current->setDefaultPath(defaultPaths);
                 }
             }
             
             //set default
             if ((toolsLocation == "default") || (toolsLocation == "clear")){
-#ifdef MOTHUR_FILES
+#ifdef MOTHUR_TOOLS
                 string temp = MOTHUR_TOOLS;
                 m->mothurOut("tools=" + temp+ "\n");
                 current->setToolsPath(temp);

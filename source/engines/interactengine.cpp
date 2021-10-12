@@ -16,7 +16,6 @@ InteractEngine::InteractEngine(string tpath, map<string, string> ev) : Engine(tp
     if (m->getLogFileName() == "") {
         time_t ltime = time(NULL); /* calendar time */
         string outputPath = current->getOutputDir();
-        //if (outputPath == "") { outputPath = current->getDefaultPath();  }
         string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
         m->setLogFileName(logFileName, false);
         m->mothurOut("\n");

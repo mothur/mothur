@@ -589,9 +589,8 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
         filename = getFullPathName(filename);
         string inputDir = locations[0];
         string outputDir = locations[1];
-        string defaultPath = locations[2];
-        string mothurPath = locations[3];
-        string mothurToolsPath = locations[4];
+        string mothurPath = locations[2];
+        string mothurToolsPath = locations[3];
 
         bool ableToOpen;
         ifstream in;
@@ -618,14 +617,19 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
             }
         }
 
-
-        //if you can't open it, try default location
+        //if you can't open it, try default locations
         if (!ableToOpen) {
-            if (defaultPath != "") { //default path is set
-                string tryPath = defaultPath + getSimpleName(filename);
-                m->mothurOut("Unable to open " + filename + ". Trying default " + tryPath+ ".\n");
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 4; i < locations.size(); i++) {
+                string defaultPath = locations[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_FILES directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
@@ -2172,20 +2176,26 @@ string Utils::getExtension(string longName){
     }
 }
 /***********************************************************************/
-bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS){
+bool Utils::mothurInitialPrep(vector<string>& defaultPaths, string& tools, string& mothurVersion, string& releaseDate, string& OS){
     try {
         
         string lastChar = "";
+        defaultPaths.clear();
         #ifdef MOTHUR_FILES
-            defaultPath = MOTHUR_FILES;
-            defaultPath = removeQuotes(defaultPath);
-            //add / to name if needed
-            lastChar = defaultPath.substr(defaultPath.length()-1);
-            if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            string defaultPath = MOTHUR_FILES;
         
-            defaultPath = getFullPathName(defaultPath);
-        #else
-            defaultPath = "";
+            vector<string> temp; splitAtChar(defaultPath, temp, ';');
+            
+            for (int i = 0; i < temp.size(); i++) {
+                defaultPath = removeQuotes(temp[i]);
+                //add / to name if needed
+                lastChar = defaultPath.substr(defaultPath.length()-1);
+                if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+        
+                defaultPath = getFullPathName(defaultPath);
+                defaultPaths.push_back(defaultPath);
+            }
+        
         #endif
         
         #ifdef MOTHUR_TOOLS
