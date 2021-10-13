@@ -75,6 +75,13 @@ public:
                 pos = nextCommand.find("$"+it->first);
             }
         }
+        
+        //replace mothurhome with mothur executable location
+        unsigned long pos = nextCommand.find("mothurhome");
+        while (pos != string::npos) { //allow for multiple uses of mothurhome in a single command
+            nextCommand.replace(pos,10,current->getProgramPath()); //
+            pos = nextCommand.find("mothurhome");
+        }
     }
     
     virtual string findType(string nextCommand) {

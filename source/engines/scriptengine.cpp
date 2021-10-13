@@ -142,8 +142,10 @@ string ScriptEngine::getNextCommand(string& commandString) {
         }else { //assume command, look for environmental variables to replace
             
             int evPos = nextcommand.find_first_of('$');
-            if (evPos == string::npos) { }//no '$' , nothing to do
-            else { replaceVariables(nextcommand); }
+            if (evPos == string::npos) { //no '$' , check for mothurhome
+                evPos = nextcommand.find("mothurhome");
+                if (evPos != string::npos) { replaceVariables(nextcommand); }
+            }else { replaceVariables(nextcommand); }
         }
         
         if (m->getDebug()) {

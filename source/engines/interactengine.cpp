@@ -147,8 +147,10 @@ string InteractEngine::getCommand()  {
         }else { //assume command, look for environmental variables to replace
             
             int evPos = returnCommand.find_first_of('$');
-            if (evPos == string::npos) { }//no '$' , nothing to do
-            else { replaceVariables(returnCommand); }
+            if (evPos == string::npos) { //no '$' , check for mothurhome
+                evPos = returnCommand.find("mothurhome");
+                if (evPos != string::npos) { replaceVariables(returnCommand); }
+            }else { replaceVariables(returnCommand); }
         }
              
         if (m->getDebug()) {
