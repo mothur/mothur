@@ -49,7 +49,7 @@ public:
             
             //if you haven't set your own location
             #ifdef MOTHUR_TOOLS
-                current->setBlastPath(current->getToolsPath());
+                current->setBlastPath((current->getToolsPath())[0]);
             #endif
             
             start = time(NULL);

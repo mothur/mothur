@@ -258,13 +258,12 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
 			
             vector<string> versionOutputs;
             bool foundTool = false;
-            string path = current->getProgramPath();
             string programName = "uchime"; programName += EXECUTABLE_EXT;
             
             uchimeLocation = validParameter.validFile(parameters, "uchime");
             if (uchimeLocation == "not found") {
                 uchimeLocation = "";
-                foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
+                foundTool = util.findTool(programName, uchimeLocation, versionOutputs, current->getLocations());
             }
             else {
                 //test to make sure uchime exists
@@ -273,7 +272,7 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
                 foundTool = util.openInputFile(uchimeLocation, in, "no error"); in.close();
                 if(!foundTool) {
                     m->mothurOut(uchimeLocation + " file does not exist or cannot be opened, ignoring.\n"); uchimeLocation = "";
-                    foundTool = util.findTool(programName, uchimeLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, uchimeLocation, versionOutputs, current->getLocations());
                 }
             }
             

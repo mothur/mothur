@@ -584,13 +584,15 @@ string Utils::findProgramPath(string programName){
     }
 }
 /***********************************************************************/
-bool Utils::checkLocations(string& filename, vector<string> locations){
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::checkLocations(string& filename, vector< vector<string> > locations){
     try {
         filename = getFullPathName(filename);
-        string inputDir = locations[0];
-        string outputDir = locations[1];
-        string mothurPath = locations[2];
-        string mothurToolsPath = locations[3];
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
         ifstream in;
@@ -599,16 +601,23 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
 
         //if you can't open it, try input location
         if (!ableToOpen) {
-            if (inputDir != "") { //default path is set
-                string tryPath = inputDir + getSimpleName(filename);
-                m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath + ".\n");
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it, try output location
         if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
             if (outputDir != "") { //default path is set
                 string tryPath = outputDir + getSimpleName(filename);
                 m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath+ ".\n");
@@ -619,8 +628,8 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
 
         //if you can't open it, try default locations
         if (!ableToOpen) {
-            for (int i = 4; i < locations.size(); i++) {
-                string defaultPath = locations[i];
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
                 
                 if (defaultPath != "") { //default path is set
                     string tryPath = defaultPath + getSimpleName(filename);
@@ -635,18 +644,27 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
             string tryPath = mothurPath + getSimpleName(filename);
-            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable location " + tryPath+ ".\n");
+            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable directory " + tryPath+ ".\n");
             ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
             filename = tryPath;
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
-            string tryPath = mothurToolsPath + getSimpleName(filename);
-            m->mothurOut("Unable to open " + filename + ". Trying mothur's tools location " + tryPath+ ".\n");
-            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-            filename = tryPath;
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_TOOLS directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
         }
 
         if (!ableToOpen) { m->mothurOut("Unable to open " + filename + ".\n");  return false;  }
@@ -659,31 +677,38 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
     }
 }
 /***********************************************************************/
-bool Utils::checkLocations(string& filename, vector<string> locations, string silent){
+bool Utils::checkLocations(string& filename, vector< vector<string> > locations, string silent){
     try {
         filename = getFullPathName(filename);
-        string inputDir = locations[0];
-        string outputDir = locations[1];
-        string defaultPath = locations[2];
-        string mothurPath = locations[3];
-        string mothurToolsPath = locations[4];
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
         ifstream in;
         ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
-
+        
         //if you can't open it, try input location
         if (!ableToOpen) {
-            if (inputDir != "") { //default path is set
-                string tryPath = inputDir + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it, try output location
         if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
             if (outputDir != "") { //default path is set
                 string tryPath = outputDir + getSimpleName(filename);
                 ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
@@ -691,18 +716,24 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
             }
         }
 
-
-        //if you can't open it, try default location
+        //if you can't open it, try default locations
         if (!ableToOpen) {
-            if (defaultPath != "") { //default path is set
-                string tryPath = defaultPath + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
             string tryPath = mothurPath + getSimpleName(filename);
             ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
             filename = tryPath;
@@ -710,15 +741,21 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
-            if (mothurToolsPath != "") { //default path is set
-                string tryPath = mothurToolsPath + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
-        if (!ableToOpen) { return false;  }
-
+        if (!ableToOpen) {  return false;  }
+        
         return true;
     }
     catch(exception& e) {
@@ -727,7 +764,7 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
     }
 }
 /***********************************************************************/
-bool Utils::findBlastLocation(string& toolLocation, string mothurProgramPath, vector<string> locations){
+bool Utils::findBlastLocation(string& toolLocation, vector< vector<string> > locations){
     try {
         bool foundTool = false;
         string programName = "formatdb"; programName += EXECUTABLE_EXT;
@@ -735,10 +772,12 @@ bool Utils::findBlastLocation(string& toolLocation, string mothurProgramPath, ve
         toolLocation = "";
         string blastBin = "blast"; blastBin += PATH_SEPARATOR; blastBin += "bin"; blastBin += PATH_SEPARATOR;
        
-        for (int i = 0; i < locations.size(); i++) { locations[i] += blastBin; }
+        for (int i = 0; i < locations.size(); i++) {
+            for (int j = 0; j < locations[i].size(); j++) { locations[i][j] += blastBin; }
+        }
         
         vector<string> versionOutputs;
-        foundTool = findTool(programName, toolLocation, mothurProgramPath, versionOutputs, locations);
+        foundTool = findTool(programName, toolLocation, versionOutputs, locations);
         
         if (foundTool) { toolLocation = hasPath(toolLocation); }
         else { toolLocation = ""; }
@@ -751,9 +790,14 @@ bool Utils::findBlastLocation(string& toolLocation, string mothurProgramPath, ve
     }
 }
 /***********************************************************************/
-bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgramPath, vector<string>& versionOutputs, vector<string> locations){
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::findTool(string& toolName, string& toolLocation, vector<string>& versionOutputs, vector< vector<string> > locations){
     try {
         bool foundTool = false;
+        string mothurProgramPath = "";
+        if (locations.size() >= 3) {
+            if (locations[2].size() != 0) { mothurProgramPath = locations[2][0]; }
+        }
         string toolCommand = mothurProgramPath + toolName; //windows def
         
         //test to make sure tool exists
@@ -2176,11 +2220,11 @@ string Utils::getExtension(string longName){
     }
 }
 /***********************************************************************/
-bool Utils::mothurInitialPrep(vector<string>& defaultPaths, string& tools, string& mothurVersion, string& releaseDate, string& OS){
+bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& toolPaths, string& mothurVersion, string& releaseDate, string& OS){
     try {
         
         string lastChar = "";
-        defaultPaths.clear();
+        defaultPaths.clear(); toolPaths.clear();
         #ifdef MOTHUR_FILES
             string defaultPath = MOTHUR_FILES;
         
@@ -2199,15 +2243,19 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, string& tools, strin
         #endif
         
         #ifdef MOTHUR_TOOLS
-            tools = MOTHUR_TOOLS;
-            tools = removeQuotes(tools);
-            //add / to name if needed
-            lastChar = tools.substr(tools.length()-1);
-            if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
+            string tools = MOTHUR_TOOLS;
         
-            tools = getFullPathName(tools);
-        #else
-            tools = "";
+            vector<string> tempt; splitAtChar(tools, tempt, ';');
+        
+            for (int i = 0; i < tempt.size(); i++) {
+                tools = removeQuotes(tempt[i]);
+                //add / to name if needed
+                lastChar = tools.substr(tools.length()-1);
+                if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
+    
+                tools = getFullPathName(tools);
+                toolPaths.push_back(tools);
+            }
         #endif
         
         #ifdef LOGFILE_NAME
@@ -2267,11 +2315,24 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, string& tools, strin
         }
         
         #ifdef MOTHUR_FILES
-            m->appendLogBuffer("\nUsing default search path for mothur input files: " + defaultPath + "\n\n");
+        
+        if (defaultPaths.size() != 0) {
+            m->appendLogBuffer("\nUsing default search path for mothur input files:\n");
+            for (int i = 0; i < defaultPaths.size(); i++) {
+                m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
+            }
+            m->appendLogBuffer("\n");
+        }
         #endif
         
         #ifdef MOTHUR_TOOLS
-            m->appendLogBuffer("\nUsing mothur tools location: " + tools + "\n\n");
+            if (toolPaths.size() != 0) {
+                m->appendLogBuffer("\nUsing mothur tools locations:\n");
+                for (int i = 0; i < toolPaths.size(); i++) {
+                    m->appendLogBuffer("\t" + toolPaths[i] + "\n");
+                }
+                m->appendLogBuffer("\n");
+            }
         #endif
         
         //header

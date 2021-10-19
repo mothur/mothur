@@ -186,10 +186,8 @@ AlignCommand::AlignCommand(string option) : Command()  {
             
             if ((search == "blast") || (align == "blast")) {
                 string blastlocation = "";
-                vector<string> locations = current->getLocations();
-                string path = current->getProgramPath();
                 
-                if (!util.findBlastLocation(blastlocation, path, locations)){
+                if (!util.findBlastLocation(blastlocation, current->getLocations())){
                     m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search or align method. Using defaults instead.\n");
                     if (search == "blast") { search = "kmer"; }
                     if (align == "blast") { align = "needleman"; }

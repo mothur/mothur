@@ -268,9 +268,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option) : Command()  {
 			
             if (search == "blast") {
                 string blastlocation = "";
-                vector<string> locations = current->getLocations();
-                string path = current->getProgramPath();
-                bool foundTool = util.findBlastLocation(blastlocation, path, locations);
+                bool foundTool = util.findBlastLocation(blastlocation, current->getLocations());
 
                 if (!foundTool){
                     m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";

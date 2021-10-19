@@ -164,14 +164,13 @@ ClusterCommand::ClusterCommand(string option) : Command()  {
             
             vector<string> versionOutputs;
             bool foundTool = false;
-            string path = current->getProgramPath();
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             
             vsearchLocation = validParameter.validPath(parameters, "vsearch");
             if (vsearchLocation == "not found") {
                 vsearchLocation = "";
                 if ((method == "agc") || (method == "dgc")) {
-                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
                 }
             }
             else {
@@ -183,7 +182,7 @@ ClusterCommand::ClusterCommand(string option) : Command()  {
                     if(!ableToOpen) {
                         m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
                         programName = util.getSimpleName(vsearchLocation); vsearchLocation = "";
-                        foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                        foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
                     }
                 }
             }

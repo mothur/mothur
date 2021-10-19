@@ -84,8 +84,8 @@ SetDirectoryCommand::SetDirectoryCommand(string option) : Command()  {
 			input = validParameter.validPath(parameters, "input");
 			if (input == "not found") {  input = "";  }
 			
-			tempdefault = validParameter.validPath(parameters, "mothurfiles");
-			if (tempdefault == "not found") {  tempdefault = "";  }
+			mothurfiles = validParameter.validPath(parameters, "mothurfiles");
+			if (mothurfiles == "not found") {  mothurfiles = "";  }
             
             blastLocation = validParameter.validPath(parameters, "blastdir");
             if (blastLocation == "not found") {  blastLocation = "";  }
@@ -121,9 +121,9 @@ SetDirectoryCommand::SetDirectoryCommand(string option) : Command()  {
                 m->mothurOut("Setting random seed to " + toString(random) + ".\n\n");
             }
             
-			if ((input == "") && (output == "") && (tempdefault == "") && (blastLocation == "") && (toolsLocation == "")&& nodebug && nomod && !seed) {
+			if ((input == "") && (output == "") && (mothurfiles == "") && (blastLocation == "") && (toolsLocation == "")&& nodebug && nomod && !seed) {
 				m->mothurOut("[ERROR]: You must provide either an input, output, tempdefault, blastdir, tools, debug or modifynames for the set.dir command.\n");  abort = true;
-			}else if((input == "") && (output == "") && (tempdefault == "") && (blastLocation == "") && (toolsLocation == "")) { debugorSeedOnly = true; }
+			}else if((input == "") && (output == "") && (mothurfiles == "") && (blastLocation == "") && (toolsLocation == "")) { debugorSeedOnly = true; }
 		}
 	}
 	catch(exception& e) {
@@ -172,8 +172,8 @@ int SetDirectoryCommand::execute(){
                 }
             }
             
-            //set default
-            if (tempdefault == "clear") {
+            //set default location of mothurs files
+            if (mothurfiles == "clear") {
 #ifdef MOTHUR_FILES
 				string defaultPath = MOTHUR_FILES;
                 vector<string> defaultPaths;
@@ -202,17 +202,17 @@ int SetDirectoryCommand::execute(){
 				m->mothurOut("No default directory defined at compile time.\n"); 
 				current->setDefaultPath(nullVector);
 #endif
-            }else if (tempdefault == "") {  //do nothing
-            }else if (tempdefault == "default") {
+            }else if (mothurfiles == "") {  //do nothing
+            }else if (mothurfiles == "default") {
                 string tempdefault = current->getProgramPath();
                 
                 m->mothurOut("mothurfiles=" + tempdefault+ "\n");
                 vector<string> temp; temp.push_back(tempdefault);
                 current->setDefaultPath(temp);
             }else {
-                tempdefault = util.removeQuotes(tempdefault);
+                mothurfiles = util.removeQuotes(mothurfiles);
                 vector<string> defaultPaths;
-                vector<string> temp; util.splitAtChar(tempdefault, temp, ';');
+                vector<string> temp; util.splitAtChar(mothurfiles, temp, ';');
                 
                 for (int i = 0; i < temp.size(); i++) {
                     string defaultPath = util.removeQuotes(temp[i]);
@@ -239,20 +239,60 @@ int SetDirectoryCommand::execute(){
             //set default
             if ((toolsLocation == "default") || (toolsLocation == "clear")){
 #ifdef MOTHUR_TOOLS
-                string temp = MOTHUR_TOOLS;
-                m->mothurOut("tools=" + temp+ "\n");
-                current->setToolsPath(temp);
+                string toolsPath = MOTHUR_TOOLS;
+                
+                vector<string> toolsPaths;
+                vector<string> temp; util.splitAtChar(toolsPath, temp, ';');
+                
+                for (int i = 0; i < temp.size(); i++) {
+                    string defaultPath = util.removeQuotes(temp[i]);
+                    //add / to name if needed
+                    string lastChar = defaultPath.substr(defaultPath.length()-1);
+                    if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            
+                    defaultPath = util.getFullPathName(defaultPath);
+                    toolsPaths.push_back(defaultPath);
+                }
+                
+                if (toolsPaths.size() != 0) {
+                    m->mothurOut("mothurtools=\n");
+                    for (int i = 0; i < toolsPaths.size(); i++) {
+                        m->mothurOut("\t" + toolsPaths[i] + "\n");
+                    }
+                    m->mothurOutEndLine();
+                }
+
+                current->setDefaultPath(toolsPaths);
 #else
                 string temp = current->getProgramPath();
                 m->mothurOut("tools=" + temp+ "\n");
-                current->setToolsPath(temp);
+                vector<string> temps; temps.push_back(temp);
+                current->setToolsPath(temps);
 #endif
             }else if (toolsLocation == "") {  //do nothing
             }else {
                 toolsLocation = util.removeQuotes(toolsLocation);
-                if (util.dirCheckExists(toolsLocation)) {
-                    m->mothurOut("tools=" + toolsLocation+ "\n");
-                    current->setToolsPath(toolsLocation);
+                vector<string> defaultPaths;
+                vector<string> temp; util.splitAtChar(toolsLocation, temp, ';');
+                
+                for (int i = 0; i < temp.size(); i++) {
+                    string defaultPath = util.removeQuotes(temp[i]);
+                    //add / to name if needed
+                    string lastChar = defaultPath.substr(defaultPath.length()-1);
+                    if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            
+                    defaultPath = util.getFullPathName(defaultPath);
+                    
+                    if (util.mkDir(defaultPath)) { defaultPaths.push_back(defaultPath); }
+                }
+            
+                if (defaultPaths.size() != 0) {
+                    m->mothurOut("mothurtools=\n");
+                    for (int i = 0; i < defaultPaths.size(); i++) {
+                        m->mothurOut("\t" + defaultPaths[i] + "\n");
+                    }
+                    m->mothurOutEndLine();
+                    current->setToolsPath(defaultPaths);
                 }
             }
             

@@ -242,14 +242,11 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option) : Command()  {
 			dups = util.isTrue(temp);
 			
             bool foundTool = false;
-            path = current->getProgramPath();
-            
 			blastlocation = validParameter.validPath(parameters, "blastlocation");
 			if (blastlocation == "not found") {
                 if (search == "blast") {
                     blastlocation = "";
-                    vector<string> locations = current->getLocations();
-                    foundTool = util.findBlastLocation(blastlocation, path, locations);
+                    foundTool = util.findBlastLocation(blastlocation, current->getLocations());
 
                     if (!foundTool){
                         m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";

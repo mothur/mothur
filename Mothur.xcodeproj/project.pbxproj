@@ -3980,7 +3980,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release/;/Users/swestcott/Desktop/mothurbugs/\\\"\"",
 					"VERSION=\"\\\"1.46.0\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/;/Users/swestcott/Desktop/release/\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";

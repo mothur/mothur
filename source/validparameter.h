@@ -37,7 +37,7 @@ class ValidParameters {
 		map<string, vector<string> > parameterRanges;
 		MothurOut* m;
         CurrentFile* current;
-        vector<string> locations;
+        vector< vector<string> > locations;
 
 };
 

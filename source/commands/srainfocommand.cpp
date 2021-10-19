@@ -106,7 +106,6 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
             
             vector<string> versionOutputs;
             bool foundTool = false;
-            string path = current->getProgramPath();
             string programName = "fasterq-dump"; programName += EXECUTABLE_EXT;
             string programVersion = "2.9.6";
 #ifdef WINDOWS
@@ -116,7 +115,7 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
             fasterQLocation = validParameter.validFile(parameters, "fasterq");
             if (fasterQLocation == "not found") {
                 fasterQLocation = "";
-                foundTool = util.findTool(programName, fasterQLocation, path, versionOutputs, current->getLocations());
+                foundTool = util.findTool(programName, fasterQLocation, versionOutputs, current->getLocations());
             }else {
                 //test to make sure fasterq exists
                 ifstream in;
@@ -125,7 +124,7 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
                 if(!ableToOpen) {
                     m->mothurOut(fasterQLocation + " file does not exist or cannot be opened, ignoring.\n"); fasterQLocation = "";
                     programName = util.getSimpleName(fasterQLocation); fasterQLocation = "";
-                    foundTool = util.findTool(programName, fasterQLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, fasterQLocation, versionOutputs, current->getLocations());
                 }
             }
           
@@ -140,7 +139,6 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
             }
             
             foundTool = false;
-            path = current->getProgramPath();
             programName = "prefetch"; programName += EXECUTABLE_EXT;
             versionOutputs.clear(); programVersion = "2.9.3";
             
@@ -151,7 +149,7 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
             prefetchLocation = validParameter.validFile(parameters, "prefetch");
             if (prefetchLocation == "not found") {
                 prefetchLocation = "";
-                foundTool = util.findTool(programName, prefetchLocation, path, versionOutputs, current->getLocations());
+                foundTool = util.findTool(programName, prefetchLocation, versionOutputs, current->getLocations());
             }else {
                 //test to make sure prefetch exists
                 ifstream in;
@@ -160,7 +158,7 @@ SRAInfoCommand::SRAInfoCommand(string option) : Command()  {
                 if(!ableToOpen) {
                     m->mothurOut(prefetchLocation + " file does not exist or cannot be opened, ignoring.\n"); prefetchLocation = "";
                     programName = util.getSimpleName(prefetchLocation); prefetchLocation = "";
-                    foundTool = util.findTool(programName, prefetchLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, prefetchLocation, versionOutputs, current->getLocations());
                 }
             }
             

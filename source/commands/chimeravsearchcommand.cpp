@@ -209,13 +209,12 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
             
             vector<string> versionOutputs;
             bool foundTool = false;
-            path = current->getProgramPath();
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             
             vsearchLocation = validParameter.validFile(parameters, "vsearch");
             if (vsearchLocation == "not found") {
                 vsearchLocation = "";
-                foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
             }
             else {
                 //test to make sure vsearch exists
@@ -224,7 +223,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
                 bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
                 if(!ableToOpen) {
                     m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
-                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
                 }else { foundTool = true; }
             }
 

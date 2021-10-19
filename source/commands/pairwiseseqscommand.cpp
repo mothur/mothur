@@ -175,9 +175,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option) : Command()  {
             
             if (align == "blast") {
                 string blastlocation = "";
-                vector<string> locations = current->getLocations();
-                string path = current->getProgramPath();
-                bool foundTool = util.findBlastLocation(blastlocation, path, locations);
+                bool foundTool = util.findBlastLocation(blastlocation, current->getLocations());
 
                 if (!foundTool){
                     m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as align method. Using needleman instead.\n"); align = "needleman";
