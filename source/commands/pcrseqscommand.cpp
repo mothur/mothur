@@ -317,10 +317,6 @@ int PcrSeqsCommand::execute(){
         }
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
-        itTypes = outputTypes.find("fasta");
-        if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { preserveOrder((itTypes->second)[0]);  }
-        }
             
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
         
