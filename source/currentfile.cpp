@@ -341,7 +341,6 @@ void CurrentFile::setToolsPath(vector<string> pathnames)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);
         
-    
         toolsPath.clear();
         for (int i = 0; i < pathnames.size(); i++) {
             string pathname = pathnames[i];
@@ -359,6 +358,27 @@ void CurrentFile::setToolsPath(vector<string> pathnames)  {
     }
 }
 /*********************************************************************************************/
+void CurrentFile::setInputDir(vector<string> pathnames)  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        inputDir.clear();
+        for (int i = 0; i < pathnames.size(); i++) {
+            string pathname = pathnames[i];
+            if (pathname != "") { //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            inputDir.push_back(util.getFullPathName(pathname));
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setToolsPath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
 //locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
 vector< vector<string> > CurrentFile::getLocations()  {
     try {
@@ -366,8 +386,8 @@ vector< vector<string> > CurrentFile::getLocations()  {
         
         vector< vector<string> > locations;
         
-        vector<string> inputDirs; inputDirs.push_back(inputDir);
-        locations.push_back(inputDirs);
+        //allows for multiple locations, order matters
+        locations.push_back(inputDir);
         
         vector<string> outputDirs; outputDirs.push_back(outputDir);
         locations.push_back(outputDirs);

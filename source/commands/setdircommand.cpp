@@ -157,18 +157,37 @@ int SetDirectoryCommand::execute(){
             }
             
             //redirect input
-            if ((input == "clear") || (input == "")) {  input = "";  current->setInputDir(input);  }
+            if ((input == "clear") || (input == "")) {  input = "";  current->setInputDir(nullVector);  }
             else if (input == "default") {
                 string input = current->getProgramPath();
                 //input = exepath.substr(0, (exepath.find_last_of('m')));
                 
                 m->mothurOut("inputDir=" + input+ "\n");
-                current->setInputDir(input);
+                vector<string> temp; temp.push_back(input);
+                current->setInputDir(temp);
             }else {
                 input = util.removeQuotes(input);
-                if (util.dirCheckExists(input)) {
-                    m->mothurOut("inputDir=" + input+ "\n");
-                    current->setInputDir(input);
+                vector<string> inputPaths;
+                vector<string> temp; util.splitAtChar(input, temp, ';');
+                
+                for (int i = 0; i < temp.size(); i++) {
+                    string inputPath = util.removeQuotes(temp[i]);
+                    //add / to name if needed
+                    string lastChar = inputPath.substr(inputPath.length()-1);
+                    if (lastChar != PATH_SEPARATOR) { inputPath += PATH_SEPARATOR; }
+            
+                    inputPath = util.getFullPathName(inputPath);
+                    
+                    if (util.dirCheckExists(inputPath)) { inputPaths.push_back(inputPath); }
+                }
+            
+                if (inputPaths.size() != 0) {
+                    m->mothurOut("inputdir=\n");
+                    for (int i = 0; i < inputPaths.size(); i++) {
+                        m->mothurOut("\t" + inputPaths[i] + "\n");
+                    }
+                    m->mothurOutEndLine();
+                    current->setInputDir(inputPaths);
                 }
             }
             
@@ -225,7 +244,6 @@ int SetDirectoryCommand::execute(){
                     if (util.mkDir(defaultPath)) { defaultPaths.push_back(defaultPath); }
                 }
             
-                
                 if (defaultPaths.size() != 0) {
                     m->mothurOut("mothurfiles=\n");
                     for (int i = 0; i < defaultPaths.size(); i++) {

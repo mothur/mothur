@@ -26,7 +26,7 @@ class Command {
 	public:
 		Command() {
             m = MothurOut::getInstance();  current = CurrentFile::getInstance();
-            inputdir = current->getInputDir();
+            inputdirs = current->getInputDir();
             outputdir = current->getOutputDir();
         }
 		
@@ -141,8 +141,9 @@ class Command {
         Utils util;
         CurrentFile* current;
 		bool calledHelp;
-        string inputdir, outputdir;
+        string outputdir;
 			
+        vector<string> inputdirs;
 		map<string, vector<string> > outputTypes;
 		vector<CommandParameter> parameters;
 	

@@ -764,6 +764,39 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations,
     }
 }
 /***********************************************************************/
+bool Utils::checkSpecificLocations(string& filename, vector<string> locations, string silent){
+    try {
+        string savedName = filename;
+        filename = getFullPathName(filename);
+        
+        bool ableToOpen = false;
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror"); in.close();
+        
+        //if you can't open it, try locations
+        if (!ableToOpen) {
+            for (int i = 0; i < locations.size(); i++) {
+                string dir = locations[i];
+                
+                if (dir != "") { //default path is set
+                    string tryPath = dir + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        if (!ableToOpen) { filename = savedName; return false;  }
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkSpecificLocations");
+        exit(1);
+    }
+}
+/***********************************************************************/
 bool Utils::findBlastLocation(string& toolLocation, vector< vector<string> > locations){
     try {
         bool foundTool = false;
@@ -2317,7 +2350,7 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         #ifdef MOTHUR_FILES
         
         if (defaultPaths.size() != 0) {
-            m->appendLogBuffer("\nUsing default search path for mothur input files:\n");
+            m->appendLogBuffer("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
             for (int i = 0; i < defaultPaths.size(); i++) {
                 m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
             }
@@ -2327,7 +2360,7 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         
         #ifdef MOTHUR_TOOLS
             if (toolPaths.size() != 0) {
-                m->appendLogBuffer("\nUsing mothur tools locations:\n");
+                m->appendLogBuffer("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
                 for (int i = 0; i < toolPaths.size(); i++) {
                     m->appendLogBuffer("\t" + toolPaths[i] + "\n");
                 }

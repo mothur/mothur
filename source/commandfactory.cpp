@@ -172,7 +172,7 @@ CommandFactory::CommandFactory(){
 	m = MothurOut::getInstance();
     current = CurrentFile::getInstance();
 
-	current->setOutputDir(""); current->setInputDir("");
+	current->setOutputDir(""); current->setInputDir(nullVector);
 	append = false;
 
 	//initialize list of valid commands
@@ -367,9 +367,28 @@ int CommandFactory::checkForRedirects(string optionString) {
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
             intputOption = util.trimWhiteSpace(intputOption);
             intputOption = util.removeQuotes(intputOption);
-            if(util.dirCheckExists(intputOption)){
-                current->setInputDir(intputOption); 
-                m->mothurOut("Setting input directory to: " + intputOption); m->mothurOutEndLine();
+    
+            vector<string> inputPaths;
+            vector<string> temp; util.splitAtChar(intputOption, temp, ';');
+            
+            for (int i = 0; i < temp.size(); i++) {
+                string inputPath = util.removeQuotes(temp[i]);
+                //add / to name if needed
+                string lastChar = inputPath.substr(inputPath.length()-1);
+                if (lastChar != PATH_SEPARATOR) { inputPath += PATH_SEPARATOR; }
+        
+                inputPath = util.getFullPathName(inputPath);
+                
+                if (util.dirCheckExists(inputPath)) { inputPaths.push_back(inputPath); }
+            }
+        
+            if (inputPaths.size() != 0) {
+                m->mothurOut("Setting input directories to: \n");
+                for (int i = 0; i < inputPaths.size(); i++) {
+                    m->mothurOut("\t" + inputPaths[i] + "\n");
+                }
+                m->mothurOutEndLine();
+                current->setInputDir(inputPaths);
             }
         }
 
@@ -589,9 +608,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
             }
             
             //user has opted to redirect input from dir where mothur.exe is located to some other place
-            if (current->getInputDir() != "") {
-                if (optionString != "") { optionString += ", inputdir=" + current->getInputDir(); }
-                else { optionString += "inputdir=" + current->getInputDir(); }
+            if ((current->getInputDir()).size() != 0) {
+                if (optionString != "") { optionString += ", inputdir=" + (current->getInputDir())[0]; }
+                else { optionString += "inputdir=" + (current->getInputDir())[0]; }
             }
         }
 		if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}

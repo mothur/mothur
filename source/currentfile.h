@@ -108,8 +108,8 @@ class CurrentFile {
         void setPaths(vector<string>);
         string getOutputDir() { lock_guard<std::mutex> guard(currentProtector); return outputDir; }
         void setOutputDir(string f) { lock_guard<std::mutex> guard(currentProtector); outputDir = util.getFullPathName(f); }
-        string getInputDir() { lock_guard<std::mutex> guard(currentProtector); return inputDir; }
-        void setInputDir(string f) { lock_guard<std::mutex> guard(currentProtector); inputDir = util.getFullPathName(f); }
+        vector<string> getInputDir() { lock_guard<std::mutex> guard(currentProtector); return inputDir; }
+        void setInputDir(vector<string> f);
         void setFileName(string);
         string getReleaseDate() { lock_guard<std::mutex> guard(currentProtector); return releaseDate; }
         void setReleaseDate(string r) { lock_guard<std::mutex> guard(currentProtector); releaseDate = r; }
@@ -135,9 +135,9 @@ class CurrentFile {
 		MothurOut* m;
         Utils util;
         
-        vector<string> paths, defaultPath, toolsPath; //paths stored in PATH environment variables, defaultPaths = MOTHUR_FILES, toolsPath = MOTHUR_TOOLS
+        vector<string> paths, defaultPath, toolsPath, inputDir; //paths stored in PATH environment variables, defaultPaths = MOTHUR_FILES, toolsPath = MOTHUR_TOOLS
         string logFileName, mothurProgramPath, homePath;
-        string outputDir, blastPath, inputDir;
+        string outputDir, blastPath;
         string releaseDate, version;
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, clrfile;
@@ -154,7 +154,7 @@ class CurrentFile {
 		CurrentFile() {
             m = MothurOut::getInstance();
             blastPath=""; testFilePath = "";
-            inputDir = ""; outputDir= "";
+            outputDir= "";
             accnosfile = "";
             filefile = "";
             phylipfile = "";

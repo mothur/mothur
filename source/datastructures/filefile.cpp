@@ -16,7 +16,6 @@ FileFile::FileFile(string f, string md) : filename(f), mode(md) {
         m = MothurOut::getInstance();
         
         current = CurrentFile::getInstance();
-        inputDir = current->getInputDir();
         mpath = current->getProgramPath();
         
         columnWithGroups = false;
@@ -175,26 +174,6 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
         }
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + ", forward = " + forward + ", reverse = " + reverse + ", forwardIndex = " + findex + ", reverseIndex = " + rindex + ".\n"); }
-        
-        if (inputDir != "") {
-            string path = util.hasPath(forward);
-            if (path == "") {  forward = inputDir + forward;  }
-            
-            if (reverse != "") { //could be blank if pacbio mode
-                path = util.hasPath(reverse);
-                if (path == "") {  reverse = inputDir + reverse;  }
-            }
-            
-            if ((findex != "") && (findex != "NONE")) {
-                path = util.hasPath(findex);
-                if (path == "") {  findex = inputDir + findex;  }
-            }
-            
-            if ((rindex != "") && (rindex != "NONE")) {
-                path = util.hasPath(rindex);
-                if (path == "") {  rindex = inputDir + rindex;  }
-            }
-        }
         
         //check to make sure both are able to be opened
         bool openForward = util.checkLocations(forward, current->getLocations());

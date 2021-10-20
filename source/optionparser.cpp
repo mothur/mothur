@@ -190,15 +190,17 @@ map<string, string> OptionParser::getParameters() {
             }else{ it++; }
         }
         
-        string inputDir = current->getInputDir();
-        if (inputDir != "") {
+        vector<string> inputDirs = current->getInputDir();
+        if (inputDirs.size() != 0) {
             
             for (it = parameters.begin(); it != parameters.end(); it++) {
                 if (fileTypes.count(it->first) != 0) {
                     string path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {
-                        it->second = inputDir + it->second;
+                        string inputLocation = it->second;
+                        util.checkSpecificLocations(inputLocation, inputDirs, "");
+                        it->second = inputLocation;
                     }
                 }
             }

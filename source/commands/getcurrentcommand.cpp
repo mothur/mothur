@@ -182,9 +182,13 @@ int GetCurrentCommand::execute(){
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
         
-        string inputDir = current->getInputDir();
-        if (inputDir != "") {
-            m->mothurOut("\nCurrent input directory saved by mothur: " + inputDir); m->mothurOutEndLine();
+        vector<string> inputDirs = current->getInputDir();
+        if (inputDirs.size() != 0) {
+            m->mothurOut("\nCurrent input directories saved by mothur:\n");
+           for (int i = 0; i < inputDirs.size(); i++) {
+               m->mothurOut("\t" + inputDirs[i] + "\n");
+           }
+           m->mothurOutEndLine();
         }
         
         string outputdir = current->getOutputDir();
