@@ -247,7 +247,7 @@ int RemoveSeqsCommand::execute(){
         
         if (countfile != "") {
             if (fastafile != "") {
-                m->mothurOut("\n[WARNING]: Are you run the remove.seqs command after running a chimera command with dereplicate=t? If so, the count file has already been modified to remove all chimeras and adjust group counts. Including the count file here will cause downstream file mismatches.\n\n");
+                //m->mothurOut("\n[WARNING]: Are you run the remove.seqs command after running a chimera command with dereplicate=t? If so, the count file has already been modified to remove all chimeras and adjust group counts. Including the count file here will cause downstream file mismatches.\n\n");
             }
         }
 		
