@@ -11,6 +11,7 @@
 #include "deconvolutecommand.h"
 #include "sequence.hpp"
 #include "systemcommand.h"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraUchimeCommand::setParameters(){	
@@ -28,6 +29,8 @@ vector<string> ChimeraUchimeCommand::setParameters(){
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
 		CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "","",false,false); parameters.push_back(pabskew);
 		CommandParameter pchimealns("chimealns", "Boolean", "", "F", "", "", "","alns",false,false); parameters.push_back(pchimealns);
+        CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","alns",false,false); parameters.push_back(premovechimeras);
+
 		CommandParameter pminh("minh", "Number", "", "0.3", "", "", "","",false,false); parameters.push_back(pminh);
 		CommandParameter pmindiv("mindiv", "Number", "", "0.5", "", "", "","",false,false); parameters.push_back(pmindiv);
 		CommandParameter pxn("xn", "Number", "", "8.0", "", "", "","",false,false); parameters.push_back(pxn);
@@ -52,6 +55,7 @@ vector<string> ChimeraUchimeCommand::setParameters(){
         outputTypes["accnos"] = tempOutNames;
         outputTypes["alns"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -68,7 +72,7 @@ string ChimeraUchimeCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.uchime command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command is a wrapper for uchime written by Robert C. Edgar.\n";
-		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl, strand and queryfact.\n";
+		helpString += "The chimera.uchime command parameters are fasta, name, count, reference, processors, dereplicate, removechimeras abskew, chimealns, minh, mindiv, xn, dn, xa, chunks, minchunk, idsmoothwindow, minsmoothid, maxp, skipgaps, skipgaps2, minlen, maxlen, ucl, strand and queryfact.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
         helpString += "The count parameter allows you to provide a count file, if you are using template=self. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
@@ -76,6 +80,7 @@ string ChimeraUchimeCommand::getHelpString(){
         helpString += "If the dereplicate parameter is false, then if one group finds the sequence to be chimeric, then all groups find it to be chimeric, default=f.\n";
 		helpString += "The reference parameter allows you to enter a reference file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
+        helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
         helpString += "The uchime parameter allows you to specify the name and location of your uchime executable. By default mothur will look in your path and mothur's executable and mothur tools locations.  You can set the uchime location as follows, uchime=/usr/bin/uchime.\n";
 		helpString += "The abskew parameter can only be used with template=self. Minimum abundance skew. Default 1.9. Abundance skew is: min [ abund(parent1), abund(parent2) ] / abund(query).\n";
 		helpString += "The chimealns parameter allows you to indicate you would like a file containing multiple alignments of query sequences to parents in human readable format. Alignments show columns with differences that support or contradict a chimeric model.\n";
@@ -135,7 +140,8 @@ string ChimeraUchimeCommand::getOutputPattern(string type) {
         if (type == "chimera") {  pattern = "[filename],[tag],uchime.chimeras"; }
         else if (type == "accnos") {  pattern = "[filename],[tag],uchime.accnos"; }
         else if (type == "alns") {  pattern = "[filename],[tag],uchime.alns"; }
-        else if (type == "count") {  pattern = "[filename],[tag],uchime.pick.count_table-[filename],count_table"; }
+        else if (type == "fasta") {  pattern = "[filename],[tag],uchime.fasta"; }
+        else if (type == "count") {  pattern = "[filename],[tag],uchime.count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -194,9 +200,6 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
             
             if (hasGroup && hasCount) { m->mothurOut("[ERROR]: You must enter ONLY ONE of the following: count or group.\n");  abort = true; }
             
-            
-            
-            
             map<string, string>::iterator it = parameters.find("reference");
             //user has given a template file
             if(it != parameters.end()){
@@ -251,7 +254,9 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
 			if (temp == "not found") { temp = "false";			}
 			dups = util.isTrue(temp);
 
-			
+            temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
+            removeChimeras = util.isTrue(temp);
+            
 			if (hasName && (templatefile != "self")) { m->mothurOut("You have provided a namefile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
             if (hasCount && (templatefile != "self")) { m->mothurOut("You have provided a countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
@@ -279,7 +284,6 @@ ChimeraUchimeCommand::ChimeraUchimeCommand(string option) : Command()  {
             if (!foundTool) { abort = true; }
             
             uchimeLocation = util.getFullPathName(uchimeLocation);
-            m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n");
             if (m->getDebug()) { m->mothurOut("[DEBUG]: uchime location using " + uchimeLocation + "\n"); }
             
             if (!abort) {
@@ -735,6 +739,53 @@ int ChimeraUchimeCommand::execute(){
         
         delete vars;
         
+        if (removeChimeras) {
+            if (!util.isBlank(accnosFileName)) {
+                m->mothurOut("\nRemoving chimeras from your input files:\n");
+                
+                string inputString = "fasta=" + fastafile + ", accnos=" + accnosFileName;
+                if ((countfile != "") && (!dups))   {   inputString += ", count=" + countfile;  }
+                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                
+                if (countfile != "") {
+                    if (!dups) { //dereplicate=f, so remove sequences where any sample found the reads to be chimeric
+                        map<string, string> variables;
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
+                        variables["[tag]"] = "denovo";
+                        if (templatefile != "self") { variables["[tag]"] = "ref"; }
+                        string currentName = getOutputFileName("count", variables);
+
+                        util.renameFile(filenames["count"][0], currentName);
+                        util.mothurRemove(filenames["count"][0]);
+                        outputNames.push_back(currentName); outputTypes["count"].push_back(currentName);
+                    }//else, mothur created a modified count file removing chimeras by sample. No need to include count file on remove.seqs command. Deconvolute function created modified count table already
+                }
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+                variables["[tag]"] = "denovo";
+                if (templatefile != "self") { variables["[tag]"] = "ref"; }
+                string currentName = getOutputFileName("fasta", variables);
+
+                util.renameFile(filenames["fasta"][0], currentName);
+                util.mothurRemove(filenames["fasta"][0]);
+                
+                outputNames.push_back(currentName); outputTypes["fasta"].push_back(currentName);
+            }else { m->mothurOut("\nNo chimeras found, skipping remove.seqs.\n"); }
+        }
+        
+        
 		//set accnos file as new current accnosfile
 		string currentName = "";
 		itTypes = outputTypes.find("accnos");
@@ -747,6 +798,11 @@ int ChimeraUchimeCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();
