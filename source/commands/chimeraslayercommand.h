@@ -52,7 +52,7 @@ private:
 
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
 
-	bool abort, realign, trim, trimera, hasCount, dups;
+	bool abort, realign, trim, trimera, hasCount, dups, removeChimeras;
 	string fastafile, templatefile, search, countfile, blastlocation;
 	int window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, templateSeqsLength;
     long long numSeqs;
