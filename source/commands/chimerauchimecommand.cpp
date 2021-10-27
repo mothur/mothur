@@ -758,6 +758,8 @@ int ChimeraUchimeCommand::execute(){
                 delete removeCommand;
                 current->setMothurCalling(false);
                 
+                m->mothurOut("/******************************************/\n");
+
                 if (countfile != "") {
                     if (!dups) { //dereplicate=f, so remove sequences where any sample found the reads to be chimeric
                         map<string, string> variables;

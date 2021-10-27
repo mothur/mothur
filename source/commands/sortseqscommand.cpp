@@ -570,11 +570,8 @@ int SortSeqsCommand::readQual(){
 		string outputFileName = getOutputFileName("qfile", variables);
         outputTypes["qfile"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(qualfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(qualfile, in);
 		string name;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have

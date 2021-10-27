@@ -211,8 +211,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
             dn = validParameter.valid(parameters, "dn");							if (dn == "not found")				{ useDn = false; dn = "1.4";						}	else{ useDn = true;				}
             mindiffs = validParameter.valid(parameters, "mindiffs");				if (mindiffs == "not found")				{ useMindiffs = false; mindiffs = "3";							}	else{ useMindiffs = true;				}
             
-            temp = validParameter.valid(parameters, "dereplicate");
-            if (temp == "not found") { temp = "false";			}
+            temp = validParameter.valid(parameters, "dereplicate"); if (temp == "not found") { temp = "false";			}
             dups = util.isTrue(temp);
             
             vector<string> versionOutputs;
@@ -653,6 +652,8 @@ int ChimeraVsearchCommand::execute(){
                 delete removeCommand;
                 current->setMothurCalling(false);
                 
+                m->mothurOut("/******************************************/\n");
+
                 if (countfile != "") {
                     if (!dups) { //dereplicate=f, so remove sequences where any sample found the reads to be chimeric
                         map<string, string> variables;
@@ -712,11 +713,10 @@ int ChimeraVsearchCommand::execute(){
 //**********************************************************************************************************************
 int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accnosFileName, string alnsFileName, long long& numRedund){
     try {
+
+        ofstream out2; util.openOutputFile(accnosFileName+".temp", out2);
+        
         int total = 0;
-        
-        ofstream out2;
-        util.openOutputFile(accnosFileName+".temp", out2);
-        
         string name;
         set<string> namesInFile; //this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
         set<string>::iterator itNames;
@@ -725,15 +725,13 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         
         if (!util.isBlank(accnosFileName)) {
             //edit accnos file
-            ifstream in2;
-            util.openInputFile(accnosFileName, in2);
+            ifstream in2; util.openInputFile(accnosFileName, in2);
             
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
                 
                 in2 >> name; util.gobble(in2);
-                
-                
+            
                 itChimeras = chimerasInFile.find(name);
                 
                 if (itChimeras == chimerasInFile.end()) {
@@ -741,7 +739,6 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                     chimerasInFile.insert(name);
                     total++;
                 }
-                
             }
             in2.close();
         }
@@ -750,20 +747,14 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         util.mothurRemove(accnosFileName);
         rename((accnosFileName+".temp").c_str(), accnosFileName.c_str());
         
-        
-        
         //edit chimera file
-        ifstream in;
-        util.openInputFile(outputFileName, in);
-        
-        ofstream out;
-        util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        ifstream in; util.openInputFile(outputFileName, in);
+        ofstream out; util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         //out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
         
         float temp1;
         string parent1, parent2, parent3, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13, flag;
-        name = "";
-        namesInFile.clear();
+        name = ""; namesInFile.clear();
         //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
         /*										1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
          0.000000	F11Fcsw_33372/ab=18/		*	*	*	*	*	*	*	*	*	*	*	*	*	*	N
@@ -804,12 +795,10 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                 out << temp1 << '\t' << name << '\t' << parent1 << '\t' << parent2 << '\t' << parent3 << '\t' << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << '\t' << temp13 << '\t' << flag << endl;
             }
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
         
         util.mothurRemove(outputFileName);
         rename((outputFileName+".temp").c_str(), outputFileName.c_str());
-        
         
         //edit anls file
         //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
@@ -844,11 +833,8 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
          Diffs Left 7: N 0, A 6, Y 1 (14.3%); Right 35: N 1, A 30, Y 4 (11.4%), Score 0.0047
          */
         if (chimealns) {
-            ifstream in3;
-            util.openInputFile(alnsFileName, in3);
-            
-            ofstream out3;
-            util.openOutputFile(alnsFileName+".temp", out3); out3.setf(ios::fixed, ios::floatfield); out3.setf(ios::showpoint);
+            ifstream in3; util.openInputFile(alnsFileName, in3);
+            ofstream out3; util.openOutputFile(alnsFileName+".temp", out3); out3.setf(ios::fixed, ios::floatfield); out3.setf(ios::showpoint);
             
             name = "";
             namesInFile.clear();
@@ -857,8 +843,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
             while (!in3.eof()) {
                 if (m->getControl_pressed()) { in3.close(); out3.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName)); util.mothurRemove((alnsFileName+".temp")); return 0; }
                 
-                line = "";
-                line = util.getline(in3);
+                line = ""; line = util.getline(in3);
                 string temp = "";
                 
                 if (line != "") {
@@ -889,16 +874,11 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                                     namesInFile.insert(name);
                                 }
                             }else { out << name << endl;  }
-                            
                         }
-                        
-                    }else { //not need to alter line
-                        out3 << line << endl;
-                    }
+                    }else { out3 << line << endl; } //not need to alter line
                 }else { out3 << endl; }
             }
-            in3.close();
-            out3.close();
+            in3.close(); out3.close();
             
             util.mothurRemove(alnsFileName);
             rename((alnsFileName+".temp").c_str(), alnsFileName.c_str());
