@@ -39,7 +39,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }		
 	
 private:
-	bool abort, hasCount, dups;
+	bool abort, hasCount, dups, removeChimeras;
 	string fastafile, countfile;
 	int processors, alignLength;
 	double cutoff, alpha, beta;
