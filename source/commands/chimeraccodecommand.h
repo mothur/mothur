@@ -36,7 +36,7 @@ public:
 	
 		
 private:
-	bool abort, filter, save;
+	bool abort, filter, save, removeChimeras;
 	string fastafile, templatefile, maskfile;
 	int window, numwanted, numSeqs, templateSeqsLength;
 	vector<string> outputNames;

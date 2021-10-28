@@ -393,7 +393,6 @@ int ChimeraPerseusCommand::execute(){
                     current->setMothurCalling(false);
                     groups = cparser.getNamesOfGroups();
                     group2Files = cparser.getFiles();
-                    
                 }
                 
                 if (m->getControl_pressed()) { return 0; }
@@ -414,8 +413,7 @@ int ChimeraPerseusCommand::execute(){
                     CountTable newCount; newCount.readTable(countfile, true, false);
                     
                     if (!util.isBlank(countlist)) {
-                        ifstream in2;
-                        util.openInputFile(countlist, in2);
+                        ifstream in2; util.openInputFile(countlist, in2);
                         
                         string name, group;
                         while (!in2.eof()) {
@@ -485,7 +483,6 @@ int ChimeraPerseusCommand::execute(){
                 
                 delete removeCommand;
                 current->setMothurCalling(false);
-                
                 m->mothurOut("/******************************************/\n");
 
                 if (countfile != "") {
