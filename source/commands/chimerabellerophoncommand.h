@@ -37,7 +37,7 @@ public:
 		
 private:
 
-	bool abort, filter, correction;
+	bool abort, filter, correction, removeChimeras;
 	string fastafile;
 	int processors, window, increment, numSeqs;
 	vector<string> outputNames;
