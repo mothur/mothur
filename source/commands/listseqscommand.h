@@ -34,7 +34,7 @@ class ListSeqsCommand : public Command {
 	
 	private:
 		vector<string> outputNames;
-		vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles;
+		vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles;
         string  format, inputFileName;
         bool abort;
         
