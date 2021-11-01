@@ -170,7 +170,7 @@ bool OptiFitCluster::update(double& listMetric) {
                 for (set<long long>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { binsToTry.insert(seqBin[*itClose]); }
                 
                 //merge into each "close" otu
-                vector<vector<double> > ties;
+                vector<vector<double> > ties; vector<vector<double> > ties0;
                 for (set<long long>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     //reset tn, tp,fp,fn values to original bin
                     tn[0] = fittrueNegatives; tp[0] = fittruePositives; fp[0] = fitfalsePositives; fn[0] = fitfalseNegatives;
@@ -190,21 +190,30 @@ bool OptiFitCluster::update(double& listMetric) {
                     double newFitMetric = metric->getValue(tp[0], tn[0], fp[0], fn[0]); //score when sequence is moved
                     //new best
                     if (newComboMetric > bestMetric[1]) {
-                        ties.clear();
+                        ties.clear(); ties0.clear();
                         bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
+                        bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
                         vector<double> tie; tie.push_back(bestMetric[1]); tie.push_back(bestBin[1]); tie.push_back(bestTp[1]);
                         tie.push_back(bestTn[1]); tie.push_back(bestFp[1]); tie.push_back(bestFn[1]); ties.push_back(tie);
+                        vector<double> tie0; tie0.push_back(bestMetric[0]); tie0.push_back(bestBin[0]); tie0.push_back(bestTp[0]);
+                        tie0.push_back(bestTn[0]); tie0.push_back(bestFp[0]); tie0.push_back(bestFn[0]); ties0.push_back(tie0);
+
                         
                     }else if (newComboMetric == bestMetric[1]) {
                         bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
+                        bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
                         vector<double> tie; tie.push_back(bestMetric[1]); tie.push_back(bestBin[1]); tie.push_back(bestTp[1]);
                         tie.push_back(bestTn[1]); tie.push_back(bestFp[1]); tie.push_back(bestFn[1]); ties.push_back(tie);
+                        vector<double> tie0; tie0.push_back(bestMetric[0]); tie0.push_back(bestBin[0]); tie0.push_back(bestTp[0]);
+                        tie0.push_back(bestTn[0]); tie0.push_back(bestFp[0]); tie0.push_back(bestFn[0]); ties0.push_back(tie0);
+
                     }
                 }
                 
                 if (ties.size() > 1) {
                     int randomTie = util.getRandomIndex((int)ties.size()-1);
                     bestMetric[1] = ties[randomTie][0]; bestBin[1] = ties[randomTie][1]; bestTp[1] = ties[randomTie][2]; bestTn[1] = ties[randomTie][3]; bestFp[1] = ties[randomTie][4]; bestFn[1] = ties[randomTie][5];
+                    bestMetric[0] = ties0[randomTie][0]; bestBin[0] = ties0[randomTie][1]; bestTp[0] = ties0[randomTie][2]; bestTn[0] = ties0[randomTie][3]; bestFp[0] = ties0[randomTie][4]; bestFn[0] = ties0[randomTie][5];
                 }
                 
                 //how to choose the best bin if they differ????
