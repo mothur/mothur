@@ -10,7 +10,7 @@
 
 
 /***********************************************************************/
-OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns, string crit) : Cluster(), matrix(mt), metric(met), numComboSingletons(ns), criteria(crit) {
+OptiFitCluster::OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns) : Cluster(), matrix(mt), metric(met), numComboSingletons(ns) {
     m = MothurOut::getInstance();
     maxRefBinNumber = 0;
     closed = false;
@@ -85,8 +85,6 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         double comboValue = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
-        //cout << "combo intial mcc " << comboValue << '\t' << combotruePositives << '\t' << combotrueNegatives << '\t' << combofalsePositives << '\t' << combofalseNegatives << endl;
-        
         //add insert location
         seqBin[bins.size()] = -1;
         insertLocation = bins.size();
@@ -95,11 +93,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
         
         if (randomize) { util.mothurRandomShuffle(randomizeSeqs); }
         
-        if (criteria == "fit") {
-            double temp1, temp2, temp3, temp4;
-            getFitStats(temp1, temp2, temp3, temp4);
-            value = metric->getValue(temp1, temp2, temp3, temp4);
-        }else { value = comboValue; }
+        value = comboValue;
         
         return value;
     }
@@ -114,7 +108,7 @@ int OptiFitCluster::initialize(double& value, bool randomize, vector<vector< str
  * keep or move the sequence to the OTU where the `metric` is the largest - flip a coin on ties */
 bool OptiFitCluster::update(double& listMetric) {
     try {
-        double comboCaused, fitCaused, bothCaused; comboCaused = 0; fitCaused = 0; bothCaused = 0;
+        //double comboCaused, fitCaused, bothCaused; comboCaused = 0; fitCaused = 0; bothCaused = 0;
         //for each sequence (singletons removed on read)
         for (int i = 0; i < randomizeSeqs.size(); i++) {
             
@@ -127,48 +121,27 @@ bool OptiFitCluster::update(double& listMetric) {
             
             if (binNumber == -1) { }
             else {
-                vector<long long> bestBin; bestBin.resize(2, binNumber);
-                vector<double> tn; tn.push_back(fittrueNegatives); tn.push_back(combotrueNegatives);
-                vector<double> tp; tp.push_back(fittruePositives); tp.push_back(combotruePositives);
-                vector<double> fp; fp.push_back(fitfalsePositives); fp.push_back(combofalsePositives);
-                vector<double> fn; fn.push_back(fitfalseNegatives); fn.push_back(combofalseNegatives);
-                vector<double> bestMetric; bestMetric.resize(2, -1);  //bestMetric[0] = fitSeqs alone, bestMetric[1] = combo or ref and fit
-                
-                vector<double> bestTp; bestTp.resize(2, 0);
-                vector<double> bestTn; bestTn.resize(2, 0);
-                vector<double> bestFp; bestFp.resize(2, 0);
-                vector<double> bestFn; bestFn.resize(2, 0);
+                long long bestBin = binNumber;
+                double tn = combotrueNegatives; double tp = combotruePositives; double fn = combofalseNegatives; double fp = combofalsePositives;
+                double bestMetric = -1.0; double bestTp = 0; double bestTn = 0; double bestFp = 0; double bestFn = 0;
             
                 //close / far count in current bin
                 vector<double> results = getCloseFarCounts(seqNumber, binNumber);
                 double combocCount = results[0];  double combofCount = results[1];
                 
-                //close / far count in current bin for fit seqs
-                vector<double> fitresults = getCloseFarFitCounts(seqNumber, binNumber);
-                double fitcCount = fitresults[0];  double fitfCount = fitresults[1];
-                
-                //fit metrics in current bin
-                bestMetric[0] = metric->getValue(tp[0], tn[0], fp[0], fn[0]);
-                bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
-                
                 //combo metric in current bin
-                bestMetric[1] = metric->getValue(tp[1], tn[1], fp[1], fn[1]);
-                bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
+                bestMetric = metric->getValue(tp, tn, fp, fn);
+                bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
                 
                 //if not already singleton, then calc value if singleton was created
                 if (!((bins[binNumber].size()) == 1)) {
                     //make a singleton
-                    fn[0]+=fitcCount; tn[0]+=fitfCount; fp[0]-=fitfCount; tp[0]-=fitcCount;
-                    fn[1]+=combocCount; tn[1]+=combofCount; fp[1]-=combofCount; tp[1]-=combocCount;
+                    fn+=combocCount; tn+=combofCount; fp-=combofCount; tp-=combocCount;
                     
-                    double singleFitMetric = metric->getValue(tp[0], tn[0], fp[0], fn[0]);
-                    double singleComboMetric = metric->getValue(tp[1], tn[1], fp[1], fn[1]);
-                    if ((singleFitMetric > bestMetric[0]) || (singleComboMetric > bestMetric[1])) {
-                        bestBin[1] = -1; bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
-                        bestMetric[1] = singleComboMetric;
-                        
-                        bestBin[0] = -1; bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
-                        bestMetric[0] = singleFitMetric;
+                    double singleComboMetric = metric->getValue(tp, tn, fp, fn);
+                    if (singleComboMetric > bestMetric) {
+                        bestBin = -1; bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
+                        bestMetric = singleComboMetric;
                     }
                 }
                 
@@ -177,55 +150,43 @@ bool OptiFitCluster::update(double& listMetric) {
                 for (set<long long>::iterator itClose = closeSeqs.begin(); itClose != closeSeqs.end(); itClose++) { binsToTry.insert(seqBin[*itClose]); }
                 
                 //merge into each "close" otu
+                vector<vector<double> > ties;
                 for (set<long long>::iterator it = binsToTry.begin(); it != binsToTry.end(); it++) {
                     //reset tn, tp,fp,fn values to original bin
-                    tn[0] = fittrueNegatives; tp[0] = fittruePositives; fp[0] = fitfalsePositives; fn[0] = fitfalseNegatives;
-                    tn[1] = combotrueNegatives; tp[1] = combotruePositives; fp[1] = combofalsePositives; fn[1] = combofalseNegatives;
+                    tn = combotrueNegatives; tp = combotruePositives; fp = combofalsePositives; fn = combofalseNegatives;
                     
                     //move out of old bin
-                    fn[0]+=fitcCount; tn[0]+=fitfCount; fp[0]-=fitfCount; tp[0]-=fitcCount;
-                    fn[1]+=combocCount; tn[1]+=combofCount; fp[1]-=combofCount; tp[1]-=combocCount;
+                    fn+=combocCount; tn+=combofCount; fp-=combofCount; tp-=combocCount;
                     
                     results = getCloseFarCounts(seqNumber, *it); //results[0] = close count, results[1] = far count
-                    fn[1]-=results[0]; tn[1]-=results[1];  tp[1]+=results[0]; fp[1]+=results[1]; //move into new bin
+                    fn-=results[0]; tn-=results[1];  tp+=results[0]; fp+=results[1]; //move into new bin
                     
-                    results = getCloseFarFitCounts(seqNumber, *it);
-                    fn[0]-=results[0]; tn[0]-=results[1];  tp[0]+=results[0]; fp[0]+=results[1]; //move into new bin - only consider fit seqs
-                    
-                    double newComboMetric = metric->getValue(tp[1], tn[1], fp[1], fn[1]); //score when sequence is moved
-                    double newFitMetric = metric->getValue(tp[0], tn[0], fp[0], fn[0]); //score when sequence is moved
-                    //new best
-                    if ((newFitMetric > bestMetric[0]) || (newComboMetric > bestMetric[1])) {
-                        bool move = false;
-                        if ((newComboMetric > bestMetric[1]) && (newFitMetric > bestMetric[0])) { bothCaused++; }
-                        else if (newComboMetric < bestMetric[1]) {
-                            fitCaused++;
-                        }
-                        else if (newFitMetric < bestMetric[0]) { comboCaused++; }
+                    double newComboMetric = metric->getValue(tp, tn, fp, fn); //score when sequence is moved
+                    if (newComboMetric > bestMetric) {
+                        ties.clear();
+                        bestMetric = newComboMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
+                        vector<double> tie; tie.push_back(bestMetric); tie.push_back(bestBin); tie.push_back(bestTp);
+                        tie.push_back(bestTn); tie.push_back(bestFp); tie.push_back(bestFn); ties.push_back(tie);
                         
-                        if (criteria == "both") {
-                            move = true;
-                        }else if (criteria == "fit") {
-                            if (newFitMetric > bestMetric[0]) { move = true;  }
-                        }else if (criteria == "combo") {
-                            if (newComboMetric > bestMetric[1]) { move = true; }
-                        }
-                        if (move) {
-                            bestMetric[0] = newFitMetric; bestBin[0] = (*it); bestTp[0] = tp[0]; bestTn[0] = tn[0]; bestFp[0] = fp[0]; bestFn[0] = fn[0];
-                            bestMetric[1] = newComboMetric; bestBin[1] = (*it); bestTp[1] = tp[1]; bestTn[1] = tn[1]; bestFp[1] = fp[1]; bestFn[1] = fn[1];
-                        }
+                    }else if (newComboMetric == bestMetric) {
+                        bestMetric = newComboMetric; bestBin = (*it); bestTp = tp; bestTn = tn; bestFp = fp; bestFn = fn;
+                        vector<double> tie; tie.push_back(bestMetric); tie.push_back(bestBin); tie.push_back(bestTp);
+                        tie.push_back(bestTn); tie.push_back(bestFp); tie.push_back(bestFn); ties.push_back(tie);
                     }
                 }
                 
-                //how to choose the best bin if they differ????
-                long long newBin = bestBin[1];
+                //how to choose the best bin if they differ, randomly select
+                if (ties.size() > 1) {
+                    int randomTie = util.getRandomIndex((int)ties.size()-1);
+                    bestMetric = ties[randomTie][0]; bestBin = ties[randomTie][1]; bestTp = ties[randomTie][2]; bestTn = ties[randomTie][3]; bestFp = ties[randomTie][4]; bestFn = ties[randomTie][5];
+                }
+                long long newBin = bestBin;
                 
                 bool usedInsert = false;
                 if (newBin == -1) {  newBin = insertLocation;  usedInsert = true;  }
                 
                 if (newBin != binNumber) {
-                    combotruePositives = bestTp[1]; combotrueNegatives = bestTn[1]; combofalsePositives = bestFp[1]; combofalseNegatives = bestFn[1];
-                    fittruePositives = bestTp[0]; fittrueNegatives = bestTn[0]; fitfalsePositives = bestFp[0]; fitfalseNegatives = bestFn[0];
+                    combotruePositives = bestTp; combotrueNegatives = bestTn; combofalsePositives = bestFp; combofalseNegatives = bestFn;
                     
                     //move seq from i to j
                     bins[newBin].push_back(seqNumber); //add seq to bestbin
@@ -239,15 +200,8 @@ bool OptiFitCluster::update(double& listMetric) {
             }
         }
         
-        if (criteria == "fit") {
-            double temp1, temp2, temp3, temp4;
-            getFitStats(temp1, temp2, temp3, temp4);
-            listMetric = metric->getValue(temp1, temp2, temp3, temp4);
-        }
-        else { listMetric = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives); }
+        listMetric = metric->getValue(combotruePositives, combotrueNegatives, combofalsePositives, combofalseNegatives);
         
-        //cout << fittruePositives << '\t' << fittrueNegatives << '\t' << fitfalsePositives << '\t' << fitfalseNegatives << endl;
-        //cout << "combo improved " << comboCaused << " fit improved " << fitCaused << " both improved " << bothCaused << '\t' << listMetric << '\t' << endl;
         if (m->getDebug()) { ListVector* list = getList(); list->print(cout); delete list; }
         
         return 0;
