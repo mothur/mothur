@@ -3866,7 +3866,7 @@ int Utils::checkName(string& name) {
     }
 }
 /************************************************************/
-bool Utils::checkGroupName(string name) {
+bool Utils::checkGroupName(string& name) {
     try {
 
         bool goodName = true;
@@ -3878,6 +3878,14 @@ bool Utils::checkGroupName(string name) {
 
         if (!goodName) {
             m->mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n");
+            
+            string newName = "";
+            for (int i = 0; i < name.length(); i++) {
+                if ((name[i] == ':') || (name[i] == '-') || (name[i] == '/')) { newName += "_";  }
+                else { newName += name[i]; }
+            }
+            m->mothurOut("\n[NOTE] Updating " + name + " to " + newName + " to avoid downstream issues.\n\n");
+            name = newName;
         }
 
         return goodName;

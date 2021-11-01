@@ -42,7 +42,7 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
         indexGroupMap.clear();
         indexNameMap.clear();
         counts.clear();
-        for (set<string>::iterator it = gs.begin(); it != gs.end(); it++) { groups.push_back(*it);  hasGroups = true; }
+        for (set<string>::iterator it = gs.begin(); it != gs.end(); it++) { string gName = *it; util.checkGroupName(gName); groups.push_back(gName);  hasGroups = true; }
         numGroups = groups.size();
         totalGroups.resize(numGroups, 0);
 
@@ -137,6 +137,7 @@ bool CountTable::testGroups(string file, vector<string>& groups) {
             hasGroups = true;
 
             for (int i = 2; i < columnHeaders.size(); i++) {
+                util.checkGroupName(columnHeaders[i]);
                 groups.push_back(columnHeaders[i]);
             }
             //sort groups to keep consistent with how we store the groups in groupmap
@@ -495,6 +496,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
         set<string> setOfSelectedGroups;
         if (readGroups) {
             for (int i = 2; i < columnHeaders.size(); i++) {
+                util.checkGroupName(columnHeaders[i]);
                 bool saveGroup = true;
                 if (selectedGroups.size() != 0) {
                     if (!(util.inUsersGroups(columnHeaders[i], selectedGroups))) { saveGroup = false; }
@@ -701,7 +703,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
         if (readGroups) {
             for (int i = 2; i < columnHeaders.size(); i++) {
                 groups.push_back(columnHeaders[i]);
-                
+                util.checkGroupName(columnHeaders[i]);
                 if (isCompressed) {
                     map<string, int>::iterator it = headerIndex2Group.find(columnHeaders[i]);
                     if (it != headerIndex2Group.end()) {

@@ -217,7 +217,7 @@ public:
     //string manipulation
     string addUnclassifieds(string tax, int maxlevel, bool probs);
     string trimTax(string tax, int trimLevel);
-    bool checkGroupName(string name);
+    bool checkGroupName(string& name);
     int checkName(string&);
     void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
     int getNumNames(string);

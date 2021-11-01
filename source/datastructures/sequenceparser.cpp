@@ -30,6 +30,8 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, string nameFi
         if (groupsSelected.size() != 0) { sort(groupsSelected.begin(), groupsSelected.end());   }
         else                            { groupsSelected = namesOfGroups;                       }
         
+        for (int i = 0; i < groupsSelected.size(); i++) { util.checkGroupName(groupsSelected[i]); }
+        
         inputString += "processors=1, groups=" + util.getStringFromVector(groupsSelected, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
         inputString += ", fasta=" + fastaFile;
         inputString += ", name=" + nameFile;
@@ -93,9 +95,11 @@ SequenceParser::SequenceParser(string groupFile, string fastaFile, vector<string
         string inputString = "";
         if (groupsSelected.size() != 0) {
             sort(groupsSelected.begin(), groupsSelected.end());
+            for (int i = 0; i < groupsSelected.size(); i++) { util.checkGroupName(groupsSelected[i]); }
             inputString += "groups=" + util.getStringFromVector(groupsSelected, "-");
         }else {
             groupsSelected = namesOfGroups;
+            for (int i = 0; i < groupsSelected.size(); i++) { util.checkGroupName(groupsSelected[i]); }
         }
         
         inputString += ", fasta=" + fastaFile;
