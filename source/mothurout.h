@@ -70,6 +70,8 @@ class MothurOut {
         void setControl_pressed(bool t)                 { control_pressed = t;              }
         bool getChangedSeqNames()                       { return changedSeqNames;           }
         void setChangedSeqNames(bool t)                 { changedSeqNames = t;              }
+        bool getChangedGroupNames()                     { return changedGroupNames;         }
+        void setChangedGroupNames(bool t)               { changedGroupNames = t;            }
         bool getExecuting()                             { return executing;                 }
         void setExecuting(bool t)                       { executing = t;                    }
     
@@ -82,6 +84,7 @@ class MothurOut {
             debug = false;
             quietMode = false;
             changedSeqNames = true;
+            changedGroupNames = true;
             silenceLog = false;
             silenceWarnings = false; //per command
             numErrors = 0; numWarnings = 0;
@@ -100,7 +103,7 @@ class MothurOut {
         int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
         string logFileName, buffer, homePath;
         vector<string> paths;
-        bool changedSeqNames, silenceLog, silenceWarnings, control_pressed, executing, debug, quietMode;
+        bool changedSeqNames, changedGroupNames, silenceLog, silenceWarnings, control_pressed, executing, debug, quietMode;
 };
 /***********************************************/
 

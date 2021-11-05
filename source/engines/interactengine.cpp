@@ -54,11 +54,7 @@ bool InteractEngine::getInput(){
             
             if (commandName != "") {
                 numCommandsRun++;
-                m->setExecuting(true);
-                m->resetCommandErrors();
-                
-                //executes valid command
-                m->setChangedSeqNames(true);
+                m->setExecuting(true); m->resetCommandErrors(); m->setChangedSeqNames(true); m->setChangedGroupNames(true);
                 
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();

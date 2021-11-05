@@ -292,7 +292,7 @@ public:
 
 private:
     MothurOut* m;
-    bool modifyNames;
+    bool modifyNames, modifyGroups;
     string homePath, currentWorkingDirectory;
     mt19937_64 mersenne_twister_engine;
     vector<string> paths; //paths stored in environment varaibale PATH
