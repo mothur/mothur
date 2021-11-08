@@ -125,7 +125,6 @@ SubSampleCommand::SubSampleCommand(string option) : Command() {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
