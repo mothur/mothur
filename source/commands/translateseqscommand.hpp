@@ -56,34 +56,37 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, stop;
+    bool abort, stop, dna;
     string fastafile;
     int processors;
     vector<string> outputNames;
     vector<int> frames;
+    
+    double createProcesses(string, vector<linePair>, int);
 };
 
 //**********************************************************************************************************************
 struct translateSeqsStruct {
     OutputWriter* outputWriter;
     string inputFilename;
-    bool stop;
-    vector<int> frames;
+    bool stop, dna;
+    int frame;
     double numSeqs;
     
     linePair filePos;
     MothurOut* m;
     Utils util;
     
-    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, vector<int> f) {
+    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, bool dn, int f) {
         
         //passed in
         filePos.start = fP.start;
         filePos.end = fP.end;
         outputWriter = oFName;
         inputFilename = fname;
-        frames = f;
+        frame = f;
         stop = st;
+        dna = dn;
         
         //initialized
         numSeqs = 0;

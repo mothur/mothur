@@ -15,6 +15,7 @@ vector<string> TranslateSeqsCommand::setParameters(){
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pframes("frames", "Multiple", "1-2-3--1--2--3", "1", "", "", "","",true,false,true); parameters.push_back(pframes);
         CommandParameter pstop("stop", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pstop);
+        CommandParameter pdna("dna", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdna);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -38,9 +39,10 @@ string TranslateSeqsCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The translate.seqs command reads a fastafile containing dna and translates it to amino acids, reads a fasta file containing amino acids and translates it to dna.\n";
-        helpString += "The translate.seqs command parameters are fasta, frames, stop and processors.\n";
+        helpString += "The translate.seqs command parameters are fasta, frames, stop, dna and processors.\n";
         helpString += "The frames parameter is used to indicate the reading frames you want to use. Options are 1, 2, 3, -1, -2, -3. You can select multiple frames by separating them with '|' characters. For example: frames=1|-1|2.\n";
-        helpString += "The frames parameter is used to indicate when to stop the translation. If T, then if the translation hits a stop codon, it stops before that codon. If F, it returns the full translation with a * as the stop codon. Default=t.\n";
+        helpString += "The stop parameter is used to indicate when to stop the translation. If T, then if the translation hits a stop codon, it stops before that codon. If F, it returns the full translation with a * as the stop codon. Default=t.\n";
+        helpString += "The dna parameter is used to indicate which type of data is in your fasta file. Default=t, meaning the data is dna. dna=f, means the data in the fasta file is amino acids. \n";
         helpString += "The translate.seqs command should be in the following format: \n";
         helpString += "translate.seqs(fasta=yourFastaFile, processors=2) \n";
             
@@ -91,12 +93,22 @@ TranslateSeqsCommand::TranslateSeqsCommand(string option) : Command()  {
             vector<string> fs; util.splitAtChar(temp, fs, '|');
             for (int i = 0; i < fs.size(); i++) {
                 int thisFrame; util.mothurConvert(fs[i], thisFrame);
-                frames.push_back(thisFrame);
+                if ((thisFrame == 1) || (thisFrame == 2) || (thisFrame == 3) || (thisFrame == -2) || (thisFrame == -1) || (thisFrame == -3)) {
+                    frames.push_back(thisFrame); }
+                else {
+                    m->mothurOut("[WARNING]: " + fs[i] + " is not a valid frame option. Options include 1,2,3,-1,-2,-3. Ignoring " + fs[i] + "\n");
+                }
             }
+            if (frames.size() == 0) { abort = true; }
             
             temp = validParameter.valid(parameters, "stop");        if (temp == "not found") { temp = "T"; }
             stop = util.isTrue(temp);
             
+            temp = validParameter.valid(parameters, "dna");        if (temp == "not found") { temp = "T"; }
+            dna = util.isTrue(temp);
+            
+            //force single frames for aa to dna translation
+            if (dna) { frames.clear(); frames.push_back(1); }
         }
     }
     catch(exception& e) {
@@ -113,23 +125,54 @@ int TranslateSeqsCommand::execute(){
         
         long start = time(NULL);
         
-        for (int i = 0; i < frames.size(); i++) {
-            cout << frames[i] << endl;
-        }
-        
         string thisOutputDir = outputdir;
         if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
-        variables["[tag]"] = "...... TODO ........ ";
-        string outputFileName = getOutputFileName("fasta", variables);
-        outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-    
         
+        vector<linePair> lines; vector<double> positions;
+#if defined NON_WINDOWS
+        positions = util.divideFile(fastafile, processors);
+        for (int i = 0; i < (positions.size()-1); i++) {    lines.push_back(linePair(positions[i], positions[(i+1)]));    }
+#else
+        long long numFastaSeqs = 0;
+        positions = util.setFilePosFasta(filename, numFastaSeqs);
+        if (numFastaSeqs < processors) { processors = numFastaSeqs; m->mothurOut("Reducing processors to " + toString(numFastaSeqs) + ".\n");  }
         
+        //figure out how many sequences you have to process
+        int numSeqsPerProcessor = numFastaSeqs / processors;
+        for (int i = 0; i < processors; i++) {
+            int startIndex =  i * numSeqsPerProcessor;
+            if(i == (processors - 1)){    numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;     }
+            lines.push_back(linePair(positions[startIndex], numSeqsPerProcessor));
+        }
+#endif
         
+        double numSeqs = 0;
+        for (int i = 0; i < frames.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            variables["[tag]"] = "dna";
+            if (!dna) { variables["[tag]"] = "aa" + toString(frames[i]); }
+            string outputFileName = getOutputFileName("fasta", variables);
+            outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+            
+            numSeqs += createProcesses(outputFileName, lines, frames[i]);
+        }
         
-        //if dna,
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to translate " + toString(numSeqs) + " sequences.\n");
+
+        //set accnos file as new current accnosfile
+        string currentName = "";
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
+        m->mothurOut("\nOutput File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
+        m->mothurOutEndLine();
+ 
         return 0;
     }
     catch(exception& e) {
@@ -137,5 +180,57 @@ int TranslateSeqsCommand::execute(){
         exit(1);
     }
 }
+//**********************************************************************************************************************
+void translateDriver(translateSeqsStruct* params) {
+    try {
+        
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "TranslateSeqsCommand", "driver");
+        exit(1);
+    }
+}
+//***************************************************************************************************************
+//    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, bool dn, int frame) {
+double TranslateSeqsCommand::createProcesses(string outputFileName, vector<linePair> lines, int frame) {
+    try {
+        //create array of worker threads
+        vector<std::thread*> workerThreads;
+        vector<translateSeqsStruct*> data;
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(outputFileName);
+        
+        for (int i = 0; i < processors-1; i++) {
+            
+            OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+            
+            translateSeqsStruct* dataBundle = new translateSeqsStruct(lines[i+1], threadOutputWriter, fastafile, stop, dna, frame);
+            data.push_back(dataBundle);
 
+            workerThreads.push_back(new std::thread(translateDriver, dataBundle));
+         }
+        
+        OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+        translateSeqsStruct* dataBundle = new translateSeqsStruct(lines[0], threadOutputWriter, fastafile, stop, dna, frame);
+        
+        translateDriver(dataBundle);
+        double num = dataBundle->numSeqs;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->numSeqs;
+            
+            delete data[i]->outputWriter;
+            delete data[i];
+            delete workerThreads[i];
+        }
+        synchronizedOutputFile->close(); delete threadOutputWriter;  delete dataBundle;
+        
+        return num;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TranslateSeqsCommand", "createProcesses");
+        exit(1);
+    }
+}
 //***************************************************************************************************************
