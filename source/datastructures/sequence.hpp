@@ -21,6 +21,8 @@
 #include "utils.hpp"
 #include "writer.h"
 
+class Protein;
+
 /**************************************************************************************************/
 
 class Sequence {
@@ -52,6 +54,7 @@ public:
     string getComment();
 	void setPairwise(string);
 	string getPairwise();
+    Protein getProtein(int start); 
 	
 	string getInlineSeq();
     int getNumNs();
@@ -74,6 +77,7 @@ public:
 	void printSequence(ostream&);
     void printSequence(OutputWriter*);
     void printUnAlignedSequence(ostream&);
+    
 	
 protected:
     

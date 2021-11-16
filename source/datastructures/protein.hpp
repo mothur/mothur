@@ -14,6 +14,8 @@
 #include "writer.h"
 #include "aminoacid.hpp"
 
+class Sequence;
+
 /**************************************************************************************************/
 
 class Protein {
