@@ -60,12 +60,15 @@ class AminoAcid {
 public:
     AminoAcid();
     AminoAcid(char);    //AminoAcid character
+    AminoAcid(string);    //dna codon length of 3
     ~AminoAcid() {}
     
     string getName();
-    char getAmino()          { return aminoBase; }
-    int getNum()             { return aminoNum; }
+    char getAmino()          { return aminoBase;    }
+    int getNum()             { return aminoNum;     }
     void setAmino(char c);
+    
+    vector<string> getCompressedDNA() { return dna; }
     
 protected:
     
@@ -74,10 +77,16 @@ protected:
     
     char aminoBase;
     int aminoNum;
+    vector<string> dna;
     set<char> validAminoAcids;
+    vector<vector<vector<char>>> codons;
+    map<char, int> indexes; //A -> 0, T -> 1, G -> 2, C -> 3, N -> 4
+    map<char, int>::iterator it;
 
     void fillValidAminoAcid();
+    void fillCodonsMap();
     char getAminoBase(string); //from name
+    int getIndex(char x);
     
 };
 
