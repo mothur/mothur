@@ -11,6 +11,7 @@
 
 #include "command.hpp"
 #include "sequence.hpp"
+#include "protein.hpp"
 
 /*
  This command would take...
@@ -62,7 +63,7 @@ private:
     vector<string> outputNames;
     vector<int> frames;
     
-    double createProcesses(string, vector<linePair>, int);
+    double createProcessesTranslateDNAtoAminoAcids(string, vector<linePair>, int);
 };
 
 //**********************************************************************************************************************
@@ -74,8 +75,7 @@ struct translateSeqsStruct {
     double numSeqs;
     
     linePair filePos;
-    MothurOut* m;
-    Utils util;
+    MothurOut* m; Utils util;
     
     translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, bool dn, int f) {
         
