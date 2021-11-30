@@ -1001,7 +1001,7 @@
 		48705AC019BE32C50075E977 /* mergesfffilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mergesfffilecommand.h; path = source/commands/mergesfffilecommand.h; sourceTree = SOURCE_ROOT; };
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = SOURCE_ROOT; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = SOURCE_ROOT; };
-		4875F69922DCC723006A7D8C /* Ubuntu_18_Build.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Ubuntu_18_Build.txt; sourceTree = SOURCE_ROOT; };
+		4875F69922DCC723006A7D8C /* Ubuntu_20_Build.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Ubuntu_20_Build.txt; sourceTree = SOURCE_ROOT; };
 		48789AEF2061776100A7D848 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utf8.h; path = source/utf8.h; sourceTree = SOURCE_ROOT; };
 		48789AF02061776100A7D848 /* checked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = checked.h; path = source/checked.h; sourceTree = SOURCE_ROOT; };
 		48789AF12061776100A7D848 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = source/core.h; sourceTree = SOURCE_ROOT; };
@@ -1868,7 +1868,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4875F69922DCC723006A7D8C /* Ubuntu_18_Build.txt */,
+				4875F69922DCC723006A7D8C /* Ubuntu_20_Build.txt */,
 				F490972626090AC500C1B24F /* External_Libraries_INSTALL */,
 				A7A61F1A130035C800E05B6B /* LICENSE.md */,
 				48FD9946243E5FB10017C521 /* Makefile_cluster */,
