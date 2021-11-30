@@ -114,7 +114,7 @@ string AlignCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],align"; } //makes file like: amazon.align
-        else if (type == "alignreport") {  pattern = "[filename],align.report"; }
+        else if (type == "alignreport") {  pattern = "[filename],align_report"; }
         else if (type == "accnos") {  pattern = "[filename],flip.accnos"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         

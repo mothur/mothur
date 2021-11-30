@@ -195,7 +195,7 @@ string MakeContigsCommand::getOutputPattern(string type) {
         if (type == "fasta") {  pattern = "[filename],[tag],contigs.fasta"; }
         else if (type == "qfile") {  pattern = "[filename],[tag],contigs.qual"; }
         else if (type == "count") {  pattern = "[filename],[tag],contigs.count_table"; }
-        else if (type == "report") {  pattern = "[filename],[tag],contigs.report"; }
+        else if (type == "report") {  pattern = "[filename],[tag],contigs_report"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
 
         return pattern;

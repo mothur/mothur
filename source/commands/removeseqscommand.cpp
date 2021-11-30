@@ -91,8 +91,8 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
         else if (type == "count")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
-        else if (type == "alignreport")      {   pattern = "[filename],pick.align.report";    }
-        else if (type == "contigsreport")    {   pattern = "[filename],pick.contigs.report";  }
+        else if (type == "alignreport")      {   pattern = "[filename],pick.[extension]";    }
+        else if (type == "contigsreport")    {   pattern = "[filename],pick.[extension]";  }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -845,6 +845,7 @@ void RemoveSeqsCommand::readAlign(){
 		if (outputdir == "") {  thisOutputDir += util.hasPath(alignfile);  }
 		map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
+        variables["[extension]"] = util.getExtension(alignfile);
 		string outputFileName = getOutputFileName("alignreport", variables);
 		
 		ofstream out; util.openOutputFile(outputFileName, out);
@@ -904,6 +905,7 @@ void RemoveSeqsCommand::readContigs(){
         if (outputdir == "") {  thisOutputDir += util.hasPath(contigsreportfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(contigsreportfile));
+        variables["[extension]"] = util.getExtension(contigsreportfile);
         string outputFileName = getOutputFileName("contigsreport", variables);
         ofstream out; util.openOutputFile(outputFileName, out);
         

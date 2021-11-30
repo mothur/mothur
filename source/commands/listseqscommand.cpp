@@ -87,9 +87,6 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			
-			//check for required parameters
 			fastafiles = validParameter.validFiles(parameters, "fasta");
             if (fastafiles.size() != 0) {
                 if (fastafiles[0] == "not open") { abort = true; }
