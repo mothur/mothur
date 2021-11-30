@@ -91,7 +91,7 @@ string GetLineageCommand::getOutputPattern(string type) {
         else if (type == "count")           {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
-        else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
+        else if (type == "alignreport")     {   pattern = "[filename],pick.[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;

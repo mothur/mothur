@@ -70,9 +70,12 @@ string GetSeqsCommand::getHelpString(){
 		helpString += "The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport, contigsreport, fastq and dups.  You must provide accnos unless you have a valid current accnos file, and at least one of the other parameters.\n";
 		helpString += "The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=true. \n";
         helpString += "The format parameter is used to indicate whether your sequences are sanger, solexa, illumina1.8+ or illumina, default=illumina1.8+.\n";
+        helpString += "You may enter multiple files of the same type separated by dashes. For example: get.seqs(accnos=yourAccnos, fastq=forward.fastq-reverse.fastq).\n";
 		helpString += "The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n";
 		helpString += "Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n";
-		;
+		
+        getCommonQuestions();
+        
 		return helpString;
 	}
 	catch(exception& e) {
@@ -94,8 +97,8 @@ string GetSeqsCommand::getOutputPattern(string type) {
         else if (type == "list")        {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "qfile")       {   pattern = "[filename],pick,[extension]";    }
         else if (type == "accnosreport")        {   pattern = "[filename],pick.accnos.report";      }
-        else if (type == "alignreport")         {   pattern = "[filename],pick.align.report";       }
-        else if (type == "contigsreport")       {   pattern = "[filename],pick.contigs.report";       }
+        else if (type == "alignreport")         {   pattern = "[filename],pick.[extension]";       }
+        else if (type == "contigsreport")       {   pattern = "[filename],pick.[extension]";       }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -106,14 +109,28 @@ string GetSeqsCommand::getOutputPattern(string type) {
     }
 }
 //**********************************************************************************************************************
+string GetSeqsCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string howto = "How do I get the reads present in BOTH my paired fastq files to resolve file mismatches?\n"; howtos.push_back(howto);
+        string hanswer = "\tYou can use a combination of the list.seqs and get.seqs command as follows:\n\n";
+        hanswer += "\tmothur > list.seqs(fastq=foward.fastq-reverse.fastq)\n\tmothur > get.seqs(fastq=foward.fastq-reverse.fastq, accnos=current)\n";  hanswers.push_back(hanswer);
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "getCommonQuestions");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 
 GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
     try {
-        names = n;
-        dups = true;
-        outputdir = output;
-        fastafile = ffile;
-        listfile = lfile;
+        names = n; dups = true; outputdir = output;
         
         abort = false; calledHelp = false;
         vector<string> tempOutNames;
@@ -123,17 +140,12 @@ GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string
         outputTypes["list"] = tempOutNames;
         
         if (dupsFile != "") {
-            if (dupsFileType == "count") {
-                countfile = dupsFile;
-                readCount();
-            }else { //names
-                namefile = dupsFile;
-                readName();
-            }
+            if (dupsFileType == "count")    { readCount(dupsFile);  }
+            else                            { readName(dupsFile);   }
         }
         
-        if (fastafile != "")            {        readFasta();        }
-        if (listfile != "")             {        readList();         }
+        if (ffile != "")    {    readFasta(ffile);      }
+        if (lfile != "")    {    readList(lfile);       }
         
     }
     catch(exception& e) {
@@ -169,66 +181,65 @@ GetSeqsCommand::GetSeqsCommand(string option) : Command() {
 			
 			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
-			fastafile = validParameter.validFile(parameters, "fasta");
-			if (fastafile == "not open") { fastafile = ""; abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  }
-			else { current->setFastaFile(fastafile); }
-			
-			namefile = validParameter.validFile(parameters, "name");
-			if (namefile == "not open") { namefile = ""; abort = true; }
-			else if (namefile == "not found") {  namefile = "";  }	
-			else { current->setNameFile(namefile); }
-			
-			groupfile = validParameter.validFile(parameters, "group");
-			if (groupfile == "not open") { abort = true; }
-			else if (groupfile == "not found") {  groupfile = "";  }	
-			else { current->setGroupFile(groupfile); }
-			
-			alignfile = validParameter.validFile(parameters, "alignreport");
-			if (alignfile == "not open") { abort = true; }
-			else if (alignfile == "not found") {  alignfile = "";  }
-            
-            contigsreportfile = validParameter.validFile(parameters, "contigsreport");
-            if (contigsreportfile == "not open") { abort = true; }
-            else if (contigsreportfile == "not found") {  contigsreportfile = "";  }
-            else { current->setContigsReportFile(contigsreportfile); }
-			
-			listfile = validParameter.validFile(parameters, "list");
-			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") {  listfile = "";  }
-			else { current->setListFile(listfile); }
-			
-			taxfile = validParameter.validFile(parameters, "taxonomy");
-			if (taxfile == "not open") { taxfile = ""; abort = true; }
-			else if (taxfile == "not found") {  taxfile = "";  }
-			else { current->setTaxonomyFile(taxfile); }
-			
-			qualfile = validParameter.validFile(parameters, "qfile");
-			if (qualfile == "not open") { abort = true; }
-			else if (qualfile == "not found") {  qualfile = "";  }
-			else { current->setQualFile(qualfile); }
-            
-            fastqfile = validParameter.validFile(parameters, "fastq");
-			if (fastqfile == "not open") { abort = true; }
-			else if (fastqfile == "not found") {  fastqfile = "";  }
-			
-			accnosfile2 = validParameter.validFile(parameters, "accnos2");
-			if (accnosfile2 == "not open") { abort = true; }
-			else if (accnosfile2 == "not found") {  accnosfile2 = "";  }
-			
-            countfile = validParameter.validFile(parameters, "count");
-            if (countfile == "not open") { countfile = ""; abort = true; }
-            else if (countfile == "not found") { countfile = "";  }	
-            else { current->setCountFile(countfile); }
-            
-            if ((namefile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: name or count.\n");  abort = true;
+            fastafiles = validParameter.validFiles(parameters, "fasta");
+            if (fastafiles.size() != 0) {
+                if (fastafiles[0] == "not open") { abort = true; }
+                else { current->setFastaFile(fastafiles[0]); }
             }
             
-            if ((groupfile != "") && (countfile != "")) {
-                m->mothurOut("[ERROR]: you may only use one of the following: group or count.\n");  abort=true;
+            namefiles = validParameter.validFiles(parameters, "name");
+            if (namefiles.size() != 0) {
+                if (namefiles[0] == "not open") { abort = true; }
+                else { current->setNameFile(namefiles[0]); }
             }
-
+            
+            groupfiles = validParameter.validFiles(parameters, "group");
+            if (groupfiles.size() != 0) {
+                if (groupfiles[0] == "not open") { abort = true; }
+                else { current->setGroupFile(groupfiles[0]); }
+            }
+            
+            alignfiles = validParameter.validFiles(parameters, "alignreport");
+            if (alignfiles.size() != 0) {
+                if (alignfiles[0] == "not open") { abort = true; }
+            }
+            
+            contigsreportfiles = validParameter.validFiles(parameters, "contigsreport");
+            if (contigsreportfiles.size() != 0) {
+                if (contigsreportfiles[0] == "not open") { abort = true; }
+                else { current->setContigsReportFile(contigsreportfiles[0]); }
+            }
+            
+            listfiles = validParameter.validFiles(parameters, "list");
+            if (listfiles.size() != 0) {
+                if (listfiles[0] == "not open") { abort = true; }
+                else { current->setListFile(listfiles[0]); }
+            }
+            
+            taxfiles = validParameter.validFiles(parameters, "taxonomy");
+            if (taxfiles.size() != 0) {
+                if (taxfiles[0] == "not open") { abort = true; }
+                else { current->setTaxonomyFile(taxfiles[0]); }
+            }
+            
+            countfiles = validParameter.validFiles(parameters, "count");
+            if (countfiles.size() != 0) {
+                if (countfiles[0] == "not open") { abort = true; }
+                else { current->setCountFile(countfiles[0]); }
+            }
+            
+            fastqfiles = validParameter.validFiles(parameters, "fastq");
+            if (fastqfiles.size() != 0) {
+                if (fastqfiles[0] == "not open") { abort = true; }
+            }
+            
+            qualityfiles = validParameter.validFiles(parameters, "qfile");
+            if (qualityfiles.size() != 0) {
+                if (qualityfiles[0] == "not open") { abort = true; }
+                else { current->setQualFile(qualityfiles[0]); }
+            }
+            
+            if ((qualityfiles.size() == 0) && (fastqfiles.size() == 0) && (countfiles.size() == 0) && (fastafiles.size() == 0) && (namefiles.size() == 0) && (listfiles.size() == 0) && (groupfiles.size() == 0) && (alignfiles.size() == 0) && (taxfiles.size() == 0) && (contigsreportfiles.size() == 0))  { m->mothurOut("You must provide a file.\n"); abort = true; }
 			
 			string usedDups = "true";
 			string temp = validParameter.valid(parameters, "dups");	if (temp == "not found") { temp = "true"; usedDups = ""; }
@@ -241,8 +252,6 @@ GetSeqsCommand::GetSeqsCommand(string option) : Command() {
                 abort=true;
             }
 			
-			if ((fastqfile == "") && (fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == "") && (countfile == "") && (contigsreportfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, count, alignreport, contigsreport, taxonomy, quality, fastq or listfile.\n");  abort = true; }
-            
             //read accnos file
             if (!abort) { names = util.readAccnos(accnosfile);  } 
 		}
@@ -259,23 +268,25 @@ int GetSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-		//read through the correct file and output lines you want to keep
-		if (namefile != "")			    {		readName();			}
-		if (fastafile != "")		    {		readFasta();		}
-        if (fastqfile != "")		    {		readFastq();		}
-		if (groupfile != "")		    {		readGroup();		}
-        if (countfile != "")		    {		readCount();		}
-		if (alignfile != "")		    {		readAlign();		}
-        if (contigsreportfile != "")    {       readContigs();      }
-		if (listfile != "")			    {		readList();			}
-		if (taxfile != "")			    {		readTax();			}
-		if (qualfile != "")			    {		readQual();			}
-		if (accnosfile2 != "")		    {		compareAccnos();	}
+        string fastafile = ""; string namefile = ""; string qualfile = ""; string taxfile = ""; string groupfile = ""; string listfile = "";
         
-        if (m->getDebug()) { runSanityCheck(); }
+        //read through the correct file and output lines you want to keep
+        if (namefiles.size() != 0)          { namefile = namefiles[0];  for (int i = 0; i < namefiles.size(); i++)       { readName(namefiles[i]);   }   }
+        if (fastafiles.size() != 0)         { fastafile = fastafiles[0]; for (int i = 0; i < fastafiles.size(); i++)    { readFasta(fastafiles[i]); }   }
+        if (qualityfiles.size() != 0)       { qualfile = qualityfiles[0]; for (int i = 0; i < qualityfiles.size(); i++) { readQual(qualityfiles[i]); }  }
+        if (groupfiles.size() != 0)         { groupfile = groupfiles[0];    for (int i = 0; i < groupfiles.size(); i++)     { readGroup(groupfiles[i]);  }  }
+        if (taxfiles.size() != 0)           { taxfile = taxfiles[0];    for (int i = 0; i < taxfiles.size(); i++)           { readTax(taxfiles[i]);    }  }
+        if (listfiles.size() != 0)          { listfile = listfiles[0];   for (int i = 0; i < taxfiles.size(); i++)           { readTax(taxfiles[i]);    }  }
+
+        if (alignfiles.size() != 0)         {    for (int i = 0; i < alignfiles.size(); i++)           { readAlign(alignfiles[i]);    }  }
+        if (contigsreportfiles.size() != 0) {    for (int i = 0; i < contigsreportfiles.size(); i++)   { readContigs(contigsreportfiles[i]);    }  }
+        if (countfiles.size() != 0)         {    for (int i = 0; i < countfiles.size(); i++)           { readCount(countfiles[i]);    }  }
+        if (fastqfiles.size() != 0)         {    for (int i = 0; i < fastqfiles.size(); i++)            { readFastq(fastqfiles[i]);  }  }
+        if (accnosfile2 != "")              {    compareAccnos(namefile);                                       }
+
+        if (m->getDebug()) { runSanityCheck(fastafile, namefile, qualfile, taxfile, groupfile, listfile); }
 		
 		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
-		
 		
 		if (outputNames.size() != 0) {
 			m->mothurOut("\nOutput File Names:\n");
@@ -329,11 +340,9 @@ int GetSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readFastq(){
+void GetSeqsCommand::readFastq(string fastqfile){
 	try {
-		bool wroteSomething = false;
-		int selectedCount = 0;
-        
+		bool wroteSomething = false; int selectedCount = 0;
 		ifstream in; util.openInputFile(fastqfile, in);
 		
 		string thisOutputDir = outputdir;
@@ -371,13 +380,12 @@ void GetSeqsCommand::readFastq(){
             
 			util.gobble(in);
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
         
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");   }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastqfile + " does not contain any sequence from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fastq file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastqfile + ".\n");
 		
 		return;
 	}
@@ -387,46 +395,43 @@ void GetSeqsCommand::readFastq(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readFasta(){
-	try {
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-		map<string, string> variables; 
+void GetSeqsCommand::readFasta(string fastafile){
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
         variables["[extension]"] = util.getExtension(fastafile);
-		string outputFileName = getOutputFileName("fasta", variables);
-		ofstream out; util.openOutputFile(outputFileName, out);
-		
-		ifstream in; util.openInputFile(fastafile, in);
-		string name;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+        string outputFileName = getOutputFileName("fasta", variables);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        ifstream in; util.openInputFile(fastafile, in);
+        string name; bool wroteSomething = false; int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["fasta"] = temp; }
-		
+        
         set<string> uniqueNames; int line = 0; int redundNum = 0;
-		while(!in.eof()){
-		
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
-			
-			Sequence currSeq(in);
-			name = currSeq.getName();
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
+            
+            Sequence currSeq(in);
+            name = currSeq.getName();
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
                 if (it != uniqueMap.end()) { currSeq.setName(it->second); }
             }
-			
+            
             name = currSeq.getName();
             
-			if (name != "") {
+            if (name != "") {
                 line++;
-				//if this name is in the accnos file
-				if (names.count(name) != 0) {
+                //if this name is in the accnos file
+                if (names.count(name) != 0) {
                     if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
                         wroteSomething = true;
-					
+                    
                         currSeq.printSequence(out);
                         selectedCount++;
                         uniqueNames.insert(name);
@@ -437,26 +442,25 @@ void GetSeqsCommand::readFasta(){
                         redundNum++;
                     }
                 }
-			}
-			util.gobble(in);
-		}
-		in.close();	
-		out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
-		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your fasta file.\n");
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "readFasta");
-		exit(1);
-	}
+            }
+            util.gobble(in);
+        }
+        in.close(); out.close();
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastafile + " does not contain any sequence from the .accnos file.\n");  }
+        outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastafile + ".\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readFasta");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readQual(){
+void GetSeqsCommand::readQual(string qualfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(qualfile);  }
@@ -506,10 +510,10 @@ void GetSeqsCommand::readQual(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");   }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + qualfile + " does not contain any sequence from the .accnos file.\n");   }
 		outputNames.push_back(outputFileName);  outputTypes["qfile"].push_back(outputFileName); 
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your quality file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + qualfile + ".\n");
 
 		return;
 	}
@@ -519,7 +523,7 @@ void GetSeqsCommand::readQual(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readCount(){
+void GetSeqsCommand::readCount(string countfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
@@ -536,10 +540,10 @@ void GetSeqsCommand::readCount(){
         
         ct.printTable(outputFileName);
 		
-		if (wroteSomething == false) {  m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");   }
+		if (wroteSomething == false) {  m->mothurOut("[WARNING]: " + countfile + " does not contain any sequence from the .accnos file.\n");   }
 		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your count file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + countfile + ".\n");
         
 		return;
 	}
@@ -549,7 +553,7 @@ void GetSeqsCommand::readCount(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readList(){
+void GetSeqsCommand::readList(string listfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(listfile);  }
@@ -559,8 +563,7 @@ void GetSeqsCommand::readList(){
         InputData input(listfile, "list", nullVector);
         ListVector* list = input.getListVector();
 		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+		bool wroteSomething = false; int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
 		
@@ -633,9 +636,9 @@ void GetSeqsCommand::readList(){
 		}
 		
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + listfile + " does not contain any sequence from the .accnos file.\n");  }
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your list file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + listfile + ".\n");
 		
 		return;
 	}
@@ -645,42 +648,40 @@ void GetSeqsCommand::readList(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readName(){
-	try {
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
-        map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+void GetSeqsCommand::readName(string namefile){
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
-		string outputFileName = getOutputFileName("name", variables);
-		ofstream out; util.openOutputFile(outputFileName, out);
-		
-		ifstream in; util.openInputFile(namefile, in);
-		string name, firstCol, secondCol;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+        string outputFileName = getOutputFileName("name", variables);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        
+        ifstream in; util.openInputFile(namefile, in);
+        string name, firstCol, secondCol;
+        bool wroteSomething = false; int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["name"] = temp; }
         if (m->getDebug()) { set<string> temp; sanity["dupname"] = temp; }
-		
+        
         set<string> uniqueNames;
-		while(!in.eof()){
-		
-			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			in >> firstCol;			util.gobble(in);
-			in >> secondCol;        util.gobble(in);
-			
-			string hold = "";
-			if (dups) { hold = secondCol; }
-			
-			vector<string> parsedNames;
-			util.splitAtComma(secondCol, parsedNames);
-			
-			vector<string> validSecond; vector<string> parsedNames2;
+            in >> firstCol;            util.gobble(in);
+            in >> secondCol;        util.gobble(in);
+            
+            string hold = "";
+            if (dups) { hold = secondCol; }
+            
+            vector<string> parsedNames;
+            util.splitAtComma(secondCol, parsedNames);
+            
+            vector<string> validSecond; vector<string> parsedNames2;
             bool parsedError = false;
-			for (int i = 0; i < parsedNames.size(); i++) {
+            for (int i = 0; i < parsedNames.size(); i++) {
                 if (names.count(parsedNames[i]) != 0) {
                     if (uniqueNames.count(parsedNames[i]) == 0) { //this name hasn't been seen yet
                         uniqueNames.insert(parsedNames[i]);
@@ -691,8 +692,8 @@ void GetSeqsCommand::readName(){
                         m->mothurOut("[WARNING]: " + parsedNames[i] + " is in your name file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                         parsedError = true;
                     }
-				}
-			}
+                }
+            }
             if (parsedError) {
                 parsedNames = parsedNames2;
                 hold = "";
@@ -702,13 +703,13 @@ void GetSeqsCommand::readName(){
                 }
             }
 
-			if (dups && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
-				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->getDebug()) { sanity["dupname"].insert(parsedNames[i]); } }
-				out << firstCol << '\t' << hold << endl;
-				wroteSomething = true;
-				selectedCount += parsedNames.size();
+            if (dups && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
+                for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]); if (m->getDebug()) { sanity["dupname"].insert(parsedNames[i]); } }
+                out << firstCol << '\t' << hold << endl;
+                wroteSomething = true;
+                selectedCount += parsedNames.size();
                 if (m->getDebug()) { sanity["name"].insert(firstCol); }
-			}else {
+            }else {
                 
                 if (validSecond.size() != 0) {
                     selectedCount += validSecond.size();
@@ -747,24 +748,24 @@ void GetSeqsCommand::readName(){
                         }
                     }
                 }
-			}
-		}
-		in.close(); out.close();
-		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
-		outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your name file.\n");
-		
-		return;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetSeqsCommand", "readName");
-		exit(1);
-	}
+            }
+        }
+        in.close(); out.close();
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + namefile + " does not contain any sequence from the .accnos file.\n");  }
+        outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + namefile + " file.\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readName");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readGroup(){
+void GetSeqsCommand::readGroup(string groupfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(groupfile);  }
@@ -772,16 +773,10 @@ void GetSeqsCommand::readGroup(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
 		
-
-		ifstream in;
-		util.openInputFile(groupfile, in);
-		string name, group;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+		ifstream in; util.openInputFile(groupfile, in);
+		string name, group; bool wroteSomething = false; int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["group"] = temp; }
 		
@@ -790,11 +785,9 @@ void GetSeqsCommand::readGroup(){
 
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-
 			in >> name;		util.gobble(in);		//read from first column
-			in >> group;			//read from second column
+            in >> group;	util.gobble(in);		//read from second column
             
-			
             if (names.count(name) != 0) {
                 if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
                     uniqueNames.insert(name);
@@ -808,16 +801,13 @@ void GetSeqsCommand::readGroup(){
                     m->mothurOut("[WARNING]: " + name + " is in your group file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
                 }
             }
-					
-			util.gobble(in);
 		}
-		in.close();
-		out.close();
+		in.close(); out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + groupfile + " does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["group"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your group file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + groupfile + ".\n");
 
 		return;
 	}
@@ -827,7 +817,7 @@ void GetSeqsCommand::readGroup(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readTax(){
+void GetSeqsCommand::readTax(string taxfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(taxfile);  }
@@ -835,15 +825,10 @@ void GetSeqsCommand::readTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
+		ofstream out; util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(taxfile, in);
-		string name, tax;
-		
-		bool wroteSomething = false;
-		int selectedCount = 0;
+		ifstream in; util.openInputFile(taxfile, in);
+		string name, tax; bool wroteSomething = false;  int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["tax"] = temp; }
 		
@@ -878,10 +863,10 @@ void GetSeqsCommand::readTax(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + taxfile + " does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["taxonomy"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your taxonomy file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + taxfile + ".\n");
 			
 		return;
 
@@ -893,19 +878,19 @@ void GetSeqsCommand::readTax(){
 }
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void GetSeqsCommand::readAlign(){
+void GetSeqsCommand::readAlign(string alignfile){
 	try {
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(alignfile);  }
         map<string, string> variables; 
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(alignfile));
+        variables["[extension]"] = util.getExtension(alignfile);
 		string outputFileName = getOutputFileName("alignreport", variables);
 		
         ofstream out; util.openOutputFile(outputFileName, out);
         ifstream in; util.openInputFile(alignfile, in);
 		
-        AlignReport report;
-        report.readHeaders(in); util.gobble(in);
+        AlignReport report; report.readHeaders(in); util.gobble(in);
         report.printHeaders(out);
 		
         bool wroteSomething = false; int selectedCount = 0;
@@ -938,10 +923,10 @@ void GetSeqsCommand::readAlign(){
 		}
 		in.close(); out.close();
 		
-		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  }
+		if (wroteSomething == false) { m->mothurOut("[WARNING]: " + alignfile + " does not contain any sequence from the .accnos file.\n");  }
 		outputNames.push_back(outputFileName);  outputTypes["alignreport"].push_back(outputFileName);
 		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from your alignreport file.\n");
+		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + alignfile + ".\n");
 		
 		return;
 	}
@@ -952,23 +937,22 @@ void GetSeqsCommand::readAlign(){
 }
 //**********************************************************************************************************************
 //contigsreport file has a column header line then all other lines contain 8 columns.  we just want the first column since that contains the name
-void GetSeqsCommand::readContigs(){
+void GetSeqsCommand::readContigs(string contigsreportfile){
     try {
         string thisOutputDir = outputdir;
         if (outputdir == "") {  thisOutputDir += util.hasPath(contigsreportfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(contigsreportfile));
+        variables["[extension]"] = util.getExtension(contigsreportfile);
         string outputFileName = getOutputFileName("contigsreport", variables);
         ofstream out; util.openOutputFile(outputFileName, out);
         
-        bool wroteSomething = false;
-        int selectedCount = 0;
+        bool wroteSomething = false; int selectedCount = 0;
         
         set<string> uniqueNames;
         ifstream in; util.openInputFile(contigsreportfile, in);
         
-        ContigsReport report;
-        report.readHeaders(in); util.gobble(in);
+        ContigsReport report; report.readHeaders(in); util.gobble(in);
         report.printHeaders(out);
         
         while(!in.eof()){
@@ -994,13 +978,12 @@ void GetSeqsCommand::readContigs(){
                 }
             }
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
         
-        if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); } //reopening file clears header line
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + contigsreportfile + " does not contain any sequence from the .accnos file.\n");  ofstream out1; util.openOutputFile(outputFileName, out1); out1.close(); } //reopening file clears header line
         outputNames.push_back(outputFileName);  outputTypes["contigsreport"].push_back(outputFileName);
         
-        m->mothurOut("Selected " + toString(selectedCount) + " sequences from your contigsreport file.\n");
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + contigsreportfile + ".\n");
         
         return;
     }
@@ -1011,7 +994,7 @@ void GetSeqsCommand::readContigs(){
 }
 //**********************************************************************************************************************
 //just looking at common mistakes. 
-int GetSeqsCommand::runSanityCheck(){
+int GetSeqsCommand::runSanityCheck(string fastafile, string namefile, string qualfile, string taxfile, string groupfile, string listfile){
 	try {
         string thisOutputDir = outputdir;
         if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -1020,7 +1003,6 @@ int GetSeqsCommand::runSanityCheck(){
         ofstream out;
 		util.openOutputFile(filename, out); 
 
-       
         //compare fasta, name, qual and taxonomy if given to make sure they contain the same seqs
         if (fastafile != "") {
             if (namefile != "") { //compare with fasta
@@ -1104,7 +1086,7 @@ int GetSeqsCommand::createMisMatchFile(ofstream& out, string filename1, string f
 }
 //**********************************************************************************************************************
 
-int GetSeqsCommand::compareAccnos(){
+int GetSeqsCommand::compareAccnos(string namefile){
 	try {
 		
 		string thisOutputDir = outputdir;
@@ -1127,9 +1109,7 @@ int GetSeqsCommand::compareAccnos(){
 		map<string, int> nameCount;
 		
 		if (namefile != "") {
-			ifstream inName;
-			util.openInputFile(namefile, inName);
-			
+			ifstream inName; util.openInputFile(namefile, inName);
 			
 			while(!inName.eof()){
 				
