@@ -34,7 +34,7 @@ public:
 	void help() { m->mothurOut(getHelpString()); }	
 	
 private:
-	string output, input, mothurfiles, blastLocation, toolsLocation;
+	string output, input, mothurfiles, toolsLocation;
 	bool abort, debugorSeedOnly, modifyNames;
     int random;
 	vector<string> outputNames;

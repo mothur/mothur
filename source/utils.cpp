@@ -797,32 +797,6 @@ bool Utils::checkSpecificLocations(string& filename, vector<string> locations, s
     }
 }
 /***********************************************************************/
-bool Utils::findBlastLocation(string& toolLocation, vector< vector<string> > locations){
-    try {
-        bool foundTool = false;
-        string programName = "formatdb"; programName += EXECUTABLE_EXT;
-
-        toolLocation = "";
-        string blastBin = "blast"; blastBin += PATH_SEPARATOR; blastBin += "bin"; blastBin += PATH_SEPARATOR;
-       
-        for (int i = 0; i < locations.size(); i++) {
-            for (int j = 0; j < locations[i].size(); j++) { locations[i][j] += blastBin; }
-        }
-        
-        vector<string> versionOutputs;
-        foundTool = findTool(programName, toolLocation, versionOutputs, locations);
-        
-        if (foundTool) { toolLocation = hasPath(toolLocation); }
-        else { toolLocation = ""; }
-        
-        return foundTool;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "findBlastLocation");
-        exit(1);
-    }
-}
-/***********************************************************************/
 //locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
 bool Utils::findTool(string& toolName, string& toolLocation, vector<string>& versionOutputs, vector< vector<string> > locations){
     try {

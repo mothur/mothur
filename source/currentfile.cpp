@@ -277,24 +277,6 @@ void CurrentFile::setTestFilePath(string pathname)  {
     }
 }
 /*********************************************************************************************/
-void CurrentFile::setBlastPath(string pathname)  {
-    try {
-        lock_guard<std::mutex> guard(currentProtector);
-        
-        if (pathname != "") {
-            //add / to name if needed
-            string lastChar = pathname.substr(pathname.length()-1);
-            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
-        }
-        blastPath = util.getFullPathName(pathname);
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "CurrentFile", "setBlastPath");
-        exit(1);
-    }
-}
-/*********************************************************************************************/
 void CurrentFile::setHomePath(string pathname)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);

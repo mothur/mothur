@@ -38,7 +38,6 @@ public:
             }
             
             current->setProgramPath(util.getFullPathName(path));
-            current->setBlastPath(current->getProgramPath());
             
             //if you haven't set your own location
             #ifdef MOTHUR_FILES
@@ -48,11 +47,6 @@ public:
                         vector<string> temps; temps.push_back(current->getProgramPath());
                         current->setDefaultPath(temps);
                     }
-            #endif
-            
-            //if you haven't set your own location
-            #ifdef MOTHUR_TOOLS
-                current->setBlastPath((current->getToolsPath())[0]);
             #endif
             
             start = time(NULL);
