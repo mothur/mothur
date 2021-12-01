@@ -21,10 +21,10 @@ vector<string> AlignCommand::setParameters(){
 	try {
 		CommandParameter ptemplate("reference", "InputTypes", "", "", "none", "none", "none","",false,true,true); parameters.push_back(ptemplate);
 		CommandParameter pcandidate("fasta", "InputTypes", "", "", "none", "none", "none","fasta-alignreport-accnos",false,true,true); parameters.push_back(pcandidate);
-		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix", "kmer", "", "", "","",false,false,true); parameters.push_back(psearch);
+		CommandParameter psearch("search", "Multiple", "kmer-suffix", "kmer", "", "", "","",false,false,true); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
-		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false,true); parameters.push_back(palign);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-noalign", "needleman", "", "", "","",false,false,true); parameters.push_back(palign);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-5.0", "", "", "","",false,false); parameters.push_back(pgapopen);
 		CommandParameter pgapextend("gapextend", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapextend);
@@ -58,8 +58,8 @@ string AlignCommand::getHelpString(){
 		helpString += "The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n";
 		helpString += "The align.seqs command parameters are " + getCommandParameters() + ".\n";
 		helpString += "The reference and fasta parameters are required. You may leave fasta blank if you have a valid fasta file.\n";
-		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer and blast. The default is kmer.\n";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix or kmer. The default is kmer.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman and noalign. The default is needleman.\n";
 		helpString += "The ksize parameter allows you to specify the kmer size for finding most similar reference to a given sequence.  The default is 8.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. Default=1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases. Default=-1.0.\n";
@@ -179,20 +179,10 @@ AlignCommand::AlignCommand(string option) : Command()  {
 			util.mothurConvert(temp, threshold); 
 			
 			search = validParameter.valid(parameters, "search");		if (search == "not found"){	search = "kmer";		}
-			if ((search != "suffix") && (search != "kmer") && (search != "blast")) { m->mothurOut("invalid search option: choices are kmer, suffix or blast.\n");  abort=true; }
+			if ((search != "suffix") && (search != "kmer")) { m->mothurOut("invalid search option: choices are kmer or suffix.\n");  abort=true; }
 			
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-			if ((align != "needleman") && (align != "gotoh") && (align != "blast") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh, blast or noalign.\n");  abort=true; }
-            
-            if ((search == "blast") || (align == "blast")) {
-                string blastlocation = "";
-                
-                if (!util.findBlastLocation(blastlocation, current->getLocations())){
-                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search or align method. Using defaults instead.\n");
-                    if (search == "blast") { search = "kmer"; }
-                    if (align == "blast") { align = "needleman"; }
-                }
-            }
+			if ((align != "needleman") && (align != "gotoh") && (align != "noalign")) { m->mothurOut("invalid align option: choices are needleman, gotoh or noalign.\n");  abort=true; }
 		}
 		
 	}
@@ -317,7 +307,6 @@ struct alignStruct {
         if (m->getDebug()) { m->mothurOut("[DEBUG]: template longest base = "  + toString(longestBase) + " \n");            }
         if(al == "gotoh")            {    alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);   }
         else if(al == "needleman")    {    alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);         }
-        else if(al == "blast")        {    alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);             }
         else if(al == "noalign")        {    alignment = new NoAlign();                                                     }
         else {
             m->mothurOut(al + " is not a valid alignment option. I will run the command using needleman.\n");

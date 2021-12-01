@@ -5,7 +5,7 @@
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
  *
  *  This is a class for an abstract datatype for classes that implement various types of alignment	algorithms.
- *	As of 12/18/08 these included alignments based on blastn, needleman-wunsch, and the	Gotoh algorithms
+ *	As of 12/01/21 these included alignments based on needleman-wunsch, and the	Gotoh algorithms
  *  
  */
 
