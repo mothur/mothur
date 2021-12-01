@@ -291,8 +291,6 @@
 		481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
 		481FB6261AC1B7EA0076CFF3 /* alignmentcell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65512D37EC300DA6239 /* alignmentcell.cpp */; };
 		481FB6271AC1B7EA0076CFF3 /* alignmentdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65712D37EC300DA6239 /* alignmentdb.cpp */; };
-		481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
-		481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		481FB62A1AC1B7EA0076CFF3 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77916E6176F7F7600EEFE18 /* designmap.cpp */; };
 		481FB62D1AC1B7EA0076CFF3 /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */; };
@@ -604,8 +602,6 @@
 		A7E9B88812D37EC400DA6239 /* bellerophon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65C12D37EC300DA6239 /* bellerophon.cpp */; };
 		A7E9B88912D37EC400DA6239 /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65E12D37EC300DA6239 /* bergerparker.cpp */; };
 		A7E9B88A12D37EC400DA6239 /* binsequencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */; };
-		A7E9B88B12D37EC400DA6239 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
-		A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66612D37EC400DA6239 /* boneh.cpp */; };
 		A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
 		A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
@@ -1303,10 +1299,6 @@
 		A7E9B65F12D37EC300DA6239 /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bergerparker.h; path = source/calculators/bergerparker.h; sourceTree = SOURCE_ROOT; };
 		A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = binsequencecommand.cpp; path = source/commands/binsequencecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66112D37EC300DA6239 /* binsequencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = binsequencecommand.h; path = source/commands/binsequencecommand.h; sourceTree = SOURCE_ROOT; };
-		A7E9B66212D37EC300DA6239 /* blastalign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blastalign.cpp; path = source/datastructures/blastalign.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66312D37EC400DA6239 /* blastalign.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blastalign.hpp; path = source/datastructures/blastalign.hpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66412D37EC400DA6239 /* blastdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blastdb.cpp; path = source/datastructures/blastdb.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66512D37EC400DA6239 /* blastdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blastdb.hpp; path = source/datastructures/blastdb.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66612D37EC400DA6239 /* boneh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = boneh.cpp; path = source/calculators/boneh.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66712D37EC400DA6239 /* boneh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = boneh.h; path = source/calculators/boneh.h; sourceTree = SOURCE_ROOT; };
 		A7E9B66812D37EC400DA6239 /* bootstrap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bootstrap.cpp; path = source/calculators/bootstrap.cpp; sourceTree = SOURCE_ROOT; };
@@ -2771,10 +2763,6 @@
 				48A0B8F025472C4500726384 /* biomhdf5.hpp */,
 				48A0B8F425472C6500726384 /* biomsimple.cpp */,
 				48A0B8F525472C6500726384 /* biomsimple.hpp */,
-				A7E9B66212D37EC300DA6239 /* blastalign.cpp */,
-				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
-				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
-				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
 				48883FFB20C6D6C000CAF112 /* compare.h */,
 				F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */,
 				F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */,
@@ -3163,7 +3151,6 @@
 				4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */,
 				481FB61B1AC1B7AC0076CFF3 /* trimflowscommand.cpp in Sources */,
 				481FB6781AC1B88F0076CFF3 /* readcolumn.cpp in Sources */,
-				481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */,
 				481FB6831AC1B8B80076CFF3 /* trialSwap2.cpp in Sources */,
 				481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */,
 				4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */,
@@ -3254,7 +3241,6 @@
 				481FB55E1AC1B66D0076CFF3 /* sharedjackknife.cpp in Sources */,
 				481FB64B1AC1B7F40076CFF3 /* suffixtree.cpp in Sources */,
 				481FB5F21AC1B77E0076CFF3 /* phylotypecommand.cpp in Sources */,
-				481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */,
 				481FB61D1AC1B7AC0076CFF3 /* unifracunweightedcommand.cpp in Sources */,
 				481FB6141AC1B7AC0076CFF3 /* subsamplecommand.cpp in Sources */,
 				481FB5481AC1B61F0076CFF3 /* hellinger.cpp in Sources */,
@@ -3544,8 +3530,6 @@
 				A7E9B88912D37EC400DA6239 /* bergerparker.cpp in Sources */,
 				F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */,
 				A7E9B88A12D37EC400DA6239 /* binsequencecommand.cpp in Sources */,
-				A7E9B88B12D37EC400DA6239 /* blastalign.cpp in Sources */,
-				A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */,
 				A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */,
 				A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */,
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
