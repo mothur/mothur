@@ -34,21 +34,21 @@ class RemoveSeqsCommand : public Command {
 	
 	private:
 		set<string> names;
-		string accnosfile, fastafile, fastqfile, namefile, groupfile, countfile, alignfile, listfile, taxfile, qualfile,  format, contigsreportfile;
+        vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles, outputNames;
+		string accnosfile, format;
 		bool abort, dups;
-		vector<string> outputNames;
         map<string, string> uniqueMap;
 		
-		void readFasta();
-        void readFastq();
-		void readName();
-		void readGroup();
-        void readCount();
-		void readAlign();
-        void readContigs();
-		void readList();
-		void readTax();
-		void readQual();
+		void readFasta(string);
+        void readFastq(string);
+		void readName(string);
+		void readGroup(string);
+        void readCount(string);
+		void readAlign(string);
+        void readContigs(string);
+		void readList(string);
+		void readTax(string);
+		void readQual(string);
 		
 };
 
