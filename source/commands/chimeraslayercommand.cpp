@@ -29,7 +29,6 @@ vector<string> ChimeraSlayerCommand::setParameters(){
 		CommandParameter pmincov("mincov", "Number", "", "70", "", "", "","",false,false); parameters.push_back(pmincov);
 		CommandParameter pminsnp("minsnp", "Number", "", "10", "", "", "","",false,false); parameters.push_back(pminsnp);
 		CommandParameter pminbs("minbs", "Number", "", "90", "", "", "","",false,false); parameters.push_back(pminbs);
-		CommandParameter psearch("search", "Multiple", "kmer-blast", "blast", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter prealign("realign", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(prealign);
 		CommandParameter ptrim("trim", "Boolean", "", "F", "", "", "","fasta",false,false); parameters.push_back(ptrim);
 		CommandParameter psplit("split", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(psplit);
@@ -40,7 +39,6 @@ vector<string> ChimeraSlayerCommand::setParameters(){
         CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","alns",false,false); parameters.push_back(premovechimeras);
         CommandParameter pparents("parents", "Number", "", "3", "", "", "","",false,false); parameters.push_back(pparents);
 		CommandParameter pincrement("increment", "Number", "", "5", "", "", "","",false,false); parameters.push_back(pincrement);
-		CommandParameter pblastlocation("blastlocation", "String", "", "", "", "", "","",false,false); parameters.push_back(pblastlocation);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -68,7 +66,7 @@ string ChimeraSlayerCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The chimera.slayer command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
 		helpString += "This command was modeled after the chimeraSlayer written by the Broad Institute.\n";
-		helpString += "The chimera.slayer command parameters are fasta, name, group, template, processors, dereplicate, removechimeras, trim, ksize, window, match, mismatch, divergence, minsim, mincov, minbs, minsnp, parents, search, iters, increment, numwanted, blastlocation and realign.\n";
+		helpString += "The chimera.slayer command parameters are fasta, name, group, template, processors, dereplicate, removechimeras, trim, ksize, window, match, mismatch, divergence, minsim, mincov, minbs, minsnp, parents, iters, increment, numwanted and realign.\n";
 		helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
 		helpString += "The name parameter allows you to provide a name file, if you are using reference=self. \n";
 		helpString += "The group parameter allows you to provide a group file. The group file can be used with a namesfile and reference=self. When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
@@ -81,22 +79,20 @@ string ChimeraSlayerCommand::getHelpString(){
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n";
 		helpString += "The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n";
 		helpString += "The ksize parameter allows you to input kmersize, default is 7, used if search is kmer. \n";
-		helpString += "The match parameter allows you to reward matched bases in blast search, default is 5. \n";
+		helpString += "The match parameter allows you to reward matched bases, default is 5. \n";
 		helpString += "The parents parameter allows you to select the number of potential parents to investigate from the numwanted best matches after rating them, default is 3. \n";
-		helpString += "The mismatch parameter allows you to penalize mismatched bases in blast search, default is -4. \n";
+		helpString += "The mismatch parameter allows you to penalize mismatched bases, default is -4. \n";
 		helpString += "The divergence parameter allows you to set a cutoff for chimera determination, default is 1.007. \n";
 		helpString += "The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method, default=1000.\n";
 		helpString += "The minsim parameter allows you to specify a minimum similarity with the parent fragments, default=90. \n";
 		helpString += "The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n";
 		helpString += "The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n";
 		helpString += "The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n";
-		helpString += "The search parameter allows you to specify search method for finding the closest parent. Choices are blast and kmer. Default=blast. \n";
 		helpString += "The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default true.  \n";
         helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
-		helpString += "The blastlocation parameter allows you to specify the location of your blast executable. By default mothur will look in ./blast/bin relative to mothur's executable.  \n";
 		helpString += "The chimera.slayer command should be in the following format: \n";
-		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate, search=yourSearch) \n";
-		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta, search=kmer) \n";
+		helpString += "chimera.slayer(fasta=yourFastaFile, reference=yourTemplate) \n";
+		helpString += "Example: chimera.slayer(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
 			
 		return helpString;
 	}
@@ -226,8 +222,6 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "split");			if (temp == "not found") { temp = "f"; }
 			trimera = util.isTrue(temp); 
 			
-			search = validParameter.valid(parameters, "search");			if (search == "not found") { search = "blast"; }
-			
 			temp = validParameter.valid(parameters, "iters");			if (temp == "not found") { temp = "1000"; }
 			util.mothurConvert(temp, iters); 
 			 
@@ -242,41 +236,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option) : Command()  {
 			
             temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
             removeChimeras = util.isTrue(temp);
-            
-            bool foundTool = false;
-			blastlocation = validParameter.validPath(parameters, "blastlocation");
-			if (blastlocation == "not found") {
-                if (search == "blast") {
-                    blastlocation = "";
-                    foundTool = util.findBlastLocation(blastlocation, current->getLocations());
-
-                    if (!foundTool){
-                        m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";
-                    }
-                }
-            }else {
-				//add / to name if needed
-				string lastChar = blastlocation.substr(blastlocation.length()-1);
-                if (lastChar != PATH_SEPARATOR) { blastlocation += PATH_SEPARATOR; }
-				blastlocation = util.getFullPathName(blastlocation);
-				
-				//test to make sure formatdb exists
-				ifstream in;
-                string formatdbCommand = blastlocation + "formatdb" + EXECUTABLE_EXT;
-				formatdbCommand = util.getFullPathName(formatdbCommand);
-				bool ableToOpen = util.openInputFile(formatdbCommand, in, "no error"); in.close();
-				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + formatdbCommand + " file does not exist. mothur requires formatdb.exe to run chimera.slayer.\n");  abort = true; }
-
-				//test to make sure formatdb exists
-				ifstream in2;
-                string blastCommand = blastlocation + "megablast" + EXECUTABLE_EXT;
-				blastCommand = util.getFullPathName(blastCommand);
-				ableToOpen = util.openInputFile(blastCommand, in2, "no error"); in2.close();
-				if(!ableToOpen) {	m->mothurOut("[ERROR]: " + blastCommand + " file does not exist. mothur requires blastall.exe to run chimera.slayer.\n");  abort = true; }
-			}
-            
-			if ((search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search.\n");  abort = true;  }
-			
+            			
 			if ((hasName || hasCount) && (templatefile != "self")) { m->mothurOut("You have provided a namefile or countfile and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 			if (hasGroup && (templatefile != "self")) { m->mothurOut("You have provided a group file and the reference parameter is not set to self. I am not sure what reference you are trying to use, aborting.\n");  abort=true; }
 
@@ -785,9 +745,9 @@ int ChimeraSlayerCommand::driver(string outputFName, string filename, string acc
         
 		MothurChimera* chimera;
 		if (templatefile != "self") { //you want to run slayer with a reference template
-			chimera = new ChimeraSlayer(filename, templatefile, trim, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, util.getRandomNumber());
+			chimera = new ChimeraSlayer(filename, templatefile, trim, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, util.getRandomNumber());
 		}else {
-			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, blastlocation, util.getRandomNumber());	
+			chimera = new ChimeraSlayer(filename, templatefile, trim, priority, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign, util.getRandomNumber());
 		}
 		
 		if (m->getControl_pressed()) { delete chimera; return 0; }
@@ -878,13 +838,7 @@ int ChimeraSlayerCommand::driver(string outputFName, string filename, string acc
 		//report progress
 		if((count) % 100 != 0){	m->mothurOutJustToScreen("Processing sequence: " + toString(count)+ "\n"); 		}
 		
-		int numNoParents = chimera->getNumNoParents();
-		if (numNoParents == count) { m->mothurOut("[WARNING]: megablast returned 0 potential parents for all your sequences. This could be due to formatdb.exe not being setup properly, please check formatdb.log for errors.\n");  }
-		
-		out.close();
-		out2.close();
-		if (trim) { out3.close(); }
-		inFASTA.close();
+		out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close();
 		delete chimera;
 				
 		return count;
@@ -940,15 +894,11 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string thisfastafile, strin
         vector<seqPriorityNode> nameVector;
         
         if (hasCount) {
-            CountTable ct;
-            ct.readTable(thisdupsfile, false, false);
-            
+            CountTable ct; ct.readTable(thisdupsfile, false, false);
             nameAbund = ct.getNameMap();
         }
 
-		
-		ifstream in;
-		util.openInputFile(thisfastafile, in);
+		ifstream in; util.openInputFile(thisfastafile, in);
 		
 		while (!in.eof()) {
 			

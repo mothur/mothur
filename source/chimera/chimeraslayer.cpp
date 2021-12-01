@@ -10,15 +10,13 @@
 #include "chimeraslayer.h"
 #include "chimerarealigner.h"
 #include "kmerdb.hpp"
-#include "blastdb.hpp"
 
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string mode, int k, int ms, int mms, int win, float div, 
-int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : MothurChimera()  {  	
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, int k, int ms, int mms, int win, float div,
+int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, int tid) : MothurChimera()  {
 	try {
 		fastafile = file;
 		templateFileName = temp; templateSeqs = readSeqs(temp);
-		searchMethod = mode;
 		kmerSize = k;
 		match = ms;
 		misMatch = mms;
@@ -35,7 +33,6 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 		realign = r; 
 		trimChimera = trim;
 		numNoParents = 0;
-		blastlocation = blas;
 		threadID = tid;
 	
 		doPrep();
@@ -47,13 +44,12 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 }
 //***************************************************************************************************************
 //template=self
-ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
-							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid, bool bg) : MothurChimera()  {  	
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, int k, int ms, int mms, int win, float div,
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, int tid, bool bg) : MothurChimera()  {
 	try {
 		byGroup = bg;
 		fastafile = file; templateSeqs = readSeqs(fastafile);
 		templateFileName = temp; 
-		searchMethod = mode;
 		kmerSize = k;
 		match = ms;
 		misMatch = mms;
@@ -71,24 +67,10 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		trimChimera = trim;
 		priority = prior;
 		numNoParents = 0;
-		blastlocation = blas;
 		threadID = tid;
 		
 		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
-		
-		if (searchMethod == "distance") { 
-			//createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
-			
-			//run filter on template copying templateSeqs into filteredTemplateSeqs
-			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->getControl_pressed()) {  break; }
-				
-				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
-				runFilter(newSeq);  
-				filteredTemplateSeqs.push_back(newSeq);
-			}
-		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
@@ -97,12 +79,11 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 }
 //***************************************************************************************************************
 //template=self
-ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, string mode, int k, int ms, int mms, int win, float div, 
-							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, string blas, int tid) : MothurChimera()  {  	
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, int>& prior, int k, int ms, int mms, int win, float div,
+							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r, int tid) : MothurChimera()  {
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
 		templateFileName = temp; 
-		searchMethod = mode;
 		kmerSize = k;
 		match = ms;
 		misMatch = mms;
@@ -120,24 +101,9 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 		trimChimera = trim;
 		priority = prior;
 		numNoParents = 0;
-		blastlocation = blas;
 		threadID = tid;
 		
-		
 		createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
-		
-		if (searchMethod == "distance") { 
-			//createFilter(templateSeqs, 0.0); //just removed columns where all seqs have a gap
-			
-			//run filter on template copying templateSeqs into filteredTemplateSeqs
-			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->getControl_pressed()) {  break; }
-				
-				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
-				runFilter(newSeq);  
-				filteredTemplateSeqs.push_back(newSeq);
-			}
-		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
@@ -147,115 +113,79 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, map<string, in
 //***************************************************************************************************************
 int ChimeraSlayer::doPrep() {
 	try {
-		if (searchMethod == "distance") { 
-			//read in all query seqs
-			vector<Sequence*> tempQuerySeqs = readSeqs(fastafile);
-		
-			vector<Sequence*> temp = templateSeqs;
-			for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
-		
-			createFilter(temp, 0.0); //just removed columns where all seqs have a gap
-		
-			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
-		
-			if (m->getControl_pressed()) {  return 0; } 
-		
-			//run filter on template copying templateSeqs into filteredTemplateSeqs
-			for (int i = 0; i < templateSeqs.size(); i++) {  
-				if (m->getControl_pressed()) {  return 0; }
-				
-				Sequence* newSeq = new Sequence(templateSeqs[i]->getName(), templateSeqs[i]->getAligned());
-				runFilter(newSeq);  
-				filteredTemplateSeqs.push_back(newSeq);
-			}
-		}
-		string 	kmerDBNameLeft;
-		string 	kmerDBNameRight;
+        string 	kmerDBNameLeft;
+        string 	kmerDBNameRight;
         Utils util;
-		//generate the kmerdb to pass to maligner
-		if (searchMethod == "kmer") { 
-			string templatePath = util.hasPath(templateFileName);
-			string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
-			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
-				
-			string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
-			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
-		
-			//leftside
-			kmerDBNameLeft = leftTemplateFileName.substr(0,leftTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-			ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
-			bool needToGenerateLeft = true;
-			
-			if(kmerFileTestLeft){
-                string line = util.getline(kmerFileTestLeft);
-				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
-				if (GoodFile) {  needToGenerateLeft = false;	}
-			}
-			
-			if(needToGenerateLeft){	
-			
-				for (int i = 0; i < templateSeqs.size(); i++) {
-					
-					if (m->getControl_pressed()) { return 0; } 
-					
-					string leftFrag = templateSeqs[i]->getUnaligned();
-					leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
-					
-					Sequence leftTemp(templateSeqs[i]->getName(), leftFrag);
-					databaseLeft->addSequence(leftTemp);	
-				}
-				databaseLeft->generateDB();
-				
-			}else {	
-				databaseLeft->readDB(kmerFileTestLeft);
-			}
-			kmerFileTestLeft.close();
-			
-			databaseLeft->setNumSeqs(templateSeqs.size());
-			
-			//rightside
-			kmerDBNameRight = rightTemplateFileName.substr(0,rightTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-			ifstream kmerFileTestRight(kmerDBNameRight.c_str());
-			bool needToGenerateRight = true;
-			
-			if(kmerFileTestRight){
-                string line = util.getline(kmerFileTestRight);
-				bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
-				if (GoodFile) {  needToGenerateRight = false;	}
-			}
-			
-			if(needToGenerateRight){	
-			
-				for (int i = 0; i < templateSeqs.size(); i++) {
-					if (m->getControl_pressed()) { return 0; } 
-					
-					string rightFrag = templateSeqs[i]->getUnaligned();
-					rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
-					
-					Sequence rightTemp(templateSeqs[i]->getName(), rightFrag);
-					databaseRight->addSequence(rightTemp);	
-				}
-				databaseRight->generateDB();
-				
-			}else {	 databaseRight->readDB(kmerFileTestRight);	 }
-			kmerFileTestRight.close();
-			
-			databaseRight->setNumSeqs(templateSeqs.size());
-    
-		}else if (searchMethod == "blast") {
-		
-			//generate blastdb
-			databaseLeft = new BlastDB(util.getRootName(util.getSimpleName(fastafile)), -1.0, -1.0, 1, -3, blastlocation, threadID);
-			
-			if (m->getControl_pressed()) { return 0; }
-
-			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
-			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(templateSeqs.size());
-		}
-		
-		return 0;
-
+        
+        string templatePath = util.hasPath(templateFileName);
+        string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
+        databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
+        
+        string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
+        databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);
+        
+        //leftside
+        kmerDBNameLeft = leftTemplateFileName.substr(0,leftTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+        ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
+        bool needToGenerateLeft = true;
+        
+        if(kmerFileTestLeft){
+            string line = util.getline(kmerFileTestLeft);
+            bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
+            if (GoodFile) {  needToGenerateLeft = false;	}
+        }
+        
+        if(needToGenerateLeft){
+            
+            for (int i = 0; i < templateSeqs.size(); i++) {
+                
+                if (m->getControl_pressed()) { return 0; }
+                
+                string leftFrag = templateSeqs[i]->getUnaligned();
+                leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
+                
+                Sequence leftTemp(templateSeqs[i]->getName(), leftFrag);
+                databaseLeft->addSequence(leftTemp);
+            }
+            databaseLeft->generateDB();
+            
+        }else {
+            databaseLeft->readDB(kmerFileTestLeft);
+        }
+        kmerFileTestLeft.close();
+        
+        databaseLeft->setNumSeqs(templateSeqs.size());
+        
+        //rightside
+        kmerDBNameRight = rightTemplateFileName.substr(0,rightTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+        ifstream kmerFileTestRight(kmerDBNameRight.c_str());
+        bool needToGenerateRight = true;
+        
+        if(kmerFileTestRight){
+            string line = util.getline(kmerFileTestRight);
+            bool GoodFile = util.checkReleaseVersion(line, current->getVersion());
+            if (GoodFile) {  needToGenerateRight = false;	}
+        }
+        
+        if(needToGenerateRight){
+            
+            for (int i = 0; i < templateSeqs.size(); i++) {
+                if (m->getControl_pressed()) { return 0; }
+                
+                string rightFrag = templateSeqs[i]->getUnaligned();
+                rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
+                
+                Sequence rightTemp(templateSeqs[i]->getName(), rightFrag);
+                databaseRight->addSequence(rightTemp);
+            }
+            databaseRight->generateDB();
+            
+        }else {	 databaseRight->readDB(kmerFileTestRight);	 }
+        kmerFileTestRight.close();
+        
+        databaseRight->setNumSeqs(templateSeqs.size());
+        
+        return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "doprep");
@@ -280,71 +210,45 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 			if (!(priority[templateSeqs[i]->getName()] > myAbund)) { break; }
 			
 			//if its am not chimeric add it
-			if (chimericSeqs.count(templateSeqs[i]->getName()) == 0) { 
-				userTemplate.push_back(templateSeqs[i]); 
-				if (searchMethod == "distance") { userTemplateFiltered.push_back(filteredTemplateSeqs[i]); }
-			}
+			if (chimericSeqs.count(templateSeqs[i]->getName()) == 0) {  userTemplate.push_back(templateSeqs[i]);  }
 		}
 		
-		//avoids nuisance error from formatdb for making blank blast database
-		if (userTemplate.size() == 0) {
-			return userTemplate;
-		}
-		
-		string 	kmerDBNameLeft;
-		string 	kmerDBNameRight;
-		
-		//generate the kmerdb to pass to maligner
-		if (searchMethod == "kmer") {
-            Utils util;
-			string templatePath = util.hasPath(templateFileName);
-			string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
-			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
-			
-			string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
-			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
-			
-			
-			for (int i = 0; i < userTemplate.size(); i++) {
-				
-				if (m->getControl_pressed()) { return userTemplate; } 
-				
-				string leftFrag = userTemplate[i]->getUnaligned();
-				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
-				
-				Sequence leftTemp(userTemplate[i]->getName(), leftFrag);
-				databaseLeft->addSequence(leftTemp);	
-			}
-			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(userTemplate.size());
-				
-			for (int i = 0; i < userTemplate.size(); i++) {
-				if (m->getControl_pressed()) { return userTemplate; }  
-					
-				string rightFrag = userTemplate[i]->getUnaligned();
-				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
-					
-				Sequence rightTemp(userTemplate[i]->getName(), rightFrag);
-				databaseRight->addSequence(rightTemp);	
-			}
-			databaseRight->generateDB();
-			databaseRight->setNumSeqs(userTemplate.size());
-	
-		}else if (searchMethod == "blast") {
-			
-			//generate blastdb
-            Utils util;
-			databaseLeft = new BlastDB(util.getRootName(util.getSimpleName(templateFileName)), -1.0, -1.0, 1, -3, blastlocation, threadID);
-			
-			if (m->getControl_pressed()) { return userTemplate; }
-
-			for (int i = 0; i < userTemplate.size(); i++) { if (m->getControl_pressed()) { return userTemplate; }   databaseLeft->addSequence(*userTemplate[i]);	}
-			databaseLeft->generateDB();
-			databaseLeft->setNumSeqs(userTemplate.size());
-		}
+        Utils util;
+        string kmerDBNameLeft, kmerDBNameRight;
+        string templatePath = util.hasPath(templateFileName);
+        string rightTemplateFileName = templatePath + "right." + util.getRootName(util.getSimpleName(templateFileName));
+        databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
+        
+        string leftTemplateFileName = templatePath + "left." + util.getRootName(util.getSimpleName(templateFileName));
+        databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);
+        
+        for (int i = 0; i < userTemplate.size(); i++) {
+            
+            if (m->getControl_pressed()) { return userTemplate; }
+            
+            string leftFrag = userTemplate[i]->getUnaligned();
+            leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
+            
+            Sequence leftTemp(userTemplate[i]->getName(), leftFrag);
+            databaseLeft->addSequence(leftTemp);
+        }
+        databaseLeft->generateDB();
+        databaseLeft->setNumSeqs(userTemplate.size());
+        
+        for (int i = 0; i < userTemplate.size(); i++) {
+            if (m->getControl_pressed()) { return userTemplate; }
+            
+            string rightFrag = userTemplate[i]->getUnaligned();
+            rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
+            
+            Sequence rightTemp(userTemplate[i]->getName(), rightFrag);
+            databaseRight->addSequence(rightTemp);
+        }
+        databaseRight->generateDB();
+        databaseRight->setNumSeqs(userTemplate.size());
+        
 		
 		return userTemplate;
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "getTemplate");
@@ -354,10 +258,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence q, vector<Sequence*>& user
 
 //***************************************************************************************************************
 ChimeraSlayer::~ChimeraSlayer() { 	
-	if (templateFileName != "self") {
-		if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
-		else if (searchMethod == "blast") {  delete databaseLeft; }
-	}
+	if (templateFileName != "self") { delete databaseRight;  delete databaseLeft;   }
 }
 //***************************************************************************************************************
 void ChimeraSlayer::printHeader(ostream& out) {
@@ -545,10 +446,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		Maligner maligner(refSeqs, match, misMatch, divR, minSim, minCov); 
 		Slayer slayer(window, increment, minSim, divR, iters, minSNP, minBS);
 		
-		if (templateFileName == "self") {
-			if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
-			else if (searchMethod == "blast") {  delete databaseLeft; }
-		}
+		if (templateFileName == "self") { delete databaseRight;  delete databaseLeft;   }
 	
 		if (m->getControl_pressed()) {  return 0;  }
 
@@ -564,13 +462,9 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			
 			if (realign) {
 				vector<string> parents;
-				for (int i = 0; i < Results.size(); i++) {
-					parents.push_back(Results[i].parentAligned);
-				}
+				for (int i = 0; i < Results.size(); i++) { parents.push_back(Results[i].parentAligned); }
 				
-				ChimeraReAligner realigner;		
-				realigner.reAlign(query, parents);
-
+				ChimeraReAligner realigner;	 realigner.reAlign(query, parents);
 			}
 			
 			//get sequence that were given from maligner results
@@ -594,9 +488,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 						removeDups[Results[j].parent] = dist;
 						parentNameSeq[Results[j].parent] = Results[j].parentAligned;
 					}
-				
 				}
-				
 			}
 			
 			for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
@@ -615,16 +507,9 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 				sort(seqs.begin(), seqs.end(), compareSeqCompare);
 				//prioritize larger more similiar sequence fragments
 				reverse(seqs.begin(), seqs.end());
-				
-				//for (int k = seqs.size()-1; k > (parents-1); k--)  {  
-				//	delete seqs[k].seq;
-					//seqs.pop_back();	
-				//}
 			}
 		
 			//put seqs into vector to send to slayer
-			
-
 			vector<Sequence> seqsForSlayer;
 			for (int k = 0; k < seqs.size(); k++) { seqsForSlayer.push_back(seqs[k].seq);	 }
 			
@@ -776,114 +661,12 @@ string ChimeraSlayer::getBlock(data_struct data, string flag){
 vector<Sequence> ChimeraSlayer::getRefSeqs(Sequence q, vector<Sequence*>& thisTemplate, vector<Sequence*>& thisFilteredTemplate){
 	try {
 		
-		vector<Sequence> refSeqs;
-		
-		if (searchMethod == "distance") {
-			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
-			Sequence* newSeq = new Sequence(q.getName(), q.getAligned());
-			runFilter(newSeq);
-			refSeqs = decalc.findClosest(*newSeq, thisTemplate, thisFilteredTemplate, numWanted, minSim);
-			delete newSeq;
-		}else if (searchMethod == "blast")  {
-			refSeqs = getBlastSeqs(q, thisTemplate, numWanted); //fills indexes
-		}else if (searchMethod == "kmer") {
-			refSeqs = getKmerSeqs(q, thisTemplate, numWanted); //fills indexes
-		}else { m->mothurOut("not valid search."); exit(1);  } //should never get here
+		vector<Sequence> refSeqs = getKmerSeqs(q, thisTemplate, numWanted); //fills indexes
 		
 		return refSeqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "getRefSeqs");
-		exit(1);
-	}
-}
-//***************************************************************************************************************/
-vector<Sequence> ChimeraSlayer::getBlastSeqs(Sequence q, vector<Sequence*>& db, int num) {
-	try {	
-		
-		vector<Sequence> refResults;
-		
-		//get parts of query
-		string queryUnAligned = q.getUnaligned();
-		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
-		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
-	
-		Sequence* queryLeft = new Sequence(q.getName(), leftQuery);
-		Sequence* queryRight = new Sequence(q.getName(), rightQuery);
-		
-        
-		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1, minSim);
-		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1, minSim);
-				
-		//merge results		
-		map<int, int> seen;
-		map<int, int>::iterator it;
-		vector<int> mergedResults;
-		
-		int index = 0;
-//		for (int i = 0; i < smaller.size(); i++) {
-		while(index < tempIndexesLeft.size() && index < tempIndexesRight.size()){
-			
-			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
-	
-			//add left if you havent already
-			it = seen.find(tempIndexesLeft[index]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesLeft[index]);
-				seen[tempIndexesLeft[index]] = tempIndexesLeft[index];
-			}
-			
-			//add right if you havent already
-			it = seen.find(tempIndexesRight[index]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesRight[index]);
-				seen[tempIndexesRight[index]] = tempIndexesRight[index];
-			}
-			index++;
-		}
-
-		
-		for (int i = index; i < tempIndexesLeft.size(); i++) {
-			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
-			
-			//add right if you havent already
-			it = seen.find(tempIndexesLeft[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesLeft[i]);
-				seen[tempIndexesLeft[i]] = tempIndexesLeft[i];
-			}
-		}
-
-		for (int i = index; i < tempIndexesRight.size(); i++) {
-			if (m->getControl_pressed()) { delete queryRight; delete queryLeft; return refResults; }
-			
-			//add right if you havent already
-			it = seen.find(tempIndexesRight[i]);
-			if (it == seen.end()) {  
-				mergedResults.push_back(tempIndexesRight[i]);
-				seen[tempIndexesRight[i]] = tempIndexesRight[i];
-			}
-		}
-		//string qname = q->getName().substr(0, q->getName().find_last_of('_'));	
-			
-		
-		if (mergedResults.size() == 0) { numNoParents++; }
-		
-		for (int i = 0; i < mergedResults.size(); i++) {
-			
-			if (db[mergedResults[i]]->getName() != q.getName()) { 
-				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
-				refResults.push_back(temp);
-			}
-		}
-
-		delete queryRight;
-		delete queryLeft;
-		
-		return refResults;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ChimeraSlayer", "getBlastSeqs");
 		exit(1);
 	}
 }
@@ -959,12 +742,10 @@ vector<Sequence> ChimeraSlayer::getKmerSeqs(Sequence q, vector<Sequence*>& db, i
 			if (db[mergedResults[i]]->getName() != q.getName()) { 
 				Sequence temp(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
-				
 			}
 		}
 
-		delete queryRight;
-		delete queryLeft;
+		delete queryRight; delete queryLeft;
 		
 		return refResults;
 	}
