@@ -280,6 +280,65 @@ vector<string> ValidParameters::validFiles(map<string, string>& container, strin
     }
 }
 /******************************************************/
+vector<string> ValidParameters::validFastqGZFiles(map<string, string>& container, string parameter, bool& gz) {
+    try {
+        vector<string> vFiles;
+        Utils util;
+        bool openedAtLeastOne = false; bool allGZ = true; bool allPlainTxt = true;
+
+        map<string, string>::iterator it = container.find(parameter);
+        if(it != container.end()){ //no parameter given
+            if ((it->second == "NONE") || (it->second == "none")) {it->second = "NONE";}//ignore
+            else {
+                
+                vector<string> files; util.splitAtDash(it->second, files);
+                
+                //check for gz
+                for (int i = 0; i < files.size(); i++) {
+                    #ifdef USE_BOOST
+                        if (util.isGZ(files[i])[1]) { allPlainTxt = false;  }
+                        else {   allGZ = false;  }
+    
+                        if (!allGZ && !allPlainTxt) { //mixed bag of files, uh oh...
+                            m->mothurOut("[ERROR]: Your files must all be in compressed .gz form or all in plain text form.  Please correct. \n"); m->setControl_pressed(true); }
+                    #else
+                        allGZ=false;
+                    #endif
+                }
+                
+                if (allGZ) { gz = true; } else { gz = false; }
+                
+                for (int i = 0; i < files.size(); i++) {
+                    
+                    files[i] = util.removeQuotes(files[i]);
+                    string filename = files[i];
+                    
+                    if (!gz) {
+                        if (util.checkLocations(filename, current->getLocations())) { vFiles.push_back(filename); container[parameter] = filename; openedAtLeastOne = true; }
+                        else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
+                    }else {
+                        if (util.checkLocationsGZ(filename, current->getLocations())) { vFiles.push_back(filename); container[parameter] = filename; openedAtLeastOne = true; }
+                        else { m->mothurOut("Unable to open " + filename + ", skipping.\n");  }
+                    }
+                    //check for blank file
+                    if (openedAtLeastOne) {
+                        if (util.isBlank(container[parameter])) { m->mothurOut("[ERROR]: " + filename + " is blank, skipping.\n");  }
+                    }
+                }
+                
+                if (!openedAtLeastOne) { vFiles.push_back("not open"); }
+            }
+        }else { gz = false; return vFiles; }
+        
+        return vFiles;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidParameters", "validFile");
+        exit(1);
+    }
+}
+/******************************************************/
 string ValidParameters::validFile(map<string, string>& container, string parameter) {
     try {
         bool ableToOpen = false;

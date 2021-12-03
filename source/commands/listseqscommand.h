@@ -39,6 +39,8 @@ class ListSeqsCommand : public Command {
         bool abort;
         
         void process(vector<string> files, set<string>&, void f(set<string>&, ifstream&, MothurOut*&));
+        void process(vector<string> files, set<string>&, string, void f(set<string>&, ifstream&, MothurOut*&));
+
 };
 
 #endif

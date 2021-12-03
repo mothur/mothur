@@ -346,8 +346,8 @@ int ListSeqsCommand::execute(){
         
 		//read functions fill names vector
 		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	                }
-        if (qualityfiles.size() != 0)       {    process(qualityfiles, names, &readQual);               }
-        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names, &readFastq);	                }
+        if (qualityfiles.size() != 0)       {   process(qualityfiles, names, &readQual);                }
+        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names, "fastq", &readFastq);	    }
 		if (namefiles.size() != 0)	        {	process(namefiles, names, &readNameTaxGroup);           }
 		if (groupfiles.size() != 0)	        {	process(groupfiles, names, &readNameTaxGroup);          }
         if (taxfiles.size() != 0)           {   process(taxfiles, names, &readNameTaxGroup);            }
@@ -386,6 +386,30 @@ int ListSeqsCommand::execute(){
 		m->errorOut(e, "ListSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void ListSeqsCommand::process(vector<string> files, set<string>& names, string isFastq, void f(set<string>&, ifstream&, MothurOut*&)){
+    try {
+        Utils util;
+        
+        //determine if the files are compressed. If so,
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            inputFileName = files[i];
+            
+            ifstream in; util.openInputFile(inputFileName, in);
+            
+            f(names, in, m);
+            
+            in.close();
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "process");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, ifstream&, MothurOut*&)){
