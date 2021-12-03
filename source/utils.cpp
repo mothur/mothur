@@ -692,7 +692,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
 
 #ifdef USE_BOOST
         boost::iostreams::filtering_istream inBoost;
-        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror");
+        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror"); in.close(); inBoost.pop();
 #else
         m->mothurOut("[ERROR]: cannot read gz format without enabling boost libraries.\n"); m->setControl_pressed(true); return false;
 #endif
@@ -710,7 +710,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
                     ifstream in2;
                     #ifdef USE_BOOST
                         boost::iostreams::filtering_istream inBoost2;
-                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror");
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
                     #endif
                     filename = tryPath;
                     
@@ -728,7 +728,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
                 ifstream in2;
                 #ifdef USE_BOOST
                     boost::iostreams::filtering_istream inBoost2;
-                    ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror");
+                    ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
                 #endif
                 filename = tryPath;
             }
@@ -745,7 +745,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
                     ifstream in2;
                     #ifdef USE_BOOST
                         boost::iostreams::filtering_istream inBoost2;
-                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror");
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
                     #endif
                     filename = tryPath;
                     
@@ -762,7 +762,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
             ifstream in2;
             #ifdef USE_BOOST
                 boost::iostreams::filtering_istream inBoost2;
-                ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror");
+                ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
             #endif
             filename = tryPath;
         }
@@ -778,7 +778,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
                     ifstream in2;
                     #ifdef USE_BOOST
                         boost::iostreams::filtering_istream inBoost2;
-                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror");
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
                     #endif
                     filename = tryPath;
                     
