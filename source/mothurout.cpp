@@ -111,16 +111,6 @@ void MothurOut::closeLog()  {
 	}
 }
 /*********************************************************************************************/
-void MothurOut::mothurOutClearBuffer() {
-    try {
-        if (buffer != "") { string output = buffer; buffer = ""; mothurOut(output);   }
-    }
-    catch(exception& e) {
-        errorOut(e, "MothurOut", "mothurOutClearBuffer");
-        exit(1);
-    }
-}
-/*********************************************************************************************/
 MothurOut::~MothurOut() {
 	try {
 		_uniqueInstance = 0;
@@ -133,6 +123,8 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
+        if (outLog == NULL) { appendLogBuffer(output);  return; }
+        
         if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) {
             numErrors++;
@@ -148,7 +140,6 @@ void MothurOut::mothurOut(string output) {
             if (numCommandWarnings > maxCommandWarnings) {
                 if (!silenceWarnings) {
                     logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
                 }
                 silenceWarnings = true; // write to cout, don't add to logfile
             }
@@ -212,6 +203,8 @@ void MothurOut::mothurOutJustToScreen(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
+        if (outLog == NULL) { appendLogBuffer("\n"); return; }
+        
 		if (!quietMode) {
             if (!silenceLog) { *outLog << buffer << endl; }
             logger() << buffer << endl;
@@ -224,69 +217,10 @@ void MothurOut::mothurOutEndLine() {
 	}
 }
 /*********************************************************************************************/
-void MothurOut::mothurOut(string output, ofstream& outputFile) {
-	try {
-        if (buffer != "") { output = buffer + output; buffer = ""; }
-        if (output.find("[ERROR]") != string::npos) {
-            numErrors++;
-            numCommandErrors++;
-            if (numCommandErrors > maxCommandErrors) { logger() << "\n**** Exceeded maximum allowed command errors, quitting ****\n"; control_pressed = true; } //abort command
-        }
-        bool savedSilenceLog = silenceLog;
-        bool containsWarning = false;
-        if (output.find("[WARNING]") != string::npos) {
-            numWarnings++;
-            numCommandWarnings++;
-            containsWarning = true;
-            if (numCommandWarnings > maxCommandWarnings) {
-                if (!silenceWarnings) {
-                    logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                }
-                silenceWarnings = true; // write to cout, don't add to logfile
-            }
-        }
-        
-        if (!quietMode) {
-            if (!silenceLog) {
-                if (silenceWarnings && containsWarning) {} //do not print warning to logfile if warnings are silenced
-                else { *outLog << output; outputFile << output;  }
-            }
-            logger() << output;
-        }else {
-            //check for this being an error
-            if ((output.find("[ERROR]") != string::npos) || (output.find("mothur >") != string::npos)) {
-                if (!silenceLog) { *outLog << output; }
-                outputFile << output;
-                logger() << output;
-            }
-            
-        }
-        silenceLog = savedSilenceLog;
-	}
-	catch(exception& e) {
-		errorOut(e, "MothurOut", "MothurOut");
-		exit(1);
-	}
-}
-/*********************************************************************************************/
-void MothurOut::mothurOutEndLine(ofstream& outputFile) {
-	try {
-        if (!quietMode) {
-            if (!silenceLog) { *outLog << buffer << endl; }
-            logger() << buffer << endl;
-            outputFile << buffer << endl;
-        }
-        buffer = "";
-	}
-	catch(exception& e) {
-		errorOut(e, "MothurOut", "MothurOutEndLine");
-		exit(1);
-	}
-}
-/*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
+        if (outLog == NULL) { appendLogBuffer(output); return; }
+        
         if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) {
             numErrors++;
@@ -303,7 +237,6 @@ void MothurOut::mothurOutJustToLog(string output) {
             if (numCommandWarnings > maxCommandWarnings) {
                 if (!silenceWarnings) {
                     logger() << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
-                    *outLog << "\n**** Exceeded maximum allowed command warnings, silencing warnings ****\n";
                 }
                 silenceWarnings = true; // write to cout, don't add to logfile
             }

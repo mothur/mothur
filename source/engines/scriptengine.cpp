@@ -13,9 +13,20 @@ ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, strin
     try {
         //remove quotes
         listOfCommands = commandString.substr(1, (commandString.length()-1));
+        noBufferNeeded = true;
         
         int pos = listOfCommands.find("set.logfile");
-        if (pos == string::npos) { noBufferNeeded = true; }
+        if (pos != string::npos) { noBufferNeeded = false; }
+        
+        if (noBufferNeeded) {
+            if (m->getLogFileName() == "") {
+                time_t ltime = time(NULL); /* calendar time */
+                string outputPath = current->getOutputDir();
+                string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
+                m->setLogFileName(logFileName, false);
+                m->mothurOut("\n");
+            }
+        }
         
         setEnvironmentVariables(ev);
     }
@@ -52,8 +63,7 @@ bool ScriptEngine::getInput(){
             commandName = parser.getCommandString();
             options = parser.getOptionString();
             
-            if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
-            else                    { m->mothurOut("\nmothur > " + input + "\n");       }
+            m->mothurOut("\nmothur > " + input + "\n");  
         
             if (m->getControl_pressed()) { input = "quit()"; }
 

@@ -57,7 +57,7 @@ int main(int argc, char *argv[], char *envp[]){
         
 		if (argc>1) {
             if (argc > 2) { //is one of these -q for quiet mode?
-                if (argc > 3) { m->appendLogBuffer("[ERROR]: mothur only allows command inputs and the -q command line options.\n  i.e. ./mothur \"#summary.seqs(fasta=final.fasta);\" -q\n or ./mothur -q \"#summary.seqs(fasta=final.fasta);\"\n"); return 0; }
+                if (argc > 3) { m->mothurOut("[ERROR]: mothur only allows command inputs and the -q command line options.\n  i.e. ./mothur \"#summary.seqs(fasta=final.fasta);\" -q\n or ./mothur -q \"#summary.seqs(fasta=final.fasta);\"\n"); return 0; }
                 else {
                     string argv1 = argv[1];
                     string argv2 = argv[2];
@@ -67,8 +67,8 @@ int main(int argc, char *argv[], char *envp[]){
                     }else if ((argv2 == "--quiet") || (argv2 == "-q")) {
                          m->setQuietMode(true);
                     }else {
-                        m->appendLogBuffer("[ERROR]: mothur only allows command inputs and the -q command line options.\n");
-                        m->appendLogBuffer("[ERROR]: Unrecognized options: " + argv1 + " " + argv2 + "\n");
+                        m->mothurOut("[ERROR]: mothur only allows command inputs and the -q command line options.\n");
+                        m->mothurOut("[ERROR]: Unrecognized options: " + argv1 + " " + argv2 + "\n");
                         return 0;
                     }
                 }
@@ -95,24 +95,24 @@ int main(int argc, char *argv[], char *envp[]){
 		if(argc>1){
 			input = argv[1];
 			if (input[0] == '#') {
-				m->appendLogBuffer("Script Mode\n\n");
+				m->mothurOut("Script Mode\n\n");
 				mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);
 			}else if ((input == "--version") || (input == "-v")) {
 				cout << (OS + "\nMothur version=" + mothurVersion + "\nRelease Date=" + releaseDate + "\n\n"); return 0;
             }else if ((input == "--help") || (input == "-h")) {
                 createLogFile = false;
-                m->appendLogBuffer("Script Mode\n\n");
+                m->mothurOut("Script Mode\n\n");
 
                 string helpQuit = "#help();quit();";
                
                 argv[1] = util.mothurConvert(helpQuit);
                 mothur = new ScriptEngine(argv[0], argv[1], environmentalVariables);
 			}else{
-				m->appendLogBuffer("Batch Mode\n\n");
+				m->mothurOut("Batch Mode\n\n");
                 mothur = new BatchEngine(argv[0], argv[1], environmentalVariables);
 			}
 		}else{
-			m->appendLogBuffer("Interactive Mode\n\n");
+			m->mothurOut("Interactive Mode\n\n");
             mothur = new InteractEngine(argv[0], environmentalVariables);
 		}
 		

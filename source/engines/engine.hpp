@@ -69,7 +69,7 @@ public:
    
     virtual void replaceVariables(string& nextCommand) {
         for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
-            unsigned long pos = nextCommand.find("$"+it->first);
+            size_t pos = nextCommand.find("$"+it->first);
             while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
                 nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
                 pos = nextCommand.find("$"+it->first);
@@ -82,11 +82,11 @@ public:
         
          //determine if this is a command or batch file / environmental variable
          //we know commands must include '(' characters for search for that
-         unsigned long openParen = nextCommand.find_first_of('(');
+         size_t openParen = nextCommand.find_first_of('(');
          if (openParen == string::npos) { //no '(' character -> assume not a command, treat as new batchfile / environmental variable
              //are you another batch file or an environmental variable
              //if no '=' sign than not an environmental variable
-             int equalsSign = nextCommand.find_first_of('=');
+             size_t equalsSign = nextCommand.find_first_of('=');
              if (equalsSign == string::npos) { //no '=' character -> assume not a environmental variable, treat as new batch
                  type = "batch";
              }else { //assume environmental variable. filenames can contain '=' characters, but this is a rare case
@@ -124,11 +124,6 @@ public:
 
         vector<string> pathDirs;
         util.splitAtChar(pathEnvironmentValue, pathDirs, delim);
-
-        if (m->getDebug()) {
-            m->mothurOut("[DEBUG]: dir's in path:\n");
-            for (int i = 0; i < pathDirs.size(); i++) { m->mothurOut("[DEBUG]: " + pathDirs[i] + "\n"); }
-        }
         
         current->setPaths(pathDirs);
         current->setHomePath(homeEnvironmentValue);

@@ -22,8 +22,6 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
         }
         
         batchFileName = batchFile;
-        setEnvironmentVariables(ev); //inherit environmental variables from nested batch files
-        
         noBufferNeeded = true;
         
         if (openedBatch) { //check for set.logfile
@@ -44,6 +42,18 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
             openedBatch = util.openInputFile(batchFileName, inputBatchFile, "no error");
         }
         
+        if (noBufferNeeded) {
+            if (m->getLogFileName() == "") {
+                time_t ltime = time(NULL); /* calendar time */
+                string outputPath = current->getOutputDir();
+                string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
+                m->setLogFileName(logFileName, false);
+                m->mothurOut("\n");
+            }
+        }
+        
+        setEnvironmentVariables(ev); //inherit environmental variables from nested batch files
+
         bstart = time(NULL);
         numBatches = 0;
     }
@@ -81,8 +91,7 @@ bool BatchEngine::getInput(){
             string commandName = parser.getCommandString();
             string options = parser.getOptionString();
             
-            if (!noBufferNeeded)    { m->appendLogBuffer("\nmothur > " + input + "\n"); }
-            else                    { m->mothurOut("\nmothur > " + input + "\n");       }
+            m->mothurOut("\nmothur > " + input + "\n");
                 
             if (m->getControl_pressed()) { input = "quit()"; }
                                         
@@ -134,7 +143,6 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         string type = findType(nextcommand);
        
         if (type == "batch") {
-            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             BatchEngine newBatchEngine(path, nextcommand, environmentalVariables);
@@ -144,7 +152,6 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
                 while(!bail)    {    bail = newBatchEngine.getInput();    }
                 numBatches++;
             }
-            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             nextcommand = getNextCommand(inputBatchFile);

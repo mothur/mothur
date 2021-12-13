@@ -39,10 +39,8 @@ class MothurOut {
 		static MothurOut* getInstance();
     
         //logger
-        void appendLogBuffer(string); //used to store log before we establish the logfilename
         bool getDebug()                                 { return debug;                                 }
         void setDebug(bool t)                           { debug = t;                                    }
-        bool getQuietMode()                             { return quietMode;                             }
         void setQuietMode(bool t)                       { quietMode = t;                                }
         int getNumErrors()                              { return numErrors;                             }
         void resetCommandErrors()                       { control_pressed = false; numCommandErrors = 0; numCommandWarnings = 0; silenceWarnings = false;}
@@ -55,9 +53,7 @@ class MothurOut {
     
 		void mothurOut(string); //writes to cout and the logfile
 		void mothurOutEndLine(); //writes to cout and the logfile
-        void mothurOutClearBuffer();
 		void mothurOut(string, ofstream&); //writes to the ofstream, cout and the logfile
-		void mothurOutEndLine(ofstream&); //writes to the ofstream, cout and the logfile
         void mothurOutJustToScreen(string); //writes to cout
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
@@ -95,6 +91,8 @@ class MothurOut {
 		}
 		~MothurOut();
 		
+        void appendLogBuffer(string); //used to store log before we establish the logfilename
+
 		ofstream* outLog;
         unsigned seed;
         int numErrors, numWarnings, numCommandErrors, numCommandWarnings, maxCommandErrors, maxCommandWarnings;
