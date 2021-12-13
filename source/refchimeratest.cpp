@@ -414,7 +414,7 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
             rAlign = reference.substr(0, j) + rAlign;
         }
 
-        if (length == 0) { diffs = MAXINT; }
+        if (length == 0) { diffs = MOTHURMAX; }
         
 		return diffs;
 	}
@@ -491,7 +491,7 @@ int RefChimeraTest::getUnalignedDiffs(string qAlign, string rAlign, vector<int>&
 
 int RefChimeraTest::getAlignedMismatches(string& querySeq, vector<vector<int> >& left, vector<vector<int> >& right, int& bestRefSeq){
 	
-	int bestSequenceMismatch = MAXINT;
+	int bestSequenceMismatch = MOTHURMAX;
 	
 	for(int i=0;i<numRefSeqs;i++){
 		
@@ -525,7 +525,7 @@ int RefChimeraTest::getAlignedMismatches(string& querySeq, vector<vector<int> >&
 
 int RefChimeraTest::getChimera(vector<vector<int> >& left, vector<vector<int> >& right, int& leftParent, int& rightParent, int& breakPoint, vector<int>& singleLeft, vector<int>& bestLeft, vector<int>& singleRight, vector<int>& bestRight){
 	
-	singleLeft.resize(alignLength, MAXINT);
+	singleLeft.resize(alignLength, MOTHURMAX);
 	bestLeft.resize(alignLength, -1);
 	
 	for(int l=0;l<alignLength;l++){
@@ -537,7 +537,7 @@ int RefChimeraTest::getChimera(vector<vector<int> >& left, vector<vector<int> >&
 		}
 	}
 	
-	singleRight.resize(alignLength, MAXINT);
+	singleRight.resize(alignLength, MOTHURMAX);
 	bestRight.resize(alignLength, -1);
 	
 	for(int l=0;l<alignLength;l++){
@@ -549,7 +549,7 @@ int RefChimeraTest::getChimera(vector<vector<int> >& left, vector<vector<int> >&
 		}
 	}
 	
-	int bestChimeraMismatches = MAXINT;
+	int bestChimeraMismatches = MOTHURMAX;
 	leftParent = -1;
 	rightParent = -1;
 	breakPoint = -1;
@@ -571,7 +571,7 @@ int RefChimeraTest::getChimera(vector<vector<int> >& left, vector<vector<int> >&
 
 int RefChimeraTest::getTrimera(vector<vector<int> >& left, vector<vector<int> >& right, int& leftParent, int& middleParent, int& rightParent, int& breakPointA, int& breakPointB, vector<int>& singleLeft, vector<int>& bestLeft, vector<int>& singleRight, vector<int>& bestRight){
 	
-	int bestTrimeraMismatches = MAXINT;
+	int bestTrimeraMismatches = MOTHURMAX;
 	
 	leftParent = -1;
 	middleParent = -1;
@@ -584,7 +584,7 @@ int RefChimeraTest::getTrimera(vector<vector<int> >& left, vector<vector<int> >&
     vector<vector<int> > minDeltaSeq; minDeltaSeq.resize(alignLength);
 	
 	for(int i=0;i<alignLength;i++){
-		minDelta[i].assign(alignLength, MAXINT);
+		minDelta[i].assign(alignLength, MOTHURMAX);
 		minDeltaSeq[i].assign(alignLength, -1);
 	}
 	
