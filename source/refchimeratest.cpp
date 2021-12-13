@@ -10,8 +10,6 @@
 #include "refchimeratest.h"
 #include "mothur.h"
 
-int MAXINT = numeric_limits<int>::max();
-
 //***************************************************************************************************************
 
 RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, bool aligned) : aligned(aligned){

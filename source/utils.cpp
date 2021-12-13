@@ -692,7 +692,7 @@ bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > location
 
 #ifdef USE_BOOST
         boost::iostreams::filtering_istream inBoost;
-        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror"); in.close(); inBoost.pop();
+        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror"); in.close(); inBoost.pop(); inBoost.reset();
 #else
         m->mothurOut("[ERROR]: cannot read gz format without enabling boost libraries.\n"); m->setControl_pressed(true); return false;
 #endif
@@ -1113,6 +1113,25 @@ bool Utils::openInputFileBinary(string fileName, ifstream& file, boost::iostream
         exit(1);
     }
 }
+/***********************************************************************/
+bool Utils::openOutputFileBinary(string fileName, ofstream& file, boost::iostreams::filtering_ostream& outBoost){
+    try {
+        string completeFileName = getFullPathName(fileName);
+        
+        file.open(completeFileName, ios_base::out | ios_base::binary | ios_base::trunc);
+        
+        if(!file) { return false; }
+        else { //check for blank file
+            outBoost.push(boost::iostreams::gzip_compressor());
+            outBoost.push(file);
+            return true;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "openOutputFileGZBinary");
+        exit(1);
+    }
+}
 #endif
 /***********************************************************************/
 //results[0] = allGZ, results[1] = allNotGZ
@@ -1127,8 +1146,8 @@ vector<bool> Utils::allGZFiles(vector<string> & files){
 
             //ignore none and blank filenames
             if ((files[i] != "") || (files[i] != "NONE")) {
-                if (isGZ(files[i])[1]) { allNOTGZ = false;  }
-                else {  allGZ = false;  }
+                if ((isGZ(files[i]))[1]) { allNOTGZ = false;  cout << "notGz " << files[i] << endl; }
+                else {  allGZ = false; cout << "yesGz " << files[i] << endl;  }
             }
         }
 
@@ -1172,29 +1191,28 @@ bool Utils::isHDF5(string filename){
 vector<bool> Utils::isGZ(string filename){
     try {
         vector<bool> results; results.resize(2, false);
-#ifdef USE_BOOST
-        ifstream fileHandle;
-        boost::iostreams::filtering_istream gzin;
-
+        
         if ((getExtension(filename) != ".gz") && (getExtension(filename) != ".GZ")) { return results; } // results[0] = false; results[1] = false;
-
-        bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
+        
+#ifdef USE_BOOST
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        bool ableToOpen = openInputFileBinary(filename, in, inBoost, ""); //no error
         if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
         try
         {
-            gzin >> c;
+            inBoost >> c;
             results[1] = true;
         }
         catch ( boost::iostreams::gzip_error & e )
         {
-            gzin.pop();
-            fileHandle.close();
+            inBoost.pop(); inBoost.reset();
+            in.close();
             return results;  // results[0] = true; results[1] = false;
         }
-        fileHandle.close();
+        in.close(); inBoost.pop(); inBoost.reset();
 #else
         m->mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); m->setControl_pressed(true);
 #endif

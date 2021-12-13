@@ -28,7 +28,6 @@ class ValidParameters {
 		vector <string> addParameters(string[], int);
 		void initParameterRanges();
 		vector<string> validFiles(map<string, string>&, string);
-        vector<string> validFastqGZFiles(map<string, string>&, string, bool&); 
         string validFile(map<string, string>&, string);
         string valid(map<string, string>&, string);
         string validPath(map<string, string>&, string);

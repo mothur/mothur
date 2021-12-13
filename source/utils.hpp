@@ -118,6 +118,7 @@ public:
 #ifdef USE_BOOST
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    bool openOutputFileBinary(string, ofstream&, boost::iostreams::filtering_ostream&);
     string getline(boost::iostreams::filtering_istream& fileHandle);
 #endif
     

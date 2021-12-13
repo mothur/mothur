@@ -134,7 +134,7 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
                 else { current->setCountFile(countfiles[0]); }
             }
             
-            fastqfiles = validParameter.validFastqGZFiles(parameters, "fastq", gz);
+            fastqfiles = validParameter.validFiles(parameters, "fastq");
             if (fastqfiles.size() != 0) {
                 if (fastqfiles[0] == "not open") { abort = true; }
             }
@@ -424,6 +424,8 @@ void ListSeqsCommand::process(vector<string> files, set<string>& names){
             
             inputFileName = files[i];
             
+            bool gz = util.isGZ(inputFileName)[1];
+            
             if (!gz) {
                 ifstream in; util.openInputFile(inputFileName, in);
                 readFastq(names, in, m);
@@ -433,7 +435,7 @@ void ListSeqsCommand::process(vector<string> files, set<string>& names){
                     ifstream in; boost::iostreams::filtering_istream inBoost;
                     util.openInputFileBinary(inputFileName, in, inBoost);
                     readFastq(names, inBoost, m);
-                    in.close(); inBoost.pop();
+                    in.close(); inBoost.pop(); inBoost.reset();
                 #endif
             }
         }

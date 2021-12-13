@@ -36,7 +36,7 @@ class ListSeqsCommand : public Command {
 		vector<string> outputNames;
 		vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles;
         string  format, inputFileName;
-        bool abort, gz;
+        bool abort;
         
         void process(vector<string> files, set<string>&);
         void process(vector<string> files, set<string>&, void f(set<string>&, ifstream&, MothurOut*&));
