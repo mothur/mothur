@@ -54,7 +54,7 @@ public:
     string getComment();
 	void setPairwise(string);
 	string getPairwise();
-    Protein getProtein(int start); 
+    Protein getProtein(int start, bool);
 	
 	string getInlineSeq();
     int getNumNs();

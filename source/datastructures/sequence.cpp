@@ -227,7 +227,7 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 }
 /***********************************************************************/
 //startFrame options: 1,2,3,-1,-2,-3. 1 -> start at 0, 2 start at 1, 3 start at 2.
-Protein Sequence::getProtein(int sf) {
+Protein Sequence::getProtein(int sf, bool trim) {
     try {
         vector<AminoAcid> aa;
         
@@ -242,6 +242,12 @@ Protein Sequence::getProtein(int sf) {
             string codon = ""; codon += unaligned[i]; codon += unaligned[i+1]; codon += unaligned[i+2]; i += 3;
            
             AminoAcid thisAA(codon);
+            
+            if (thisAA.getNum() == stop) {
+                if (trim) {  break;  }
+                else {  thisAA.setAmino('*'); }
+            }
+            
             aa.push_back(thisAA);
         }
         

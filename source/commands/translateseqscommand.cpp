@@ -235,7 +235,7 @@ void translateToAminoAcidDriver(translateSeqsStruct* params) {
             Sequence seq(inFASTA); params->util.gobble(inFASTA);
             
             if (seq.getName() != "") {
-                Protein prot = seq.getProtein(params->frame);
+                Protein prot = seq.getProtein(params->frame, params->stop);
                 prot.printProtein(params->outputWriter);
                 count++;
             }
