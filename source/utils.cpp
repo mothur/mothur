@@ -1114,7 +1114,7 @@ bool Utils::openInputFileBinary(string fileName, ifstream& file, boost::iostream
     }
 }
 /***********************************************************************/
-bool Utils::openOutputFileBinary(string fileName, ofstream& file, boost::iostreams::filtering_ostream& outBoost){
+bool Utils::openOutputFileBinary(string fileName, ofstream& file, ostream*& out, boost::iostreams::filtering_streambuf<boost::iostreams::output>& outBoost){
     try {
         string completeFileName = getFullPathName(fileName);
         
@@ -1122,8 +1122,10 @@ bool Utils::openOutputFileBinary(string fileName, ofstream& file, boost::iostrea
         
         if(!file) { return false; }
         else { //check for blank file
-            outBoost.push(boost::iostreams::gzip_compressor());
+            outBoost.push(boost::iostreams::gzip_compressor(boost::iostreams::gzip_params(9)));
             outBoost.push(file);
+            
+            out = new ostream(&outBoost);
             return true;
         }
     }

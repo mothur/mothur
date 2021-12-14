@@ -349,14 +349,14 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
         if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
         map<string, string> variables;
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
-        variables["[extension]"] = util.getExtension(fastqfile);
+        variables["[extension]"] = ".fastq" + util.getExtension(fastqfile);
         string outputFileName = getOutputFileName("fastq", variables);
         
         ifstream in; boost::iostreams::filtering_istream inBoost;
         util.openInputFileBinary(fastqfile, in, inBoost);
         
-        ofstream out; boost::iostreams::filtering_ostream outBoost;
-        util.openOutputFileBinary(fastqfile, out, outBoost);
+        ofstream file; ostream* out; boost::iostreams::filtering_streambuf<boost::iostreams::output> outBoost;
+        util.openOutputFileBinary(outputFileName, file, out, outBoost);
         
         bool wroteSomething = false; int selectedCount = 0; set<string> uniqueNames;
         
@@ -375,7 +375,7 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
                     if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
                         wroteSomething = true;
                         selectedCount++;
-                        fread.printFastq(out);
+                        fread.printFastq(*out);
                         uniqueNames.insert(name);
                     }else {
                         m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
@@ -384,10 +384,9 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
             }
             util.gobble(inBoost);
         }
-        in.close();
-        out.close();
-        inBoost.pop();
-        outBoost.pop();
+        in.close(); inBoost.pop();
+        boost::iostreams::close(outBoost);
+        file.close(); delete out;
         
         if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return; }
         
