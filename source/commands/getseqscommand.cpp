@@ -340,76 +340,8 @@ int GetSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readGZFastq(string fastqfile){
-    try {
-        
-#ifdef USE_BOOST
-        
-        string thisOutputDir = outputdir;
-        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
-        map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
-        variables["[extension]"] = ".fastq" + util.getExtension(fastqfile);
-        string outputFileName = getOutputFileName("fastq", variables);
-        
-        ifstream in; boost::iostreams::filtering_istream inBoost;
-        util.openInputFileBinary(fastqfile, in, inBoost);
-        
-        ofstream file; ostream* out; boost::iostreams::filtering_streambuf<boost::iostreams::output> outBoost;
-        util.openOutputFileBinary(outputFileName, file, out, outBoost);
-        
-        bool wroteSomething = false; int selectedCount = 0; set<string> uniqueNames;
-        
-        while(!inBoost.eof()){
-            
-            if (m->getControl_pressed()) { break; }
-            
-            //read sequence name
-            bool ignore;
-            FastqRead fread(inBoost, ignore, format);  util.gobble(inBoost);
-            
-            if (!ignore) {
-                string name = fread.getName();
-                
-                if (names.count(name) != 0) {
-                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
-                        wroteSomething = true;
-                        selectedCount++;
-                        fread.printFastq(*out);
-                        uniqueNames.insert(name);
-                    }else {
-                        m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
-                    }
-                }
-            }
-            util.gobble(inBoost);
-        }
-        in.close(); inBoost.pop();
-        boost::iostreams::close(outBoost);
-        file.close(); delete out;
-        
-        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return; }
-        
-        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastqfile + " does not contain any sequence from the .accnos file.\n");   }
-        outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
-        
-        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastqfile + ".\n");
-#endif
-        
-        return;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "GetSeqsCommand", "readFastq");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
 void GetSeqsCommand::readFastq(string fastqfile){
 	try {
-        bool gz = util.isGZ(fastqfile)[1];
-        
-        if (gz) { readGZFastq(fastqfile); return; }
-        
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;

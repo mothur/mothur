@@ -117,19 +117,16 @@ bool CountTable::testGroups(string file) {
 /************************************************************/
 bool CountTable::testGroups(string file, vector<string>& groups) {
     try {
-        m = MothurOut::getInstance(); hasGroups = false; total = 0;
-        ifstream in;
-        util.openInputFile(file, in);
+        m = MothurOut::getInstance(); hasGroups = false; total = 0; isCompressed = true;
+        ifstream in; util.openInputFile(file, in);
 
         string headers = util.getline(in); util.gobble(in);
         
         if (headers[0] == '#') { //is this a count file in compressed form
-            isCompressed = true;
-            
             //read headers
             headers = util.getline(in); util.gobble(in); //gets compressed group name map line
             headers = util.getline(in); util.gobble(in);
-        }
+        }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
 
@@ -403,19 +400,17 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning) {
 bool CountTable::isCountTable(string file) {
     try {
         
-        filename = file;
-        ifstream in;
-        util.openInputFile(filename, in);
+        filename = file; isCompressed = true;
+        ifstream in; util.openInputFile(filename, in);
         
         string headers = util.getline(in); util.gobble(in);
         
         if (headers[0] == '#') { //is this a count file in compressed form
-            isCompressed = true;
-            
             //read headers
             headers = util.getline(in); util.gobble(in); //gets compressed group name map line
             headers = util.getline(in); util.gobble(in);
-        }
+        }else { isCompressed = false; }
+        
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
         in.close();
         
@@ -457,15 +452,13 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vect
 /************************************************************/
 int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vector<string> selectedGroups) {
     try {
-        if (!readGroups) { selectedGroups.clear(); }
+        if (!readGroups) { selectedGroups.clear(); } isCompressed = true;
 
         string headers = util.getline(in); util.gobble(in);
         
         map<string, int> headerIndex2Group;
         //#1,F003D000	2,F003D002	3,F003D004	4,F003D006	5,F003D008	6,F003D142	7,F003D144	8,F003D146	9,F003D148	10,F003D150
         if (headers[0] == '#') { //is this a count file in compressed form
-            isCompressed = true;
-            
             //read headers
             headers = util.getline(in); util.gobble(in); //gets compressed group name map line
             headers = headers.substr(1);
@@ -480,7 +473,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
             }
             
             headers = util.getline(in); util.gobble(in);
-        }
+        }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
         
@@ -661,17 +654,14 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
 /************************************************************/
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<string> selectedSeqs) {
     try {
-        filename = file;
-        ifstream in;
-        util.openInputFile(filename, in);
+        filename = file; isCompressed = true;
+        ifstream in; util.openInputFile(filename, in);
         
         string headers = util.getline(in); util.gobble(in);
         
         map<string, int> headerIndex2Group;
         //#1,F003D000	2,F003D002	3,F003D004	4,F003D006	5,F003D008	6,F003D142	7,F003D144	8,F003D146	9,F003D148	10,F003D150
         if (headers[0] == '#') { //is this a count file in compressed form
-            isCompressed = true;
-            
             //read headers
             headers = util.getline(in); util.gobble(in); //gets compressed group name map line
             headers = headers.substr(1);
@@ -686,7 +676,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
             }
             
             headers = util.getline(in); util.gobble(in);
-        }
+        }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
         
@@ -2135,8 +2125,13 @@ int CountTable::copy(CountTable* ct) {
         vector<string> names = ct->getNamesOfSeqs();
 
         for (int i = 0; i < names.size(); i++) {
-            vector<int> thisCounts = ct->getGroupCounts(names[i]);
-            push_back(names[i], thisCounts, false);
+            if (hasGroups) {
+                vector<int> thisCounts = ct->getGroupCounts(names[i]);
+                push_back(names[i], thisCounts, false);
+            }else {
+                int thisCount = ct->getNumSeqs(names[i]);
+                push_back(names[i], thisCount);
+            }
         }
         
         isCompressed = ct->isTableCompressed();

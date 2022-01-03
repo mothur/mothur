@@ -133,7 +133,7 @@ string VsearchFileParser::getNamesFile(string& inputFile){
         string inputString = "fasta=" + inputFile + ", format=count";
         m->mothurOut("/******************************************/\n");
         m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
-        Command* uniqueCommand = new DeconvoluteCommand(inputString);
+        Command* uniqueCommand = new UniqueSeqsCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

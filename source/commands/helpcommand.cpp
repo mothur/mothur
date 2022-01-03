@@ -21,7 +21,7 @@
 #include "quitcommand.h"
 #include "helpcommand.h"
 #include "commandfactory.hpp"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "parsimonycommand.h"
 #include "unifracunweightedcommand.h"
 #include "unifracweightedcommand.h"
@@ -247,7 +247,7 @@ int HelpCommand::execute(){
                 string optionString = "help";
                 
                 if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
-                else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
+                else if(commandName == "unique.seqs")			{	command = new UniqueSeqsCommand(optionString);				}
                 else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
                 else if(commandName == "help")					{	command = new HelpCommand(optionString);					}
                 else if(commandName == "quit")					{	command = new QuitCommand(optionString);					}

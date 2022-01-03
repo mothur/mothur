@@ -61,7 +61,7 @@ class CountTable {
 
     public:
 
-        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = false; }
+        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = true; }
         ~CountTable() {}
 
         //reads and creates smart enough to eliminate groups with zero counts
