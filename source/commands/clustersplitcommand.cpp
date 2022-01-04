@@ -494,23 +494,21 @@ map<double, int> ClusterSplitCommand::completeListFile(vector<string> listNames,
 		//read in singletons
 		if (singleton != "none") {
             
-            ifstream in;
-            util.openInputFile(singleton, in);
-				
-			string firstCol, secondCol;
-			listSingle = new ListVector();
-            
-            if (type == "count") { util.getline(in); util.gobble(in); }
-            
-			while (!in.eof()) {
-				in >> firstCol >> secondCol;
-                util.getline(in);
-                if (type == "name")  { listSingle->push_back(secondCol); }
-                else { listSingle->push_back(firstCol); }
-                util.gobble(in);
-			}
-            
-			in.close();
+            listSingle = new ListVector();
+            if (type == "count") {
+                
+                CountTable ct; ct.readTable(singleton, false, false);
+                
+                vector<string> singletonSeqNames = ct.getNamesOfSeqs();
+                
+                for (int i = 0; i < singletonSeqNames.size(); i++) { listSingle->push_back(singletonSeqNames[i]); }
+                
+            }else if (type == "name") {
+                map<string, string> singletonSeqNames; util.readNames(singleton, singletonSeqNames);
+                
+                for (map<string, string>::iterator it = singletonSeqNames.begin(); it != singletonSeqNames.end(); it++) { listSingle->push_back(it->second); }
+            }
+    
 			util.mothurRemove(singleton);
             
 			numSingleBins = listSingle->getNumBins();
