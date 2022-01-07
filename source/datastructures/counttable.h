@@ -73,7 +73,7 @@ class CountTable {
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(ifstream&, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
-        int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
+        int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table. if format=name, use namefile to create count table
     
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();
