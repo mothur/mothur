@@ -125,6 +125,28 @@ RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dups
     }
 }
 //**********************************************************************************************************************
+
+RemoveSeqsCommand::RemoveSeqsCommand(set<string> n, string dupsFile, string dupsFileType, string output) {
+    try {
+        names = n;
+    
+        outputdir = output; dups = true; abort = false; calledHelp = false;
+        
+        vector<string> tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        
+        if (dupsFile != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile); }
+            else                            {  readName(dupsFile); }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(string option) : Command()  {
 	try {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
