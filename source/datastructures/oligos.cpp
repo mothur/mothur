@@ -270,7 +270,7 @@ int Oligos::readOligos(){
 					
 					//check for repeat barcodes
                     string tempPair = oligo+roligo;
-                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding.\n");   }
+                    if (uniquePrimers.count(tempPair) != 0) { m->mothurOut("[WARNING]: primer pair " + newPrimer.forward + " " + newPrimer.reverse + " is in your oligos file already, disregarding.\n");   }
                     else { uniquePrimers.insert(tempPair);
 					
                         if (m->getDebug()) {  if (group != "") { m->mothurOut("[DEBUG]: reading group " + group + ".\n"); }else{ m->mothurOut("[DEBUG]: no group for primer pair " + newPrimer.forward + " " + newPrimer.reverse + ".\n"); }  }
