@@ -965,7 +965,7 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
             
             CountTable newCt;
 
-            if (badNames.size() != 0) { newCt.addGroup("scrap");  }
+            if (badNames.size() != 0) { newCt.addGroup("scrap");   }
     
             for (map<string, int>::iterator itCount = groupCounts.begin(); itCount != groupCounts.end(); itCount++) { newCt.addGroup(itCount->first); }
             
@@ -980,7 +980,7 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
                 
                 map<string, int>::iterator itCount = nameCount.find(seqName);
                 if (itCount != nameCount.end()) {
-                    vector<int> counts; counts.resize(groupCounts.size()+1, 0);
+                    vector<int> counts; counts.resize(count, 0);
                     counts[groupIndexes[seqGroup]] = itCount->second;
                     newCt.push_back(seqName, counts);
                 }else { m->mothurOut("[ERROR]: missing count info for " + seqName + "\n"); m->setControl_pressed(true); }
