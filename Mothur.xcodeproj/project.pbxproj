@@ -4086,7 +4086,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
-					"VERSION=\"\\\"1.44.3\\\"\"",
+					"VERSION=\"\\\"1.47.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
@@ -4176,7 +4176,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.44.3\\\"\"",
+					"VERSION=\"\\\"1.47.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
