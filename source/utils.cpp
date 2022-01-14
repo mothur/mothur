@@ -2464,21 +2464,21 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         #ifdef MOTHUR_FILES
         
         if (defaultPaths.size() != 0) {
-            m->appendLogBuffer("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
+            m->mothurOut("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
             for (int i = 0; i < defaultPaths.size(); i++) {
-                m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
+                m->mothurOut("\t" + defaultPaths[i] + "\n");
             }
-            m->appendLogBuffer("\n");
+            m->mothurOut("\n");
         }
         #endif
         
         #ifdef MOTHUR_TOOLS
             if (toolPaths.size() != 0) {
-                m->appendLogBuffer("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
+                m->mothurOut("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
                 for (int i = 0; i < toolPaths.size(); i++) {
-                    m->appendLogBuffer("\t" + toolPaths[i] + "\n");
+                    m->mothurOut("\t" + toolPaths[i] + "\n");
                 }
-                m->appendLogBuffer("\n");
+                m->mothurOut("\n");
             }
         #endif
         

@@ -276,7 +276,7 @@ int GetSeqsCommand::execute(){
         if (qualityfiles.size() != 0)       { qualfile = qualityfiles[0]; for (int i = 0; i < qualityfiles.size(); i++) { readQual(qualityfiles[i]); }  }
         if (groupfiles.size() != 0)         { groupfile = groupfiles[0];    for (int i = 0; i < groupfiles.size(); i++)     { readGroup(groupfiles[i]);  }  }
         if (taxfiles.size() != 0)           { taxfile = taxfiles[0];    for (int i = 0; i < taxfiles.size(); i++)           { readTax(taxfiles[i]);    }  }
-        if (listfiles.size() != 0)          { listfile = listfiles[0];   for (int i = 0; i < taxfiles.size(); i++)           { readTax(taxfiles[i]);    }  }
+        if (listfiles.size() != 0)          { listfile = listfiles[0];   for (int i = 0; i < listfiles.size(); i++)           { readList(listfiles[i]);    }  }
 
         if (alignfiles.size() != 0)         {    for (int i = 0; i < alignfiles.size(); i++)           { readAlign(alignfiles[i]);    }  }
         if (contigsreportfiles.size() != 0) {    for (int i = 0; i < contigsreportfiles.size(); i++)   { readContigs(contigsreportfiles[i]);    }  }
