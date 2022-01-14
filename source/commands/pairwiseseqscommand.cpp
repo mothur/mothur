@@ -17,7 +17,7 @@ vector<string> PairwiseSeqsCommand::setParameters(){
         CommandParameter poldfasta("oldfasta", "InputTypes", "", "", "none", "none", "OldFastaColumn","",false,false); parameters.push_back(poldfasta);
         CommandParameter pfitcalc("fitcalc", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pfitcalc);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "none", "none", "none","phylip-column",false,true,true); parameters.push_back(pfasta);
-		CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+		CommandParameter palign("align", "Multiple", "needleman-gotoh-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
 		CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
 		CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
 		CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
@@ -57,7 +57,7 @@ string PairwiseSeqsCommand::getHelpString(){
 		helpString += "The pairwise.seqs command reads a fasta file and creates distance matrix.\n";
 		helpString += "The pairwise.seqs command parameters are fasta, align, match, mismatch, gapopen, gapextend, calc, output, cutoff, oldfasta, column, processors.\n";
 		helpString += "The fasta parameter is required.\n";
-		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+		helpString += "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman and noalign. The default is needleman.\n";
 		helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -72,7 +72,7 @@ string PairwiseSeqsCommand::getHelpString(){
 		helpString += "The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n";
 		helpString += "The pairwise.seqs command should be in the following format: \n";
 		helpString += "pairwise.seqs(fasta=yourfastaFile, align=yourAlignmentMethod) \n";
-		helpString += "Example pairwise.seqs(fasta=candidate.fasta, align=blast)\n";
+		helpString += "Example pairwise.seqs(fasta=candidate.fasta, align=gotoh)\n";
 		
 		return helpString;
 	}
@@ -109,7 +109,6 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option) : Command()  {
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
-			
 			fastaFileName = validParameter.validFile(parameters, "fasta");
 			if (fastaFileName == "not found") {
 				fastaFileName = current->getFastaFile();
@@ -172,17 +171,6 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(string option) : Command()  {
 			compress = util.isTrue(temp); 
 			
 			align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-            
-            if (align == "blast") {
-                string blastlocation = "";
-                vector<string> locations = current->getLocations();
-                string path = current->getProgramPath();
-                bool foundTool = util.findBlastLocation(blastlocation, path, locations);
-
-                if (!foundTool){
-                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as align method. Using needleman instead.\n"); align = "needleman";
-                }
-            }
             
             temp = validParameter.valid(parameters, "fitcalc");	if(temp == "not found"){	temp = "F";	}
             fitCalc = util.isTrue(temp);
@@ -272,7 +260,7 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(StorageDatabase*& storageDB, vector< ve
         
     }
     catch(exception& e) {
-        m->errorOut(e, "DistanceCommand", "DistanceCommand");
+        m->errorOut(e, "PairwiseSeqsCommand", "PairwiseSeqsCommand");
         exit(1);
     }
 }
@@ -459,7 +447,6 @@ int driverColumn(pairwiseData* params){
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
         else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
-        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
         else if(params->align == "noalign")		{	alignment = new NoAlign();													}
         else {
             params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
@@ -539,7 +526,6 @@ int driverFitCalc(pairwiseData* params){
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
         else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
-        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
         else if(params->align == "noalign")		{	alignment = new NoAlign();													}
         else {
             params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
@@ -620,7 +606,6 @@ int driverLt(pairwiseData* params){
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
         else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
-        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
         else if(params->align == "noalign")		{	alignment = new NoAlign();													}
         else {
             params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");
@@ -707,7 +692,6 @@ int driverSquare(pairwiseData* params){
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
         else if(params->align == "needleman")	{	alignment = new NeedlemanOverlap(params->gapOpen, params->match, params->misMatch, params->longestBase);				}
-        else if(params->align == "blast")		{	alignment = new BlastAlignment(params->gapOpen, params->gapExtend, params->match, params->misMatch);		}
         else if(params->align == "noalign")		{	alignment = new NoAlign();													}
         else {
             params->m->mothurOut(params->align + " is not a valid alignment option. I will run the command using needleman.\n");

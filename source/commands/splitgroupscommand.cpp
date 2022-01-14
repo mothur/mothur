@@ -202,14 +202,6 @@ SplitGroupCommand::SplitGroupCommand(string option) : Command()  {
                 else { outputdir = util.hasPath(countfile);  }
             }
 			
-            if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files;
-                    if (fastafile != "")    {  files.push_back(fastafile);  }
-                    else                    {  files.push_back(flowfile);   }
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 
 	}

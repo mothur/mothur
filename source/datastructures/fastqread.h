@@ -50,13 +50,12 @@ public:
     string getSeq() { return sequence; }
     void setSeq(string s) { sequence = s; }
     vector<int> getScores() { return scores; }
-    void setScores(vector<int> s) { scores = s;  }
+    void setScores(vector<int> s); 
     void printFastq(ostream&);
     
     Sequence getSequence();
     QualityScores getQuality();
     
-
 private:
     MothurOut* m;
     Utils util;

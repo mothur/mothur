@@ -91,7 +91,6 @@ private:
     map<int, long long> inserts;
 
     map<string, int> nameMap;
-    map<string, int>::iterator itFindName;
     map<int, long long>::iterator it;
 
     void processNameCount(string n); //determines whether name or count and fills nameMap, ignored if n = ""
@@ -122,8 +121,8 @@ struct seqSumData {
 
 
     string filename, summaryFile, contigsfile, output;
-    unsigned long long start;
-    unsigned long long end;
+    double start;
+    double end;
     long long count;
     long long total;
     MothurOut* m;
@@ -134,7 +133,7 @@ struct seqSumData {
 
     seqSumData(){}
     //FastaSummarize - output file created
-    seqSumData(string f, string sum, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+    seqSumData(string f, string sum, double st, double en, bool na, map<string, int> nam) {
         filename = f;
         m = MothurOut::getInstance();
         start = st;
@@ -147,7 +146,7 @@ struct seqSumData {
     }
 
     //FastaSummarySummarize - no output files
-    seqSumData(string f, unsigned long long st, unsigned long long en, bool na, map<string, int> nam) {
+    seqSumData(string f, double st, double en, bool na, map<string, int> nam) {
         filename = f;
         m = MothurOut::getInstance();
         start = st;

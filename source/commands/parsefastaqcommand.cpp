@@ -507,11 +507,9 @@ int ParseFastaQCommand::processFile(vector<string> files, TrimOligos*& trimOligo
         if (fasta) { util.openOutputFile(ffastaFile, outfFasta);  outputNames.push_back(ffastaFile); outputTypes["fasta"].push_back(ffastaFile);	util.openOutputFile(rfastaFile, outrFasta);  outputNames.push_back(rfastaFile); outputTypes["fasta"].push_back(rfastaFile);}
         if (qual) { util.openOutputFile(fqualFile, outfQual);	outputNames.push_back(fqualFile);  outputTypes["qfile"].push_back(fqualFile);	util.openOutputFile(rqualFile, outrQual);	outputNames.push_back(rqualFile);  outputTypes["qfile"].push_back(rqualFile);	}
         
-        ifstream inf;
-        util.openInputFile(inputfile, inf);
+        ifstream inf; util.openInputFile(inputfile, inf);
         
-        ifstream inr;
-        util.openInputFile(inputReverse, inr);
+        ifstream inr; util.openInputFile(inputReverse, inr);
         
         ifstream inFIndex, inRIndex;
         if (files[2] != "") { util.openInputFile(files[2], inFIndex);  }

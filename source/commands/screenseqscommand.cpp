@@ -145,8 +145,8 @@ string ScreenSeqsCommand::getOutputPattern(string type) {
         else if (type == "count")       {   pattern = "[filename],good,[extension]";    }
         else if (type == "accnos")      {   pattern = "[filename],bad.accnos";          }
         else if (type == "qfile")       {   pattern = "[filename],good,[extension]";    }
-        else if (type == "alignreport")      {   pattern = "[filename],good.align.report";    }
-        else if (type == "contigsreport")      {   pattern = "[filename],good.contigs.report";    }
+        else if (type == "alignreport")      {   pattern = "[filename],good.[extension]";    }
+        else if (type == "contigsreport")      {   pattern = "[filename],good.[extension]";    }
         else if (type == "summary")      {   pattern = "[filename],good.summary";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
@@ -324,12 +324,6 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "criteria");	if (temp == "not found"){	temp = "90";				}
 			util.mothurConvert(temp, criteria); 
 			
-			if (countfile == "") { 
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 
 	}
@@ -581,6 +575,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(alignreport));
+        variables["[extension]"] = util.getExtension(alignreport);
         string outSummary =  getOutputFileName("alignreport",variables);
         outputNames.push_back(outSummary); outputTypes["alignreport"].push_back(outSummary);
         
@@ -663,6 +658,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
     try{
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(contigsreport));
+        variables["[extension]"] = util.getExtension(contigsreport);
         string outSummary =  getOutputFileName("contigsreport",variables);
         outputNames.push_back(outSummary); outputTypes["contigsreport"].push_back(outSummary);
         

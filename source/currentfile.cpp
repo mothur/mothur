@@ -237,15 +237,19 @@ int CurrentFile::setProcessors(string p)  {
     }
 }
 /*********************************************************************************************/
-void CurrentFile::setDefaultPath(string pathname)  {
+void CurrentFile::setDefaultPath(vector<string> pathnames)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);
         
-        if (pathname != "") { //add / to name if needed
-            string lastChar = pathname.substr(pathname.length()-1);
-            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        defaultPath.clear();
+        for (int i = 0; i < pathnames.size(); i++) {
+            string pathname = pathnames[i];
+            if (pathname != "") { //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            defaultPath.push_back(util.getFullPathName(pathname));
         }
-        defaultPath = util.getFullPathName(pathname);
     }
     catch(exception& e) {
         m->errorOut(e, "CurrentFile", "setDefaultPath");
@@ -268,24 +272,6 @@ void CurrentFile::setTestFilePath(string pathname)  {
     }
     catch(exception& e) {
         m->errorOut(e, "CurrentFile", "setTestFilePath");
-        exit(1);
-    }
-}
-/*********************************************************************************************/
-void CurrentFile::setBlastPath(string pathname)  {
-    try {
-        lock_guard<std::mutex> guard(currentProtector);
-        
-        if (pathname != "") {
-            //add / to name if needed
-            string lastChar = pathname.substr(pathname.length()-1);
-            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
-        }
-        blastPath = util.getFullPathName(pathname);
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "CurrentFile", "setBlastPath");
         exit(1);
     }
 }
@@ -332,16 +318,19 @@ void CurrentFile::setPaths(vector<string> pathVariables)  {
     }
 }
 /*********************************************************************************************/
-void CurrentFile::setToolsPath(string pathname)  {
+void CurrentFile::setToolsPath(vector<string> pathnames)  {
     try {
         lock_guard<std::mutex> guard(currentProtector);
         
-        if (pathname != "") {
-            //add / to name if needed
-            string lastChar = pathname.substr(pathname.length()-1);
-            if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+        toolsPath.clear();
+        for (int i = 0; i < pathnames.size(); i++) {
+            string pathname = pathnames[i];
+            if (pathname != "") { //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            toolsPath.push_back(util.getFullPathName(pathname));
         }
-        toolsPath = util.getFullPathName(pathname);
         
     }
     catch(exception& e) {
@@ -349,6 +338,58 @@ void CurrentFile::setToolsPath(string pathname)  {
         exit(1);
     }
 }
-
-
+/*********************************************************************************************/
+void CurrentFile::setInputDir(vector<string> pathnames)  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        inputDir.clear();
+        for (int i = 0; i < pathnames.size(); i++) {
+            string pathname = pathnames[i];
+            if (pathname != "") { //add / to name if needed
+                string lastChar = pathname.substr(pathname.length()-1);
+                if (lastChar != PATH_SEPARATOR) { pathname += PATH_SEPARATOR; }
+            }
+            inputDir.push_back(util.getFullPathName(pathname));
+        }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setToolsPath");
+        exit(1);
+    }
+}
+/*********************************************************************************************/
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+vector< vector<string> > CurrentFile::getLocations()  {
+    try {
+        lock_guard<std::mutex> guard(currentProtector);
+        
+        vector< vector<string> > locations;
+        
+        //allows for multiple locations, order matters
+        locations.push_back(inputDir);
+        
+        vector<string> outputDirs; outputDirs.push_back(outputDir);
+        locations.push_back(outputDirs);
+        
+        vector<string> mothurHome; mothurHome.push_back(mothurProgramPath);
+        locations.push_back(mothurHome);
+        
+        //MOTHUR_TOOLS
+        locations.push_back(toolsPath);
+        
+        //MOTHUR_FILES
+        locations.push_back(defaultPath);
+        
+        
+        return locations;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "CurrentFile", "setToolsPath");
+        exit(1);
+    }
+}
+//{  }
 /*********************************************************************************************/

@@ -8,10 +8,12 @@
  */
 
 #include "chimeraperseuscommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequence.hpp"
 #include "counttable.h"
 #include "sequencecountparser.h"
+#include "removeseqscommand.h"
+
 //**********************************************************************************************************************
 vector<string> ChimeraPerseusCommand::setParameters(){	
 	try {
@@ -21,7 +23,7 @@ vector<string> ChimeraPerseusCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pdups("dereplicate", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pdups);
-
+        CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","fasta",false,false); parameters.push_back(premovechimeras);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -35,6 +37,7 @@ vector<string> ChimeraPerseusCommand::setParameters(){
         outputTypes["chimera"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 			
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -57,6 +60,7 @@ string ChimeraPerseusCommand::getHelpString(){
 		helpString += "The group parameter allows you to provide a group file.  When checking sequences, only sequences from the same group as the query sequence will be used as the reference. \n";
 		helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "If the dereplicate parameter is false, then if one group finds the seqeunce to be chimeric, then all groups find it to be chimeric, default=f.\n";
+        helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
 		helpString += "The alpha parameter ....  The default is -5.54. \n";
 		helpString += "The beta parameter ....  The default is 0.33. \n";
 		helpString += "The cutoff parameter ....  The default is 0.50. \n";
@@ -78,7 +82,8 @@ string ChimeraPerseusCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],perseus.chimeras"; } 
         else if (type == "accnos") {  pattern = "[filename],perseus.accnos"; }
-        else if (type == "count") {  pattern = "[filename],perseus.pick.count_table"; }
+        else if (type == "fasta") {  pattern = "[filename],perseus.fasta"; }
+        else if (type == "count") {  pattern = "[filename],perseus.count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -163,6 +168,9 @@ ChimeraPerseusCommand::ChimeraPerseusCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "dereplicate");	
 			if (temp == "not found") { temp = "false";			}
 			dups = util.isTrue(temp);
+            
+            temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
+            removeChimeras = util.isTrue(temp);
             
             if (!abort) {
                 if ((namefile != "") || (groupfile != "")) { //convert to count
@@ -385,7 +393,6 @@ int ChimeraPerseusCommand::execute(){
                     current->setMothurCalling(false);
                     groups = cparser.getNamesOfGroups();
                     group2Files = cparser.getFiles();
-                    
                 }
                 
                 if (m->getControl_pressed()) { return 0; }
@@ -406,8 +413,7 @@ int ChimeraPerseusCommand::execute(){
                     CountTable newCount; newCount.readTable(countfile, true, false);
                     
                     if (!util.isBlank(countlist)) {
-                        ifstream in2;
-                        util.openInputFile(countlist, in2);
+                        ifstream in2; util.openInputFile(countlist, in2);
                         
                         string name, group;
                         while (!in2.eof()) {
@@ -459,6 +465,48 @@ int ChimeraPerseusCommand::execute(){
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
         outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
         
+        if (removeChimeras) {
+            if (!util.isBlank(accnosFileName)) {
+                m->mothurOut("\nRemoving chimeras from your input files:\n");
+                
+                string inputString = "fasta=" + fastafile + ", accnos=" + accnosFileName;
+                if ((countfile != "") && (!dups))   {   inputString += ", count=" + countfile;  }
+                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                m->mothurOut("/******************************************/\n");
+
+                if (countfile != "") {
+                    if (!dups) { //dereplicate=f, so remove sequences where any sample found the reads to be chimeric
+                        map<string, string> variables;
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
+                        string currentName = getOutputFileName("count", variables);
+
+                        util.renameFile(filenames["count"][0], currentName);
+                        util.mothurRemove(filenames["count"][0]);
+                        outputNames.push_back(currentName); outputTypes["count"].push_back(currentName);
+                    }//else, mothur created a modified count file removing chimeras by sample. No need to include count file on remove.seqs command. Deconvolute function created modified count table already
+                }
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+                string currentName = getOutputFileName("fasta", variables);
+
+                util.renameFile(filenames["fasta"][0], currentName);
+                util.mothurRemove(filenames["fasta"][0]);
+                
+                outputNames.push_back(currentName); outputTypes["fasta"].push_back(currentName);
+            }else { m->mothurOut("\nNo chimeras found, skipping remove.seqs.\n"); }
+        }
         
 		//set accnos file as new current accnosfile
 		string currentName = "";
@@ -472,6 +520,11 @@ int ChimeraPerseusCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
 		}
 		
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();
@@ -497,7 +550,7 @@ string ChimeraPerseusCommand::getCountFile(string& inputFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

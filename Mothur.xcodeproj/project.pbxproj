@@ -179,7 +179,7 @@
 		481FB5AD1AC1B7300076CFF3 /* countgroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A795840C13F13CD900F201D5 /* countgroupscommand.cpp */; };
 		481FB5AE1AC1B7300076CFF3 /* countseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7730EFE13967241007433A3 /* countseqscommand.cpp */; };
 		481FB5AF1AC1B7300076CFF3 /* createdatabasecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */; };
-		481FB5B01AC1B7300076CFF3 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */; };
+		481FB5B01AC1B7300076CFF3 /* uniqueseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* uniqueseqscommand.cpp */; };
 		481FB5B11AC1B7300076CFF3 /* degapseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */; };
 		481FB5B21AC1B7300076CFF3 /* deuniqueseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C712D37EC400DA6239 /* deuniqueseqscommand.cpp */; };
 		481FB5B31AC1B7300076CFF3 /* deuniquetreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77A221E139001B600B0BE70 /* deuniquetreecommand.cpp */; };
@@ -291,8 +291,6 @@
 		481FB6251AC1B7EA0076CFF3 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
 		481FB6261AC1B7EA0076CFF3 /* alignmentcell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65512D37EC300DA6239 /* alignmentcell.cpp */; };
 		481FB6271AC1B7EA0076CFF3 /* alignmentdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65712D37EC300DA6239 /* alignmentdb.cpp */; };
-		481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
-		481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		481FB62A1AC1B7EA0076CFF3 /* counttable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A74D59A3159A1E2000043046 /* counttable.cpp */; };
 		481FB62C1AC1B7EA0076CFF3 /* designmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A77916E6176F7F7600EEFE18 /* designmap.cpp */; };
 		481FB62D1AC1B7EA0076CFF3 /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6CD12D37EC400DA6239 /* distancedb.cpp */; };
@@ -604,8 +602,6 @@
 		A7E9B88812D37EC400DA6239 /* bellerophon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65C12D37EC300DA6239 /* bellerophon.cpp */; };
 		A7E9B88912D37EC400DA6239 /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65E12D37EC300DA6239 /* bergerparker.cpp */; };
 		A7E9B88A12D37EC400DA6239 /* binsequencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */; };
-		A7E9B88B12D37EC400DA6239 /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66212D37EC300DA6239 /* blastalign.cpp */; };
-		A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66412D37EC400DA6239 /* blastdb.cpp */; };
 		A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66612D37EC400DA6239 /* boneh.cpp */; };
 		A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66812D37EC400DA6239 /* bootstrap.cpp */; };
 		A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B66C12D37EC400DA6239 /* bstick.cpp */; };
@@ -644,7 +640,7 @@
 		A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6B912D37EC400DA6239 /* corraxescommand.cpp */; };
 		A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6BB12D37EC400DA6239 /* coverage.cpp */; };
 		A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C112D37EC400DA6239 /* decalc.cpp */; };
-		A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */; };
+		A7E9B8B912D37EC400DA6239 /* uniqueseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C312D37EC400DA6239 /* uniqueseqscommand.cpp */; };
 		A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */; };
 		A7E9B8BB12D37EC400DA6239 /* deuniqueseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6C712D37EC400DA6239 /* deuniqueseqscommand.cpp */; };
 		A7E9B8BC12D37EC400DA6239 /* distancecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B6CB12D37EC400DA6239 /* distancecommand.cpp */; };
@@ -1001,7 +997,7 @@
 		48705AC019BE32C50075E977 /* mergesfffilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mergesfffilecommand.h; path = source/commands/mergesfffilecommand.h; sourceTree = SOURCE_ROOT; };
 		48705AC119BE32C50075E977 /* sharedrjsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sharedrjsd.cpp; path = source/calculators/sharedrjsd.cpp; sourceTree = SOURCE_ROOT; };
 		48705AC219BE32C50075E977 /* sharedrjsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sharedrjsd.h; path = source/calculators/sharedrjsd.h; sourceTree = SOURCE_ROOT; };
-		4875F69922DCC723006A7D8C /* Ubuntu_18_Build.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Ubuntu_18_Build.txt; sourceTree = SOURCE_ROOT; };
+		4875F69922DCC723006A7D8C /* Ubuntu_20_Build.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Ubuntu_20_Build.txt; sourceTree = SOURCE_ROOT; };
 		48789AEF2061776100A7D848 /* utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utf8.h; path = source/utf8.h; sourceTree = SOURCE_ROOT; };
 		48789AF02061776100A7D848 /* checked.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = checked.h; path = source/checked.h; sourceTree = SOURCE_ROOT; };
 		48789AF12061776100A7D848 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = source/core.h; sourceTree = SOURCE_ROOT; };
@@ -1303,10 +1299,6 @@
 		A7E9B65F12D37EC300DA6239 /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bergerparker.h; path = source/calculators/bergerparker.h; sourceTree = SOURCE_ROOT; };
 		A7E9B66012D37EC300DA6239 /* binsequencecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = binsequencecommand.cpp; path = source/commands/binsequencecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66112D37EC300DA6239 /* binsequencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = binsequencecommand.h; path = source/commands/binsequencecommand.h; sourceTree = SOURCE_ROOT; };
-		A7E9B66212D37EC300DA6239 /* blastalign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blastalign.cpp; path = source/datastructures/blastalign.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66312D37EC400DA6239 /* blastalign.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blastalign.hpp; path = source/datastructures/blastalign.hpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66412D37EC400DA6239 /* blastdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blastdb.cpp; path = source/datastructures/blastdb.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B66512D37EC400DA6239 /* blastdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blastdb.hpp; path = source/datastructures/blastdb.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66612D37EC400DA6239 /* boneh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = boneh.cpp; path = source/calculators/boneh.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B66712D37EC400DA6239 /* boneh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = boneh.h; path = source/calculators/boneh.h; sourceTree = SOURCE_ROOT; };
 		A7E9B66812D37EC400DA6239 /* bootstrap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bootstrap.cpp; path = source/calculators/bootstrap.cpp; sourceTree = SOURCE_ROOT; };
@@ -1391,8 +1383,8 @@
 		A7E9B6C012D37EC400DA6239 /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dayhoff.h; path = source/calculators/dayhoff.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6C112D37EC400DA6239 /* decalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = decalc.cpp; path = source/chimera/decalc.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B6C212D37EC400DA6239 /* decalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = decalc.h; path = source/chimera/decalc.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = deconvolutecommand.cpp; path = source/commands/deconvolutecommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B6C412D37EC400DA6239 /* deconvolutecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = deconvolutecommand.h; path = source/commands/deconvolutecommand.h; sourceTree = SOURCE_ROOT; };
+		A7E9B6C312D37EC400DA6239 /* uniqueseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uniqueseqscommand.cpp; path = source/commands/uniqueseqscommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7E9B6C412D37EC400DA6239 /* uniqueseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uniqueseqscommand.h; path = source/commands/uniqueseqscommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; lineEnding = 0; name = degapseqscommand.cpp; path = source/commands/degapseqscommand.cpp; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.cpp; };
 		A7E9B6C612D37EC400DA6239 /* degapseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = degapseqscommand.h; path = source/commands/degapseqscommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B6C712D37EC400DA6239 /* deuniqueseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = deuniqueseqscommand.cpp; path = source/commands/deuniqueseqscommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1868,7 +1860,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4875F69922DCC723006A7D8C /* Ubuntu_18_Build.txt */,
+				4875F69922DCC723006A7D8C /* Ubuntu_20_Build.txt */,
 				F490972626090AC500C1B24F /* External_Libraries_INSTALL */,
 				A7A61F1A130035C800E05B6B /* LICENSE.md */,
 				48FD9946243E5FB10017C521 /* Makefile_cluster */,
@@ -2504,8 +2496,6 @@
 				A7730EFE13967241007433A3 /* countseqscommand.cpp */,
 				A77EBD2C1523707F00ED407C /* createdatabasecommand.h */,
 				A77EBD2E1523709100ED407C /* createdatabasecommand.cpp */,
-				A7E9B6C412D37EC400DA6239 /* deconvolutecommand.h */,
-				A7E9B6C312D37EC400DA6239 /* deconvolutecommand.cpp */,
 				A7E9B6C612D37EC400DA6239 /* degapseqscommand.h */,
 				A7E9B6C512D37EC400DA6239 /* degapseqscommand.cpp */,
 				A7E9B6C812D37EC400DA6239 /* deuniqueseqscommand.h */,
@@ -2726,6 +2716,8 @@
 				A7E9B86C12D37EC400DA6239 /* unifracunweightedcommand.cpp */,
 				A7E9B86F12D37EC400DA6239 /* unifracweightedcommand.h */,
 				A7E9B86E12D37EC400DA6239 /* unifracweightedcommand.cpp */,
+				A7E9B6C412D37EC400DA6239 /* uniqueseqscommand.h */,
+				A7E9B6C312D37EC400DA6239 /* uniqueseqscommand.cpp */,
 				A7E9B87B12D37EC400DA6239 /* venncommand.h */,
 				A7E9B87A12D37EC400DA6239 /* venncommand.cpp */,
 			);
@@ -2771,10 +2763,6 @@
 				48A0B8F025472C4500726384 /* biomhdf5.hpp */,
 				48A0B8F425472C6500726384 /* biomsimple.cpp */,
 				48A0B8F525472C6500726384 /* biomsimple.hpp */,
-				A7E9B66212D37EC300DA6239 /* blastalign.cpp */,
-				A7E9B66312D37EC400DA6239 /* blastalign.hpp */,
-				A7E9B66412D37EC400DA6239 /* blastdb.cpp */,
-				A7E9B66512D37EC400DA6239 /* blastdb.hpp */,
 				48883FFB20C6D6C000CAF112 /* compare.h */,
 				F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */,
 				F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */,
@@ -3163,7 +3151,6 @@
 				4827A4DC1CB3ED2200345170 /* fastqdataset.cpp in Sources */,
 				481FB61B1AC1B7AC0076CFF3 /* trimflowscommand.cpp in Sources */,
 				481FB6781AC1B88F0076CFF3 /* readcolumn.cpp in Sources */,
-				481FB6291AC1B7EA0076CFF3 /* blastdb.cpp in Sources */,
 				481FB6831AC1B8B80076CFF3 /* trialSwap2.cpp in Sources */,
 				481FB63A1AC1B7EA0076CFF3 /* qualityscores.cpp in Sources */,
 				4803D5B3211DDA5A001C63B5 /* testsharedrabundvectors.cpp in Sources */,
@@ -3254,7 +3241,6 @@
 				481FB55E1AC1B66D0076CFF3 /* sharedjackknife.cpp in Sources */,
 				481FB64B1AC1B7F40076CFF3 /* suffixtree.cpp in Sources */,
 				481FB5F21AC1B77E0076CFF3 /* phylotypecommand.cpp in Sources */,
-				481FB6281AC1B7EA0076CFF3 /* blastalign.cpp in Sources */,
 				481FB61D1AC1B7AC0076CFF3 /* unifracunweightedcommand.cpp in Sources */,
 				481FB6141AC1B7AC0076CFF3 /* subsamplecommand.cpp in Sources */,
 				481FB5481AC1B61F0076CFF3 /* hellinger.cpp in Sources */,
@@ -3270,7 +3256,7 @@
 				481FB6431AC1B7EA0076CFF3 /* sharedordervector.cpp in Sources */,
 				4803D5AD211CA67F001C63B5 /* testsharedrabundvector.cpp in Sources */,
 				481FB5301AC1B5C80076CFF3 /* calcsparcc.cpp in Sources */,
-				481FB5B01AC1B7300076CFF3 /* deconvolutecommand.cpp in Sources */,
+				481FB5B01AC1B7300076CFF3 /* uniqueseqscommand.cpp in Sources */,
 				481FB6001AC1B7970076CFF3 /* renameseqscommand.cpp in Sources */,
 				481FB5921AC1B71B0076CFF3 /* anosimcommand.cpp in Sources */,
 				481FB6201AC1B7B30076CFF3 /* commandoptionparser.cpp in Sources */,
@@ -3544,8 +3530,6 @@
 				A7E9B88912D37EC400DA6239 /* bergerparker.cpp in Sources */,
 				F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */,
 				A7E9B88A12D37EC400DA6239 /* binsequencecommand.cpp in Sources */,
-				A7E9B88B12D37EC400DA6239 /* blastalign.cpp in Sources */,
-				A7E9B88C12D37EC400DA6239 /* blastdb.cpp in Sources */,
 				A7E9B88D12D37EC400DA6239 /* boneh.cpp in Sources */,
 				A7E9B88E12D37EC400DA6239 /* bootstrap.cpp in Sources */,
 				A7E9B89012D37EC400DA6239 /* bstick.cpp in Sources */,
@@ -3598,7 +3582,7 @@
 				A7E9B8B512D37EC400DA6239 /* corraxescommand.cpp in Sources */,
 				A7E9B8B612D37EC400DA6239 /* coverage.cpp in Sources */,
 				A7E9B8B812D37EC400DA6239 /* decalc.cpp in Sources */,
-				A7E9B8B912D37EC400DA6239 /* deconvolutecommand.cpp in Sources */,
+				A7E9B8B912D37EC400DA6239 /* uniqueseqscommand.cpp in Sources */,
 				A7E9B8BA12D37EC400DA6239 /* degapseqscommand.cpp in Sources */,
 				F4A866BF265BE7EC0010479A /* aminoacid.cpp in Sources */,
 				4815BEB12289E13500677EE2 /* lnrarefaction.cpp in Sources */,
@@ -3978,9 +3962,9 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
-					"VERSION=\"\\\"1.46.1\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release/;/Users/swestcott/Desktop/mothurbugs/\\\"\"",
+					"VERSION=\"\\\"1.46.0\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/;/Users/swestcott/Desktop/release/\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -4102,7 +4086,7 @@
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
-					"VERSION=\"\\\"1.44.3\\\"\"",
+					"VERSION=\"\\\"1.47.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
 				);
@@ -4192,7 +4176,7 @@
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"VERSION=\"\\\"1.44.3\\\"\"",
+					"VERSION=\"\\\"1.47.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",

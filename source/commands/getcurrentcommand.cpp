@@ -177,23 +177,31 @@ int GetCurrentCommand::execute(){
             variables["[filename]"] = util.getFullPathName(outputdir);
             string filename = getOutputFileName("summary", variables);
             
-			m->mothurOutEndLine(); m->mothurOut("Current files saved by mothur:\n"); 
+			m->mothurOut("\nCurrent files saved by mothur:\n");
 			current->printCurrentFiles(filename);
             outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
 		}
         
-        string inputDir = current->getInputDir();
-        if (inputDir != "") {
-            m->mothurOutEndLine(); m->mothurOut("Current input directory saved by mothur: " + inputDir); m->mothurOutEndLine();
+        vector<string> inputDirs = current->getInputDir();
+        if (inputDirs.size() != 0) {
+            m->mothurOut("\nCurrent input directories saved by mothur:\n");
+           for (int i = 0; i < inputDirs.size(); i++) {
+               m->mothurOut("\t" + inputDirs[i] + "\n");
+           }
+           m->mothurOutEndLine();
         }
         
         string outputdir = current->getOutputDir();
         if (outputdir != "") {
-            m->mothurOutEndLine(); m->mothurOut("Current output directory saved by mothur: " + outputdir); m->mothurOutEndLine();
+            m->mothurOut("\nCurrent output directory saved by mothur: " + outputdir); m->mothurOutEndLine();
         }
-        string defaultPath = current->getDefaultPath();
-        if (defaultPath != "") {
-            m->mothurOutEndLine(); m->mothurOut("Current default directory saved by mothur: " + defaultPath); m->mothurOutEndLine();
+        vector<string> defaultPath = current->getDefaultPath();
+        if (defaultPath.size() != 0) {
+             m->mothurOut("\nCurrent default directories saved by mothur:\n");
+            for (int i = 0; i < defaultPath.size(); i++) {
+                m->mothurOut("\t" + defaultPath[i] + "\n");
+            }
+            m->mothurOutEndLine();
         }
         
         

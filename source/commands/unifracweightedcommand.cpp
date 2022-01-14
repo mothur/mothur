@@ -198,12 +198,6 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) : Command() {
             if (subsample && (!phylip)) { phylip=true; outputForm = "lt"; }
             if (consensus && (!subsample)) { m->mothurOut("[ERROR]: you cannot use consensus without subsample.\n"); abort=true; }
             
-			if (countfile=="") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(treefile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                } 
-            }
 		}
 	}
 	catch(exception& e) {

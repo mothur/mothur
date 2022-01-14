@@ -27,7 +27,7 @@ class ValidParameters {
 		bool isValidParameter(string, vector<string>, string);
 		vector <string> addParameters(string[], int);
 		void initParameterRanges();
-		vector<string> validFiles(map<string, string>&, string); 
+		vector<string> validFiles(map<string, string>&, string);
         string validFile(map<string, string>&, string);
         string valid(map<string, string>&, string);
         string validPath(map<string, string>&, string);
@@ -37,7 +37,7 @@ class ValidParameters {
 		map<string, vector<string> > parameterRanges;
 		MothurOut* m;
         CurrentFile* current;
-        vector<string> locations;
+        vector< vector<string> > locations;
 
 };
 

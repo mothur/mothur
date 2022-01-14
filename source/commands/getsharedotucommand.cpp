@@ -411,7 +411,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			outputString += groupString + ".";
 			m->mothurOut(outputString); m->mothurOutEndLine();
 		}else { 
-			m->mothurOut("\t" + toString(num)); m->mothurOutEndLine(); 
+            m->mothurOut(shared->getLabel() + "\t" + toString(num)+"\n");
 			outputNames.push_back(outputFileNames);
 			if (output != "accnos") { outputTypes["sharedseqs"].push_back(outputFileNames); }
 			else { outputTypes["accnos"].push_back(outputFileNames); }
@@ -463,7 +463,8 @@ int GetSharedOTUCommand::runShared() {
         string lastLabel = "";
         
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
-        //Groups = lookup->getNamesGroups();
+        
+        if (Groups.size() == 0) { Groups = lookup->getNamesGroups(); }
         
         if (userGroups == "") {
             //make string for outputfile name
@@ -509,8 +510,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 		if (output != "accnos") { outputFileNames = getOutputFileName("sharedseqs", variables); }
 		else { outputFileNames = getOutputFileName("accnos", variables); }
         
-        ofstream outNames;
-		util.openOutputFile(outputFileNames, outNames);
+        ofstream outNames; util.openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
 		int num = 0;
@@ -577,7 +577,7 @@ int GetSharedOTUCommand::process(SharedRAbundVectors*& lookup) {
 			outputString += groupString + ".";
 			m->mothurOut(outputString); m->mothurOutEndLine();
 		}else {
-			m->mothurOut("\t" + toString(num)); m->mothurOutEndLine();
+			m->mothurOut(lookup->getLabel() + "\t" + toString(num)+"\n");
 			outputNames.push_back(outputFileNames);
 			if (output != "accnos") { outputTypes["sharedseqs"].push_back(outputFileNames); }
 			else { outputTypes["accnos"].push_back(outputFileNames); }

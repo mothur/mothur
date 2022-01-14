@@ -169,11 +169,6 @@ SeqErrorCommand::SeqErrorCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "aligned");			if (temp == "not found"){	temp = "t";				}
 			aligned = util.isTrue(temp); 
 
-			if ((namesFileName == "") && (queryFileName != "")){
-				vector<string> files; files.push_back(queryFileName); 
-				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-			}
-
             if(aligned ){
                 if((reportFileName != "" && qualFileName == "") || (reportFileName == "" && qualFileName != "")){
                     m->mothurOut("if you use either a qual file or a report file, you have to have both.");
@@ -266,8 +261,49 @@ int SeqErrorCommand::execute(){
 			megAlignmentFile << megaAlignVector[i] << endl;
 		}
         megAlignmentFile.close();
+        
+        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        
+        
+        bool extraOutput = false;
+        if (extraOutput) {
+            //read error.chimera
+            ifstream in; util.openInputFile(errorChimeraFileName, in);
+            int chimeraCount = 0;
+            while (!in.eof()) {
+                if (m->getControl_pressed()) { break; }
+                
+                string line = util.getline(in); util.gobble(in);
+                vector<string> pieces = util.splitWhiteSpace(line);
+                
+                if (pieces.size() != 0) {
+                    if (pieces[pieces.size()-1] == "2") {
+                        chimeraCount++;
+                    }
+                }
+            }
+            in.close();
+            m->mothurOut("\nTrue chimeras found: " + toString(chimeraCount) + "\n");
+            m->mothurOut("\nReference names for chimeras:\n\n");
+            
+            //read error.summary to extract names of parents
+            ifstream in2; util.openInputFile(errorSummaryFileName, in2);
+            while (!in2.eof()) {
+                if (m->getControl_pressed()) { break; }
+                
+                string line = util.getline(in2); util.gobble(in2);
+                vector<string> pieces = util.splitWhiteSpace(line);
+                
+                if (pieces.size() != 0) {
+                    if (pieces[pieces.size()-1] == "2") {
+                        cout << pieces[1] << endl;
+                    }
+                }
+            }
+            in2.close();
+            
+        }
       
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
 		 
 		m->mothurOut("\nOutput File Names: \n");
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]+"\n");  }

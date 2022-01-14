@@ -201,14 +201,6 @@ PcrSeqsCommand::PcrSeqsCommand(string option) : Command()  {
             if ((oligosfile != "") && (ecolifile != "")) {
                  m->mothurOut("[ERROR]: You can not use an ecoli file at the same time as an oligos file.\n"); abort = true;
             }
-            
-			//check to make sure you didn't forget the name file by mistake			
-			if (countfile == "") { 
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
         
 	}
@@ -224,8 +216,7 @@ int PcrSeqsCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
-        fileAligned = true; pairedOligos = false;
+        long start = time(NULL); fileAligned = true; pairedOligos = false;
         
         string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -325,6 +316,7 @@ int PcrSeqsCommand::execute(){
         }
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
+            
         m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
         
 		m->mothurOut("\nOutput File Names: \n");
@@ -580,7 +572,7 @@ bool trimStartEnd(Sequence& seq, pcrData* params) {
                 if (params->start != -1) {
                     if (params->keepdots)   {  seq.filterToPos(params->start-1);  }
                     else {
-                        string seqString = seq.getAligned().substr(params->start);
+                        string seqString = seq.getAligned().substr(params->start-1);
                         seq.setAligned(seqString);
                     }
                 }

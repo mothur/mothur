@@ -18,8 +18,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
         //run splitGroups command to parse files
         string inputString = "";
         if (groupsSelected.size() == 0) {
-            CountTable ct;
-            ct.testGroups(countfile, groupsSelected); //fills groupsSelected with groups in count table
+            CountTable ct; ct.testGroups(countfile, groupsSelected); //fills groupsSelected with groups in count table
         }
         
         inputString += "groups=" + util.getStringFromVector(groupsSelected, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.

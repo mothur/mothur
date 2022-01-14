@@ -255,8 +255,6 @@ int RefChimeraTest::analyzeUnalignedQuery(string queryName, string querySeq, str
 /**************************************************************************************************/
 
 double RefChimeraTest::alignQueryToReferences(string query, string reference, string& qAlign, string& rAlign, double& length){
-    
-    
     try {
 		double GAP = -5;
 		double MATCH = 1;
@@ -423,7 +421,6 @@ double RefChimeraTest::alignQueryToReferences(string query, string reference, st
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 
 int RefChimeraTest::getUnalignedDiffs(string qAlign, string rAlign, vector<int>& leftDiffs, vector<int>& leftMap, vector<int>& rightDiffs, vector<int>& rightMap){

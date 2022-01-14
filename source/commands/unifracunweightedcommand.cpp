@@ -200,12 +200,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) : Command()  {
 
 			if (!random) {  iters = 0;  } //turn off random calcs
 			
-			if (countfile=="") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(treefile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                } 
-            }
+			
 		}
 		
 	}

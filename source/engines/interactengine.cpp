@@ -16,7 +16,6 @@ InteractEngine::InteractEngine(string tpath, map<string, string> ev) : Engine(tp
     if (m->getLogFileName() == "") {
         time_t ltime = time(NULL); /* calendar time */
         string outputPath = current->getOutputDir();
-        //if (outputPath == "") { outputPath = current->getDefaultPath();  }
         string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
         m->setLogFileName(logFileName, false);
         m->mothurOut("\n");
@@ -55,11 +54,7 @@ bool InteractEngine::getInput(){
             
             if (commandName != "") {
                 numCommandsRun++;
-                m->setExecuting(true);
-                m->resetCommandErrors();
-                
-                //executes valid command
-                m->setChangedSeqNames(true);
+                m->setExecuting(true); m->resetCommandErrors(); m->setChangedSeqNames(true); m->setChangedGroupNames(true);
                 
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
@@ -146,8 +141,10 @@ string InteractEngine::getCommand()  {
         }else { //assume command, look for environmental variables to replace
             
             int evPos = returnCommand.find_first_of('$');
-            if (evPos == string::npos) { }//no '$' , nothing to do
-            else { replaceVariables(returnCommand); }
+            if (evPos == string::npos) { //no '$' , check for mothurhome
+                evPos = returnCommand.find("mothurhome");
+                if (evPos != string::npos) { replaceVariables(returnCommand); }
+            }else { replaceVariables(returnCommand); }
         }
              
         if (m->getDebug()) {

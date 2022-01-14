@@ -97,9 +97,7 @@ bool BatchEngine::getInput(){
                                         
             if (commandName != "") {
                 numCommandsRun++;
-                m->setExecuting(true);
-                m->resetCommandErrors();
-                m->setChangedSeqNames(true);
+                m->setExecuting(true); m->resetCommandErrors(); m->setChangedSeqNames(true); m->setChangedGroupNames(true);
                             
                 Command* command = cFactory->getCommand(commandName, options);
                 quitCommandCalled = command->execute();
@@ -171,8 +169,10 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
         }else { //assume command, look for environmental variables to replace
             
             int evPos = nextcommand.find_first_of('$');
-            if (evPos == string::npos) { }//no '$' , nothing to do
-            else { replaceVariables(nextcommand); }
+            if (evPos == string::npos) { //no '$' , check for mothurhome
+                evPos = nextcommand.find("mothurhome");
+                if (evPos != string::npos) { replaceVariables(nextcommand); }
+            }else { replaceVariables(nextcommand); }
         }
        
         if (m->getDebug()) {

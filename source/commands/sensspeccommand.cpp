@@ -220,7 +220,24 @@ int SensSpecCommand::process(ListVector*& list, bool& getCutoff, string& origCut
         string nameOrCount = "";
         string thisNamefile = "";
         if (countfile != "") { nameOrCount = "count"; thisNamefile = countfile; CountTable ct; ct.readTable(countfile, false, false); }
-        else if (namefile != "") { nameOrCount = "name"; thisNamefile = namefile; }
+        else if (namefile != "") {
+            nameOrCount = "name"; thisNamefile = namefile;
+            //remove redundant names from list
+            map<string, int> thisNames = util.readNames(namefile);
+            for (int i = 0; i < list->getNumBins(); i++) {
+                string bin = list->get(i);
+                vector<string> binNames; util.splitAtChar(bin, binNames, ',');
+                string newBin = "";
+                for (int j = 0; j < binNames.size(); j++) {
+                    map<string, int>::iterator it = thisNames.find(binNames[j]);
+                    if (it != thisNames.end()) {
+                        newBin += "," + binNames[j];
+                    }
+                }
+                newBin = newBin.substr(1);
+                list->set(i, newBin);
+            }
+        }
         
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }

@@ -142,12 +142,6 @@ ClassifyTreeCommand::ClassifyTreeCommand(string option) : Command()  {
             if ((output == "node") || (output == "taxon")) {
             }else { m->mothurOut("[ERROR]: " + output + "is not a valid output option.  Valid output options are node or taxon.\n");  abort = true; }
             
-            if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(treefile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-			}
 		}
 	}
 	catch(exception& e) {

@@ -18,6 +18,7 @@ vector<string> ListSeqsCommand::setParameters(){
 	try {
         CommandParameter pfastq("fastq", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pfastq);
 		CommandParameter pfasta("fasta", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pfasta);
+        CommandParameter pqfile("qfile", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pqfile);
 		CommandParameter pname("name", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pname);
         CommandParameter pcount("count", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "FNGLT", "FNGLT", "none","accnos",false,false,true); parameters.push_back(pgroup);
@@ -47,7 +48,7 @@ vector<string> ListSeqsCommand::setParameters(){
 string ListSeqsCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq, alignreport or contigsreport file and outputs a .accnos file containing sequence names.\n";
+		helpString += "The list.seqs command reads a fasta, name, group, count, list, taxonomy, fastq, qfile, alignreport or contigsreport file and outputs a .accnos file containing sequence names.\n";
 		helpString += "The list.seqs command parameters are fasta, name, group, count, list, taxonomy, fastq, contigsreport and alignreport.  You must provide one of these parameters.\n";
 		helpString += "The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n";
 		helpString += "Example list.seqs(fasta=amazon.fasta).\n";
@@ -86,9 +87,6 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			
-			//check for required parameters
 			fastafiles = validParameter.validFiles(parameters, "fasta");
             if (fastafiles.size() != 0) {
                 if (fastafiles[0] == "not open") { abort = true; }
@@ -141,7 +139,13 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
                 if (fastqfiles[0] == "not open") { abort = true; }
             }
 			
-			if ((fastqfiles.size() == 0) && (countfiles.size() == 0) && (fastafiles.size() == 0) && (namefiles.size() == 0) && (listfiles.size() == 0) && (groupfiles.size() == 0) && (alignfiles.size() == 0) && (taxfiles.size() == 0) && (contigsreportfiles.size() == 0))  { m->mothurOut("You must provide a file.\n"); abort = true; }
+            qualityfiles = validParameter.validFiles(parameters, "qfile");
+            if (qualityfiles.size() != 0) {
+                if (qualityfiles[0] == "not open") { abort = true; }
+                else { current->setQualFile(qualityfiles[0]); }
+            }
+            
+			if ((qualityfiles.size() == 0) && (fastqfiles.size() == 0) && (countfiles.size() == 0) && (fastafiles.size() == 0) && (namefiles.size() == 0) && (listfiles.size() == 0) && (groupfiles.size() == 0) && (alignfiles.size() == 0) && (taxfiles.size() == 0) && (contigsreportfiles.size() == 0))  { m->mothurOut("You must provide a file.\n"); abort = true; }
 		}
 	}
 	catch(exception& e) {
@@ -156,6 +160,33 @@ void addName(bool empty, string name, set<string>& names, set<string>& newNames)
         if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
     }
 }
+#ifdef USE_BOOST
+//**********************************************************************************************************************
+void readFastq(set<string>& names, boost::iostreams::filtering_istream& inBoost, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        Utils util;
+        
+        while(!inBoost.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            bool ignore;
+            FastqRead fread(inBoost, ignore, "illumina1.8+");  util.gobble(inBoost);
+            
+            if (!ignore) { addName(empty, fread.getName(), names, newNames); }
+        }
+        
+        names = newNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+#endif
 //**********************************************************************************************************************
 void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
     try {
@@ -178,6 +209,30 @@ void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
     }
     catch(exception& e) {
         m->errorOut(e, "ListSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void readQual(set<string>& names, ifstream& in, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        Utils util;
+        
+        while(!in.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            QualityScores currSeq(in); util.gobble(in);
+            
+            if (currSeq.getName() != "") { addName(empty, currSeq.getName(), names, newNames); }
+        }
+        
+        names = newNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readQual");
         exit(1);
     }
 }
@@ -317,15 +372,16 @@ int ListSeqsCommand::execute(){
         set<string> names;
         
 		//read functions fill names vector
-		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	        }
-        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names, &readFastq);	        }
-		if (namefiles.size() != 0)	        {	process(namefiles, names, &readNameTaxGroup);   }
-		if (groupfiles.size() != 0)	        {	process(groupfiles, names, &readNameTaxGroup);  }
-        if (taxfiles.size() != 0)           {   process(taxfiles, names, &readNameTaxGroup);    }
-		if (alignfiles.size() != 0)	        {   process(alignfiles, names, &readAlignContigs);         }
-        if (contigsreportfiles.size() != 0) {   process(contigsreportfiles, names, &readAlignContigs); }
-		if (listfiles.size() != 0)	        {	process(listfiles, names, &readList);       }
-        if (countfiles.size() != 0)	        {	process(countfiles, names, &readCount);     }
+		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	                }
+        if (qualityfiles.size() != 0)       {   process(qualityfiles, names, &readQual);                }
+        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names);	                            }
+		if (namefiles.size() != 0)	        {	process(namefiles, names, &readNameTaxGroup);           }
+		if (groupfiles.size() != 0)	        {	process(groupfiles, names, &readNameTaxGroup);          }
+        if (taxfiles.size() != 0)           {   process(taxfiles, names, &readNameTaxGroup);            }
+		if (alignfiles.size() != 0)	        {   process(alignfiles, names, &readAlignContigs);          }
+        if (contigsreportfiles.size() != 0) {   process(contigsreportfiles, names, &readAlignContigs);  }
+		if (listfiles.size() != 0)	        {	process(listfiles, names, &readList);                   }
+        if (countfiles.size() != 0)	        {	process(countfiles, names, &readCount);                 }
         
 		if (m->getControl_pressed()) { outputTypes.clear();  return 0; }
 		
@@ -357,6 +413,37 @@ int ListSeqsCommand::execute(){
 		m->errorOut(e, "ListSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void ListSeqsCommand::process(vector<string> files, set<string>& names){
+    try {
+        Utils util;
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            inputFileName = files[i];
+            
+            bool gz = util.isGZ(inputFileName)[1];
+            
+            if (!gz) {
+                ifstream in; util.openInputFile(inputFileName, in);
+                readFastq(names, in, m);
+                in.close();
+            }else {
+                #ifdef USE_BOOST
+                    ifstream in; boost::iostreams::filtering_istream inBoost;
+                    util.openInputFileBinary(inputFileName, in, inBoost);
+                    readFastq(names, inBoost, m);
+                    in.close(); inBoost.pop(); inBoost.reset();
+                #endif
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "process");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, ifstream&, MothurOut*&)){

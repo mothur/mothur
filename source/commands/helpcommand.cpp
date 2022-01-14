@@ -21,7 +21,7 @@
 #include "quitcommand.h"
 #include "helpcommand.h"
 #include "commandfactory.hpp"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "parsimonycommand.h"
 #include "unifracunweightedcommand.h"
 #include "unifracweightedcommand.h"
@@ -172,7 +172,7 @@ string HelpCommand::getCommonQuestions(){
     try {
         vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
     
-        string question = "How do I site mothur?"; questions.push_back(question);
+        string question = "How do I cite mothur?"; questions.push_back(question);
         string qanswer = "\tSchloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n"; qanswers.push_back(qanswer);
         
         question = "Do you have an example analysis?"; questions.push_back(question);
@@ -247,7 +247,7 @@ int HelpCommand::execute(){
                 string optionString = "help";
                 
                 if(commandName == "cluster")                    {	command = new ClusterCommand(optionString);					}
-                else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
+                else if(commandName == "unique.seqs")			{	command = new UniqueSeqsCommand(optionString);				}
                 else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
                 else if(commandName == "help")					{	command = new HelpCommand(optionString);					}
                 else if(commandName == "quit")					{	command = new QuitCommand(optionString);					}

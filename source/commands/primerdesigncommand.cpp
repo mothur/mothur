@@ -159,12 +159,6 @@ PrimerDesignCommand::PrimerDesignCommand(string option) : Command()  {
             label = validParameter.valid(parameters, "label");			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile.\n");  label=""; }
         
-            if (countfile == "") { 
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 	}
 	catch(exception& e) {

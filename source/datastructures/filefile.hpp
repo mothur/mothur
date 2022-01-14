@@ -76,7 +76,7 @@ protected:
     MothurOut* m;
     CurrentFile* current;
     Utils util;
-    string filename, mode, inputDir, mpath;
+    string filename, mode, mpath;
     bool gz, hasIndex, columnWithGroups;
     int fileOption; //1 -> 2 column(3 forms of 2 column), 2 -> 3 column, 3 -> 4 column
     vector< vector<string> > files;

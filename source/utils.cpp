@@ -33,7 +33,7 @@ string getLabelTag(string label){
 Utils::Utils(){
     try {
 
-        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames();
+        m = MothurOut::getInstance();  modifyNames = m->getChangedSeqNames(); modifyGroups = m->getChangedGroupNames();
         long long s = m->getRandomSeed();
         mersenne_twister_engine.seed(s); srand(s);
         homePath = m->getHomePath(); currentWorkingDirectory = "";
@@ -584,14 +584,15 @@ string Utils::findProgramPath(string programName){
     }
 }
 /***********************************************************************/
-bool Utils::checkLocations(string& filename, vector<string> locations){
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::checkLocations(string& filename, vector< vector<string> > locations){
     try {
         filename = getFullPathName(filename);
-        string inputDir = locations[0];
-        string outputDir = locations[1];
-        string defaultPath = locations[2];
-        string mothurPath = locations[3];
-        string mothurToolsPath = locations[4];
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
         ifstream in;
@@ -600,16 +601,23 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
 
         //if you can't open it, try input location
         if (!ableToOpen) {
-            if (inputDir != "") { //default path is set
-                string tryPath = inputDir + getSimpleName(filename);
-                m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath + ".\n");
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it, try output location
         if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
             if (outputDir != "") { //default path is set
                 string tryPath = outputDir + getSimpleName(filename);
                 m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath+ ".\n");
@@ -618,31 +626,45 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
             }
         }
 
-
-        //if you can't open it, try default location
+        //if you can't open it, try default locations
         if (!ableToOpen) {
-            if (defaultPath != "") { //default path is set
-                string tryPath = defaultPath + getSimpleName(filename);
-                m->mothurOut("Unable to open " + filename + ". Trying default " + tryPath+ ".\n");
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_FILES directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
             string tryPath = mothurPath + getSimpleName(filename);
-            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable location " + tryPath+ ".\n");
+            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable directory " + tryPath+ ".\n");
             ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
             filename = tryPath;
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
-            string tryPath = mothurToolsPath + getSimpleName(filename);
-            m->mothurOut("Unable to open " + filename + ". Trying mothur's tools location " + tryPath+ ".\n");
-            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-            filename = tryPath;
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_TOOLS directory " + tryPath+ ".\n");
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
         }
 
         if (!ableToOpen) { m->mothurOut("Unable to open " + filename + ".\n");  return false;  }
@@ -655,65 +677,117 @@ bool Utils::checkLocations(string& filename, vector<string> locations){
     }
 }
 /***********************************************************************/
-bool Utils::checkLocations(string& filename, vector<string> locations, string silent){
+//function assumes files are all gz
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > locations){
     try {
         filename = getFullPathName(filename);
-        string inputDir = locations[0];
-        string outputDir = locations[1];
-        string defaultPath = locations[2];
-        string mothurPath = locations[3];
-        string mothurToolsPath = locations[4];
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
+        
+        ifstream in; bool ableToOpen;
 
-        bool ableToOpen;
-        ifstream in;
-        ableToOpen = openInputFile(filename, in, "noerror");
-        in.close();
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inBoost;
+        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror"); in.close(); inBoost.pop(); inBoost.reset();
+#else
+        m->mothurOut("[ERROR]: cannot read gz format without enabling boost libraries.\n"); m->setControl_pressed(true); return false;
+#endif
+        
 
         //if you can't open it, try input location
         if (!ableToOpen) {
-            if (inputDir != "") { //default path is set
-                string tryPath = inputDir + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath+ ".\n");
+                    
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it, try output location
         if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
             if (outputDir != "") { //default path is set
                 string tryPath = outputDir + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath+ ".\n");
+                ifstream in2;
+                #ifdef USE_BOOST
+                    boost::iostreams::filtering_istream inBoost2;
+                    ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                #endif
                 filename = tryPath;
             }
         }
 
-
-        //if you can't open it, try default location
+        //if you can't open it, try default locations
         if (!ableToOpen) {
-            if (defaultPath != "") { //default path is set
-                string tryPath = defaultPath + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_FILES directory " + tryPath+ ".\n");
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
             string tryPath = mothurPath + getSimpleName(filename);
-            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable directory " + tryPath+ ".\n");
+            ifstream in2;
+            #ifdef USE_BOOST
+                boost::iostreams::filtering_istream inBoost2;
+                ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+            #endif
             filename = tryPath;
         }
 
         //if you can't open it its not in current working directory or inputDir, try mothur excutable location
         if (!ableToOpen) {
-            if (mothurToolsPath != "") { //default path is set
-                string tryPath = mothurToolsPath + getSimpleName(filename);
-                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
-                filename = tryPath;
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_TOOLS directory " + tryPath+ ".\n");
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
             }
         }
 
-        if (!ableToOpen) { return false;  }
+        if (!ableToOpen) { m->mothurOut("Unable to open " + filename + ".\n");  return false;  }
 
         return true;
     }
@@ -723,33 +797,134 @@ bool Utils::checkLocations(string& filename, vector<string> locations, string si
     }
 }
 /***********************************************************************/
-bool Utils::findBlastLocation(string& toolLocation, string mothurProgramPath, vector<string> locations){
+bool Utils::checkLocations(string& filename, vector< vector<string> > locations, string silent){
     try {
-        bool foundTool = false;
-        string programName = "formatdb"; programName += EXECUTABLE_EXT;
+        filename = getFullPathName(filename);
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
 
-        toolLocation = "";
-        string blastBin = "blast"; blastBin += PATH_SEPARATOR; blastBin += "bin"; blastBin += PATH_SEPARATOR;
-       
-        for (int i = 0; i < locations.size(); i++) { locations[i] += blastBin; }
+        bool ableToOpen;
+        ifstream in;
+        ableToOpen = openInputFile(filename, in, "noerror");
+        in.close();
         
-        vector<string> versionOutputs;
-        foundTool = findTool(programName, toolLocation, mothurProgramPath, versionOutputs, locations);
+        //if you can't open it, try input location
+        if (!ableToOpen) {
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        //if you can't open it, try output location
+        if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
+            if (outputDir != "") { //default path is set
+                string tryPath = outputDir + getSimpleName(filename);
+                ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                filename = tryPath;
+            }
+        }
+
+        //if you can't open it, try default locations
+        if (!ableToOpen) {
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
+            string tryPath = mothurPath + getSimpleName(filename);
+            ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+            filename = tryPath;
+        }
+
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        if (!ableToOpen) {  return false;  }
         
-        if (foundTool) { toolLocation = hasPath(toolLocation); }
-        else { toolLocation = ""; }
-        
-        return foundTool;
+        return true;
     }
     catch(exception& e) {
-        m->errorOut(e, "Utils", "findBlastLocation");
+        m->errorOut(e, "Utils", "checkLocations");
         exit(1);
     }
 }
 /***********************************************************************/
-bool Utils::findTool(string& toolName, string& toolLocation, string mothurProgramPath, vector<string>& versionOutputs, vector<string> locations){
+bool Utils::checkSpecificLocations(string& filename, vector<string> locations, string silent){
+    try {
+        string savedName = filename;
+        filename = getFullPathName(filename);
+        
+        bool ableToOpen = false;
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror"); in.close();
+        
+        //if you can't open it, try locations
+        if (!ableToOpen) {
+            for (int i = 0; i < locations.size(); i++) {
+                string dir = locations[i];
+                
+                if (dir != "") { //default path is set
+                    string tryPath = dir + getSimpleName(filename);
+                    ifstream in2; ableToOpen = openInputFile(tryPath, in2, "noerror"); in2.close();
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        if (!ableToOpen) { filename = savedName; return false;  }
+        
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkSpecificLocations");
+        exit(1);
+    }
+}
+/***********************************************************************/
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::findTool(string& toolName, string& toolLocation, vector<string>& versionOutputs, vector< vector<string> > locations){
     try {
         bool foundTool = false;
+        string mothurProgramPath = "";
+        if (locations.size() >= 3) {
+            if (locations[2].size() != 0) { mothurProgramPath = locations[2][0]; }
+        }
         string toolCommand = mothurProgramPath + toolName; //windows def
         
         //test to make sure tool exists
@@ -938,6 +1113,27 @@ bool Utils::openInputFileBinary(string fileName, ifstream& file, boost::iostream
         exit(1);
     }
 }
+/***********************************************************************/
+bool Utils::openOutputFileBinary(string fileName, ofstream& file, ostream*& out, boost::iostreams::filtering_streambuf<boost::iostreams::output>& outBoost){
+    try {
+        string completeFileName = getFullPathName(fileName);
+        
+        file.open(completeFileName, ios_base::out | ios_base::binary | ios_base::trunc);
+        
+        if(!file) { return false; }
+        else { //check for blank file
+            outBoost.push(boost::iostreams::gzip_compressor(boost::iostreams::gzip_params(9)));
+            outBoost.push(file);
+            
+            out = new ostream(&outBoost);
+            return true;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "openOutputFileGZBinary");
+        exit(1);
+    }
+}
 #endif
 /***********************************************************************/
 //results[0] = allGZ, results[1] = allNotGZ
@@ -952,8 +1148,8 @@ vector<bool> Utils::allGZFiles(vector<string> & files){
 
             //ignore none and blank filenames
             if ((files[i] != "") || (files[i] != "NONE")) {
-                if (isGZ(files[i])[1]) { allNOTGZ = false;  }
-                else {  allGZ = false;  }
+                if ((isGZ(files[i]))[1]) { allNOTGZ = false;  cout << "notGz " << files[i] << endl; }
+                else {  allGZ = false; cout << "yesGz " << files[i] << endl;  }
             }
         }
 
@@ -997,29 +1193,28 @@ bool Utils::isHDF5(string filename){
 vector<bool> Utils::isGZ(string filename){
     try {
         vector<bool> results; results.resize(2, false);
-#ifdef USE_BOOST
-        ifstream fileHandle;
-        boost::iostreams::filtering_istream gzin;
-
+        
         if ((getExtension(filename) != ".gz") && (getExtension(filename) != ".GZ")) { return results; } // results[0] = false; results[1] = false;
-
-        bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
+        
+#ifdef USE_BOOST
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        bool ableToOpen = openInputFileBinary(filename, in, inBoost, ""); //no error
         if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
         try
         {
-            gzin >> c;
+            inBoost >> c;
             results[1] = true;
         }
         catch ( boost::iostreams::gzip_error & e )
         {
-            gzin.pop();
-            fileHandle.close();
+            inBoost.pop(); inBoost.reset();
+            in.close();
             return results;  // results[0] = true; results[1] = false;
         }
-        fileHandle.close();
+        in.close(); inBoost.pop(); inBoost.reset();
 #else
         m->mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); m->setControl_pressed(true);
 #endif
@@ -2172,32 +2367,42 @@ string Utils::getExtension(string longName){
     }
 }
 /***********************************************************************/
-bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothurVersion, string& releaseDate, string& OS){
+bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& toolPaths, string& mothurVersion, string& releaseDate, string& OS){
     try {
         
         string lastChar = "";
+        defaultPaths.clear(); toolPaths.clear();
         #ifdef MOTHUR_FILES
-            defaultPath = MOTHUR_FILES;
-            defaultPath = removeQuotes(defaultPath);
-            //add / to name if needed
-            lastChar = defaultPath.substr(defaultPath.length()-1);
-            if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+            string defaultPath = MOTHUR_FILES;
         
-            defaultPath = getFullPathName(defaultPath);
-        #else
-            defaultPath = "";
+            vector<string> temp; splitAtChar(defaultPath, temp, ';');
+            
+            for (int i = 0; i < temp.size(); i++) {
+                defaultPath = removeQuotes(temp[i]);
+                //add / to name if needed
+                lastChar = defaultPath.substr(defaultPath.length()-1);
+                if (lastChar != PATH_SEPARATOR) { defaultPath += PATH_SEPARATOR; }
+        
+                defaultPath = getFullPathName(defaultPath);
+                defaultPaths.push_back(defaultPath);
+            }
+        
         #endif
         
         #ifdef MOTHUR_TOOLS
-            tools = MOTHUR_TOOLS;
-            tools = removeQuotes(tools);
-            //add / to name if needed
-            lastChar = tools.substr(tools.length()-1);
-            if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
+            string tools = MOTHUR_TOOLS;
         
-            tools = getFullPathName(tools);
-        #else
-            tools = "";
+            vector<string> tempt; splitAtChar(tools, tempt, ';');
+        
+            for (int i = 0; i < tempt.size(); i++) {
+                tools = removeQuotes(tempt[i]);
+                //add / to name if needed
+                lastChar = tools.substr(tools.length()-1);
+                if (lastChar != PATH_SEPARATOR) { tools += PATH_SEPARATOR; }
+    
+                tools = getFullPathName(tools);
+                toolPaths.push_back(tools);
+            }
         #endif
         
         #ifdef LOGFILE_NAME
@@ -2257,11 +2462,24 @@ bool Utils::mothurInitialPrep(string& defaultPath, string& tools, string& mothur
         }
         
         #ifdef MOTHUR_FILES
-            m->mothurOut("\nUsing default search path for mothur input files: " + defaultPath + "\n\n");
+        
+        if (defaultPaths.size() != 0) {
+            m->appendLogBuffer("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
+            for (int i = 0; i < defaultPaths.size(); i++) {
+                m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
+            }
+            m->appendLogBuffer("\n");
+        }
         #endif
         
         #ifdef MOTHUR_TOOLS
-            m->mothurOut("\nUsing mothur tools location: " + tools + "\n\n");
+            if (toolPaths.size() != 0) {
+                m->appendLogBuffer("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
+                for (int i = 0; i < toolPaths.size(); i++) {
+                    m->appendLogBuffer("\t" + toolPaths[i] + "\n");
+                }
+                m->appendLogBuffer("\n");
+            }
         #endif
         
         //header
@@ -2399,11 +2617,8 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
 vector<double> Utils::setFilePosFasta(string filename, long long& num) {
     try {
         vector<double> positions;
-        ifstream inFASTA;
-        //openInputFileBinary(filename, inFASTA);
         string completeFileName = getFullPathName(filename);
-        //inFASTA.open(completeFileName.c_str(), ios::binary);
-        openInputFileBinary(completeFileName, inFASTA);
+        ifstream inFASTA; openInputFileBinary(completeFileName, inFASTA);
         
         string input;
         double count = 0;
@@ -3765,20 +3980,30 @@ int Utils::checkName(string& name) {
     }
 }
 /************************************************************/
-bool Utils::checkGroupName(string name) {
+bool Utils::checkGroupName(string& name) {
     try {
 
         bool goodName = true;
-        for (int i = 0; i < name.length(); i++) {
-            if (name[i] == ':') {  goodName = false; break;  }
-            else if (name[i] == '-') {  goodName = false; break;  }
-            else if (name[i] == '/') {  goodName = false; break;  }
+        if (modifyNames) {
+            for (int i = 0; i < name.length(); i++) {
+                if (name[i] == ':') {  goodName = false; break;  }
+                else if (name[i] == '-') {  goodName = false; break;  }
+                else if (name[i] == '/') {  goodName = false; break;  }
+            }
+            
+            if (!goodName) {
+                m->setChangedGroupNames(true);
+                m->mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n");
+                
+                string newName = "";
+                for (int i = 0; i < name.length(); i++) {
+                    if ((name[i] == ':') || (name[i] == '-') || (name[i] == '/')) { newName += "_";  }
+                    else { newName += name[i]; }
+                }
+                m->mothurOut("\n[NOTE] Updating " + name + " to " + newName + " to avoid downstream issues.\n\n");
+                name = newName;
+            }
         }
-
-        if (!goodName) {
-            m->mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n");
-        }
-
         return goodName;
     }
     catch(exception& e) {

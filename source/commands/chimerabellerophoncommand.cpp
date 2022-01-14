@@ -9,6 +9,8 @@
 
 #include "chimerabellerophoncommand.h"
 #include "bellerophon.h"
+#include "removeseqscommand.h"
+
 
 //**********************************************************************************************************************
 vector<string> ChimeraBellerophonCommand::setParameters(){	
@@ -18,6 +20,7 @@ vector<string> ChimeraBellerophonCommand::setParameters(){
 		CommandParameter pcorrection("correction", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pcorrection);
 		CommandParameter pwindow("window", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pwindow);
 		CommandParameter pincrement("increment", "Number", "", "25", "", "", "","",false,false); parameters.push_back(pincrement);
+        CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","fasta",false,false); parameters.push_back(premovechimeras);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -27,6 +30,8 @@ vector<string> ChimeraBellerophonCommand::setParameters(){
         vector<string> tempOutNames;
         outputTypes["chimera"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -47,6 +52,8 @@ string ChimeraBellerophonCommand::getHelpString(){
 		helpString += "The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras, default is 1/4 sequence length. \n";
 		helpString += "The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default is 25.\n";
+        helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
+
 		helpString += "chimera.bellerophon(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors) \n";
 		helpString += "Example: chimera.bellerophon(fasta=AD.align, filter=True, correction=true, window=200) \n";
 			
@@ -63,7 +70,8 @@ string ChimeraBellerophonCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "chimera") {  pattern = "[filename],bellerophon.chimeras"; } 
-        else if (type == "accnos") {  pattern = "[filename],bellerophon.accnos"; } 
+        else if (type == "accnos") {  pattern = "[filename],bellerophon.accnos"; }
+        else if (type == "fasta")   {  pattern = "[filename],bellerophon.fasta";     }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -107,6 +115,9 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option) : Command() 
 			
 			temp = validParameter.valid(parameters, "increment");		if (temp == "not found") { temp = "25"; }
 			util.mothurConvert(temp, increment);
+            
+            temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
+            removeChimeras = util.isTrue(temp);
 		}
 	}
 	catch(exception& e) {
@@ -149,6 +160,36 @@ int ChimeraBellerophonCommand::execute(){
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); 	return 0;	}
         
         m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
+        
+        if (removeChimeras) {
+            if (!util.isBlank(accnosFileName)) {
+                m->mothurOut("\nRemoving chimeras from your input files:\n");
+                
+                string inputString = "fasta=" + fastafile + ", accnos=" + accnosFileName;
+                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                m->mothurOut("/******************************************/\n");
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+                string currentName = getOutputFileName("fasta", variables);
+
+                util.renameFile(filenames["fasta"][0], currentName);
+                util.mothurRemove(filenames["fasta"][0]);
+                
+                outputNames.push_back(currentName); outputTypes["fasta"].push_back(currentName);
+            }else { m->mothurOut("\nNo chimeras found, skipping remove.seqs.\n"); }
+        }
 
 		//set accnos file as new current accnosfile
 		string currentName = "";
@@ -157,6 +198,11 @@ int ChimeraBellerophonCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		

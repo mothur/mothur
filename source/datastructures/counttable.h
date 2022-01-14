@@ -54,7 +54,6 @@
 
 #include "mothurout.h"
 #include "listvector.hpp"
-#include "groupmap.h"
 #include "sequence.hpp"
 #include "sharedrabundvectors.hpp"
 
@@ -62,10 +61,11 @@ class CountTable {
 
     public:
 
-        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = false; }
+        CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = true; }
         ~CountTable() {}
 
         //reads and creates smart enough to eliminate groups with zero counts
+        int createTable(map<string, string>&); //seqName->group
         int createTable(set<string>&, map<string, string>&, set<string>&); //seqNames, seqName->group, groupNames
         int createTable(string, string, vector<string>, bool createGroup=false); //namefile, groupfile, selectedGroups, createGroup,
         int readTable(string, bool, bool); //filename, readGroups, mothurRunning
@@ -73,7 +73,7 @@ class CountTable {
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(ifstream&, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
-        int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table
+        int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table. if format=name, use namefile to create count table
     
         int zeroOutTable(); //turn all counts to zeros
         int clearTable();
@@ -89,8 +89,10 @@ class CountTable {
         vector<string> printTable(string, bool compress); //preserves order in original, printing compressed or not based on compress flag pasted in
         vector<string> printSortedTable(string); //sorted by seqName
         int printHeaders(ofstream&, vector<string> optionalGroups=nullVector);
+        set<int> printCompressedHeaders(ofstream&, vector<string> optionalGroups=nullVector);
         vector<string> getHardCodedHeaders(); //Representative_Sequence, total
         int printSeq(ofstream&, string);
+        int printCompressedSeq(ofstream&, string, vector<string> optionalGroups=nullVector);
     
         bool testGroups(string file); //used to check if file has group data without reading it
         bool testGroups(string file, vector<string>&); //used to check if file has group data without reading it, return groups if found.

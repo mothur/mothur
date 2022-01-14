@@ -41,7 +41,8 @@ int main(int argc, char *argv[], char *envp[]){
         
 		signal(SIGINT, ctrlc_handler );
         
-        string defaultPath, mothurVersion, releaseDate, OS, toolsPath;
+        string mothurVersion, releaseDate, OS;
+        vector<string> defaultPath, toolsPath;
         util.mothurInitialPrep(defaultPath, toolsPath, mothurVersion, releaseDate, OS);
         
         current->setReleaseDate(releaseDate);

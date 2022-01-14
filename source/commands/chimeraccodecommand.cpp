@@ -9,6 +9,7 @@
 
 #include "chimeraccodecommand.h"
 #include "ccode.h"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraCcodeCommand::setParameters(){	
@@ -19,6 +20,7 @@ vector<string> ChimeraCcodeCommand::setParameters(){
 		CommandParameter pwindow("window", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pwindow);
 		CommandParameter pnumwanted("numwanted", "Number", "", "20", "", "", "","",false,false); parameters.push_back(pnumwanted);
 		CommandParameter pmask("mask", "String", "", "", "", "", "","",false,false); parameters.push_back(pmask);
+        CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","fasta",false,false); parameters.push_back(premovechimeras);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -29,6 +31,7 @@ vector<string> ChimeraCcodeCommand::setParameters(){
         outputTypes["chimera"] = tempOutNames;
         outputTypes["mapinfo"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -52,6 +55,7 @@ string ChimeraCcodeCommand::getHelpString(){
 		helpString += "The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n";
 		helpString += "The window parameter allows you to specify the window size for searching for chimeras. \n";
 		helpString += "The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n";
+        helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
 		helpString += "The chimera.ccode command should be in the following format: \n";
 		helpString += "chimera.ccode(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.ccode(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
@@ -68,8 +72,9 @@ string ChimeraCcodeCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "chimera") {  pattern = "[filename],[tag],ccode.chimeras-[filename],ccode.chimeras"; } 
-        else if (type == "accnos") {  pattern = "[filename],[tag],ccode.accnos-[filename],ccode.accnos"; } 
+        if (type == "chimera")      {  pattern = "[filename],[tag],ccode.chimeras-[filename],ccode.chimeras"; }
+        else if (type == "accnos")  {  pattern = "[filename],[tag],ccode.accnos-[filename],ccode.accnos";   }
+        else if (type == "fasta")   {  pattern = "[filename],ccode.fasta-[filename],[tag],ccode.fasta";     }
         else if (type == "mapinfo") {  pattern =  "[filename],mapinfo"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
@@ -121,6 +126,9 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "numwanted");		if (temp == "not found") { temp = "20"; }
 			util.mothurConvert(temp, numwanted);
 			
+            temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
+            removeChimeras = util.isTrue(temp);
+            
 			//this has to go after save so that if the user sets save=t and provides no reference we abort
 			templatefile = validParameter.validFile(parameters, "reference");
 			if (templatefile == "not found") { m->mothurOut("[ERROR]: The reference parameter is a required, aborting.\n"); abort = true;
@@ -172,6 +180,36 @@ int ChimeraCcodeCommand::execute(){
         
         m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
+        if (removeChimeras) {
+            if (!util.isBlank(accnosFileName)) {
+                m->mothurOut("\nRemoving chimeras from your input files:\n");
+                
+                string inputString = "fasta=" + fastafile + ", accnos=" + accnosFileName;
+                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                m->mothurOut("/******************************************/\n");
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+                string currentName = getOutputFileName("fasta", variables);
+
+                util.renameFile(filenames["fasta"][0], currentName);
+                util.mothurRemove(filenames["fasta"][0]);
+                
+                outputNames.push_back(currentName); outputTypes["fasta"].push_back(currentName);
+            }else { m->mothurOut("\nNo chimeras found, skipping remove.seqs.\n"); }
+        }
+        
 		//set accnos file as new current accnosfile
 		string currentName = "";
 		itTypes = outputTypes.find("accnos");
@@ -179,6 +217,11 @@ int ChimeraCcodeCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
 		}
 		
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();

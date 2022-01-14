@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 void Summary::processNameCount(string n) { //name or count file to include in counts
     try {
-        nameMap.clear(); nameCountNumUniques = 0;
+        nameMap.clear(); nameCountNumUniques = 0; hasNameOrCount = false;
         if (n != "") {
             hasNameOrCount = true;
             if (isCountFile(n)) {
@@ -230,9 +230,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
         ofstream out;
         if (params->summaryFile != "") { params->util.openOutputFile(params->summaryFile, out); }
 
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
-
+        ifstream in; params->util.openInputFile(params->filename, in);
         in.seekg(params->start);
 
         //print header if you are process 0
@@ -264,7 +262,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
                     //make sure this sequence is in the namefile, else error
                     map<string, int>::iterator itFindName = params->nameMap.find(seq.getName());
 
-                    if (itFindName == params->nameMap.end()) { params->m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct."); params->m->mothurOutEndLine(); params->m->setControl_pressed(true); }
+                    if (itFindName == params->nameMap.end()) { params->m->mothurOut("[ERROR]: '" + seq.getName() + "' is not in your name or count file, please correct.\n");  params->m->setControl_pressed(true); }
                     else { num = itFindName->second; }
                 }
 
@@ -334,7 +332,9 @@ long long Summary::summarizeFasta(string fastafile, string output) {
         vector<double> positions;
 #if defined NON_WINDOWS
         positions = util.divideFile(fastafile, processors);
-        for (int i = 0; i < (positions.size()-1); i++) {	lines.push_back(linePair(positions[i], positions[(i+1)]));	 }
+        for (int i = 0; i < (positions.size()-1); i++) {
+            lines.push_back(linePair(positions[i], positions[(i+1)]));
+        }
 #else
         positions = util.setFilePosFasta(fastafile, num);
         if (num < processors) { processors = num; }
@@ -436,13 +436,14 @@ long long Summary::summarizeFasta(string fastafile, string output) {
                 util.mothurRemove((output + toString(i) + ".temp"));
             }
         }
-
-        if (hasNameOrCount) {
-            if (nameCountNumUniques != num) { // do fasta and name/count files match
-                m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
+        
+        if (!m->getControl_pressed()) {
+            if (hasNameOrCount) {
+                if (nameCountNumUniques != num) { // do fasta and name/count files match
+                    m->mothurOut("[ERROR]: Your " + type + " file contains " + toString(nameCountNumUniques) + " unique sequences, but your fasta file contains " + toString(num) + ". File mismatch detected, quitting command.\n"); m->setControl_pressed(true);
+                }
             }
         }
-
         numUniques = num;
 
         return num;

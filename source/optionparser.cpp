@@ -190,15 +190,17 @@ map<string, string> OptionParser::getParameters() {
             }else{ it++; }
         }
         
-        string inputDir = current->getInputDir();
-        if (inputDir != "") {
+        vector<string> inputDirs = current->getInputDir();
+        if (inputDirs.size() != 0) {
             
             for (it = parameters.begin(); it != parameters.end(); it++) {
                 if (fileTypes.count(it->first) != 0) {
                     string path = util.hasPath(it->second);
                     //if the user has not given a path then, add inputdir. else leave path alone.
                     if (path == "") {
-                        it->second = inputDir + it->second;
+                        string inputLocation = it->second;
+                        util.checkSpecificLocations(inputLocation, inputDirs, "");
+                        it->second = inputLocation;
                     }
                 }
             }
@@ -300,7 +302,7 @@ void OptionParser::fillFileTypes(set<string>& fileTypes) {
         fileTypes.insert("fasterq-dump");
         fileTypes.insert("input");
         
-        //uchime, vsearch, prefetch  fasterq-dump, and blast are not included
+        //uchime, vsearch, prefetch and fasterq-dump are not included
        
     }
     catch(exception& e) {
@@ -308,52 +310,4 @@ void OptionParser::fillFileTypes(set<string>& fileTypes) {
         exit(1);
     }
 }
-/***********************************************************************/
-//pass a vector of filenames that may match the current namefile.  
-//this function will look at each one, if the rootnames match, mothur will warn 
-//the user that they may have neglected to provide a namefile.
-//stops when it finds a match.
-bool OptionParser::getNameFile(vector<string> files) {
-    try {
-        string namefile = current->getNameFile();
-        bool match = false;
-        
-        if (namefile != "") {
-            string temp = util.getRootName(util.getSimpleName(namefile));
-            vector<string> rootName;
-            util.splitAtChar(temp, rootName, '.');
-            
-            for (int i = 0; i < files.size(); i++) {
-                temp = util.getRootName(util.getSimpleName(files[i]));
-                vector<string> root;
-                util.splitAtChar(temp, root, '.');
-                
-                int smallest = rootName.size();
-                if (root.size() < smallest) { smallest = root.size(); }
-                
-                int numMatches = 0;
-                for(int j = 0; j < smallest; j++) {
-                    if (root[j] == rootName[j]) { numMatches++; }
-                }
-                
-                if (smallest > 0) {
-                    if ((numMatches >= (smallest-2)) && (root[0] == rootName[0])) {
-                        m->mothurOut("[WARNING]: This command can take a namefile and you did not provide one. The current namefile is " + namefile + " which seems to match " + files[i] + ".");
-                        m->mothurOutEndLine();
-                        match = true;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        return match;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "OptionParser", "getNameFile");
-        exit(1);
-    }
-}
-
-
 /***********************************************************************/

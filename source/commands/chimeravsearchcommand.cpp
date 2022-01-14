@@ -7,10 +7,11 @@
 //
 
 #include "chimeravsearchcommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequence.hpp"
 #include "systemcommand.h"
 #include "degapseqscommand.h"
+#include "removeseqscommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraVsearchCommand::setParameters(){
@@ -26,6 +27,7 @@ vector<string> ChimeraVsearchCommand::setParameters(){
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         CommandParameter pabskew("abskew", "Number", "", "1.9", "", "", "","",false,false); parameters.push_back(pabskew);
         CommandParameter pchimealns("uchimealns", "Boolean", "", "F", "", "", "","alns",false,false); parameters.push_back(pchimealns);
+        CommandParameter premovechimeras("removechimeras", "Boolean", "", "t", "", "", "","alns",false,false); parameters.push_back(premovechimeras);
         CommandParameter pminh("minh", "Number", "", "0.28", "", "", "","",false,false); parameters.push_back(pminh);
         CommandParameter pmindiv("mindiv", "Number", "", "0.8", "", "", "","",false,false); parameters.push_back(pmindiv);
         CommandParameter pxn("xn", "Number", "", "8.0", "", "", "","",false,false); parameters.push_back(pxn);
@@ -39,6 +41,7 @@ vector<string> ChimeraVsearchCommand::setParameters(){
         vector<string> tempOutNames;
         outputTypes["chimera"] = tempOutNames;
         outputTypes["accnos"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
         outputTypes["alns"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         
@@ -57,7 +60,7 @@ string ChimeraVsearchCommand::getHelpString(){
         string helpString = "";
         helpString += "The chimera.vsearch command reads a fastafile and referencefile and outputs potentially chimeric sequences.\n";
         helpString += "This command is a wrapper for vsearch https://github.com/torognes/vsearch.\n";
-        helpString += "The chimera.vsearch command parameters are fasta, name, count, reference, processors, dereplicate, abskew, uchimealns, minh, mindiv, xn, dn, mindiffs.\n";
+        helpString += "The chimera.vsearch command parameters are fasta, name, count, reference, processors, dereplicate, removechimeras, abskew, uchimealns, minh, mindiv, xn, dn, mindiffs.\n";
         helpString += "The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required, unless you have a valid current fasta file. \n";
         helpString += "The name parameter allows you to provide a name file, if you are using template=self. \n";
         helpString += "The count parameter allows you to provide a count file, if you are using template=self. When you use a count file with group info and dereplicate=T, mothur will create a *.pick.count_table file containing seqeunces after chimeras are removed. \n";
@@ -67,6 +70,7 @@ string ChimeraVsearchCommand::getHelpString(){
         helpString += "The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n";
         helpString += "The abskew parameter can only be used with template=self. Minimum abundance skew. Default 1.9. Abundance skew is: min [ abund(parent1), abund(parent2) ] / abund(query).\n";
         helpString += "The uchimealns parameter allows you to indicate you would like a file containing multiple alignments of query sequences to parents in human readable format. Alignments show columns with differences that support or contradict a chimeric model.\n";
+        helpString += "The removechimeras parameter allows you to indicate you would like to automatically remove the sequences that are flagged as chimeric. Default=t.\n";
         helpString += "The minh parameter - mininum score to report chimera. Default 0.3. Values from 0.1 to 5 might be reasonable. Lower values increase sensitivity but may report more false positives. If you decrease xn you may need to increase minh, and vice versa.\n";
         helpString += "The mindiv parameter - minimum divergence ratio, default 0.5. Div ratio is 100%% - %%identity between query sequence and the closest candidate for being a parent. If you don't care about very close chimeras, then you could increase mindiv to, say, 1.0 or 2.0, and also decrease minh, say to 0.1, to increase sensitivity. How well this works will depend on your data. Best is to tune parameters on a good benchmark.\n";
         helpString += "The xn parameter - weight of a no vote. Default 8.0. Decreasing this weight to around 3 or 4 may give better performance on denoised data.\n";
@@ -113,8 +117,9 @@ string ChimeraVsearchCommand::getOutputPattern(string type) {
         
         if (type == "chimera") {  pattern = "[filename],[tag],vsearch.chimeras"; }
         else if (type == "accnos") {  pattern = "[filename],[tag],vsearch.accnos"; }
+        else if (type == "fasta") {  pattern = "[filename],[tag],vsearch.fasta"; }
         else if (type == "alns") {  pattern = "[filename],[tag],vsearch.alns"; }
-        else if (type == "count") {  pattern = "[filename],[tag],vsearch.pick.count_table-[filename],count_table"; }
+        else if (type == "count") {  pattern = "[filename],[tag],vsearch.count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -197,25 +202,26 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "chimealns");			if (temp == "not found") { temp = "f"; }
             chimealns = util.isTrue(temp);
             
+            temp = validParameter.valid(parameters, "removechimeras");            if (temp == "not found") { temp = "t"; }
+            removeChimeras = util.isTrue(temp);
+            
             minh = validParameter.valid(parameters, "minh");						if (minh == "not found")			{ useMinH = false; minh = "0.28";					}	else{ useMinH = true;			}
             mindiv = validParameter.valid(parameters, "mindiv");					if (mindiv == "not found")			{ useMindiv = false; mindiv = "0.8";				}	else{ useMindiv = true;			}
             xn = validParameter.valid(parameters, "xn");							if (xn == "not found")				{ useXn = false; xn = "8.0";						}	else{ useXn = true;				}
             dn = validParameter.valid(parameters, "dn");							if (dn == "not found")				{ useDn = false; dn = "1.4";						}	else{ useDn = true;				}
             mindiffs = validParameter.valid(parameters, "mindiffs");				if (mindiffs == "not found")				{ useMindiffs = false; mindiffs = "3";							}	else{ useMindiffs = true;				}
             
-            temp = validParameter.valid(parameters, "dereplicate");
-            if (temp == "not found") { temp = "false";			}
+            temp = validParameter.valid(parameters, "dereplicate"); if (temp == "not found") { temp = "false";			}
             dups = util.isTrue(temp);
             
             vector<string> versionOutputs;
             bool foundTool = false;
-            path = current->getProgramPath();
             string programName = "vsearch"; programName += EXECUTABLE_EXT;
             
             vsearchLocation = validParameter.validFile(parameters, "vsearch");
             if (vsearchLocation == "not found") {
                 vsearchLocation = "";
-                foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
             }
             else {
                 //test to make sure vsearch exists
@@ -224,7 +230,7 @@ ChimeraVsearchCommand::ChimeraVsearchCommand(string option) : Command()  {
                 bool ableToOpen = util.openInputFile(vsearchLocation, in, "no error"); in.close();
                 if(!ableToOpen) {
                     m->mothurOut(vsearchLocation + " file does not exist or cannot be opened, ignoring.\n"); vsearchLocation = "";
-                    foundTool = util.findTool(programName, vsearchLocation, path, versionOutputs, current->getLocations());
+                    foundTool = util.findTool(programName, vsearchLocation, versionOutputs, current->getLocations());
                 }else { foundTool = true; }
             }
 
@@ -329,7 +335,7 @@ void driver(vsearchData* params){
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--db"));
-            cPara.push_back(params->util.mothurConvert(params->templatefile));
+            cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--uchime_ref"));
@@ -627,6 +633,53 @@ int ChimeraVsearchCommand::execute(){
         outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
         if (chimealns) { outputNames.push_back(alnsFileName); outputTypes["alns"].push_back(alnsFileName); }
         
+        if (removeChimeras) {
+            if (!util.isBlank(accnosFileName)) {
+                m->mothurOut("\nRemoving chimeras from your input files:\n");
+                
+                string inputString = "fasta=" + fastafile + ", accnos=" + accnosFileName;
+                if ((countfile != "") && (!dups))   {   inputString += ", count=" + countfile;  }
+                
+                m->mothurOut("/******************************************/\n");
+                m->mothurOut("Running command: remove.seqs(" + inputString + ")\n");
+                current->setMothurCalling(true);
+                
+                Command* removeCommand = new RemoveSeqsCommand(inputString);
+                removeCommand->execute();
+                
+                map<string, vector<string> > filenames = removeCommand->getOutputFiles();
+                
+                delete removeCommand;
+                current->setMothurCalling(false);
+                
+                m->mothurOut("/******************************************/\n");
+
+                if (countfile != "") {
+                    if (!dups) { //dereplicate=f, so remove sequences where any sample found the reads to be chimeric
+                        map<string, string> variables;
+                        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(countfile));
+                        variables["[tag]"] = "denovo";
+                        if (templatefile != "self") { variables["[tag]"] = "ref"; }
+                        string currentName = getOutputFileName("count", variables);
+
+                        util.renameFile(filenames["count"][0], currentName);
+                        util.mothurRemove(filenames["count"][0]);
+                        outputNames.push_back(currentName); outputTypes["count"].push_back(currentName);
+                    }//else, mothur created a modified count file removing chimeras by sample. No need to include count file on remove.seqs command. Deconvolute function created modified count table already
+                }
+                
+                map<string, string> variables;
+                variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+                variables["[tag]"] = "denovo";
+                if (templatefile != "self") { variables["[tag]"] = "ref"; }
+                string currentName = getOutputFileName("fasta", variables);
+
+                util.renameFile(filenames["fasta"][0], currentName);
+                util.mothurRemove(filenames["fasta"][0]);
+                
+                outputNames.push_back(currentName); outputTypes["fasta"].push_back(currentName);
+            }else { m->mothurOut("\nNo chimeras found, skipping remove.seqs.\n"); }
+        }
         
         //set accnos file as new current accnosfile
         string currentName = "";
@@ -638,6 +691,11 @@ int ChimeraVsearchCommand::execute(){
         itTypes = outputTypes.find("count");
         if (itTypes != outputTypes.end()) {
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
         }
         
         m->mothurOut("\nOutput File Names:\n");
@@ -655,11 +713,10 @@ int ChimeraVsearchCommand::execute(){
 //**********************************************************************************************************************
 int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accnosFileName, string alnsFileName, long long& numRedund){
     try {
+
+        ofstream out2; util.openOutputFile(accnosFileName+".temp", out2);
+        
         int total = 0;
-        
-        ofstream out2;
-        util.openOutputFile(accnosFileName+".temp", out2);
-        
         string name;
         set<string> namesInFile; //this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
         set<string>::iterator itNames;
@@ -668,15 +725,13 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         
         if (!util.isBlank(accnosFileName)) {
             //edit accnos file
-            ifstream in2;
-            util.openInputFile(accnosFileName, in2);
+            ifstream in2; util.openInputFile(accnosFileName, in2);
             
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
                 
                 in2 >> name; util.gobble(in2);
-                
-                
+            
                 itChimeras = chimerasInFile.find(name);
                 
                 if (itChimeras == chimerasInFile.end()) {
@@ -684,7 +739,6 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                     chimerasInFile.insert(name);
                     total++;
                 }
-                
             }
             in2.close();
         }
@@ -693,20 +747,14 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
         util.mothurRemove(accnosFileName);
         rename((accnosFileName+".temp").c_str(), accnosFileName.c_str());
         
-        
-        
         //edit chimera file
-        ifstream in;
-        util.openInputFile(outputFileName, in);
-        
-        ofstream out;
-        util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+        ifstream in; util.openInputFile(outputFileName, in);
+        ofstream out; util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         //out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
         
         float temp1;
         string parent1, parent2, parent3, temp2, temp3, temp4, temp5, temp6, temp7, temp8, temp9, temp10, temp11, temp12, temp13, flag;
-        name = "";
-        namesInFile.clear();
+        name = ""; namesInFile.clear();
         //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
         /*										1	2	3	4	5	6	7	8	9	10	11	12	13	14	15
          0.000000	F11Fcsw_33372/ab=18/		*	*	*	*	*	*	*	*	*	*	*	*	*	*	N
@@ -747,12 +795,10 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                 out << temp1 << '\t' << name << '\t' << parent1 << '\t' << parent2 << '\t' << parent3 << '\t' << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << temp9 << '\t' << temp10 << '\t' << temp11 << '\t' << temp12 << '\t' << temp13 << '\t' << flag << endl;
             }
         }
-        in.close();
-        out.close();
+        in.close(); out.close();
         
         util.mothurRemove(outputFileName);
         rename((outputFileName+".temp").c_str(), outputFileName.c_str());
-        
         
         //edit anls file
         //assumptions - in file each read will always look like - if vsearch source is updated, revisit this code.
@@ -787,11 +833,8 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
          Diffs Left 7: N 0, A 6, Y 1 (14.3%); Right 35: N 1, A 30, Y 4 (11.4%), Score 0.0047
          */
         if (chimealns) {
-            ifstream in3;
-            util.openInputFile(alnsFileName, in3);
-            
-            ofstream out3;
-            util.openOutputFile(alnsFileName+".temp", out3); out3.setf(ios::fixed, ios::floatfield); out3.setf(ios::showpoint);
+            ifstream in3; util.openInputFile(alnsFileName, in3);
+            ofstream out3; util.openOutputFile(alnsFileName+".temp", out3); out3.setf(ios::fixed, ios::floatfield); out3.setf(ios::showpoint);
             
             name = "";
             namesInFile.clear();
@@ -800,8 +843,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
             while (!in3.eof()) {
                 if (m->getControl_pressed()) { in3.close(); out3.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName)); util.mothurRemove((alnsFileName+".temp")); return 0; }
                 
-                line = "";
-                line = util.getline(in3);
+                line = ""; line = util.getline(in3);
                 string temp = "";
                 
                 if (line != "") {
@@ -832,16 +874,11 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
                                     namesInFile.insert(name);
                                 }
                             }else { out << name << endl;  }
-                            
                         }
-                        
-                    }else { //not need to alter line
-                        out3 << line << endl;
-                    }
+                    }else { out3 << line << endl; } //not need to alter line
                 }else { out3 << endl; }
             }
-            in3.close();
-            out3.close();
+            in3.close(); out3.close();
             
             util.mothurRemove(alnsFileName);
             rename((alnsFileName+".temp").c_str(), alnsFileName.c_str());
@@ -894,7 +931,7 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
         m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
         current->setMothurCalling(true);
         
-        Command* uniqueCommand = new DeconvoluteCommand(inputString);
+        Command* uniqueCommand = new UniqueSeqsCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

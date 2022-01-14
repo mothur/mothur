@@ -138,12 +138,6 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) : Command() {
 			temp = validParameter.valid(parameters, "percent");		if (temp == "not found"){	temp = "0";				}
 			util.mothurConvert(temp, percent);
 			
-			if (countfile == "") {
-                if (namefile == "") {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 	}
 	catch(exception& e) {

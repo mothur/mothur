@@ -19,7 +19,7 @@
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "filterseqscommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "listseqscommand.h"
 #include "getdistscommand.h"
 #include "getseqscommand.h"
@@ -48,7 +48,7 @@ private:
     string namefile, refformat, distfile, countfile, fastafile, columnfile, nameOrCount, accnosfile;
     string comboDistFile;
     
-    string method, fileroot, tag,  inputDir, metric, initialize, metricName, criteria, refWeight;
+    string method, fileroot, tag,  inputDir, metric, initialize, metricName, refWeight;
     double cutoff, stableMetric;
     float adjust, fitPercent;
     int precision, length, maxIters, processors, denovoIters;

@@ -108,7 +108,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, dups;
+    bool abort, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, ucl, useMindiffs, hasCount, dups, removeChimeras;
     string fastafile, templatefile, countfile, abskew, minh, mindiv, xn, dn, mindiffs, vsearchLocation;
     int processors;
     vsearchVariables* vars;

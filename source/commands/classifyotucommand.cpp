@@ -201,13 +201,6 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option) : Command()  {
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100.\n");  abort = true;  }
 			
-            if (countfile == "") {
-                if (namefile == ""){
-                    vector<string> files; files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
-			
 		}
 	}
 	catch(exception& e) {

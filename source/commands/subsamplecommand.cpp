@@ -9,7 +9,7 @@
 
 #include "subsamplecommand.h"
 
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "getseqscommand.h"
 #include "subsample.h"
 
@@ -245,12 +245,7 @@ SubSampleCommand::SubSampleCommand(string option) : Command() {
 			if (((groupfile != "") || (countfile != "")) && ((fastafile != "") && (listfile != ""))) { 
 				m->mothurOut("A new group or count file can only be made from the subsample of a list file or fasta file, not both. Please correct.\n"); abort = true; }
 			
-            if (countfile == "") {
-                if ((fastafile != "") && (namefile == "")) {
-                    vector<string> files; files.push_back(fastafile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
+            
 		}
 
 	}
@@ -603,7 +598,7 @@ int SubSampleCommand::getSubSampleFasta() {
 			m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 			current->setMothurCalling(true);
             
-			Command* uniqueCommand = new DeconvoluteCommand(inputString);
+			Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 			uniqueCommand->execute();
 			
 			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

@@ -38,18 +38,15 @@ public:
             }
             
             current->setProgramPath(util.getFullPathName(path));
-            current->setBlastPath(current->getProgramPath());
             
             //if you haven't set your own location
             #ifdef MOTHUR_FILES
             #else
                     //set default location to search for files to mothur's executable location.  This will resolve issue of double-clicking on the executable which opens mothur and sets pwd to your home directory instead of the mothur directory and leads to "unable to find file" errors.
-                    if (current->getProgramPath() != "") { current->setDefaultPath(current->getProgramPath()); }
-            #endif
-            
-            //if you haven't set your own location
-            #ifdef MOTHUR_TOOLS
-                current->setBlastPath(current->getToolsPath());
+                    if (current->getProgramPath() != "") {
+                        vector<string> temps; temps.push_back(current->getProgramPath());
+                        current->setDefaultPath(temps);
+                    }
             #endif
             
             start = time(NULL);
@@ -74,6 +71,13 @@ public:
                 nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
                 pos = nextCommand.find("$"+it->first);
             }
+        }
+        
+        //replace mothurhome with mothur executable location
+        unsigned long pos = nextCommand.find("mothurhome");
+        while (pos != string::npos) { //allow for multiple uses of mothurhome in a single command
+            nextCommand.replace(pos,10,current->getProgramPath()); //
+            pos = nextCommand.find("mothurhome");
         }
     }
     

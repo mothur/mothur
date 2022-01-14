@@ -127,10 +127,6 @@ ShhhSeqsCommand::ShhhSeqsCommand(string option) : Command() {
 			temp = validParameter.valid(parameters, "processors");	if (temp == "not found"){	temp = current->getProcessors();	}
 			processors = current->setProcessors(temp);
                     
-			if (namefile == "") {
-				vector<string> files; files.push_back(fastafile);
-				if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-			}
 		}
 	}
 	catch(exception& e) {
@@ -615,7 +611,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");  
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

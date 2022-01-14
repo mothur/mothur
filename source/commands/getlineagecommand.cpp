@@ -91,7 +91,7 @@ string GetLineageCommand::getOutputPattern(string type) {
         else if (type == "count")           {   pattern = "[filename],pick,[extension]";    }
         else if (type == "list")            {   pattern = "[filename],[distance],pick,[extension]";    }
         else if (type == "shared")          {   pattern = "[filename],[distance],pick,[extension]";    }
-        else if (type == "alignreport")     {   pattern = "[filename],pick.align.report";    }
+        else if (type == "alignreport")     {   pattern = "[filename],pick.[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -113,9 +113,6 @@ GetLineageCommand::GetLineageCommand(string option) : Command()  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			
-			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
@@ -209,13 +206,6 @@ GetLineageCommand::GetLineageCommand(string option) : Command()  {
             if ((sharedfile != "") || (listfile != "")) {
                 label = validParameter.valid(parameters, "label");
                 if (label == "not found") { label = ""; m->mothurOut("[WARNING]: You did not provide a label, I will use the first label in your inputfile.\n");  }
-            }
-            
-            if (countfile == "") {
-                if ((namefile == "") && ((fastafile != "") || (taxfile != ""))){
-                    vector<string> files; files.push_back(fastafile); files.push_back(taxfile);
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
             }
 		}
 

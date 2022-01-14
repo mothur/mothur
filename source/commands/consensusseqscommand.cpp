@@ -132,13 +132,6 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option) : Command()  {
 			util.mothurConvert(temp, cutoff); 
 			
 			if (outputdir == ""){	outputdir = util.hasPath(fastafile);	}
-			
-            if (countfile == "") {
-                if (namefile == ""){
-                    vector<string> files; files.push_back(fastafile); 
-                    if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                }
-            }
 		}
 	}
 	catch(exception& e) {

@@ -35,10 +35,10 @@ public:
 	int execute(); 
 	void help() { m->mothurOut(getHelpString()); }		
 private:
-	int checkChiemras();
+	int checkChimeras();
     int lookForShortcutFiles(string baseName);
     
-	bool abort, filter, save;
+	bool abort, filter, save, removeChimeras;
 	string fastafile, templatefile, consfile, quanfile, maskfile, inputDir;
 	int window, increment, numSeqs, templateSeqsLength;
 	vector<string> outputNames;

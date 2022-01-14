@@ -72,43 +72,8 @@ MergeTaxSummaryCommand::MergeTaxSummaryCommand(string option) : Command()  {
 			}
 			else{
 				for(int i=0;i<numInputFiles;i++){
-					if (inputDir != "") {
-                        string path = util.hasPath(fileNames[i]);
-                        //if the user has not given a path then, add inputdir. else leave path alone.
-                        if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
-                    }
-                    
-                    bool ableToOpen;
-                    ifstream in;
-                    ableToOpen = util.openInputFile(fileNames[i], in, "noerror");
-                    in.close();	
-                    
-                    //if you can't open it, try default location
-                    if (!ableToOpen) {
-                        if (current->getDefaultPath() != "") { //default path is set
-                            string tryPath = current->getDefaultPath() + util.getSimpleName(fileNames[i]);
-                            m->mothurOut("Unable to open " + fileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-                            ifstream in2;
-                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-                            in2.close();
-                            fileNames[i] = tryPath;
-                        }
-                    }
-                    
-                    //if you can't open it, try output location
-                    if (!ableToOpen) {
-                        if (current->getOutputDir() != "") { //default path is set
-                            string tryPath = current->getOutputDir() + util.getSimpleName(fileNames[i]);
-                            m->mothurOut("Unable to open " + fileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-                            ifstream in2;
-                            ableToOpen = util.openInputFile(tryPath, in2, "noerror");
-                            in2.close();
-                            fileNames[i] = tryPath;
-                        }
-                    }
-                    
-                    
-                    
+                    bool ableToOpen = util.checkLocations(fileNames[i], current->getLocations());
+            
                     if (!ableToOpen) { 
                         m->mothurOut("Unable to open " + fileNames[i] + ". It will be disregarded.\n");  
                         //erase from file list

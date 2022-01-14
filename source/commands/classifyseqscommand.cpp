@@ -21,7 +21,7 @@ vector<string> ClassifySeqsCommand::setParameters(){
         CommandParameter pcount("count", "InputTypes", "", "", "NameCount-CountGroup", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter poutput("output", "Multiple", "simple-detail", "detail", "", "", "","",false,false, true); parameters.push_back(poutput);
-		CommandParameter psearch("search", "Multiple", "kmer-blast-suffix-distance-align", "kmer", "", "", "","",false,false); parameters.push_back(psearch);
+		CommandParameter psearch("search", "Multiple", "kmer-suffix-distance-align", "kmer", "", "", "","",false,false); parameters.push_back(psearch);
 		CommandParameter pksize("ksize", "Number", "", "8", "", "", "","",false,false); parameters.push_back(pksize);
 		CommandParameter pmethod("method", "Multiple", "wang-knn-zap", "wang", "", "", "","",false,false); parameters.push_back(pmethod);
 		CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
@@ -63,7 +63,7 @@ string ClassifySeqsCommand::getHelpString(){
 		string helpString = "";
 		helpString += "The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n";
 		helpString += "The classify.seqs command parameters are " + getCommandParameters() + ". The reference, fasta and taxonomy parameters are required.\n";
-		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer, blast, align and distance. The default is kmer.\n";
+		helpString += "The search parameter allows you to specify the method to find most similar reference sequence.  Your options are: suffix, kmer, align and distance. The default is kmer.\n";
 		helpString += "The name parameter allows you add a names file with your fasta file.\n";
 		helpString += "The group parameter allows you add a group file so you can have the summary totals broken up by group.\n";
         helpString += "The count parameter allows you add a count file so you can have the summary totals broken up by group.\n";
@@ -265,28 +265,6 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option) : Command()  {
 				m->mothurOut("The zap method requires the kmer or align search. " + search + " will be disregarded, and kmer will be used.\n" );
 				search = "kmer";
 			}
-			
-            if (search == "blast") {
-                string blastlocation = "";
-                vector<string> locations = current->getLocations();
-                string path = current->getProgramPath();
-                bool foundTool = util.findBlastLocation(blastlocation, path, locations);
-
-                if (!foundTool){
-                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as search method. Using kmer instead.\n"); search = "kmer";
-                }
-            }
-            
-            if (!abort) {
-                if (!hasCount) {
-                    if (namefile == ""){
-                        if (fastafile != "") {
-                            vector<string> files; files.push_back(fastafile);
-                            if (!current->getMothurCalling())  {  parser.getNameFile(files);  }
-                        }
-                    }
-                }
-            }
         }
 	}
 	catch(exception& e) {
