@@ -265,7 +265,7 @@ int RemoveSeqsCommand::execute(){
         if (qualityfiles.size() != 0)       { for (int i = 0; i < qualityfiles.size(); i++) { readQual(qualityfiles[i]);    }  }
         if (groupfiles.size() != 0)         { for (int i = 0; i < groupfiles.size(); i++)   { readGroup(groupfiles[i]);     }  }
         if (taxfiles.size() != 0)           { for (int i = 0; i < taxfiles.size(); i++)     { readTax(taxfiles[i]);         }  }
-        if (listfiles.size() != 0)          { for (int i = 0; i < taxfiles.size(); i++)     { readTax(taxfiles[i]);         }  }
+        if (listfiles.size() != 0)          { for (int i = 0; i < listfiles.size(); i++)     { readList(listfiles[i]);         }  }
         if (alignfiles.size() != 0)         { for (int i = 0; i < alignfiles.size(); i++)   { readAlign(alignfiles[i]);     }  }
         if (countfiles.size() != 0)         { for (int i = 0; i < countfiles.size(); i++)   { readCount(countfiles[i]);     }  }
         if (fastqfiles.size() != 0)         { for (int i = 0; i < fastqfiles.size(); i++)   { readFastq(fastqfiles[i]);     }  }
