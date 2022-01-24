@@ -48,6 +48,7 @@ class GetSeqsCommand : public Command {
 		
         void readFasta(string);
         void readFastq(string);
+        void readGZFastq(string);
         void readName(string);
         void readGroup(string);
         void readCount(string);
