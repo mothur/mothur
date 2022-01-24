@@ -88,8 +88,7 @@ vector< vector<string> > FileFile::read(string f, string mode){
         
         bool allGZ = true; bool allPlainTxt = true;
         
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         while(!in.eof()) {
             

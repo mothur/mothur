@@ -56,7 +56,6 @@ public:
     Sequence getSequence();
     QualityScores getQuality();
     
-
 private:
     MothurOut* m;
     Utils util;

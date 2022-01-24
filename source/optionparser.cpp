@@ -302,7 +302,7 @@ void OptionParser::fillFileTypes(set<string>& fileTypes) {
         fileTypes.insert("fasterq-dump");
         fileTypes.insert("input");
         
-        //uchime, vsearch, prefetch  fasterq-dump, and blast are not included
+        //uchime, vsearch, prefetch and fasterq-dump are not included
        
     }
     catch(exception& e) {

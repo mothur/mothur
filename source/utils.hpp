@@ -84,10 +84,10 @@ public:
     vector<bool> allGZFiles(vector<string>&);
     bool appendSFFFiles(string, string);
     bool findTool(string& toolName, string&, vector<string>&, vector< vector<string> > locations);
-    bool findBlastLocation(string& toolLocation, vector< vector<string> > locations);
     bool checkSpecificLocations(string&, vector<string>, string silent);
     bool checkLocations(string&, vector< vector<string> >, string silent);
     bool checkLocations(string&, vector< vector<string> >);  //filename, locations to check.  Returns false if cant be found. If found completes name with location
+    bool checkLocationsGZ(string&, vector< vector<string> >);
     bool dirCheckWritable(string&); //completes path, appends appropriate / or \, makes sure dir is writable.
     bool dirCheckExists(string&);
     bool dirCheckExists(string&, bool); //completes path, appends appropriate / or \, makes sure dir is present.
@@ -118,6 +118,7 @@ public:
 #ifdef USE_BOOST
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&);
     bool openInputFileBinary(string, ifstream&, boost::iostreams::filtering_istream&, string);
+    bool openOutputFileBinary(string fileName, ofstream& file, ostream*& out, boost::iostreams::filtering_streambuf<boost::iostreams::output>& outBoost);
     string getline(boost::iostreams::filtering_istream& fileHandle);
 #endif
     

@@ -21,7 +21,6 @@
 
 #include "gotohoverlap.hpp"
 #include "needlemanoverlap.hpp"
-#include "blastalign.hpp"
 #include "noalign.hpp"
 
 #include "ignoregaps.h"

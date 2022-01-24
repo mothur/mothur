@@ -16,7 +16,6 @@
 #include "sequence.hpp"
 #include "gotohoverlap.hpp"
 #include "needlemanoverlap.hpp"
-#include "blastalign.hpp"
 #include "noalign.hpp"
 #include "nast.hpp"
 #include "alignreport.hpp"

@@ -87,9 +87,6 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-			
-			
-			//check for required parameters
 			fastafiles = validParameter.validFiles(parameters, "fasta");
             if (fastafiles.size() != 0) {
                 if (fastafiles[0] == "not open") { abort = true; }
@@ -163,6 +160,33 @@ void addName(bool empty, string name, set<string>& names, set<string>& newNames)
         if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
     }
 }
+#ifdef USE_BOOST
+//**********************************************************************************************************************
+void readFastq(set<string>& names, boost::iostreams::filtering_istream& inBoost, MothurOut*& m){
+    try {
+        set<string> newNames;
+        bool empty = true;
+        if (names.size() != 0) { empty=false; }
+        Utils util;
+        
+        while(!inBoost.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            bool ignore;
+            FastqRead fread(inBoost, ignore, "illumina1.8+");  util.gobble(inBoost);
+            
+            if (!ignore) { addName(empty, fread.getName(), names, newNames); }
+        }
+        
+        names = newNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+#endif
 //**********************************************************************************************************************
 void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
     try {
@@ -349,8 +373,8 @@ int ListSeqsCommand::execute(){
         
 		//read functions fill names vector
 		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	                }
-        if (qualityfiles.size() != 0)       {    process(qualityfiles, names, &readQual);               }
-        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names, &readFastq);	                }
+        if (qualityfiles.size() != 0)       {   process(qualityfiles, names, &readQual);                }
+        if (fastqfiles.size() != 0)	        {	process(fastqfiles, names);	                            }
 		if (namefiles.size() != 0)	        {	process(namefiles, names, &readNameTaxGroup);           }
 		if (groupfiles.size() != 0)	        {	process(groupfiles, names, &readNameTaxGroup);          }
         if (taxfiles.size() != 0)           {   process(taxfiles, names, &readNameTaxGroup);            }
@@ -389,6 +413,37 @@ int ListSeqsCommand::execute(){
 		m->errorOut(e, "ListSeqsCommand", "execute");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void ListSeqsCommand::process(vector<string> files, set<string>& names){
+    try {
+        Utils util;
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            inputFileName = files[i];
+            
+            bool gz = util.isGZ(inputFileName)[1];
+            
+            if (!gz) {
+                ifstream in; util.openInputFile(inputFileName, in);
+                readFastq(names, in, m);
+                in.close();
+            }else {
+                #ifdef USE_BOOST
+                    ifstream in; boost::iostreams::filtering_istream inBoost;
+                    util.openInputFileBinary(inputFileName, in, inBoost);
+                    readFastq(names, inBoost, m);
+                    in.close(); inBoost.pop(); inBoost.reset();
+                #endif
+            }
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ListSeqsCommand", "process");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, ifstream&, MothurOut*&)){

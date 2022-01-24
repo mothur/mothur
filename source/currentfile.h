@@ -100,8 +100,6 @@ class CurrentFile {
 
         string getTestFilePath() { lock_guard<std::mutex> guard(currentProtector); return testFilePath; }
         void setTestFilePath(string);
-        string getBlastPath() { lock_guard<std::mutex> guard(currentProtector); return blastPath; }
-        void setBlastPath(string);
         string getHomePath() { lock_guard<std::mutex> guard(currentProtector); return homePath; }
         void setHomePath(string);
         vector<string> getPaths() { lock_guard<std::mutex> guard(currentProtector); return paths; } //environment variable 'PATH' values
@@ -137,8 +135,7 @@ class CurrentFile {
         
         vector<string> paths, defaultPath, toolsPath, inputDir; //paths stored in PATH environment variables, defaultPaths = MOTHUR_FILES, toolsPath = MOTHUR_TOOLS
         string logFileName, mothurProgramPath, homePath;
-        string outputDir, blastPath;
-        string releaseDate, version;
+        string outputDir, releaseDate, version;
     
         string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile, biomfile, filefile, testFilePath, contigsreportfile, clrfile;
         string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile, processors, flowfile, countfile, summaryfile, constaxonomyfile, groupMode, testDirectory, sharedHeaderMode, samplefile;
@@ -153,7 +150,7 @@ class CurrentFile {
         std::mutex currentProtector;
 		CurrentFile() {
             m = MothurOut::getInstance();
-            blastPath=""; testFilePath = "";
+            testFilePath = "";
             outputDir= "";
             accnosfile = "";
             filefile = "";

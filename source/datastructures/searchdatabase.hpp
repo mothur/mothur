@@ -11,7 +11,7 @@
  */
 
 
-/* This class is a parent to blastdb, kmerdb, suffixdb.  */
+/* This class is a parent to kmerdb, suffixdb.  */
 
 #include "mothur.h"
 #include "sequence.hpp"
@@ -67,7 +67,6 @@ public:
 	virtual int getReversed(int) { return 0; } 
 	virtual int getMaxKmer(){	return 1;	}
     virtual string getName(int) { return ""; }
-    virtual vector<int> findClosestMegaBlast(Sequence*, int, int){ vector<int> results; return results;}
 	
 protected:
     

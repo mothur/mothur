@@ -40,7 +40,7 @@ public:
     
 private:
     bool abort, createGroup;
-    string fastaFile, oligoFile, qFileName, groupfile, nameFile, countfile;
+    string fastaFile, oligoFile, qFileName, nameFile, countfile;
     
     bool flip, allFiles, qtrim, keepforward, pairedOligos, reorient, logtransform;
     int maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs, comboStarts;
@@ -50,14 +50,14 @@ private:
     set<string> filesToRemove;
     vector<string> groupVector;
     map<string, int> groupCounts;
-    map<string, string> nameMap;
     map<string, int> nameCount; //for countfile name -> repCount
+    map<string, string> seq2Group;
 
     vector<linePair> lines;
     vector<linePair> qLines;
     
-    long long createProcessesCreateTrim(string, string, string, string, string, string, string, string, string, string);
-    int processNamesCountFiles(string trimFasta, set<string> badNames, map<string, string> groupMap, string trimNameFileName, string scrapNameFileName, string trimCountFileName, string scrapCountFileName, string groupFile);
+    long long createProcessesCreateTrim(string, string, string, string, string, string, set<string>&);
+    int processNamesCountFiles(string trimFasta, set<string> badNames, string trimCountFileName, string scrapCountFileName);
     int setLines(string, string);
 };
 

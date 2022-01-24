@@ -1,4 +1,4 @@
-Ubuntu 18
+Ubuntu 20
 
 Install dependancies
 
@@ -15,12 +15,12 @@ USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes
 LOGFILE_NAME ?= no
-BOOST_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu\""
-BOOST_INCLUDE_DIR ?= "\"/usr/include/\""
-HDF5_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu/hdf5/serial\""
-HDF5_INCLUDE_DIR ?= "\"/usr/include/hdf5/serial/\""
-GSL_LIBRARY_DIR ?= "\"/usr/lib/x86_64-linux-gnu\""
-GSL_INCLUDE_DIR ?= "\"/usr/include/\""
+BOOST_LIBRARY_DIR ?= "/usr/lib/x86_64-linux-gnu/"
+BOOST_INCLUDE_DIR ?= "/usr/include/"
+HDF5_LIBRARY_DIR ?= "/usr/lib/x86_64-linux-gnu/hdf5/serial/"
+HDF5_INCLUDE_DIR ?= "/usr/include/hdf5/serial/"
+GSL_LIBRARY_DIR ?= "/usr/lib/x86_64-linux-gnu/"
+GSL_INCLUDE_DIR ?= "/usr/include/"
 
 make clean 
 make

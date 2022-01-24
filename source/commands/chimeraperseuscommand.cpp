@@ -8,7 +8,7 @@
  */
 
 #include "chimeraperseuscommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequence.hpp"
 #include "counttable.h"
 #include "sequencecountparser.h"
@@ -550,7 +550,7 @@ string ChimeraPerseusCommand::getCountFile(string& inputFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

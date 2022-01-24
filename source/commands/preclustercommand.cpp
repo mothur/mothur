@@ -9,7 +9,7 @@
 
 #include "splitgroupscommand.h"
 #include "preclustercommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "summary.hpp"
 
 //**********************************************************************************************************************
@@ -21,7 +21,7 @@ vector<string> PreClusterCommand::setParameters(){
         CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "none", "none","",false,false,true); parameters.push_back(pgroup);
         CommandParameter pdiffs("diffs", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pdiffs);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
-        CommandParameter palign("align", "Multiple", "needleman-gotoh-blast-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
+        CommandParameter palign("align", "Multiple", "needleman-gotoh-noalign", "needleman", "", "", "","",false,false); parameters.push_back(palign);
         CommandParameter pmatch("match", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pmatch);
         CommandParameter pmismatch("mismatch", "Number", "", "-1.0", "", "", "","",false,false); parameters.push_back(pmismatch);
         CommandParameter pgapopen("gapopen", "Number", "", "-2.0", "", "", "","",false,false); parameters.push_back(pgapopen);
@@ -68,7 +68,7 @@ string PreClusterCommand::getHelpString(){
 		helpString += "The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n";
     helpString += "The method parameter allows you to specify the algorithm to use to complete the preclusterign step. Possible methods include simple, tree, unoise, and deblur.  Default=simple.\n";
     helpString += "The clump parameter allows you to specify which reads can be combined. Possible options include lessthan and lessthanequal. lessthan -> merge reads with less abundance. lessthanequal -> merge reads with less than or equal abundance Default=lessthan.\n";
-    helpString += "The align parameter allows you to specify the alignment align_method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n";
+    helpString += "The align parameter allows you to specify the alignment align_method to use.  Your options are: gotoh, needleman and noalign. The default is needleman.\n";
     helpString += "The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n";
     helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
     helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
@@ -229,16 +229,6 @@ PreClusterCommand::PreClusterCommand(string option) : Command() {
             if (indel_prob < 0) { m->mothurOut("[ERROR]: max_indels must be positive.\n"); abort=true; }
             
             align = validParameter.valid(parameters, "align");		if (align == "not found"){	align = "needleman";	}
-            if (align == "blast") {
-                string blastlocation = "";
-                vector< vector<string> > locations = current->getLocations();
-                bool foundTool = util.findBlastLocation(blastlocation, locations);
-
-                if (!foundTool){
-                    m->mothurOut("[WARNING]: Unable to locate blast executables, cannot use blast as align method. Using needleman instead.\n"); align = "needleman";
-                }
-            }
-            
             align_method = "unaligned";
             
             if (!abort) {
@@ -335,7 +325,6 @@ struct preClusterData {
     if (align_method == "unaligned") {
       if(align == "gotoh")	{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 1000);	}
       else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);			}
-      else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
       else if(align == "noalign")		{	alignment = new NoAlign();													}
       else {
           m->mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");

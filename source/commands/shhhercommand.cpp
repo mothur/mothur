@@ -226,6 +226,8 @@ int ShhherCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
+        int startTime = time(NULL);
+        
 		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
 		getJointLookUp();	if (m->getControl_pressed()) { return 0; }
 		
@@ -234,7 +236,22 @@ int ShhherCommand::execute(){
 		if(compositeFASTAFileName != ""){
 			outputNames.push_back(compositeFASTAFileName); outputTypes["fasta"].push_back(compositeFASTAFileName);
 			outputNames.push_back(compositeNamesFileName); outputTypes["name"].push_back(compositeNamesFileName);
+            
+            //set fasta file as new current fastafile
+            string currentName = "";
+            itTypes = outputTypes.find("fasta");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+            }
+            
+            itTypes = outputTypes.find("name");
+            if (itTypes != outputTypes.end()) {
+                if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setNameFile(currentName); }
+            }
+
 		}
+
+        m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to de-noise your sequences.\n");
 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();

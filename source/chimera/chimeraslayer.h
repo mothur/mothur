@@ -24,9 +24,9 @@
 class ChimeraSlayer : public MothurChimera {
 	
 	public:
-		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
-		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int);
-		ChimeraSlayer(string, string, bool, map<string, int>&, string,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, string, int, bool);
+		ChimeraSlayer(string, string, bool, int, int, int, int, float, int, int, int, int, int, int, int, int, bool, int);
+		ChimeraSlayer(string, string, bool, map<string, int>&,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, int);
+		ChimeraSlayer(string, string, bool, map<string, int>&,  int, int, int, int, float, int, int, int, int, int, int, int, int, bool, int, bool);
 
 		~ChimeraSlayer();
 		
@@ -50,7 +50,7 @@ class ChimeraSlayer : public MothurChimera {
 	
 		vector<data_struct>  chimeraResults;
 		data_results printResults;
-		string chimeraFlags, searchMethod, fastafile, blastlocation;
+		string chimeraFlags, fastafile;
 		bool realign, trimChimera;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
@@ -62,7 +62,6 @@ class ChimeraSlayer : public MothurChimera {
 		//int readNameFile(string);
 		vector<Sequence*> getTemplate(Sequence, vector<Sequence*>&);
 		vector<Sequence> getRefSeqs(Sequence, vector<Sequence*>&, vector<Sequence*>&);
-		vector<Sequence> getBlastSeqs(Sequence, vector<Sequence*>&, int);
 		vector<Sequence> getKmerSeqs(Sequence, vector<Sequence*>&, int);
 		
 };

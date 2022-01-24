@@ -19,7 +19,6 @@
 #include "alignment.hpp"
 #include "gotohoverlap.hpp"
 #include "needlemanoverlap.hpp"
-#include "blastalign.hpp"
 #include "noalign.hpp"
 #include "filters.h"
 #include "getseqscommand.h"

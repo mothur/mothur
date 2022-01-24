@@ -677,6 +677,126 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations)
     }
 }
 /***********************************************************************/
+//function assumes files are all gz
+//locations[0] = inputdir paths, locations[1] = outputdirPaths, locations[2] = mothur's exe path, locations[3] = mothur tools paths, locations[4] = mothur_files paths
+bool Utils::checkLocationsGZ(string& filename, vector< vector<string> > locations){
+    try {
+        filename = getFullPathName(filename);
+        vector<string> inputDirs = locations[0];
+        vector<string> outputDirs = locations[1];
+        vector<string> mothurPaths = locations[2];
+        vector<string> mothurToolsPaths = locations[3];
+        vector<string> mothurFilesPaths = locations[4];
+        
+        ifstream in; bool ableToOpen;
+
+#ifdef USE_BOOST
+        boost::iostreams::filtering_istream inBoost;
+        ableToOpen = openInputFileBinary(filename, in, inBoost, "noerror"); in.close(); inBoost.pop(); inBoost.reset();
+#else
+        m->mothurOut("[ERROR]: cannot read gz format without enabling boost libraries.\n"); m->setControl_pressed(true); return false;
+#endif
+        
+
+        //if you can't open it, try input location
+        if (!ableToOpen) {
+            for (int i = 0; i < inputDirs.size(); i++) {
+                string inputDir = inputDirs[i];
+                
+                if (inputDir != "") { //default path is set
+                    string tryPath = inputDir + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying input directory " + tryPath+ ".\n");
+                    
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        //if you can't open it, try output location
+        if (!ableToOpen) {
+            string outputDir = ""; if (outputDirs.size() != 0) { outputDir = outputDirs[0]; }
+            if (outputDir != "") { //default path is set
+                string tryPath = outputDir + getSimpleName(filename);
+                m->mothurOut("Unable to open " + filename + ". Trying output directory " + tryPath+ ".\n");
+                ifstream in2;
+                #ifdef USE_BOOST
+                    boost::iostreams::filtering_istream inBoost2;
+                    ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                #endif
+                filename = tryPath;
+            }
+        }
+
+        //if you can't open it, try default locations
+        if (!ableToOpen) {
+            for (int i = 0; i < mothurFilesPaths.size(); i++) {
+                string defaultPath = mothurFilesPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_FILES directory " + tryPath+ ".\n");
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            string mothurPath = ""; if (mothurPaths.size() != 0) { mothurPath = mothurPaths[0]; }
+            string tryPath = mothurPath + getSimpleName(filename);
+            m->mothurOut("Unable to open " + filename + ". Trying mothur's executable directory " + tryPath+ ".\n");
+            ifstream in2;
+            #ifdef USE_BOOST
+                boost::iostreams::filtering_istream inBoost2;
+                ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+            #endif
+            filename = tryPath;
+        }
+
+        //if you can't open it its not in current working directory or inputDir, try mothur excutable location
+        if (!ableToOpen) {
+            for (int i = 0; i < mothurToolsPaths.size(); i++) {
+                string defaultPath = mothurToolsPaths[i];
+                
+                if (defaultPath != "") { //default path is set
+                    string tryPath = defaultPath + getSimpleName(filename);
+                    m->mothurOut("Unable to open " + filename + ". Trying MOTHUR_TOOLS directory " + tryPath+ ".\n");
+                    ifstream in2;
+                    #ifdef USE_BOOST
+                        boost::iostreams::filtering_istream inBoost2;
+                        ableToOpen = openInputFileBinary(tryPath, in2, inBoost2, "noerror"); in2.close(); inBoost2.pop();
+                    #endif
+                    filename = tryPath;
+                    
+                    if (ableToOpen) { break; }
+                }
+            }
+        }
+
+        if (!ableToOpen) { m->mothurOut("Unable to open " + filename + ".\n");  return false;  }
+
+        return true;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkLocations");
+        exit(1);
+    }
+}
+/***********************************************************************/
 bool Utils::checkLocations(string& filename, vector< vector<string> > locations, string silent){
     try {
         filename = getFullPathName(filename);
@@ -793,32 +913,6 @@ bool Utils::checkSpecificLocations(string& filename, vector<string> locations, s
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "checkSpecificLocations");
-        exit(1);
-    }
-}
-/***********************************************************************/
-bool Utils::findBlastLocation(string& toolLocation, vector< vector<string> > locations){
-    try {
-        bool foundTool = false;
-        string programName = "formatdb"; programName += EXECUTABLE_EXT;
-
-        toolLocation = "";
-        string blastBin = "blast"; blastBin += PATH_SEPARATOR; blastBin += "bin"; blastBin += PATH_SEPARATOR;
-       
-        for (int i = 0; i < locations.size(); i++) {
-            for (int j = 0; j < locations[i].size(); j++) { locations[i][j] += blastBin; }
-        }
-        
-        vector<string> versionOutputs;
-        foundTool = findTool(programName, toolLocation, versionOutputs, locations);
-        
-        if (foundTool) { toolLocation = hasPath(toolLocation); }
-        else { toolLocation = ""; }
-        
-        return foundTool;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "findBlastLocation");
         exit(1);
     }
 }
@@ -1019,6 +1113,27 @@ bool Utils::openInputFileBinary(string fileName, ifstream& file, boost::iostream
         exit(1);
     }
 }
+/***********************************************************************/
+bool Utils::openOutputFileBinary(string fileName, ofstream& file, ostream*& out, boost::iostreams::filtering_streambuf<boost::iostreams::output>& outBoost){
+    try {
+        string completeFileName = getFullPathName(fileName);
+        
+        file.open(completeFileName, ios_base::out | ios_base::binary | ios_base::trunc);
+        
+        if(!file) { return false; }
+        else { //check for blank file
+            outBoost.push(boost::iostreams::gzip_compressor(boost::iostreams::gzip_params(9)));
+            outBoost.push(file);
+            
+            out = new ostream(&outBoost);
+            return true;
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "openOutputFileGZBinary");
+        exit(1);
+    }
+}
 #endif
 /***********************************************************************/
 //results[0] = allGZ, results[1] = allNotGZ
@@ -1033,8 +1148,8 @@ vector<bool> Utils::allGZFiles(vector<string> & files){
 
             //ignore none and blank filenames
             if ((files[i] != "") || (files[i] != "NONE")) {
-                if (isGZ(files[i])[1]) { allNOTGZ = false;  }
-                else {  allGZ = false;  }
+                if ((isGZ(files[i]))[1]) { allNOTGZ = false;  cout << "notGz " << files[i] << endl; }
+                else {  allGZ = false; cout << "yesGz " << files[i] << endl;  }
             }
         }
 
@@ -1078,29 +1193,28 @@ bool Utils::isHDF5(string filename){
 vector<bool> Utils::isGZ(string filename){
     try {
         vector<bool> results; results.resize(2, false);
-#ifdef USE_BOOST
-        ifstream fileHandle;
-        boost::iostreams::filtering_istream gzin;
-
+        
         if ((getExtension(filename) != ".gz") && (getExtension(filename) != ".GZ")) { return results; } // results[0] = false; results[1] = false;
-
-        bool ableToOpen = openInputFileBinary(filename, fileHandle, gzin, ""); //no error
+        
+#ifdef USE_BOOST
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        bool ableToOpen = openInputFileBinary(filename, in, inBoost, ""); //no error
         if (!ableToOpen) { return results; } // results[0] = false; results[1] = false;
         else {  results[0] = true;  }
 
         char c;
         try
         {
-            gzin >> c;
+            inBoost >> c;
             results[1] = true;
         }
         catch ( boost::iostreams::gzip_error & e )
         {
-            gzin.pop();
-            fileHandle.close();
+            inBoost.pop(); inBoost.reset();
+            in.close();
             return results;  // results[0] = true; results[1] = false;
         }
-        fileHandle.close();
+        in.close(); inBoost.pop(); inBoost.reset();
 #else
         m->mothurOut("[ERROR]: cannot test for gz format without enabling boost libraries.\n"); m->setControl_pressed(true);
 #endif
@@ -2295,7 +2409,7 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
             string logfilename = LOGFILE_NAME;
             logfilename = getFullPathName(logfilename);
         
-            m->appendLogBuffer("Using Static Logfile " + logfilename +  "\n");
+            m->mothurOut("Using Static Logfile " + logfilename +  "\n");
         
             m->setLogFileName(logfilename, false);
             m->mothurOut("\n");
@@ -2316,12 +2430,12 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         //version
 #if defined NON_WINDOWS
 #if defined (__APPLE__) || (__MACH__)
-        m->appendLogBuffer("Mac version\n\n");
+        m->mothurOut("Mac version\n\n");
 #else
-        m->appendLogBuffer("Linux version\n\n");
+        m->mothurOut("Linux version\n\n");
 #endif
 #else
-        m->appendLogBuffer("Windows version\n\n");
+        m->mothurOut("Windows version\n\n");
 #endif
         
         string packagesUsed = "";
@@ -2344,47 +2458,47 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         if (packagesUsed != "") {
             //remove last comma
             packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
-            m->appendLogBuffer("Using " + packagesUsed + "\n");
+            m->mothurOut("Using " + packagesUsed + "\n");
         }
         
         #ifdef MOTHUR_FILES
         
         if (defaultPaths.size() != 0) {
-            m->appendLogBuffer("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
+            m->mothurOut("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
             for (int i = 0; i < defaultPaths.size(); i++) {
-                m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
+                m->mothurOut("\t" + defaultPaths[i] + "\n");
             }
-            m->appendLogBuffer("\n");
+            m->mothurOut("\n");
         }
         #endif
         
         #ifdef MOTHUR_TOOLS
             if (toolPaths.size() != 0) {
-                m->appendLogBuffer("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
+                m->mothurOut("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
                 for (int i = 0; i < toolPaths.size(); i++) {
-                    m->appendLogBuffer("\t" + toolPaths[i] + "\n");
+                    m->mothurOut("\t" + toolPaths[i] + "\n");
                 }
-                m->appendLogBuffer("\n");
+                m->mothurOut("\n");
             }
         #endif
         
         //header
-        m->appendLogBuffer("mothur v." + mothurVersion + "\n");
-        m->appendLogBuffer("Last updated: " + releaseDate + "\n");
-        m->appendLogBuffer("by\n");
-        m->appendLogBuffer("Patrick D. Schloss\n\n");
-        m->appendLogBuffer("Department of Microbiology & Immunology\n\n");
-        m->appendLogBuffer("University of Michigan\n");
-        m->appendLogBuffer("http://www.mothur.org\n\n");
-        m->appendLogBuffer("When using, please cite:\n");
-        m->appendLogBuffer("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
-        m->appendLogBuffer("Distributed under the GNU General Public License\n\n");
-        m->appendLogBuffer("Type 'help()' for information on the commands that are available\n\n");
-        m->appendLogBuffer("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
-        m->appendLogBuffer("Type 'quit()' to exit program\n\n");
+        m->mothurOut("mothur v." + mothurVersion + "\n");
+        m->mothurOut("Last updated: " + releaseDate + "\n");
+        m->mothurOut("by\n");
+        m->mothurOut("Patrick D. Schloss\n\n");
+        m->mothurOut("Department of Microbiology & Immunology\n\n");
+        m->mothurOut("University of Michigan\n");
+        m->mothurOut("http://www.mothur.org\n\n");
+        m->mothurOut("When using, please cite:\n");
+        m->mothurOut("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
+        m->mothurOut("Distributed under the GNU General Public License\n\n");
+        m->mothurOut("Type 'help()' for information on the commands that are available\n\n");
+        m->mothurOut("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
+        m->mothurOut("Type 'quit()' to exit program\n\n");
         
         m->setRandomSeed(19760620);
-        m->appendLogBuffer("[NOTE]: Setting random seed to 19760620.\n\n");
+        m->mothurOut("[NOTE]: Setting random seed to 19760620.\n\n");
      
         OS = "";
         //version

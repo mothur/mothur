@@ -9,7 +9,7 @@
 
 #include "subsamplecommand.h"
 
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "getseqscommand.h"
 #include "subsample.h"
 
@@ -597,7 +597,7 @@ int SubSampleCommand::getSubSampleFasta() {
 			m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 			current->setMothurCalling(true);
             
-			Command* uniqueCommand = new DeconvoluteCommand(inputString);
+			Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 			uniqueCommand->execute();
 			
 			map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

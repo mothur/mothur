@@ -53,13 +53,11 @@ private:
 	int driverGroups(string, string, string, map<string, map<string, int> >&, map<string, string>&, string);
 
 	bool abort, realign, trim, trimera, hasCount, dups, removeChimeras;
-	string fastafile, templatefile, search, countfile, blastlocation;
+	string fastafile, templatefile, countfile;
 	int window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, templateSeqsLength;
     long long numSeqs;
 	float divR;
     map<string, int> priority;
-    
-	
     map<string, string> group2NameFile;
 	vector<string> outputNames;
 	

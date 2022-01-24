@@ -10,7 +10,6 @@
 #include "alignmentdb.h"
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
-#include "blastdb.hpp"
 
 /**************************************************************************************************/
 AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int tid, bool writeShortcut){		//	This assumes that the template database is in fasta format, may
@@ -85,8 +84,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			
 		}
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
-		else if(method == "blast")		{	search = new BlastDB(fastaFileName.substr(0,fastaFileName.find_last_of(".")+1), gapOpen, gapExtend, match, misMatch, "", threadID);	}
-		else {
+        else {
 			method = "kmer";
 			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.\n");
 			search = new KmerDB(fastaFileName, 8);
@@ -126,7 +124,6 @@ AlignmentDB::AlignmentDB(string s){
 		method = s;
 		
 		if(method == "suffix")		{	search = new SuffixDB();	}
-		else if(method == "blast")	{	search = new BlastDB("", 0);		}
 		else						{	search = new KmerDB();		}
 
 				
