@@ -329,10 +329,8 @@ int SffMultipleCommand::execute(){
 int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligosFiles){
 	try {
         
-        ifstream in;
-        util.openInputFile(filename, in);
-        bool allBlank = true;
-        bool allFull = true;
+        ifstream in; util.openInputFile(filename, in);
+        bool allBlank = true;  bool allFull = true;
         
         string oligos, sff;
         while (!in.eof()) {

@@ -737,12 +737,8 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
         string name;
         int start, end, length, ambigs, polymer, numReps;
         
-        ofstream out;
-        util.openOutputFile(outSummary, out);
-                
-        //read summary file
-        ifstream in;
-        util.openInputFile(summaryfile, in);
+        ofstream out; util.openOutputFile(outSummary, out);
+        ifstream in; util.openInputFile(summaryfile, in);
         out << (util.getline(in)) << endl;   //skip headers
          
 		int count = 0;

@@ -387,11 +387,8 @@ void GetGroupsCommand::readFasta(){
         variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -583,11 +580,8 @@ void GetGroupsCommand::readName(){
         variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -665,11 +659,8 @@ void GetGroupsCommand::readGroup(){
         variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(groupfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
@@ -748,11 +739,8 @@ void GetGroupsCommand::readTax(){
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(taxfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -957,11 +945,8 @@ void GetGroupsCommand::readColumn(){
         string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
-        
-        ifstream in;
-        util.openInputFile(columnfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(columnfile, in);
         
         set<string> foundNames;
         string firstName, secondName;

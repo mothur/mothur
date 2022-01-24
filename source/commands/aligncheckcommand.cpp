@@ -133,15 +133,12 @@ int AlignCheckCommand::execute(){
 		
 		if (m->getControl_pressed()) { return 0; }
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
-		
-		ofstream out;
         map<string, string> variables; 
 		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
 		string outfile = getOutputFileName("aligncheck",variables);
-		util.openOutputFile(outfile, out);
-		
+        
+        ofstream out; util.openOutputFile(outfile, out);
+        ifstream in; util.openInputFile(fastafile, in);
 				
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';
 		out << "loop" << '\t' << "tilde" << '\t' << "total"  << '\t' << "numseqs" << endl;
@@ -242,9 +239,8 @@ void AlignCheckCommand::readMap(){
 	try {
 			
 		structMap.resize(1, 0);
-		ifstream in;
 		
-		util.openInputFile(mapfile, in);
+        ifstream in; util.openInputFile(mapfile, in);
 		
 		while(!in.eof()){
 			int position;

@@ -1082,8 +1082,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         //get name of first sequence in each chunk
         map<string, int> firstSeqNames;
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-            ifstream in;
-            util.openInputFile(filename, in);
+            ifstream in; util.openInputFile(filename, in);
             in.seekg(fastaFilePos[i]);
             
             //adjust start if null strings

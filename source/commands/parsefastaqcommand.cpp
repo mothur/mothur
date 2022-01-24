@@ -684,8 +684,7 @@ set<string> ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimO
         if (fasta)  { util.openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);       }
         if (qual)   { util.openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);         }
         
-        ifstream in;
-        util.openInputFile(inputfile, in);
+        ifstream in; util.openInputFile(inputfile, in);
         
         int count = 0;
         set<string> names;

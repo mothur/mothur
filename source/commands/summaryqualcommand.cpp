@@ -201,8 +201,7 @@ struct seqSumQualData {
 /**************************************************************************************/
 void driverCreateSummary(seqSumQualData* params) {
 	try {
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
 		
 		in.seekg(params->start);
         

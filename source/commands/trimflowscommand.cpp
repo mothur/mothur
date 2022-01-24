@@ -652,8 +652,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		for (int i = 0; i < processors; i++) {
 			double spot = (i+1) * chunkSize;
 			
-			ifstream in;
-			util.openInputFile(flowFileName, in);
+			ifstream in; util.openInputFile(flowFileName, in);
 			in.seekg(spot);
 			
 			string dummy = util.getline(in);
@@ -677,8 +676,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
 		}
 
-		ifstream in;
-		util.openInputFile(flowFileName, in);
+		ifstream in; util.openInputFile(flowFileName, in);
 		in >> numFlows;
 		util.gobble(in);
 		in.close();

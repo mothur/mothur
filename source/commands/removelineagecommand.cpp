@@ -447,8 +447,7 @@ string RemoveLineageCommand::readTax(){
         util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 
-		ifstream in;
-		util.openInputFile(taxfile, in);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -505,8 +504,7 @@ string RemoveLineageCommand::readConsTax(){
 		util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 		
-		ifstream in;
-		util.openInputFile(constaxonomy, in);
+		ifstream in; util.openInputFile(constaxonomy, in);
 		string otuLabel, tax;
         
         //read headers

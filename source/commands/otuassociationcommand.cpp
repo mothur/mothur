@@ -380,8 +380,7 @@ void OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 /*****************************************************************/
 void OTUAssociationCommand::readMetadata(){
 	try {
-		ifstream in;
-		util.openInputFile(metadatafile, in);
+		ifstream in; util.openInputFile(metadatafile, in);
 		
 		string headerLine = util.getline(in); util.gobble(in);
         metadataLabels = util.splitWhiteSpace(headerLine);

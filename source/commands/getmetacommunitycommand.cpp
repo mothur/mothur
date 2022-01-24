@@ -355,8 +355,7 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             for (int j = 0; j < doneFlags.size(); j++) {
                 if (!util.isBlank(doneFlags[j])) { //another process has finished
                     //are they done at a lower partition?
-                    ifstream in;
-                    util.openInputFile(doneFlags[j], in);
+                    ifstream in; util.openInputFile(doneFlags[j], in);
                     int tempNum;
                     in >> tempNum; in.close();
                     if (tempNum < numPartitions) { break; } //quit, because someone else has finished

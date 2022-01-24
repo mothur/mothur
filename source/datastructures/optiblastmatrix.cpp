@@ -268,8 +268,7 @@ int OptiBlastMatrix::readBlast(){
         }
         overlapSingleton.clear();
         
-        ifstream in;
-        util.openInputFile(distFile, in);
+        ifstream in; util.openInputFile(distFile, in);
         
         dists.resize(nameAssignment.size());
         closeness.resize(nonSingletonCount);
@@ -511,8 +510,7 @@ int OptiBlastMatrix::readBlastNames(map<string, long long>& nameAssignment) {
         string name, hold, prevName;
         int num = 0;
         
-        ifstream in;
-        Utils util; util.openInputFile(distFile, in);
+        ifstream in; Utils util; util.openInputFile(distFile, in);
         
         //read first line
         in >> prevName;

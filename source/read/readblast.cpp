@@ -261,8 +261,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		string name, hold, prevName;
 		int num = 1;
 		
-		ifstream in;
-		util.openInputFile(blastfile, in);
+		ifstream in; util.openInputFile(blastfile, in);
 		
 		//ofstream outName;
 		//util.openOutputFile((blastfile + ".tempOutNames"), outName);

@@ -559,8 +559,7 @@ int SRACommand::readContactFile(){
         lastName = ""; firstName = ""; submissionName = ""; email = ""; centerName = ""; centerType = ""; description = ""; website = ""; projectName = "";
         projectTitle = "";  ownership = "owner";
         
-        ifstream in;
-        util.openInputFile(contactfile, in);
+        ifstream in; util.openInputFile(contactfile, in);
         
         while(!in.eof()) {
             
@@ -668,8 +667,7 @@ int SRACommand::readMIMarksFile(){
         requiredFieldsForPackage.push_back("seq_methods");
         requiredFieldsForPackage.push_back("organism");
         
-        ifstream in;
-        util.openInputFile(mimarksfile, in);
+        ifstream in; util.openInputFile(mimarksfile, in);
         
         //read comments
         string temp; packageType = "";
@@ -1782,8 +1780,7 @@ bool SRACommand::checkDateFormat(string& date){
 
 int SRACommand::findFileOption(){
     try {
-        ifstream in;
-        util.openInputFile(file, in);
+        ifstream in; util.openInputFile(file, in);
         
         fileOption = 0;
         

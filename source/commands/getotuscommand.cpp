@@ -201,11 +201,8 @@ int GetOtusCommand::readClassifyOtu(){
         variables["[extension]"] = util.getExtension(constaxonomyfile);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(constaxonomyfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(constaxonomyfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
@@ -259,11 +256,8 @@ int GetOtusCommand::readOtuAssociation(){
         variables["[extension]"] = util.getExtension(otucorrfile);
 		string outputFileName = getOutputFileName("otucorr", variables);
 
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(otucorrfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(otucorrfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
@@ -314,12 +308,8 @@ int GetOtusCommand::readCorrAxes(){
         variables["[extension]"] = util.getExtension(corraxesfile);
 		string outputFileName = getOutputFileName("corraxes", variables);
 
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-        
-		ifstream in;
-		util.openInputFile(corraxesfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(corraxesfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;

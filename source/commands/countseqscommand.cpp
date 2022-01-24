@@ -280,12 +280,8 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
 	try {
         map<int, string> indexToNames;
         
-        ofstream out;
-        util.openOutputFile(name, out);
-        
-        //open input file
-		ifstream in;
-		util.openInputFile(namefile, in);
+        ofstream out; util.openOutputFile(name, out);
+		ifstream in; util.openInputFile(namefile, in);
         
         string rest = "";
         char buffer[4096];
@@ -357,12 +353,8 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
         map<string, int> groupIndex;
         map<string, int>::iterator it;
         
-        ofstream out;
-        util.openOutputFile(filename, out);
-        
-        //open input file
-		ifstream in;
-		util.openInputFile(groupfile, in);
+        ofstream out; util.openOutputFile(filename, out);
+		ifstream in; util.openInputFile(groupfile, in);
         
         string rest = "";
         char buffer[4096];

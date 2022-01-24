@@ -469,8 +469,7 @@ long long Summary::summarizeFastaSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverFastaSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 
@@ -658,8 +657,7 @@ long long Summary::summarizeContigsSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverContigsSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 
@@ -863,8 +861,7 @@ long long Summary::summarizeAlignSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverAlignSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 

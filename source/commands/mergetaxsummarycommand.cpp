@@ -112,8 +112,7 @@ int MergeTaxSummaryCommand::execute(){
        
         for (int i = 0; i < fileNames.size(); i++) {
             
-            ifstream in;
-            util.openInputFile(fileNames[i], in);
+            ifstream in; util.openInputFile(fileNames[i], in);
             string temp = util.getline(in); util.gobble(in);
             vector<string> headers = util.splitWhiteSpace(temp);
             

@@ -91,8 +91,7 @@ int MimarksAttributesCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        ifstream in;
-        util.openInputFile(xmlFile, in);
+        ifstream in; util.openInputFile(xmlFile, in);
         string header = util.getline(in); util.gobble(in);
         
         if (header != "<BioSampleAttributes>") { m->mothurOut("[ERROR]: " + header + " is not a bioSample attribute file.\n"); m->setControl_pressed(true); }

@@ -664,12 +664,10 @@ void RenameSeqsCommand::readQual(map<string, string>& oldMap){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
         variables["[extension]"] = util.getExtension(qualfile);
         string outputFileName = getOutputFileName("qfile", variables);
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["qfile"].push_back(outputFileName);
 
-        ifstream in;
-        util.openInputFile(qualfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(qualfile, in);
         
         map<string, string>::iterator it;
         int count = 0;
@@ -850,8 +848,7 @@ void RenameSeqsCommand::readList(map<string, string>& oldMap){
 //**********************************************************************************************************************
 int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
     try {
-        ifstream in;
-        util.openInputFile(mapFile, in);
+        ifstream in; util.openInputFile(mapFile, in);
         
         map<string, string>::iterator it;
         string oldname, newname;

@@ -611,8 +611,7 @@ vector<seqData> loadSequences(map<string, int>& nameMap, string thisGroupsFastaF
         bool error = false;
         vector<seqData> sequences;
         
-        ifstream in;
-        params->util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; params->util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
@@ -727,8 +726,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 		//read fasta file and create sequenceData structure - checking for file mismatches
 		vector<seqData> sequences;
 		bool error = false;
-		ifstream in;
-		util.openInputFile(inputFile, in);
+		ifstream in; util.openInputFile(inputFile, in);
 		alignLength = 0;
         
 		while (!in.eof()) {
@@ -865,11 +863,8 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
         util.printAccnos(accnosFileName, chimerasInFile);
     
 		//edit chimera file
-		ifstream in; 
-		util.openInputFile(outputFileName, in);
-		
-		ofstream out;
-		util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		ifstream in;  util.openInputFile(outputFileName, in);
+		ofstream out; util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		int DiffsToBestMatch, BestMatchIndex, DiffstToChimera, IndexofLeftParent, IndexOfRightParent;
 		float temp1,temp2, temp3, temp4, temp5, temp6, temp7, temp8;

@@ -369,8 +369,7 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 		util.readNames(namefile, nameMap);
 		bool error = false;
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		while (!in.eof()) {
 			

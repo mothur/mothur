@@ -389,11 +389,8 @@ int SortSeqsCommand::readFlow(){
 		string outputFileName = getOutputFileName("flow", variables);
 		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(flowfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(flowfile, in);
         int numFlows;
 		string name;
         
@@ -425,8 +422,7 @@ int SortSeqsCommand::readFlow(){
                     }
                     util.gobble(in);
                 }
-                in.close();
-                out.close();
+                in.close(); out.close();
                 
                 int numLeft = names.size();
                 if (numNamesInFile < numLeft) { numLeft = numNamesInFile; }
@@ -750,11 +746,8 @@ int SortSeqsCommand::readName(){
 		string outputFileName = getOutputFileName("name", variables);
         outputTypes["name"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -830,11 +823,8 @@ int SortSeqsCommand::readTax(){
 
         outputTypes["taxonomy"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-		ifstream in;
-		util.openInputFile(taxfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have

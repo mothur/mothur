@@ -533,11 +533,9 @@ void GetSeqsCommand::readQual(string qualfile){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
         variables["[extension]"] = util.getExtension(qualfile);
 		string outputFileName = getOutputFileName("qfile", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(qualfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(qualfile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -1160,11 +1158,8 @@ int GetSeqsCommand::compareAccnos(string namefile){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(accnosfile));
 		string outputFileName = getOutputFileName("accnosreport", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(accnosfile2, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(accnosfile2, in);
 		string name;
 		
 		set<string> namesAccnos2;

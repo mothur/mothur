@@ -174,8 +174,7 @@ int SummaryTaxCommand::execute(){
         map<string, vector<string> >::iterator itNames;
         if (namefile != "") { util.readNames(namefile, nameMap); }
 		
-        ifstream in;
-        util.openInputFile(taxfile, in);
+        ifstream in; util.openInputFile(taxfile, in);
         
         string name, taxon;
         while(!in.eof()){

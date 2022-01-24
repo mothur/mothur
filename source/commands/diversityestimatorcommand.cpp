@@ -772,8 +772,7 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue, boo
         int numPiecesExpected = 5;
         if (filldNu) { numPiecesExpected = 6; }
         
-        ifstream in;
-        util.openInputFile(samplefile, in);
+        ifstream in; util.openInputFile(samplefile, in);
         
         util.getline(in); util.gobble(in); //grab header
         string groupName = "";

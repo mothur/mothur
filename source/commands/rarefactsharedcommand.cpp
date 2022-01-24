@@ -387,8 +387,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             vector<string> thisTypesFiles = it->second;
             vector<string> columnHeaders;
             for (int i = 0; i < thisTypesFiles.size(); i++) {
-                ifstream in;
-                util.openInputFile(thisTypesFiles[i], in);
+                ifstream in; util.openInputFile(thisTypesFiles[i], in);
                 
                 string headers = util.getline(in); util.gobble(in);
                 columnHeaders = util.splitWhiteSpace(headers);
@@ -491,8 +490,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
             string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
-			ifstream in;
-			util.openInputFile(outputNames[i], in);
+			ifstream in; util.openInputFile(outputNames[i], in);
 			
             string labels = util.getline(in); util.gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);

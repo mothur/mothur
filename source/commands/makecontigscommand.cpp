@@ -2324,8 +2324,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
         //get name of first sequence in each chunk
         map<string, int> firstSeqNames; map<string, int> trimmedNames;
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-            ifstream in;
-            util.openInputFile(fasta[0], in);
+            ifstream in; util.openInputFile(fasta[0], in);
             in.seekg(fastaFilePos[i]);
             string name = "";
 
@@ -2756,8 +2755,7 @@ void MakeContigsCommand::debugFunction() {
     TrimOligos* rtrimOligos = NULL;
     if (reorient) {  rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, reorientedPairedPrimers, reorientedPairedBarcodes, true); numBarcodes = reorientedPairedBarcodes.size();   numPrimers = reorientedPairedPrimers.size();  }
     
-    ifstream in;
-    util.openInputFile(findexfile, in);
+    ifstream in; util.openInputFile(findexfile, in);
     
     while (!in.eof()) {
         if (m->getControl_pressed()) { break; }

@@ -427,8 +427,7 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
         vector<string> sampleMetadata;
         if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }
         else {
-            ifstream in;
-            util.openInputFile(metadatafile, in);
+            ifstream in; util.openInputFile(metadatafile, in);
             
             vector<string> groupNames, metadataLabels;
             map<string, vector<string> > lines;
@@ -502,8 +501,7 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& loo
         vector<string> sampleMetadata;
         if (metadatafile == "") {  for (int i = 0; i < lookup->size(); i++) {  sampleMetadata.push_back("null");  } }
         else {
-            ifstream in;
-            util.openInputFile(metadatafile, in);
+            ifstream in; util.openInputFile(metadatafile, in);
             
             vector<string> groupNames, metadataLabels;
             map<string, vector<string> > lines;

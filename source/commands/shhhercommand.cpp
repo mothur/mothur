@@ -304,8 +304,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
         vector<string> files;
         int count = 0;
         
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         int thisNumFLows = 0;
         in >> thisNumFLows; util.gobble(in);

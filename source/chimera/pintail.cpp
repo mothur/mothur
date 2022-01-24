@@ -342,8 +342,7 @@ vector<float> Pintail::readFreq() {
 		vector<float> prob;
 		set<int> h = decalc->getPos();  //positions of bases in masking sequence
 		
-		ifstream in;
-		util.openInputFile(consfile, in);
+		ifstream in; util.openInputFile(consfile, in);
 		
 		//read version
 		string line = util.getline(in); util.gobble(in);
@@ -403,8 +402,7 @@ vector< vector<float> > Pintail::readQuantiles() {
 		//to fill 0
 		quan.push_back(temp); 
 
-		ifstream in;
-		util.openInputFile(quanfile, in);
+		ifstream in; util.openInputFile(quanfile, in);
 		
 		//read version
 		string line = util.getline(in); util.gobble(in);

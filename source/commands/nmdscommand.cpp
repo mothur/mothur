@@ -463,8 +463,7 @@ int NMDSCommand::output(vector< vector<double> >& config, vector<string>& names,
 /*****************************************************************/
 vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 	try {
-		ifstream in;
-		util.openInputFile(axesfile, in);
+		ifstream in; util.openInputFile(axesfile, in);
 		
 		string headerLine = util.getline(in); util.gobble(in);
 		

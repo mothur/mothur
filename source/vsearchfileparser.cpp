@@ -93,8 +93,7 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         vector<seqPriorityNode> seqs;
         map<string, int>::iterator it;
         
-        ifstream in;
-        util.openInputFile(inputFile, in);
+        ifstream in; util.openInputFile(inputFile, in);
         
         while (!in.eof()) {
             
@@ -159,8 +158,7 @@ ListVector VsearchFileParser::createListFile(string inputFile, int numBins, stri
         map<string, string>::iterator itName;
         if (format == "name") { counts.clear(); util.readNames(namefile, nameMap); }
         
-        ifstream in;
-        util.openInputFile(inputFile, in);
+        ifstream in; util.openInputFile(inputFile, in);
         
         ListVector list(numBins); list.setLabel(label);
         
@@ -223,8 +221,7 @@ int VsearchFileParser::getNumBins(string logfile){
         
         int numBins = 0;
         
-        ifstream in;
-        Utils util; util.openInputFile(logfile, in);
+        ifstream in; Utils util; util.openInputFile(logfile, in);
         
         string line;
         while(!in.eof()) {

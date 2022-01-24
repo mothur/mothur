@@ -116,10 +116,8 @@ int OptiMatrix::readPhylip(){
             }
         }
         
+        ifstream in; util.openInputFile(distFile, in);
         
-        ifstream in;
-        
-        util.openInputFile(distFile, in);
         in >> nseqs >> name;
         
         if (namefile != "") { name = names[name]; } //redundant names
@@ -267,8 +265,7 @@ int OptiMatrix::readColumn(){
             }
         }
         
-        ifstream in;
-        util.openInputFile(distFile, in);
+        ifstream in; util.openInputFile(distFile, in);
         
         while(in){  //let's assume it's a triangular matrix...
             

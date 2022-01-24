@@ -134,8 +134,7 @@ int MakeGroupCommand::execute(){
 		
 			if (m->getControl_pressed()) { outputTypes.clear(); out.close(); util.mothurRemove(filename); return 0; }
 			
-			ifstream in;
-			util.openInputFile(fastaFileNames[i], in);
+			ifstream in; util.openInputFile(fastaFileNames[i], in);
 			
 			while (!in.eof()) {
 				

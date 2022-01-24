@@ -595,8 +595,7 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations)
         vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
-        ifstream in;
-        ableToOpen = openInputFile(filename, in, "noerror");
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
 
         //if you can't open it, try input location
@@ -807,8 +806,7 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations,
         vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
-        ifstream in;
-        ableToOpen = openInputFile(filename, in, "noerror");
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
         
         //if you can't open it, try input location
@@ -2683,8 +2681,7 @@ vector<consTax> Utils::readConsTax(string inputfile){
 
         vector<consTax> taxes;
 
-        ifstream in;
-        openInputFile(inputfile, in);
+        ifstream in; openInputFile(inputfile, in);
 
         //read headers
         getline(in);
@@ -2746,8 +2743,7 @@ void Utils::readConsTax(string inputfile, vector<Taxonomy>& conTax){
 //**********************************************************************************************************************
 int Utils::readConsTax(string inputfile, map<int, consTax2>& taxes){
     try {
-        ifstream in;
-        openInputFile(inputfile, in);
+        ifstream in; openInputFile(inputfile, in);
 
         //read headers
         getline(in);
@@ -2784,9 +2780,7 @@ vector<double> Utils::setFilePosEachLine(string filename, long long& num) {
         filename = getFullPathName(filename);
 
         vector<double> positions;
-        ifstream in;
-        //openInputFile(filename, in);
-        openInputFileBinary(filename, in);
+        ifstream in; openInputFileBinary(filename, in);
 
         string input;
         unsigned long long count = 0;
@@ -2839,9 +2833,7 @@ vector<double> Utils::setFilePosEachLine(string filename, unsigned long long& nu
         filename = getFullPathName(filename);
 
         vector<double> positions;
-        ifstream in;
-        //openInputFile(filename, in);
-        openInputFileBinary(filename, in);
+        ifstream in; openInputFileBinary(filename, in);
 
         string input;
         unsigned long long count = 0;
@@ -2925,8 +2917,7 @@ vector<double> Utils::divideFile(string filename, int& proc) {
             for (int i = 0; i < proc; i++) {
                 double spot = (i+1) * chunkSize;
 
-                ifstream in;
-                openInputFile(filename, in);
+                ifstream in; openInputFile(filename, in);
                 in.seekg(spot);
 
                 //look for next '>'
@@ -3008,8 +2999,7 @@ vector<double> Utils::divideFile(string filename, int& proc, char delimChar) {
         for (int i = 0; i < proc; i++) {
             double spot = (i+1) * chunkSize;
 
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(spot);
 
             getline(in); //get to end of line in case you jump into middle of line where the delim char happens to fall.
@@ -3105,8 +3095,7 @@ vector<double> Utils::divideFilePerLine(string filename, int& proc) {
         for (int i = 0; i < proc; i++) {
             double spot = (i+1) * chunkSize;
 
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(spot);
 
             //look for next line break
@@ -3157,8 +3146,7 @@ int Utils::divideFile(string filename, int& proc, vector<string>& files) {
         for (int i = 0; i < (filePos.size()-1); i++) {
 
             //read file chunk
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(filePos[i]);
             unsigned long long size = filePos[(i+1)] - filePos[i];
             char* chunk = new char[size];
@@ -3373,8 +3361,7 @@ vector<string> Utils::splitWhiteSpaceWithQuotes(string input){
 int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfidence) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(taxfile, in);
+        ifstream in; openInputFile(taxfile, in);
 
         bool error = false;
         string name, taxonomy;
@@ -3415,8 +3402,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
 int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3480,8 +3466,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund)
 int Utils::readNames(string namefile, map<string, string>& nameMap, int flip) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3538,8 +3523,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, map<string, 
     try {
         nameMap.clear(); nameCount.clear();
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3603,8 +3587,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, map<string, 
 int Utils::readNames(string namefile, map<string, string>& nameMap) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3656,8 +3639,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap) {
 int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>& namesToInclude) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
         
         string firstCol, secondCol;
         
@@ -3705,8 +3687,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>&
 int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3764,13 +3745,9 @@ int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
 /**********************************************************************************************************************/
 map<string, int> Utils::readNames(string namefile) {
     try {
+        ifstream in; openInputFile(namefile, in);
+        
         map<string, int> nameMap;
-
-        //open input file
-        ifstream in;
-        openInputFile(namefile, in);
-
-       
         string firstCol, secondCol;
 
         while (!in.eof()) {
@@ -3797,10 +3774,7 @@ map<string, int> Utils::readNames(string namefile) {
 /**********************************************************************************************************************/
 int Utils::scanNames(string namefile) {
     try {
-        
-        //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
         
         int total = 0;
         string firstCol, secondCol;
@@ -3885,8 +3859,7 @@ map<string, int> Utils::readNames(string namefile, unsigned long int& numSeqs) {
         numSeqs = 0;
 
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -4017,8 +3990,7 @@ int Utils::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<s
         int error = 0;
 
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -4156,8 +4128,7 @@ void Utils::printAccnos(string accnosfile, set<string>& names){
 int Utils::readAccnos(string accnosfile, vector<string>& names){
     try {
         names.clear();
-        ifstream in;
-        openInputFile(accnosfile, in);
+        ifstream in; openInputFile(accnosfile, in);
         string name;
 
         string rest = "";
@@ -4189,8 +4160,7 @@ int Utils::readAccnos(string accnosfile, vector<string>& names){
 int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
     try {
         names.clear();
-        ifstream in;
-        openInputFile(accnosfile, in, noerror);
+        ifstream in; openInputFile(accnosfile, in, noerror);
         string name;
         
         while (!in.eof()) {

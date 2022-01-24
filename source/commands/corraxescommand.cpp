@@ -734,8 +734,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 	try {
 		map<string, vector<float> > axes;
 		
-		ifstream in;
-		util.openInputFile(axesfile, in);
+		ifstream in; util.openInputFile(axesfile, in);
 		
 		string headerLine = util.getline(in); util.gobble(in);
 		
@@ -794,8 +793,7 @@ int CorrAxesCommand::getMetadata(){
 	try {
 		vector<string> groupNames;
 		
-		ifstream in;
-		util.openInputFile(metadatafile, in);
+		ifstream in; util.openInputFile(metadatafile, in);
 		
 		string headerLine = util.getline(in); util.gobble(in);
 		vector<string> pieces = util.splitWhiteSpace(headerLine);

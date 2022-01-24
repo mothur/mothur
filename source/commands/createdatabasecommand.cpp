@@ -487,8 +487,7 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
 		
         vector<int> sizes; 
         
-        ifstream in;
-        util.openInputFile(contaxonomyfile, in);
+        ifstream in;  util.openInputFile(contaxonomyfile, in);
         
         //read headers
         util.getline(in);
@@ -522,8 +521,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
 		
         vector<int> sizes; 
         
-        ifstream in;
-        util.openInputFile(repfastafile, in);
+        ifstream in; util.openInputFile(repfastafile, in);
         
         set<int> sanity;
         while (!in.eof()) {

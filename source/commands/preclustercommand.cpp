@@ -1065,8 +1065,7 @@ bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCo
             params->util.mothurRemove(groupOrCountFile);
         }
         
-        ifstream in;
-        params->util.openInputFile(fastafileName, in);
+        ifstream in; params->util.openInputFile(fastafileName, in);
         
         while (!in.eof()) {
             

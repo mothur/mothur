@@ -15,8 +15,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 		m = MothurOut::getInstance();
 		containsConfidence = false;
 		
-		ifstream inTax;
-		util.openInputFile(tfile, inTax);
+		ifstream inTax; util.openInputFile(tfile, inTax);
 	
 		highestLevel = getHighestLevel(inTax);
 		
@@ -30,14 +29,11 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			}
 			
 			inTax.close(); 
-			ifstream in; 
-			util.openInputFile(tfile, in);
+			ifstream in;  util.openInputFile(tfile, in);
 			
-			ofstream out;
 			equalizedFile = outputDir + util.getRootName(util.getSimpleName(tfile)) + "equalized.taxonomy";
-			util.openOutputFile(equalizedFile, out);
+            ofstream out; util.openOutputFile(equalizedFile, out);
 			
-	
 			string name, tax;
 			while (in) {
 			

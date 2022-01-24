@@ -211,8 +211,7 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 	try {
 		currentFileName = input;
         
-		ifstream in;
-		util.openInputFileBinary(input, in);
+		ifstream in; util.openInputFileBinary(input, in);
 		
 		SffCommonHeader* header = new SffCommonHeader();
         bool goodHeader = header->read(in);

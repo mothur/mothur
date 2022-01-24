@@ -122,7 +122,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) : Command() {
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }	
-			else {  readNameFile(); current->setNameFile(namefile); }
+            else {  util.readNames(namefile, names, sizes); current->setNameFile(namefile); }
             
             countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
@@ -375,31 +375,6 @@ void ClusterFragmentsCommand::printData(string newfasta, string newname){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "printData");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-void ClusterFragmentsCommand::readNameFile(){
-	try {
-		ifstream in;
-		util.openInputFile(namefile, in);
-		string firstCol, secondCol;
-				
-		while (!in.eof()) {
-			in >> firstCol >> secondCol; util.gobble(in);
-			names[firstCol] = secondCol;
-			int size = 1;
-
-			for(int i=0;i<secondCol.size();i++){
-				if(secondCol[i] == ','){	size++;	}
-			}
-			sizes[firstCol] = size;
-		}
-		in.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "readNameFile");
 		exit(1);
 	}
 }

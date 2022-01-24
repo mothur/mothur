@@ -158,8 +158,7 @@ int DeUniqueSeqsCommand::execute() {
         
 		if (m->getControl_pressed()) {  out.close(); outputTypes.clear(); util.mothurRemove(outFastaFile); if (countfile != "") { if (ct.hasGroupInfo()) { outGroup.close(); util.mothurRemove(outGroupFile); } } return 0; }
 		
-		ifstream in;
-		util.openInputFile(fastaFile, in);
+		ifstream in; util.openInputFile(fastaFile, in);
 		
 		while (!in.eof()) {
 		

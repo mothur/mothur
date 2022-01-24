@@ -489,8 +489,7 @@ int SharedCommand::createSharedFromBiom() {
             "generated_by": "mothur1.24.0",
             "date": "Tue Apr 17 13:12:07 2012", */
 
-        ifstream in;
-        util.openInputFile(biomfile, in);
+        ifstream in; util.openInputFile(biomfile, in);
 
         string matrixFormat = "";
         int numRows = 0;
@@ -1242,8 +1241,7 @@ int SharedCommand::readOrderFile() {
 		//remove old names
 		order.clear();
 
-		ifstream in;
-		util.openInputFile(ordergroupfile, in);
+		ifstream in; util.openInputFile(ordergroupfile, in);
 		string thisGroup;
 
 		while(!in.eof()){

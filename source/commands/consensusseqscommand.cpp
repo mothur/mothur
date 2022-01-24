@@ -558,8 +558,7 @@ char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 int ConsensusSeqsCommand::readFasta(){
 	try{
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		seqLength = 0;
         
 		while (!in.eof()) {

@@ -202,11 +202,9 @@ int RemoveOtusCommand::readClassifyOtu(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
         variables["[extension]"] = util.getExtension(constaxonomyfile);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(constaxonomyfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(constaxonomyfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
@@ -257,11 +255,9 @@ int RemoveOtusCommand::readOtuAssociation(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(otucorrfile));
         variables["[extension]"] = util.getExtension(otucorrfile);
 		string outputFileName = getOutputFileName("otucorr", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(otucorrfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(otucorrfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
@@ -310,12 +306,9 @@ int RemoveOtusCommand::readCorrAxes(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(corraxesfile));
         variables["[extension]"] = util.getExtension(corraxesfile);
 		string outputFileName = getOutputFileName("corraxes", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-        
-		ifstream in;
-		util.openInputFile(corraxesfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(corraxesfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;

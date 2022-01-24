@@ -178,8 +178,7 @@ int GetDistsCommand::readPhylip(){
         variables["[extension]"] = util.getExtension(phylipfile);
 		string outputFileName = getOutputFileName("phylip", variables);
 		
-        ifstream in;
-        util.openInputFile(phylipfile, in);
+        ifstream in; util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; square = 0;
@@ -343,8 +342,7 @@ int GetDistsCommand::readColumn(){
 		ofstream out;
 		util.openOutputFile(outputFileName, out);
         
-        ifstream in;
-        util.openInputFile(columnfile, in);
+        ifstream in; util.openInputFile(columnfile, in);
         
         set<string> foundNames;
         string firstName, secondName;

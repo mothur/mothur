@@ -222,8 +222,7 @@ string MergeFileCommand::mergeFileData(){
         bool useTax = false;
         if (taxfile != "") {  util.readTax(taxfile, taxMap, false);  useTax = true;  }
         
-        ifstream in;
-        util.openInputFile(fastafile, in);
+        ifstream in; util.openInputFile(fastafile, in);
 
         while(!in.eof()){
             

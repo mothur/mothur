@@ -90,8 +90,7 @@ ListVector* InputData::getListVector(){
 /***********************************************************************/
 ListVector* InputData::getListVector(string label){
 	try {
-		ifstream in;
-		util.openInputFile(filename, in);
+		ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){
@@ -196,9 +195,9 @@ SharedListVector* InputData::getSharedListVector(){
 
 SharedListVector* InputData::getSharedListVector(string label){
 	try {
-		ifstream in;
+		
 		string  thisLabel;
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){
@@ -264,9 +263,8 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 
 SharedOrderVector* InputData::getSharedOrderVector(string label){
 	try {
-		ifstream in;
 		string  thisLabel;
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){
@@ -344,10 +342,8 @@ OrderVector* InputData::getOrderVector(){
 /***********************************************************************/
 OrderVector* InputData::getOrderVector(string label){
 	try {
-	
-		ifstream in;
 		string  thisLabel;
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){
@@ -485,10 +481,9 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(){
 /***********************************************************************/
 SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 	try {
-		ifstream in;
 		string  thisLabel;
 		
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
 		nextDistanceLabel = "";
 	
 		if(in){
@@ -596,10 +591,9 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 /***********************************************************************/
 SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 	try {
-		ifstream in;
 		string  thisLabel;
 		
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
 		nextDistanceLabel = "";
 		
 		if(in){
@@ -689,10 +683,9 @@ SharedCLRVectors* InputData::getSharedCLRVectors(){
 /***********************************************************************/
 SharedCLRVectors* InputData::getSharedCLRVectors(string label){
     try {
-        ifstream in;
         string  thisLabel;
         
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
         
         if(in){
@@ -767,10 +760,8 @@ SAbundVector* InputData::getSAbundVector(){
 /***********************************************************************/
 SAbundVector* InputData::getSAbundVector(string label){
 	try {
-	
-		ifstream in;
 		string  thisLabel;
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){
@@ -923,11 +914,9 @@ RAbundVector* InputData::getRAbundVector(){
 }
 /***********************************************************************/
 RAbundVector* InputData::getRAbundVector(string label){
-	try {
-	
-		ifstream in;
+	try { 
 		string  thisLabel;
-		util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         nextDistanceLabel = "";
 		
 		if(in){

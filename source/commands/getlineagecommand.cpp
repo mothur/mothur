@@ -428,12 +428,8 @@ string GetLineageCommand::readTax(){
 		string outputFileName = getOutputFileName("taxonomy", variables);
         string accnosFileName = outputFileName + ".accnos";
 		
-        ofstream out, outAccnos;
-		util.openOutputFile(outputFileName, out);
-        util.openOutputFile(accnosFileName, outAccnos);
-		
-		ifstream in;
-		util.openInputFile(taxfile, in);
+        ofstream out, outAccnos; util.openOutputFile(outputFileName, out); util.openOutputFile(accnosFileName, outAccnos);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -492,8 +488,7 @@ string GetLineageCommand::readConsTax(){
 		util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 		
-		ifstream in;
-		util.openInputFile(constaxonomy, in);
+		ifstream in; util.openInputFile(constaxonomy, in);
         
         //read headers
         string headers = util.getline(in);

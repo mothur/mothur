@@ -377,9 +377,7 @@ int SetCurrentCommand::execute(){
 int SetCurrentCommand::readCurrentFiles(){
     try{
         
-        ifstream in;
-        util.openInputFile(currentFile, in);
-        
+        ifstream in; util.openInputFile(currentFile, in);
         
         while(!in.eof()) {
             

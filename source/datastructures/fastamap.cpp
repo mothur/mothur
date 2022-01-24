@@ -14,8 +14,7 @@
 
 void FastaMap::readFastaFile(string inFileName) {
 	try {
-		ifstream in;
-		util.openInputFile(inFileName, in);
+		ifstream in; util.openInputFile(inFileName, in);
 		string name, sequence, line;
 		sequence = "";
 		string temp;

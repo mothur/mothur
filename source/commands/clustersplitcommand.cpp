@@ -1467,8 +1467,7 @@ int ClusterSplitCommand::runSensSpec() {
         m->mothurOut("/******************************************/\n"); 
         m->mothurOut("Done.\n\n\n"); 
         
-        ifstream in;
-        util.openInputFile(outputFileName, in);
+        ifstream in; util.openInputFile(outputFileName, in);
         
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
@@ -1519,8 +1518,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
         
         string singleton, thiscolumn, thisname;
         
-        ifstream in;
-        util.openInputFile(file, in);
+        ifstream in; util.openInputFile(file, in);
         
         in >> singleton; util.gobble(in);
         
@@ -1583,8 +1581,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
 //**********************************************************************************************************************
 int ClusterSplitCommand::getLabels(string file, set<string>& listLabels){
     try {
-        ifstream in;
-        util.openInputFile(file, in);
+        ifstream in; util.openInputFile(file, in);
 
         //read headers
         util.getline(in); util.gobble(in);

@@ -377,9 +377,7 @@ bool ChopSeqsCommand::runChopFastq(string& outputFileNameAccnos){
         //report progress
         if((count) % 10000 != 0){    m->mothurOut(toString(count)+"\n");         }
         
-        in.close();
-        out.close();
-        outAccnos.close();
+        in.close(); out.close(); outAccnos.close();
         
         return wroteAccnos;
         
@@ -637,8 +635,7 @@ string getChopped(chopData* params) {
 /**************************************************************************************/
 void driverChop(chopData* params) {
 	try {
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
         
 		in.seekg(params->start);
         
@@ -782,14 +779,9 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
 //**********************************************************************************************************************
 int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
     try {
-        ofstream out;
-        util.openOutputFile(outputFile, out);
-        
-        ifstream in;
-        util.openInputFile(inputFile, in);
-        
-        ifstream inQual;
-        util.openInputFile(qualfile, inQual);
+        ofstream out; util.openOutputFile(outputFile, out);
+        ifstream in;  util.openInputFile(inputFile, in);
+        ifstream inQual; util.openInputFile(qualfile, inQual);
 
         m->mothurOut("Processing the quality file.\n");
         
@@ -798,7 +790,7 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            QualityScores qual(inQual);
+            QualityScores qual(inQual); util.gobble(inQual);
             
             string name = "";
             int start = 0; int end = 0;
@@ -823,8 +815,7 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
         //report progress
         if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
         
-        in.close();
-        out.close();
+        in.close(); inQual.close(); out.close();
         
         return 0;
     }

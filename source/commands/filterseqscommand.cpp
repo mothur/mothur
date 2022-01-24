@@ -306,8 +306,7 @@ int FilterSeqsCommand::filterSequences() {
 /**************************************************************************************/
 void driverRunFilter(filterRunData* params) {
 	try {
-        ifstream in;
-		params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         
@@ -460,8 +459,7 @@ void driverCreateFilter(filterData* params) {
         if(params->hard.compare("") != 0)	{	params->F.doHard(params->hard);                             }
         else                                {	params->F.setFilter(string(params->alignmentLength, '1'));	}
         
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         

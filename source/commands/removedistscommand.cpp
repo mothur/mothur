@@ -179,8 +179,7 @@ int RemoveDistsCommand::readPhylip(){
         variables["[extension]"] = util.getExtension(phylipfile);
 		string outputFileName = getOutputFileName("phylip", variables);
 		
-        ifstream in;
-        util.openInputFile(phylipfile, in);
+        ifstream in; util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; 
@@ -343,11 +342,8 @@ int RemoveDistsCommand::readColumn(){
 		string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-        ifstream in;
-        util.openInputFile(columnfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(columnfile, in);
         
         set<string> removeNames;
         string firstName, secondName;

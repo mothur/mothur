@@ -464,9 +464,8 @@ void GetOTURepCommand::createCount() {
 //**********************************************************************************************************************
 void GetOTURepCommand::readNamesFile(FastaMap& fasta) {
 	try {
-		ifstream in;
 		vector<string> dupNames;
-		util.openInputFile(namefile, in);
+        ifstream in; util.openInputFile(namefile, in);
 		
 		string name, names, sequence;
 	
@@ -821,8 +820,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap&
 		string tempNameFile = filename + ".temp";
 		util.openOutputFile(tempNameFile, out2);
             
-		ifstream in;
-		util.openInputFile(filename, in);
+		ifstream in; util.openInputFile(filename, in);
 		
         string tempGroup = "";
         in >> tempGroup; util.gobble(in);
@@ -973,8 +971,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		string tempNameFile = filename + ".temp";
 		util.openOutputFile(tempNameFile, out2);
 		
-		ifstream in;
-		util.openInputFile(filename, in);
+		ifstream in; util.openInputFile(filename, in);
 		
 		string rep, binnames;
         

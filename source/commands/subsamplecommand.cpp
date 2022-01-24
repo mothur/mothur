@@ -545,12 +545,8 @@ int SubSampleCommand::getSubSampleFasta() {
 		string outputFileName = getOutputFileName("fasta", variables);
         outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		//read through fasta file outputting only the names on the subsample list
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		string thisname;
 		int count = 0;
@@ -655,8 +651,7 @@ vector<string> SubSampleCommand::getNames() {
 	try {
 		vector<string> names;
         
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		string thisname;
 		while(!in.eof()){
@@ -780,14 +775,12 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
             variables["[distance]"] = thislookup->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             
-            ifstream in;
-            util.openInputFile(constaxonomyfile, in);
+            ifstream in; util.openInputFile(constaxonomyfile, in);
             
             //read headers
             string headers = util.getline(in); util.gobble(in);
             
-            ofstream outCons;
-            util.openOutputFile(consOutputFileName, outCons);
+            ofstream outCons; util.openOutputFile(consOutputFileName, outCons);
             outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
 
             outCons << headers << endl;
@@ -1118,14 +1111,12 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
             variables["[distance]"] = list->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             
-            ifstream in;
-            util.openInputFile(constaxonomyfile, in);
+            ifstream in; util.openInputFile(constaxonomyfile, in);
             
             //read headers
             string headers = util.getline(in); util.gobble(in);
             
-            ofstream outCons;
-            util.openOutputFile(consOutputFileName, outCons);
+            ofstream outCons; util.openOutputFile(consOutputFileName, outCons);
             outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
             
             outCons << headers << endl;

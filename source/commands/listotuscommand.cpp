@@ -251,11 +251,9 @@ int ListOtusCommand::createList(string constaxFile){
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
         
-        ifstream in;
-        util.openInputFile(constaxFile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(constaxFile, in);
         string otuLabel;
         
         //read headers

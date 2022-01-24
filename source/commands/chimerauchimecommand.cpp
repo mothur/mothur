@@ -383,11 +383,9 @@ int driver(uchimeData* params){
         //are you using a reference file
         if (params->templatefile != "self") {
             string outputFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2) + ".uchime_formatted";
-            ifstream in;
-            params->util.openInputFile(params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2), in);
             
-            ofstream out;
-            params->util.openOutputFile(outputFileName, out);
+            ifstream in; params->util.openInputFile(params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2), in);
+            ofstream out; params->util.openOutputFile(outputFileName, out);
             
             while (!in.eof()) {
                 if (params->m->getControl_pressed()) { break;  }
@@ -530,11 +528,8 @@ int driver(uchimeData* params){
         if (params->m->getControl_pressed()) { return 0; }
         
         //create accnos file from uchime results
-        ifstream in;
-        params->util.openInputFile(params->driverOutputFName, in);
-        
-        ofstream out;
-        params->util.openOutputFile(params->driverAccnos, out);
+        ifstream in; params->util.openInputFile(params->driverOutputFName, in);
+        ofstream out; params->util.openOutputFile(params->driverAccnos, out);
         
         int num = 0;
         params->numChimeras = 0;
@@ -1061,8 +1056,7 @@ int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 	try {
 		//create input file for uchime
 		//read through fastafile and store info
-		ifstream in;
-		util.openInputFile(filename, in);
+		ifstream in; util.openInputFile(filename, in);
 		
 		while (!in.eof()) {
 			
@@ -1118,8 +1112,7 @@ string ChimeraUchimeCommand::getCountFile(string& inputFile){
 int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile, MothurOut* m){
     try {
         int error = 0;
-        ifstream in;
-        Utils util; util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; Utils util; util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
@@ -1193,8 +1186,7 @@ void driverGroups(uchimeData* params){
             //This table will zero out group counts for seqs determined to be chimeric by that group.
             if (params->vars->dups) {
                 if (!params->util.isBlank(params->accnos+thisGroup)) {
-                    ifstream in;
-                    params->util.openInputFile(params->accnos+thisGroup, in);
+                    ifstream in; params->util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
                         vector<string> namesOfChimeras;

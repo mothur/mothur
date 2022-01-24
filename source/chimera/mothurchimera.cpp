@@ -102,8 +102,7 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
         m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
         
         
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
+        ifstream in; Utils util; util.openInputFile(file, in);
         
         //read in seqs and store in vector
         while(!in.eof()){

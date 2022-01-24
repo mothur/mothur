@@ -358,16 +358,12 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         //findCommand = "dir /B \""  + inputDir.substr(0, inputDir.length()-1) + "\\*.\"" + typeFile + " > " + tempFile + "\"";
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
-
-        ifstream in;
-        ofstream out;
-        tempOut += ".temp";
         
+        tempOut += ".temp";
         tempFile = tempFile.substr(1, tempFile.length()-2); //remove ""
         
-        util.openOutputFile(tempOut, out);
-        
-        util.openInputFile(tempFile, in);
+        ofstream out; util.openOutputFile(tempOut, out);
+        ifstream in; util.openInputFile(tempFile, in);
         
         string junk, filename;
         while (!in.eof()) {

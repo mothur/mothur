@@ -568,8 +568,7 @@ int SplitAbundCommand::splitNames() { //namefile
         }
 			
 		//open input file
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ifstream in; util.openInputFile(namefile, in);
 		
 		while (!in.eof()) {
 			if (m->getControl_pressed()) { break; }

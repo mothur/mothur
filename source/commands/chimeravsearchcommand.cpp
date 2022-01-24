@@ -896,8 +896,7 @@ int ChimeraVsearchCommand::readFasta(string filename, map<string, string>& seqs)
     try {
         //create input file for vsearch
         //read through fastafile and store info
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         int num = 0;
         while (!in.eof()) {
@@ -957,8 +956,7 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
 int getSeqsVsearch(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile, MothurOut* m){
     try {
         int error = 0;
-        ifstream in;
-        Utils util; util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; Utils util; util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
@@ -1035,8 +1033,7 @@ void driverGroups(vsearchData* params){
             //This table will zero out group counts for seqs determined to be chimeric by that group.
             if (params->vars->dups) {
                 if (!util.isBlank(params->accnos+thisGroup)) {
-                    ifstream in;
-                    util.openInputFile(params->accnos+thisGroup, in);
+                    ifstream in; util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
                         //add group to seqs2

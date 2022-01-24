@@ -401,8 +401,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
             string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
-			ifstream in;
-			util.openInputFile(outputNames[i], in);
+			ifstream in; util.openInputFile(outputNames[i], in);
 			
             string labels = util.getline(in); util.gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);

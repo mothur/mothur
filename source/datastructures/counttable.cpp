@@ -452,8 +452,7 @@ bool CountTable::isCountTable(string file) {
 int CountTable::readTable(string file, bool readGroups, bool mothurRunning, vector<string> selectedGroups) {
     try {
         filename = file;
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         readTable(in, readGroups, mothurRunning, selectedGroups);
         
