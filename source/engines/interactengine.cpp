@@ -127,7 +127,6 @@ string InteractEngine::getCommand()  {
             returnCommand = getCommand();
           
         }else if (type == "batch") {
-            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             BatchEngine newBatchEngine(path, returnCommand, environmentalVariables);
@@ -136,7 +135,6 @@ string InteractEngine::getCommand()  {
                 bool bail = false;
                 while(!bail)    {    bail = newBatchEngine.getInput();    }
             }
-            m->mothurOutClearBuffer();
             m->mothurOut("/*****************************************************************************/\n");
             
             returnCommand = getCommand();

@@ -17,11 +17,11 @@
 	containing 2 columns.  The first being the groupname and the second the list of identical sequence names. */ 
 
 
-class DeconvoluteCommand : public Command {
+class UniqueSeqsCommand : public Command {
 
 public:
-	DeconvoluteCommand(string);
-	~DeconvoluteCommand() {}
+    UniqueSeqsCommand(string);
+	~UniqueSeqsCommand() {}
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "unique.seqs";		}
@@ -42,6 +42,10 @@ private:
 	vector<string> outputNames;
 
 	bool abort;
+    
+    string processName(string); //not recommended
+    string processCount(string);
+    string createNewNameFile(string, map<string, int>);
 };
 
 #endif

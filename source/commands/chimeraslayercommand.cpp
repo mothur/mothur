@@ -8,7 +8,7 @@
  */
 
 #include "chimeraslayercommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequenceparser.h"
 #include "counttable.h"
 #include "removeseqscommand.h"
@@ -635,7 +635,7 @@ string ChimeraSlayerCommand::getCountFile(string& inputFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

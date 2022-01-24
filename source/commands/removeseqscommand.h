@@ -18,6 +18,7 @@ class RemoveSeqsCommand : public Command {
 	
 		RemoveSeqsCommand(string);
         RemoveSeqsCommand(string, string dupsFile, string dupsFileType, string output);
+        RemoveSeqsCommand(set<string>, string dupsFile, string dupsFileType, string output);
 		~RemoveSeqsCommand(){}
 	
 		vector<string> setParameters();

@@ -9,7 +9,7 @@
 
 #include "splitgroupscommand.h"
 #include "preclustercommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "summary.hpp"
 
 //**********************************************************************************************************************

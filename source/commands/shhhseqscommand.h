@@ -14,7 +14,7 @@
 #include "myseqdist.h"
 #include "seqnoise.h"
 #include "sequenceparser.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "clustercommand.h"
 
 //**********************************************************************************************************************

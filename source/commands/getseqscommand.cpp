@@ -408,10 +408,6 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
 //**********************************************************************************************************************
 void GetSeqsCommand::readFastq(string fastqfile){
 	try {
-        bool gz = util.isGZ(fastqfile)[1];
-        
-        if (gz) { readGZFastq(fastqfile); return; }
-        
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;

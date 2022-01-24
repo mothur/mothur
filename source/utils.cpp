@@ -2409,7 +2409,7 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
             string logfilename = LOGFILE_NAME;
             logfilename = getFullPathName(logfilename);
         
-            m->appendLogBuffer("Using Static Logfile " + logfilename +  "\n");
+            m->mothurOut("Using Static Logfile " + logfilename +  "\n");
         
             m->setLogFileName(logfilename, false);
             m->mothurOut("\n");
@@ -2430,12 +2430,12 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         //version
 #if defined NON_WINDOWS
 #if defined (__APPLE__) || (__MACH__)
-        m->appendLogBuffer("Mac version\n\n");
+        m->mothurOut("Mac version\n\n");
 #else
-        m->appendLogBuffer("Linux version\n\n");
+        m->mothurOut("Linux version\n\n");
 #endif
 #else
-        m->appendLogBuffer("Windows version\n\n");
+        m->mothurOut("Windows version\n\n");
 #endif
         
         string packagesUsed = "";
@@ -2458,47 +2458,47 @@ bool Utils::mothurInitialPrep(vector<string>& defaultPaths, vector<string>& tool
         if (packagesUsed != "") {
             //remove last comma
             packagesUsed = packagesUsed.substr(0,packagesUsed.length()-1);
-            m->appendLogBuffer("Using " + packagesUsed + "\n");
+            m->mothurOut("Using " + packagesUsed + "\n");
         }
         
         #ifdef MOTHUR_FILES
         
         if (defaultPaths.size() != 0) {
-            m->appendLogBuffer("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
+            m->mothurOut("\nUsing MOTHUR_FILES compiled search paths for mothur input files:\n");
             for (int i = 0; i < defaultPaths.size(); i++) {
-                m->appendLogBuffer("\t" + defaultPaths[i] + "\n");
+                m->mothurOut("\t" + defaultPaths[i] + "\n");
             }
-            m->appendLogBuffer("\n");
+            m->mothurOut("\n");
         }
         #endif
         
         #ifdef MOTHUR_TOOLS
             if (toolPaths.size() != 0) {
-                m->appendLogBuffer("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
+                m->mothurOut("\nUsing MOTHUR_TOOLS compiled search paths for mothur external tools:\n");
                 for (int i = 0; i < toolPaths.size(); i++) {
-                    m->appendLogBuffer("\t" + toolPaths[i] + "\n");
+                    m->mothurOut("\t" + toolPaths[i] + "\n");
                 }
-                m->appendLogBuffer("\n");
+                m->mothurOut("\n");
             }
         #endif
         
         //header
-        m->appendLogBuffer("mothur v." + mothurVersion + "\n");
-        m->appendLogBuffer("Last updated: " + releaseDate + "\n");
-        m->appendLogBuffer("by\n");
-        m->appendLogBuffer("Patrick D. Schloss\n\n");
-        m->appendLogBuffer("Department of Microbiology & Immunology\n\n");
-        m->appendLogBuffer("University of Michigan\n");
-        m->appendLogBuffer("http://www.mothur.org\n\n");
-        m->appendLogBuffer("When using, please cite:\n");
-        m->appendLogBuffer("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
-        m->appendLogBuffer("Distributed under the GNU General Public License\n\n");
-        m->appendLogBuffer("Type 'help()' for information on the commands that are available\n\n");
-        m->appendLogBuffer("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
-        m->appendLogBuffer("Type 'quit()' to exit program\n\n");
+        m->mothurOut("mothur v." + mothurVersion + "\n");
+        m->mothurOut("Last updated: " + releaseDate + "\n");
+        m->mothurOut("by\n");
+        m->mothurOut("Patrick D. Schloss\n\n");
+        m->mothurOut("Department of Microbiology & Immunology\n\n");
+        m->mothurOut("University of Michigan\n");
+        m->mothurOut("http://www.mothur.org\n\n");
+        m->mothurOut("When using, please cite:\n");
+        m->mothurOut("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.\n\n");
+        m->mothurOut("Distributed under the GNU General Public License\n\n");
+        m->mothurOut("Type 'help()' for information on the commands that are available\n\n");
+        m->mothurOut("For questions and analysis support, please visit our forum at https://forum.mothur.org\n\n");
+        m->mothurOut("Type 'quit()' to exit program\n\n");
         
         m->setRandomSeed(19760620);
-        m->appendLogBuffer("[NOTE]: Setting random seed to 19760620.\n\n");
+        m->mothurOut("[NOTE]: Setting random seed to 19760620.\n\n");
      
         OS = "";
         //version

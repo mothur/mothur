@@ -611,7 +611,7 @@ int ShhhSeqsCommand::deconvoluteResults(string fastaFile, string nameFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");  
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

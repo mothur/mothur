@@ -8,7 +8,7 @@
  */
 
 #include "chimerauchimecommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequence.hpp"
 #include "systemcommand.h"
 #include "removeseqscommand.h"
@@ -1094,7 +1094,7 @@ string ChimeraUchimeCommand::getCountFile(string& inputFile){
 		m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
 		current->setMothurCalling(true);
         
-		Command* uniqueCommand = new DeconvoluteCommand(inputString);
+		Command* uniqueCommand = new UniqueSeqsCommand(inputString);
 		uniqueCommand->execute();
 		
 		map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();

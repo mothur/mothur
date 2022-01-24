@@ -1136,7 +1136,7 @@ void ClusterFitCommand::createReferenceNameCount() {
             string options = "fasta=" + reffastafile + ", format=count";
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Running command: unique.seqs(" + options + ")\n");
-            Command* deconvoluteCommand = new DeconvoluteCommand(options);
+            Command* deconvoluteCommand = new UniqueSeqsCommand(options);
             
             deconvoluteCommand->execute();
             map<string, vector<string> > filenames = deconvoluteCommand->getOutputFiles();

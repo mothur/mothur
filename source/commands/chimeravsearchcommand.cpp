@@ -7,7 +7,7 @@
 //
 
 #include "chimeravsearchcommand.h"
-#include "deconvolutecommand.h"
+#include "uniqueseqscommand.h"
 #include "sequence.hpp"
 #include "systemcommand.h"
 #include "degapseqscommand.h"
@@ -931,7 +931,7 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
         m->mothurOut("Running command: unique.seqs(" + inputString + ")\n");
         current->setMothurCalling(true);
         
-        Command* uniqueCommand = new DeconvoluteCommand(inputString);
+        Command* uniqueCommand = new UniqueSeqsCommand(inputString);
         uniqueCommand->execute();
         
         map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
