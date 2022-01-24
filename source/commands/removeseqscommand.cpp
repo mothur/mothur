@@ -243,7 +243,7 @@ int RemoveSeqsCommand::execute(){
         if (qualityfiles.size() != 0)       { for (int i = 0; i < qualityfiles.size(); i++) { readQual(qualityfiles[i]);    }  }
         if (groupfiles.size() != 0)         { for (int i = 0; i < groupfiles.size(); i++)   { readGroup(groupfiles[i]);     }  }
         if (taxfiles.size() != 0)           { for (int i = 0; i < taxfiles.size(); i++)     { readTax(taxfiles[i]);         }  }
-        if (listfiles.size() != 0)          { for (int i = 0; i < taxfiles.size(); i++)     { readTax(taxfiles[i]);         }  }
+        if (listfiles.size() != 0)          { for (int i = 0; i < listfiles.size(); i++)     { readList(listfiles[i]);         }  }
         if (alignfiles.size() != 0)         { for (int i = 0; i < alignfiles.size(); i++)   { readAlign(alignfiles[i]);     }  }
         if (countfiles.size() != 0)         { for (int i = 0; i < countfiles.size(); i++)   { readCount(countfiles[i]);     }  }
         if (fastqfiles.size() != 0)         { for (int i = 0; i < fastqfiles.size(); i++)   { readFastq(fastqfiles[i]);     }  }
@@ -363,8 +363,79 @@ void RemoveSeqsCommand::readFasta(string fastafile){
 	}
 }
 //**********************************************************************************************************************
+void RemoveSeqsCommand::readGZFastq(string fastqfile){
+    try {
+        
+#ifdef USE_BOOST
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        variables["[extension]"] = ".fastq" + util.getExtension(fastqfile);
+        string outputFileName = getOutputFileName("fastq", variables);
+        
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        util.openInputFileBinary(fastqfile, in, inBoost);
+        
+        ofstream file; ostream* out; boost::iostreams::filtering_streambuf<boost::iostreams::output> outBoost;
+        util.openOutputFileBinary(outputFileName, file, out, outBoost);
+        
+        bool wroteSomething = false; int removedCount = 0; set<string> uniqueNames;
+        
+        while(!inBoost.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            //read sequence name
+            bool ignore;
+            FastqRead fread(inBoost, ignore, format);  util.gobble(inBoost);
+            
+            if (!ignore) {
+                string name = fread.getName();
+                
+                if (names.count(name) == 0) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        fread.printFastq(*out);
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
+                }else { removedCount++; }
+            }
+            util.gobble(inBoost);
+        }
+        in.close(); inBoost.pop();
+        boost::iostreams::close(outBoost);
+        file.close(); delete out;
+        
+        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return; }
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastqfile + " contains only sequences from the .accnos file.\n");   }
+        outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
+        
+        m->mothurOut("Removed " + toString(removedCount) + " sequences from " + fastqfile + ".\n");
+#else
+        m->mothurOut("[ERROR]: mothur requires the boost libraries to read and write compressed files. Please decompress your files and rerun.\n");
+
+#endif
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void RemoveSeqsCommand::readFastq(string fastqfile){
 	try {
+        
+        bool gz = util.isGZ(fastqfile)[1];
+        
+        if (gz) { readGZFastq(fastqfile); return; }
+        
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;
