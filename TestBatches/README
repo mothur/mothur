@@ -2,13 +2,13 @@ Running Test Bathches:
 
 1. Download TestReferences and TestFiles from XXX and put in same location as mothur executable
 2. Download TestBatches and put in same location as mothur's executable
-3. Download mothur's external programs: vsearch, uchime and blast. Available with mothur's executable versions
+3. Download mothur's external programs: vsearch, uchime, prefetch and fasterq-dump. Available with mothur's executable versions
 4. Run an individual batch test:
 
     sarahwestcott$ cd mothur_test_batches
     mothur_test_batches sarahwestcott$ ls
     TestBatches    TestReferences    fasterq-dump    prefetch    vsearch
-    TestFiles    blast        mothur        uchime
+    TestFiles      mothur        uchime
     mothur_test_batches sarahwestcott$ ./mothur "./TestBatches/align.seqs/batch"
 
     Output to screen will look like:
@@ -28,7 +28,7 @@ Running Test Bathches:
     sarahwestcott$ cd mothur_test_batches
     mothur_test_batches sarahwestcott$ ls
     TestBatches    TestReferences    fasterq-dump    prefetch    vsearch
-    TestFiles    blast        mothur        uchime
+    TestFiles       mothur        uchime
     mothur_test_batches sarahwestcott$ ./mothur "./TestBatches/master_batch"
 
     Output to screen will look like:
