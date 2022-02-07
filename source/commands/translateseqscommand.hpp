@@ -49,6 +49,7 @@ public:
     string getCommandCategory()        { return "Sequence Processing";        }
     
     string getHelpString();
+    string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/translate.seqs"; }
     string getDescription()        { return "tranlate dna to amino acids or amino acids to dna"; }
@@ -58,11 +59,13 @@ public:
     
 private:
     bool abort, stop, dna;
-    string fastafile;
+    string fastafile, aminofile;
     int processors;
     vector<string> outputNames;
     vector<int> frames;
     
+    void translateDNAtoAmino();
+    void alignDNAAmino();
     double createProcessesTranslateDNAtoAminoAcids(string, vector<linePair>, int);
 };
 

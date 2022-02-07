@@ -12,10 +12,10 @@
 vector<string> TranslateSeqsCommand::setParameters(){
     try {
         CommandParameter pfasta("fasta", "InputTypes", "", "", "FastaReport", "none", "none","summary",false,true,true); parameters.push_back(pfasta);
+        CommandParameter pamino("amino", "InputTypes", "", "", "FastaReport", "none", "none","summary",false,true,true); parameters.push_back(pamino);
         CommandParameter pprocessors("processors", "Number", "", "1", "", "", "","",false,false,true); parameters.push_back(pprocessors);
         CommandParameter pframes("frames", "Multiple", "1-2-3--1--2--3", "1", "", "", "","",true,false,true); parameters.push_back(pframes);
         CommandParameter pstop("stop", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pstop);
-        //CommandParameter pdna("dna", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pdna);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
         CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
@@ -39,17 +39,34 @@ string TranslateSeqsCommand::getHelpString(){
     try {
         string helpString = "";
         helpString += "The translate.seqs command reads a fastafile containing dna and translates it to amino acids, .....\n";
-        helpString += "The translate.seqs command parameters are fasta, frames, stop, dna and processors.\n";
+        helpString += "The translate.seqs command parameters are fasta, amino, frames, stop and processors.\n";
+        helpString += "The fasta parameter is used to provide a file containing DNA sequences. It is required.\n";
+        helpString += "The amino parameter is used to provide a file related to the fasta file containing amino acid sequences. Either the fasta or the amino file should be aligned and mothur will align the reads in the other file. Mothur assumes both files are in the same frame.\n";
         helpString += "The frames parameter is used to indicate the reading frames you want to use. Options are 1, 2, 3, -1, -2, -3. You can select multiple frames by separating them with '|' characters. For example: frames=1|-1|2.\n";
         helpString += "The stop parameter is used to indicate when to stop the translation. If T, then if the translation hits a stop codon, it stops before that codon. If F, it returns the full translation with a * as the stop codon. Default=t.\n";
-        //helpString += "The dna parameter is used to indicate which type of data is in your fasta file. Default=t, meaning the data is dna. dna=f, means the data in the fasta file is amino acids. \n";
         helpString += "The translate.seqs command should be in the following format: \n";
         helpString += "translate.seqs(fasta=yourFastaFile, processors=2) \n";
             
+        getCommonQuestions();
+        
         return helpString;
     }
     catch(exception& e) {
         m->errorOut(e, "TranslateSeqsCommand", "getHelpString");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+string TranslateSeqsCommand::getCommonQuestions(){
+    try {
+        vector<string> questions, issues, qanswers, ianswers, howtos, hanswers;
+        
+        string commonQuestions = util.getFormattedHelp(questions, qanswers, issues, ianswers, howtos, hanswers);
+
+        return commonQuestions;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TranslateSeqsCommand", "getCommonQuestions");
         exit(1);
     }
 }
@@ -82,9 +99,13 @@ TranslateSeqsCommand::TranslateSeqsCommand(string option) : Command()  {
             
             ValidParameters validParameter;
             fastafile = validParameter.validFile(parameters, "fasta");
-            if (fastafile == "not open") { abort = true; }
-            else if (fastafile == "not found") {  fastafile = "";  }
+            if (fastafile == "not open") { fastafile = ""; abort = true; }
+            else if (fastafile == "not found") {  fastafile = ""; abort = true; }
             else { current->setFastaFile(fastafile); }
+            
+            aminofile = validParameter.validFile(parameters, "amino");
+            if (aminofile == "not open") { aminofile = ""; abort = true; }
+            else if (aminofile == "not found") {  aminofile = "";  }
             
             string temp = validParameter.valid(parameters, "processors");    if (temp == "not found"){    temp = current->getProcessors();    }
             processors = current->setProcessors(temp);
@@ -104,11 +125,6 @@ TranslateSeqsCommand::TranslateSeqsCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "stop");        if (temp == "not found") { temp = "T"; }
             stop = util.isTrue(temp);
             
-            //temp = validParameter.valid(parameters, "dna");        if (temp == "not found") { temp = "T"; }
-            //dna = util.isTrue(temp);
-            
-            //force single frames for aa to dna translation
-            //if (dna) { frames.clear(); frames.push_back(1); }
         }
     }
     catch(exception& e) {
@@ -123,6 +139,30 @@ int TranslateSeqsCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
+        if (aminofile != "")    { alignDNAAmino();          }  //if amino file is provided then we are aligning
+        else                    { translateDNAtoAmino();    }
+        
+        //set accnos file as new current accnosfile
+        string currentName = "";
+        itTypes = outputTypes.find("fasta");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
+        }
+        
+        m->mothurOut("\nOutput File Names:\n");
+        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
+        m->mothurOutEndLine();
+ 
+        return 0;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TranslateSeqsCommand", "execute");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void TranslateSeqsCommand::translateDNAtoAmino() {
+    try {
         long start = time(NULL);
         
         string thisOutputDir = outputdir;
@@ -162,64 +202,13 @@ int TranslateSeqsCommand::execute(){
         }
         
         m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to translate " + toString(numSeqs) + " sequences.\n");
-
-        //set accnos file as new current accnosfile
-        string currentName = "";
-        itTypes = outputTypes.find("fasta");
-        if (itTypes != outputTypes.end()) {
-            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
-        }
         
-        m->mothurOut("\nOutput File Names:\n");
-        for (int i = 0; i < outputNames.size(); i++) {    m->mothurOut(outputNames[i]); m->mothurOutEndLine();    }
-        m->mothurOutEndLine();
- 
-        return 0;
     }
     catch(exception& e) {
-        m->errorOut(e, "TranslateSeqsCommand", "execute");
+        m->errorOut(e, "TranslateSeqsCommand", "translateDNAtoAmino");
         exit(1);
     }
 }
-/**********************************************************************************************************************
-void translateToDNADriver(translateSeqsStruct* params) {
-    try {
-        ifstream inFASTA; params->util.openInputFile(params->inputFilename, inFASTA);
-        inFASTA.seekg(params->filePos.start);
-
-        bool done = false;
-        long long count = 0;
-        while (!done) {
-            
-            if (params->m->getControl_pressed()) {  break; }
-            
-            Protein seq(inFASTA); params->util.gobble(inFASTA);
-            
-            if (seq.getName() != "") {
-                string translation; getDNA(seq.getAligned(), translation, params->m);
-                params->outputWriter->write('>' + seq.getName() + '\n' + translation + '\n');
-            }
-            
-            #if defined NON_WINDOWS
-                unsigned long long pos = inFASTA.tellg();
-                if ((pos == -1) || (pos >= params->filePos.end)) { break; }
-            #else
-                if (count == params->filePos.end) { break; }
-            #endif
-
-            //report progress
-            if((count) % 1000 == 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
-
-        }
-        //report progress
-        if((count) % 1000 != 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
-        params->numSeqs = count; inFASTA.close();
-    }
-    catch(exception& e) {
-        params->m->errorOut(e, "TranslateSeqsCommand", "translateToDNADriver");
-        exit(1);
-    }
-}*/
 //**********************************************************************************************************************
 void translateToAminoAcidDriver(translateSeqsStruct* params) {
     try {
