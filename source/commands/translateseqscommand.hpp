@@ -58,29 +58,33 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, stop, dna;
+    bool abort, stop, aminoAligned, dnaAligned;
     string fastafile, aminofile;
     int processors;
     vector<string> outputNames;
     vector<int> frames;
+    vector<linePair> lines;
+    vector<linePair> aLines;
     
+    bool setLines(); //returns true if error free
     void translateDNAtoAmino();
     void alignDNAAmino();
     double createProcessesTranslateDNAtoAminoAcids(string, vector<linePair>, int);
+    double createProcessesAlign(string);
 };
 
 //**********************************************************************************************************************
 struct translateSeqsStruct {
     OutputWriter* outputWriter;
     string inputFilename;
-    bool stop, dna;
+    bool stop;
     int frame;
     double numSeqs;
     
     linePair filePos;
     MothurOut* m; Utils util;
     
-    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, bool dn, int f) {
+    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, int f) {
         
         //passed in
         filePos.start = fP.start;
@@ -89,16 +93,45 @@ struct translateSeqsStruct {
         inputFilename = fname;
         frame = f;
         stop = st;
-        dna = dn;
         
         //initialized
         numSeqs = 0;
         m = MothurOut::getInstance();
     }
     ~translateSeqsStruct() {}
-    
+};
+//**********************************************************************************************************************
+struct alignStruct {
+    OutputWriter* outputWriter;
+    string fastaFilename, aminoFilename;
+    bool stop, aminoAligned, dnaAligned;
+    double numSeqs;
+        
+    linePair fastaPos;
+    linePair aminoPos;
+    MothurOut* m; Utils util;
+        
+    alignStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st, bool da, bool aa) {
+            
+        //passed in
+        fastaPos.start = fP.start;
+        fastaPos.end = fP.end;
+        aminoPos.start = aP.start;
+        aminoPos.end = aP.end;
+        outputWriter = oFName;
+        fastaFilename = fname;
+        aminoFilename = aname;
+        dnaAligned = da;
+        aminoAligned = aa;
+        stop = st;
+            
+        //initialized
+        numSeqs = 0;
+        m = MothurOut::getInstance();
+    }
+    ~alignStruct() {}
+};
 //**********************************************************************************************************************
 
-};
 
 #endif /* translateseqscommand_hpp */

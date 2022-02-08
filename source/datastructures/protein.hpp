@@ -40,13 +40,16 @@ public:
     string getName();
     void setUnaligned(vector<AminoAcid>);
     vector<AminoAcid> getUnaligned();
+    string getUnalignedString() { return getProteinString(unaligned); }
     void setAligned(vector<AminoAcid>);
     vector<AminoAcid> getAligned();
+    string getAlignedString() { return getProteinString(aligned); }
     void setComment(string);
     string getComment();
     string getInlineProtein();
     void setPairwise(vector<AminoAcid>);
     vector<AminoAcid> getPairwise();
+    string getCompressedDNA();
     bool isAligned();
     
     int getNumBases();

@@ -226,6 +226,17 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 	}							
 }
 /***********************************************************************/
+Protein Sequence::getProtein() {
+    try {
+        Protein thisProtein = getProtein(1, false);
+        return thisProtein;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getProtein");
+        exit(1);
+    }
+}
+/***********************************************************************/
 //startFrame options: 1,2,3,-1,-2,-3. 1 -> start at 0, 2 start at 1, 3 start at 2.
 Protein Sequence::getProtein(int sf, bool trim) {
     try {
@@ -581,7 +592,6 @@ void Sequence::setPairwise(string sequence){
 	pairwise = sequence;
 }
 //********************************************************************************************************************
-
 bool Sequence::isAligned(){
     
     for (int i = 0; i < aligned.length(); i++) {
@@ -589,7 +599,6 @@ bool Sequence::isAligned(){
     }
     return false;
 }
-
 //********************************************************************************************************************
 
 string Sequence::convert2ints() {

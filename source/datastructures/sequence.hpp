@@ -54,7 +54,8 @@ public:
     string getComment();
 	void setPairwise(string);
 	string getPairwise();
-    Protein getProtein(int start, bool);
+    Protein getProtein(int, bool); //starting frame, trim
+    Protein getProtein(); //assumes starting frame 1, trim=false
     bool isAligned();
 	
 	string getInlineSeq();
