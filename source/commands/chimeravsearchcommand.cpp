@@ -510,7 +510,6 @@ int ChimeraVsearchCommand::execute(){
             if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting.\n");  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
             
             util.printVsearchFile(nameMapCount, newFasta, ";size=", ";");
-            fastafile = newFasta;
         }
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
@@ -588,24 +587,10 @@ int ChimeraVsearchCommand::execute(){
         }else{
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
             
-            
             map<string, vector<string> > dummay;
             vector<string> dummyGroups;
-           
-            //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
-            ifstream in; util.openInputFile(fastafile, in);
-            ofstream outT; util.openOutputFile(newFasta, outT);
             
-            while (!in.eof()) {
-                if (m->getControl_pressed()) { break;  }
-                
-                Sequence seq(in); util.gobble(in);
-                
-                if (seq.getName() != "") { seq.printUnAlignedSequence(outT); }
-            }
-            in.close(); outT.close();
-            
-            vsearchData* dataBundle = new vsearchData(processors, dummay, outputFileName, vsearchLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, dummay, outputFileName, vsearchLocation, templatefile, newFasta, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
 
             dataBundle->setDriverNames(outputFileName, alnsFileName, accnosFileName);
             driver(dataBundle);
@@ -613,8 +598,7 @@ int ChimeraVsearchCommand::execute(){
             int numChimeras = dataBundle->numChimeras;
             
             //add headings
-            ofstream out;
-            util.openOutputFile(outputFileName+".temp", out);
+            ofstream out; util.openOutputFile(outputFileName+".temp", out);
             out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
             out.close();
             
@@ -624,7 +608,7 @@ int ChimeraVsearchCommand::execute(){
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
             
             //remove file made for vsearch
-            if (templatefile == "self") {  util.mothurRemove(fastafile); }
+            if (templatefile == "self") {  util.mothurRemove(newFasta); }
             
             m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
@@ -1125,7 +1109,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
                 }
                 else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
             }
-            vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
@@ -1141,7 +1125,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
             }
             else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
         }
-        vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, fastafile, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;
