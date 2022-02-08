@@ -484,7 +484,14 @@ void Protein::setAligned(vector<AminoAcid> sequence){
         }
     }
 }
-
+//********************************************************************************************************************
+bool Protein::isAligned(){
+    
+    for (int i = 0; i < aligned.size(); i++) {
+        if ((aligned[i].getAmino() == '.') || (aligned[i].getAmino() == '-')) { return true; }
+    }
+    return false;
+}
 //********************************************************************************************************************
 
 void Protein::setPairwise(vector<AminoAcid> sequence){ pairwise = sequence; }

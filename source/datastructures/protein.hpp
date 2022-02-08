@@ -47,6 +47,7 @@ public:
     string getInlineProtein();
     void setPairwise(vector<AminoAcid>);
     vector<AminoAcid> getPairwise();
+    bool isAligned();
     
     int getNumBases();
     int getStartPos();

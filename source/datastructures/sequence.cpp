@@ -580,6 +580,15 @@ void Sequence::setAligned(string sequence){
 void Sequence::setPairwise(string sequence){
 	pairwise = sequence;
 }
+//********************************************************************************************************************
+
+bool Sequence::isAligned(){
+    
+    for (int i = 0; i < aligned.length(); i++) {
+        if ((aligned[i] == '.') || (aligned[i] == '-')) { return true; }
+    }
+    return false;
+}
 
 //********************************************************************************************************************
 

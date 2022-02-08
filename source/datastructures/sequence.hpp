@@ -55,6 +55,7 @@ public:
 	void setPairwise(string);
 	string getPairwise();
     Protein getProtein(int start, bool);
+    bool isAligned();
 	
 	string getInlineSeq();
     int getNumNs();
