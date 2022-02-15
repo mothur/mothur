@@ -101,7 +101,7 @@ struct translateSeqsStruct {
     ~translateSeqsStruct() {}
 };
 //**********************************************************************************************************************
-struct alignStruct {
+struct alignAminoStruct {
     OutputWriter* outputWriter;
     string fastaFilename, aminoFilename;
     bool stop, aminoAligned, dnaAligned;
@@ -111,7 +111,7 @@ struct alignStruct {
     linePair aminoPos;
     MothurOut* m; Utils util;
         
-    alignStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st, bool da, bool aa) {
+    alignAminoStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st, bool da, bool aa) {
             
         //passed in
         fastaPos.start = fP.start;
@@ -129,7 +129,7 @@ struct alignStruct {
         numSeqs = 0;
         m = MothurOut::getInstance();
     }
-    ~alignStruct() {}
+    ~alignAminoStruct() {}
 };
 //**********************************************************************************************************************
 

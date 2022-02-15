@@ -250,7 +250,7 @@ Protein Sequence::getProtein(int sf, bool trim) {
         for (int i = startFrame; i <= length-3;) {
             if (m->getControl_pressed()) { break; }
             
-            string codon = ""; codon += unaligned[i]; codon += unaligned[i+1]; codon += unaligned[i+2]; i += 3;
+            string codon = ""; codon += unaligned[i]; i++; codon += unaligned[i]; i++; codon += unaligned[i]; i++;
            
             AminoAcid thisAA(codon);
             

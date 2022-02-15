@@ -27,6 +27,7 @@ class Protein {
 public:
     
     Protein();
+    Protein(string, string);
     Protein(string, vector<AminoAcid>);
     Protein(ifstream&);
     Protein(ifstream&, string&, bool);
@@ -42,6 +43,7 @@ public:
     vector<AminoAcid> getUnaligned();
     string getUnalignedString() { return getProteinString(unaligned); }
     void setAligned(vector<AminoAcid>);
+    void setAligned(string);
     vector<AminoAcid> getAligned();
     string getAlignedString() { return getProteinString(aligned); }
     void setComment(string);

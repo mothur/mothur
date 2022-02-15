@@ -7,6 +7,7 @@
 //
 
 #include "translateseqscommand.hpp"
+#include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
 vector<string> TranslateSeqsCommand::setParameters(){
@@ -297,19 +298,19 @@ void translateToAminoAcidDriver(translateSeqsStruct* params) {
     }
 }
 //**********************************************************************************************************************
-void alignProtein(Sequence& seq, Protein& prot, MothurOut* m) {
+void align(Sequence& seq, Protein& prot, MothurOut* m) {
     try {
-        //TODO:: align protein to seq
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TranslateSeqsCommand", "alignProtein");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-void alignDNA(Sequence& seq, Protein& prot, MothurOut* m) {
-    try {
-        //TODO:: align seq to protein
+        
+        int alignmentSize = max(prot.getAligned().size(), (seq.getAligned().size() / 3));
+        
+        Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, alignmentSize+1);
+        
+        alignment->align(seq, prot);
+        
+        seq.setAligned(alignment->getSeqAAln());
+        prot.setAligned(alignment->getSeqBAln());
+                
+        delete alignment;
     }
     catch(exception& e) {
         m->errorOut(e, "TranslateSeqsCommand", "alignDNA");
@@ -317,7 +318,7 @@ void alignDNA(Sequence& seq, Protein& prot, MothurOut* m) {
     }
 }
 //**********************************************************************************************************************
-void alignAminoDriver(alignStruct* params) {
+void alignAminoDriver(alignAminoStruct* params) {
     try {
         ifstream inFASTA; params->util.openInputFile(params->fastaFilename, inFASTA);
         inFASTA.seekg(params->fastaPos.start);
@@ -336,15 +337,13 @@ void alignAminoDriver(alignStruct* params) {
             
             if ((seq.getName() != "") && (prot.getName() != "") && (seq.getName() == prot.getName()))  {
                 
+                align(seq, prot, params->m); count++;
+                
                 if (params->dnaAligned) {
-                    alignProtein(seq, prot, params->m);
                     params->outputWriter->write('>' + prot.getName() + '\n' + prot.getAlignedString() + '\n');
                 }else {
-                    alignDNA(seq, prot, params->m);
                     params->outputWriter->write('>' + seq.getName() + '\n' + seq.getAligned() + '\n');
                 }
-                
-                count++;
             }
             
             #if defined NON_WINDOWS
@@ -420,7 +419,7 @@ double TranslateSeqsCommand::createProcessesAlign(string outputFileName) {
     try {
         //create array of worker threads
         vector<std::thread*> workerThreads;
-        vector<alignStruct*> data;
+        vector<alignAminoStruct*> data;
         
         auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(outputFileName);
         
@@ -428,14 +427,14 @@ double TranslateSeqsCommand::createProcessesAlign(string outputFileName) {
             
             OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
             
-            alignStruct* dataBundle = new alignStruct(lines[i+1], aLines[i+1], threadOutputWriter, fastafile, aminofile, stop);
+            alignAminoStruct* dataBundle = new alignAminoStruct(lines[i+1], aLines[i+1], threadOutputWriter, fastafile, aminofile, stop, dnaAligned, aminoAligned);
             data.push_back(dataBundle);
 
             workerThreads.push_back(new std::thread(alignAminoDriver, dataBundle));
          }
         
         OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
-        alignStruct* dataBundle = new alignStruct(lines[0], aLines[0], threadOutputWriter, fastafile, aminofile, stop);
+        alignAminoStruct* dataBundle = new alignAminoStruct(lines[0], aLines[0], threadOutputWriter, fastafile, aminofile, stop, dnaAligned, aminoAligned);
         
         alignAminoDriver(dataBundle);
         double num = dataBundle->numSeqs;
