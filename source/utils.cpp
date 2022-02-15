@@ -188,7 +188,7 @@ void Utils::mothurRandomShuffle(vector<string>& randomize){
 
 }
 /***********************************************************************/
-void Utils::mothurRandomShuffle(vector<item>& randomize){
+void Utils::mothurRandomShuffle(vector<intPair>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
     }

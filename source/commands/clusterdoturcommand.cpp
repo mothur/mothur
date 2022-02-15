@@ -216,7 +216,7 @@ int ClusterDoturCommand::execute(){
 			float rndDist = util.ceilDist(dist, precision);
             
 			if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
-			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist), counts, printHeaders);    }
 		
 			previousDist = dist;
 			rndPreviousDist = rndDist;
@@ -225,7 +225,7 @@ int ClusterDoturCommand::execute(){
 		}
 	
 		if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
-		else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
+		else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist), counts, printHeaders); }
 		
         if (countfile == "") {
             sabundFile.close();

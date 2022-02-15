@@ -71,6 +71,9 @@ class MothurOut {
         bool getExecuting()                             { return executing;                 }
         void setExecuting(bool t)                       { executing = t;                    }
     
+        vector<vector<vector<char>>> codons;
+        set<char> validAminoAcids;
+    
 	private:
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
@@ -91,10 +94,13 @@ class MothurOut {
             homePath = "";
             outLog = NULL;
             seed = std::chrono::system_clock::now().time_since_epoch().count();
+            
+            initialize(); //fills validAminoAcids and codons
 		}
 		~MothurOut();
 		
         void appendLogBuffer(string); //used to store log before we establish the logfilename
+        void initialize();
 
 		ofstream* outLog;
         unsigned seed;

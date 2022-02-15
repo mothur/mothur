@@ -60,11 +60,11 @@ int CountTable::createTable(set<string>& n, map<string, string>& g, set<string>&
 
             string seqName = *it;
 
-            vector<countTableItem> groupCounts;
+            vector<intPair> groupCounts;
             map<string, string>::iterator itGroup = g.find(seqName);
 
             if (itGroup != g.end()) {
-                groupCounts.push_back(countTableItem(1, indexGroupMap[itGroup->second]));
+                groupCounts.push_back(intPair(1, indexGroupMap[itGroup->second]));
                 totalGroups[indexGroupMap[itGroup->second]]++;
             }else {
                 //look for it in names of groups to see if the user accidently used the wrong file
@@ -257,12 +257,12 @@ int CountTable::createTable(string namefile, string groupfile, vector<string> se
                 }else { thisTotal = names.size();  }
                 
                 //if group info, then read it
-                vector<countTableItem> thisGroupsCount;
+                vector<intPair> thisGroupsCount;
                 for (map<string, int>::iterator it = groupCounts.begin(); it != groupCounts.end(); it++) {
                     int groupIndex = indexGroupMap[it->first];
                     int abund = it->second;
                     if (abund != 0) {
-                        countTableItem thisAbund(it->second, groupIndex);
+                        intPair thisAbund(it->second, groupIndex);
                         thisGroupsCount.push_back(thisAbund);
                         totalGroups[groupIndex] += abund;
                     }
@@ -289,11 +289,11 @@ int CountTable::createTable(string namefile, string groupfile, vector<string> se
             for (int i = 0; i < names.size(); i++) {
                if (m->getControl_pressed()) { break; }
                 
-                vector<countTableItem> abunds;
+                vector<intPair> abunds;
                 string group = groupMap->getGroup(names[i]);
                 int groupIndex = indexGroupMap[group];
                 totalGroups[groupIndex]++;
-                countTableItem thisAbund(1, groupIndex);
+                intPair thisAbund(1, groupIndex);
                 abunds.push_back(thisAbund);
                 
                 map<string, int>::iterator it = indexNameMap.find(names[i]);
@@ -558,7 +558,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                             string groupInfo = util.getline(in); util.gobble(in);
                             vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                             
-                            vector<countTableItem> abunds;
+                            vector<intPair> abunds;
                             for (int i = 0; i < groupNodes.size(); i++) { //for each non zero group count
                                 string abund = groupNodes[i]; string thisgroup = "";
                                 util.splitAtComma(thisgroup, abund);
@@ -568,7 +568,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                                 
                                 if (setOfSelectedGroups.count(groupName) != 0) { //we selected this group
                                     int thisIndex = indexGroupMap[groupName];
-                                    countTableItem item(a, thisIndex);
+                                    intPair item(a, thisIndex);
                                     abunds.push_back(item);
                                     totalGroups[thisIndex] += a;
                                     thisTotal += a;
@@ -596,7 +596,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                                 string groupInfo = util.getline(in); util.gobble(in);
                                 vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                                 
-                                vector<countTableItem> abunds;
+                                vector<intPair> abunds;
                                 for (int i = 0; i < groupNodes.size(); i++) { //for each non zero group count
                                     string abund = groupNodes[i]; string thisgroup = "";
                                     util.splitAtComma(thisgroup, abund);
@@ -604,7 +604,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                                     int g; util.mothurConvert(thisgroup, g); g--;
                                     string groupName = originalGroupIndexes[g]; //order of groups in file may not be sorted
                                     int thisIndex = indexGroupMap[groupName];
-                                    countTableItem item(a, thisIndex);
+                                    intPair item(a, thisIndex);
                                    
                                     abunds.push_back(item);
                                     totalGroups[thisIndex] += a;
@@ -630,7 +630,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
             if (it == indexNameMap.end()) {
                 bool saveSeq = true;
                 if (hasGroups && readGroups) {
-                    vector<countTableItem> thisGroupsCount = compressAbunds(groupCounts);
+                    vector<intPair> thisGroupsCount = compressAbunds(groupCounts);
                     if (thisGroupsCount.size() == 0) {  saveSeq = false; }
                     else { counts.push_back(thisGroupsCount); }
                 }
@@ -758,7 +758,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
                         string groupInfo = util.getline(in); util.gobble(in);
                         vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                         
-                        vector<countTableItem> abunds;
+                        vector<intPair> abunds;
                         for (int i = 0; i < groupNodes.size(); i++) { //for each non zero group count
                             string abund = groupNodes[i]; string thisgroup = "";
                             util.splitAtComma(thisgroup, abund);
@@ -766,7 +766,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
                             int g; util.mothurConvert(thisgroup, g); g--;
                             string groupName = originalGroupIndexes[g]; //order of groups in file may not be sorted
                             int thisIndex = indexGroupMap[groupName];
-                            countTableItem item(a, thisIndex);
+                            intPair item(a, thisIndex);
                             
                             abunds.push_back(item);
                             
@@ -783,7 +783,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<
             
             if (saveSeq) {
                 if (hasGroups && readGroups) {
-                    vector<countTableItem> thisGroupsCount = compressAbunds(groupCounts);
+                    vector<intPair> thisGroupsCount = compressAbunds(groupCounts);
                     counts.push_back(thisGroupsCount);
                 }
                 indexNameMap[name] = uniques;
@@ -1065,7 +1065,7 @@ vector<string> CountTable::printCompressedTable(string file, vector<string> grou
     }
 }
 /************************************************************/
-//returns index of countTableItem for group passed in. If group is not present in seq, returns index of next group or -1
+//returns index of intPair for group passed in. If group is not present in seq, returns index of next group or -1
 int CountTable::find(int seq, int group, bool returnNext) {
     try {
         
@@ -1087,7 +1087,7 @@ int CountTable::find(int seq, int group, bool returnNext) {
         exit(1);
     }
 }/************************************************************/
-//returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
+//returns abundance of intPair for seq and group passed in. If group is not present in seq, returns 0
 int CountTable::getAbund(int seq, int group) {
     try {
         int index = find(seq, group, false);
@@ -1104,7 +1104,7 @@ int CountTable::getAbund(int seq, int group) {
     }
 }
 /************************************************************/
-vector<int> CountTable::expandAbunds(vector<countTableItem>& items) {
+vector<int> CountTable::expandAbunds(vector<intPair>& items) {
     try {
         vector<int> abunds; abunds.resize(groups.size(), 0); //prefill with 0's
         
@@ -1138,13 +1138,13 @@ vector<int> CountTable::expandAbunds(int index) {
 }
 /************************************************************/
 //assumes same order as groups
-vector<countTableItem> CountTable::compressAbunds(vector<int> abunds) {
+vector<intPair> CountTable::compressAbunds(vector<int> abunds) {
     try {
-        vector<countTableItem> row;
+        vector<intPair> row;
         
         for (int i = 0; i < abunds.size(); i++) {
             if (abunds[i] != 0) {
-                countTableItem thisAbund(abunds[i], i);
+                intPair thisAbund(abunds[i], i);
                 row.push_back(thisAbund);
             }
         }
@@ -1383,7 +1383,7 @@ int CountTable::printCompressedSeq(ofstream& out, string seqName, vector<string>
 //group counts for a seq
 vector<int> CountTable::getGroupCounts(string seqName) {
     try {
-        vector<countTableItem> temp = getItems(seqName);
+        vector<intPair> temp = getItems(seqName);
         return (expandAbunds(temp)); 
         
     }
@@ -1394,9 +1394,9 @@ vector<int> CountTable::getGroupCounts(string seqName) {
 }
 /************************************************************/
 //group counts for a seq
-vector<countTableItem> CountTable::getItems(string seqName) {
+vector<intPair> CountTable::getItems(string seqName) {
     try {
-        vector<countTableItem> temp;
+        vector<intPair> temp;
         if (hasGroups) {
             map<string, int>::iterator it = indexNameMap.find(seqName);
             if (it == indexNameMap.end()) {
@@ -1487,7 +1487,7 @@ int CountTable::setAbund(string seqName, string groupName, int num) {
                     int oldCount = 0;
                     
                     if (indexOfGroup == -1) { //create item for this group
-                        countTableItem newItem(num, it->second);
+                        intPair newItem(num, it->second);
                         counts[it2->second].push_back(newItem);
                         sortRow(it2->second);
                     }else { //update total for group
