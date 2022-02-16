@@ -110,8 +110,14 @@ void NeedlemanOverlap::align(Sequence A, Protein B){
     
         string seq = A.getAligned();
         vector<string> seqA; seqA.push_back(" ");
-        for(int j=0;j<seq.length();){
+        int extentionSize = 3 - (seq.length() % 3);
+        for (int i = 0; i < extentionSize; i++) { seq += "."; } //add gaps
+        
+        for(int j = 0; j<seq.length();){
             string temp = ""; temp += seq[j]; j++; temp += seq[j]; j++; temp += seq[j]; j++;
+            if (A.getName() == "M00967_43_000000000-A3JHG_1_1101_15533_5293") {
+            AminoAcid codon(temp);
+                cout << temp << '\t' << codon.getAmino() << endl; }
             seqA.push_back(temp);
         }
         

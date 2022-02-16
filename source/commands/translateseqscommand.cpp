@@ -301,7 +301,7 @@ void translateToAminoAcidDriver(translateSeqsStruct* params) {
 void align(Sequence& seq, Protein& prot, MothurOut* m) {
     try {
         
-        int alignmentSize = max(prot.getAligned().size(), (seq.getAligned().size() / 3));
+        int alignmentSize = max(prot.getAligned().size(), (seq.getAligned().size() / 3)+1);
         
         Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, alignmentSize+1);
         
