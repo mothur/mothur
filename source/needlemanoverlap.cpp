@@ -108,7 +108,7 @@ void NeedlemanOverlap::align(string A, string B, bool createBaseMap){
 void NeedlemanOverlap::align(Sequence A, Protein B){
     try {
     
-        string seq = A.getAligned();
+        string seq = A.getUnaligned();
         vector<string> seqA; seqA.push_back(" ");
         int extentionSize = 3 - (seq.length() % 3);
         for (int i = 0; i < extentionSize; i++) { seq += "."; } //add gaps
