@@ -87,7 +87,7 @@ string AlignMuscleCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],[tag].fasta"; }
+        if (type == "fasta") {  pattern = "[filename],[tag].fasta-[filename].fasta"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -195,15 +195,7 @@ int AlignMuscleCommand::execute(){
         
         
         
-        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
-        map<string, string> variables;
-        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
-        //variables["[tag]"] = "denovo";
-        //string outputFileName = getOutputFileName("fasta", variables);
-                
-        
-        
-        
+             
         
         //set accnos file as new current accnosfile
         string currentName = "";
@@ -227,20 +219,18 @@ int AlignMuscleCommand::execute(){
 //**********************************************************************************************************************
 void AlignMuscleCommand::driver(){
     try {
-        string outputFileName = "";
-        //to allow for spaces in the path
-       /* params->driverOutputFName = "\"" + params->driverOutputFName + "\"";
-        params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
-        params->driverAlns = "\"" + params->driverAlns + "\"";
         
-        if (params->formattedFastaFilename.length() > 257) {
-            params->m->mothurOut("[ERROR]: " + params->formattedFastaFilename + " filename is " + toString(params->formattedFastaFilename.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); params->m->setControl_pressed(true); return 0;
-        }else if ((params->driverAlns.length() > 257) && (params->vars->chimealns)) {
-            params->m->mothurOut("[ERROR]: " + params->driverAlns + " filename is " + toString(params->driverAlns.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct.\n"); params->m->setControl_pressed(true); return 0;
-        }else if (params->driverOutputFName.length() > 257) {
-            params->m->mothurOut("[ERROR]: " + params->driverOutputFName + " filename is " + toString(params->driverOutputFName.length()) + " long. The uchime program can't handle files with a full path longer than 257 characters, please correct input file name.\n"); params->m->setControl_pressed(true); return 0;
-        }
-        */
+        
+        if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[tag]"] = "muscle";
+        string outputFileName = getOutputFileName("fasta", variables);
+        outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
+
+        //to allow for spaces in the path
+        outputFileName = "\"" + outputFileName + "\"";
+        
         vector<char*> cPara;
         
         string muscleCommand = muscleLocation;
@@ -302,12 +292,7 @@ void AlignMuscleCommand::driver(){
         //free memory
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] muscleParameters;
-        
-        //remove "" from filenames
-        //params->driverOutputFName = params->driverOutputFName.substr(1, params->driverOutputFName.length()-2);
-        //params->formattedFastaFilename = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
-        //params->driverAlns = params->driverAlns.substr(1, params->driverAlns.length()-2);
-        
+           
     }
     catch(exception& e) {
         m->errorOut(e, "AlignMuscleCommand", "driver");
