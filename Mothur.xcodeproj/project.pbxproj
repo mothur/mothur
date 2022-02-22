@@ -843,6 +843,8 @@
 		F4103AD325A4DB7F001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48BDDA701EC9D31400F0F6C0 /* sharedrabundvectors.cpp */; };
 		F41A1B91261257DE00144985 /* kmerdist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F41A1B8F261257DE00144985 /* kmerdist.cpp */; };
+		F44268EE27BD52D50000C15D /* alignmusclecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44268EC27BD52D50000C15D /* alignmusclecommand.cpp */; };
+		F44268EF27BD52D50000C15D /* alignmusclecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F44268EC27BD52D50000C15D /* alignmusclecommand.cpp */; };
 		F45A2E3D25A78B4D00994F76 /* contigsreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */; };
 		F4A866B7265BE7720010479A /* protein.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866B5265BE7720010479A /* protein.cpp */; };
 		F4A866B8265BE7720010479A /* protein.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866B5265BE7720010479A /* protein.cpp */; };
@@ -1808,6 +1810,8 @@
 		F4103A9D25A4D00F001ED741 /* libgsl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgsl.a; path = mothur_resources/libs/libgsl.a; sourceTree = SOURCE_ROOT; };
 		F41A1B8F261257DE00144985 /* kmerdist.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = kmerdist.cpp; path = source/calculators/kmerdist.cpp; sourceTree = SOURCE_ROOT; };
 		F41A1B90261257DE00144985 /* kmerdist.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = kmerdist.hpp; path = source/calculators/kmerdist.hpp; sourceTree = SOURCE_ROOT; };
+		F44268EC27BD52D50000C15D /* alignmusclecommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = alignmusclecommand.cpp; sourceTree = "<group>"; };
+		F44268ED27BD52D50000C15D /* alignmusclecommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = alignmusclecommand.hpp; sourceTree = "<group>"; };
 		F45A2E3B25A78B4D00994F76 /* contigsreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = contigsreport.hpp; sourceTree = "<group>"; };
 		F45A2E3C25A78B4D00994F76 /* contigsreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = contigsreport.cpp; sourceTree = "<group>"; };
 		F45A2E5025BF229600994F76 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -2434,6 +2438,8 @@
 				A7E9B65112D37EC300DA6239 /* aligncommand.cpp */,
 				A7E9B7D412D37EC400DA6239 /* aligncheckcommand.h */,
 				A7E9B7D312D37EC400DA6239 /* aligncheckcommand.cpp */,
+				F44268EC27BD52D50000C15D /* alignmusclecommand.cpp */,
+				F44268ED27BD52D50000C15D /* alignmusclecommand.hpp */,
 				A7A61F2B130062E000E05B6B /* amovacommand.h */,
 				A7A61F2C130062E000E05B6B /* amovacommand.cpp */,
 				A71CB15F130B04A2001E7287 /* anosimcommand.h */,
@@ -3490,6 +3496,7 @@
 				481FB53B1AC1B5EF0076CFF3 /* boneh.cpp in Sources */,
 				481FB6071AC1B7970076CFF3 /* setcurrentcommand.cpp in Sources */,
 				481FB5321AC1B5D00076CFF3 /* cmdargs.cpp in Sources */,
+				F44268EF27BD52D50000C15D /* alignmusclecommand.cpp in Sources */,
 				481FB6711AC1B8820076CFF3 /* rarefact.cpp in Sources */,
 				F4103AD625A4DB80001ED741 /* sharedrabundvectors.cpp in Sources */,
 				481FB5841AC1B6FF0076CFF3 /* mothurchimera.cpp in Sources */,
@@ -3556,6 +3563,7 @@
 				48576EA21D05DBCD00BBC9C0 /* vsearchfileparser.cpp in Sources */,
 				48910D461D58CAD700F60EDB /* opticluster.cpp in Sources */,
 				A7E9B8A212D37EC400DA6239 /* classifyotucommand.cpp in Sources */,
+				F44268EE27BD52D50000C15D /* alignmusclecommand.cpp in Sources */,
 				A7E9B8A312D37EC400DA6239 /* classifyseqscommand.cpp in Sources */,
 				48A055332491577800D0F97F /* sffheader.cpp in Sources */,
 				481E40E1244F62980059C925 /* calculator.cpp in Sources */,
