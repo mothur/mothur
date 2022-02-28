@@ -215,7 +215,7 @@ void HeatMapSim::printLegend(int y, float maxSim, float minSim) {
 			float label = scaler*i;
 			label = int(label * 1000 + 0.5);
 			label /= 1000.0;
-			string text = toString(label, 3);
+			string text = toString(label);
 			
 			outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"" + toString(fontSize) + "\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + text + "</text>\n";
 			x += 153;

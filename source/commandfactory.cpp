@@ -154,6 +154,7 @@
 #include "diversityestimatorcommand.hpp"
 #include "srainfocommand.hpp"
 #include "makeclrcommand.hpp"
+#include "translateseqscommand.hpp"
 #include "alignmusclecommand.hpp"
 
 
@@ -326,6 +327,7 @@ CommandFactory::CommandFactory(){
     commands["estimator.single"]    = "estimator.single";
     commands["sra.info"]            = "sra.info";
     commands["make.clr"]            = "make.clr";
+    commands["tranlate.seqs"]       = "tranlate.seqs";
     commands["align.muscle"]        = "align.muscle";
 
 }
@@ -584,6 +586,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "estimator.single")      {	command = new EstimatorSingleCommand(optionString);         }
         else if(commandName == "sra.info")              {   command = new SRAInfoCommand(optionString);                 }
         else if(commandName == "make.clr")              {   command = new MakeCLRCommand(optionString);                 }
+        else if(commandName == "translate.seqs")        {   command = new TranslateSeqsCommand(optionString);           }
+		else											{	command = new NoCommand(optionString);						}
         else if(commandName == "align.muscle")          {   command = new AlignMuscleCommand(optionString);             }
 
         else											{	command = new NoCommand(optionString);						}
@@ -763,6 +767,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "estimator.single")      {	pipecommand = new EstimatorSingleCommand(optionString);         }
         else if(commandName == "sra.info")              {   pipecommand = new SRAInfoCommand(optionString);                 }
         else if(commandName == "make.clr")              {   pipecommand = new MakeCLRCommand(optionString);                 }
+        else if(commandName == "translate.seqs")        {   pipecommand = new TranslateSeqsCommand(optionString);           }
+		else											{	pipecommand = new NoCommand(optionString);						}
         else if(commandName == "align.muscle")          {   pipecommand = new AlignMuscleCommand(optionString);             }
 
         else											{	pipecommand = new NoCommand(optionString);						}

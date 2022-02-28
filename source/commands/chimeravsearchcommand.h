@@ -44,7 +44,6 @@ struct vsearchVariables {
 };
 /**************************************************************************************************/
 struct vsearchData {
-    string fastafile;
     string dupsfile;
     string outputFName;
     string accnos, alns, formattedFastaFilename, templatefile, vsearchLocation;
@@ -59,8 +58,7 @@ struct vsearchData {
     Utils util;
     
     vsearchData(){}
-    vsearchData(int proc, map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
-        fastafile = f;
+    vsearchData(int proc, map<string, vector<string> > g2f, string o, string uloc, string t, string file, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
         dupsfile = n;
         formattedFastaFilename = file;
         outputFName = o;

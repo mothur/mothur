@@ -336,24 +336,14 @@ struct diffPair {
 	}
 };
 
-struct countTableItem {
+struct intPair {
     int abund;
     int group;
     
-    countTableItem() { abund = 0; group = -1; }
-    countTableItem(int a, int g) : abund(a), group(g) {}
-    ~countTableItem() {}
+    intPair() { abund = 0; group = -1; }
+    intPair(int a, int g) : abund(a), group(g) {}
+    ~intPair() {}
 };
-
-struct item {
-    int name;
-    int group;
-    
-    item() { name = -1; group = -1; }
-    item(int n, int g) : name(n), group(g) {}
-    ~item() {}
-};
-
 
 struct kmerCount {
     int kmerNumber;
@@ -503,7 +493,7 @@ struct spearmanRank {
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
 //***********************************************************************
-inline bool compareGroups(countTableItem left, countTableItem right){
+inline bool compareGroups(intPair left, intPair right){
 	return (left.group > right.group);
 }
 //***********************************************************************
@@ -547,14 +537,6 @@ inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right)
 inline bool compareSequenceDistance(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
 }
-//********************************************************************************************************************
-//returns sign of double
-inline double sign(double temp){
-	//find sign
-    if (temp > 0)       { return 1.0;   }
-    else if (temp < 0)  { return -1.0;  }
-    return 0;
-}
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -574,8 +556,6 @@ void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 			throw BadConversion(s);
 	
 }
-//*******************************************************************************
-template <typename T> int sgn(T val){ return (val > T(0)) - (val < T(0)); }
 //*******************************************************************************
 template<typename T>
 bool convertTestFloat(const string& s, T& x, bool failIfLeftoverChars = true){
@@ -611,12 +591,16 @@ string toString(const T&x){
 		return output.str();
 	
 }
-//***********************************************************************
+//*********************************************************************
 template<typename T>
-void mothurSwap(T&x, T&y){
-    T temp = y;
-    y = x;
-    x = temp;
+string toString(const T&x, int i){
+    
+        stringstream output;
+        
+        output.precision(i);
+        output << fixed << x;
+        
+        return output.str();
 }
 //*************************************************************************
 template<typename T>
@@ -629,25 +613,6 @@ string toHex(const T&x){
 		return output.str();
 	
 }
-//*********************************************************************
-template<typename T>
-string toString(const T&x, int i){
-	
-		stringstream output;
-		
-		output.precision(i);
-		output << fixed << x;
-		
-		return output.str();
-}
-//***********************************************************************
-template<class T>
-T fromString(const string& s){
-	istringstream stream (s);
-	T t;
-	stream >> t;
-	return t;
-}
-//****************************************************************************
+//*************************************************************************
 
 #endif

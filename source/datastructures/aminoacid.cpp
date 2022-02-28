@@ -12,8 +12,10 @@
 AminoAcid::AminoAcid() {
     try {
         m = MothurOut::getInstance();
-        fillValidAminoAcid();
-        aminoBase = '0';
+        
+        indexes['A'] = 0; indexes['T'] = 1; indexes['G'] = 2; indexes['C'] = 3; indexes['N'] = 4; indexes['-'] = 5; indexes['.'] = 5;
+
+        setAmino('?');
     }
     catch(exception& e) {
         m->errorOut(e, "AminoAcid", "AminoAcid");
@@ -24,9 +26,27 @@ AminoAcid::AminoAcid() {
 AminoAcid::AminoAcid(char c) {
     try {
         m = MothurOut::getInstance();
-        fillValidAminoAcid();
         
+        indexes['A'] = 0; indexes['T'] = 1; indexes['G'] = 2; indexes['C'] = 3; indexes['N'] = 4; indexes['-'] = 5; indexes['.'] = 5;
+
         setAmino(c);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "AminoAcid", "AminoAcid");
+        exit(1);
+    }
+}
+/******************************************************************************************************************/
+//requires the codon to be 3 characters long. Only valid characters are a,t,g,c,n.
+AminoAcid::AminoAcid(string codon) {
+    try {
+        m = MothurOut::getInstance();
+        
+        indexes['A'] = 0; indexes['T'] = 1; indexes['G'] = 2; indexes['C'] = 3; indexes['N'] = 4; indexes['-'] = 5; indexes['.'] = 5;
+
+        char amino = findAmino(codon);
+        
+        setAmino(amino);
     }
     catch(exception& e) {
         m->errorOut(e, "AminoAcid", "AminoAcid");
@@ -39,142 +59,61 @@ void AminoAcid::setAmino(char c) {
         
         c = toupper(c);
         
-        if (validAminoAcids.count(c) != 0) { aminoBase = c; getName(); }
-        
-        else {
-            m->mothurOut("[ERROR]: " + toString(c) + " is an invalid amino acid, please correct.\n"); m->setControl_pressed(true);
-        }
+        if (m->validAminoAcids.count(c) != 0) {
+            aminoBase = c;
+            getName(); //sets name, number and compressed dna
+        }else { m->mothurOut("[ERROR]: " + toString(c) + " is an invalid amino acid, please correct.\n"); m->setControl_pressed(true); }
     }
     catch(exception& e) {
         m->errorOut(e, "AminoAcid", "setAmino");
         exit(1);
     }
 }
-
-/******************************************************************************************************************
-void AminoAcid::fillCodons() {
+/******************************************************************************************************************/
+char AminoAcid::findAmino(string codon) {
     try {
-        //Ala, A         GCT,GCC,GCA,GCG
-        codonMap["GCT"] = 'A';
-        codonMap["GCC"] = 'A';
-        codonMap["GCA"] = 'A';
-        codonMap["GCG"] = 'A';
         
-        //Arg, R         CGT,CGC,CGA,CGG; AGA,AGG
-        codonMap["CGT"] = 'R';
-        codonMap["CGC"] = 'R';
-        codonMap["CGA"] = 'R';
-        codonMap["CGG"] = 'R';
-        codonMap["AGA"] = 'R';
-        codonMap["AGG"] = 'R';
+        char amino = '?';
+        if (codon.length() != 3) { m->mothurOut("[ERROR]: " + codon + " is not the correct length. Codons must be 3 characters long, quitting.\n"); m->setControl_pressed(true); return amino; }
         
-        //Asn, N         AAT,AAC
-        codonMap["AAT"] = 'N';
-        codonMap["AAC"] = 'N';
         
-        //Asp, D         GAT,GAC
-        codonMap["GAT"] = 'D';
-        codonMap["GAC"] = 'D';
+        int index1 = -1; int index2 = -1; int index3 = -1;
+        it = indexes.find(codon[0]); if (it != indexes.end()) { index1 = it->second; } else { m->mothurOut("[ERROR]: " + toString(codon[0]) + " is not A, T, G, C, or N, quitting.\n"); m->setControl_pressed(true); return amino; }
+        it = indexes.find(codon[1]); if (it != indexes.end()) { index2 = it->second; } else { m->mothurOut("[ERROR]: " + toString(codon[1]) + " is not A, T, G, C, or N, quitting.\n"); m->setControl_pressed(true); return amino; }
+        it = indexes.find(codon[2]); if (it != indexes.end()) { index3 = it->second; } else { m->mothurOut("[ERROR]: " + toString(codon[2]) + " is not A, T, G, C, or N, quitting.\n"); m->setControl_pressed(true); return amino; }
         
-        //Cys, C         TGT,TGC
-        codonMap["TGT"] = 'C';
-        codonMap["TGC"] = 'C';
+        if ((index1 == 5) && (index2 == 5) && (index3 == 5)) { amino = '-';  return amino; }
+
+        //if no N's then the set should contain one amino acid. if N's, then try all possible values for N in that position.
+        //for example:ACN -> Threonine (T) because ACA,ACT,ACG,ACC all map to Threonine
+        //   but      GAN -> could be Glutamate (E) (for N=A or G) or Aspartate (D) (for N=T or C)
+        if ((index1 > 3) || (index2 > 3) || (index3 > 3)) { //any position of the codon is an N or gap
+            set<char> possibleAminoAcids;
+            
+            if (((index1 > 3) && (index2 > 3)) || ((index1 > 3) && (index3 > 3)) || ((index3 > 3) && (index2 > 3))) { //2 N's or gaps in codon
+            }else{ //only 1 N
+                if (index1 > 3) {
+                    possibleAminoAcids.insert(m->codons[0][index2][index3]); possibleAminoAcids.insert(m->codons[1][index2][index3]);
+                    possibleAminoAcids.insert(m->codons[2][index2][index3]); possibleAminoAcids.insert(m->codons[3][index2][index3]);
+                }else if (index2 > 3) {
+                    possibleAminoAcids.insert(m->codons[index1][0][index3]); possibleAminoAcids.insert(m->codons[index1][1][index3]);
+                    possibleAminoAcids.insert(m->codons[index1][2][index3]); possibleAminoAcids.insert(m->codons[index1][3][index3]);
+                }else {
+                    possibleAminoAcids.insert(m->codons[index1][index2][0]); possibleAminoAcids.insert(m->codons[index1][index2][1]);
+                    possibleAminoAcids.insert(m->codons[index1][index2][2]); possibleAminoAcids.insert(m->codons[index1][index2][3]);
+                }
+                if (possibleAminoAcids.size() == 1) {
+                    amino = (*possibleAminoAcids.begin());
+                }
+            }
+        }else {
+            amino = m->codons[index1][index2][index3];
+        }
         
-        //Gln, Q         CAA,CAG
-        codonMap["CAA"] = 'Q';
-        codonMap["CAG"] = 'Q';
-        
-        //Glu, E         GAA,GAG
-        codonMap["GAA"] = 'E';
-        codonMap["GAG"] = 'E';
-        
-        //Gly, G         GGT,GGC,GGA,GGG
-        codonMap["GGT"] = 'G';
-        codonMap["GGC"] = 'G';
-        codonMap["GGA"] = 'G';
-        codonMap["GGG"] = 'G';
-        
-        //His, H         CAT,CAC
-        codonMap["CAT"] = 'H';
-        codonMap["CAC"] = 'H';
-        
-        //Ile, I         ATT,ATC,ATA
-        codonMap["ATT"] = 'I';
-        codonMap["ATC"] = 'I';
-        codonMap["ATA"] = 'I';
-        
-        //Leu, L         CTT,CTC,CTA,CTG; TTA,TTG
-        codonMap["CTT"] = 'L';
-        codonMap["CTC"] = 'L';
-        codonMap["CTA"] = 'L';
-        codonMap["CTG"] = 'L';
-        codonMap["TTA"] = 'L';
-        codonMap["TTG"] = 'L';
-        
-        //Lys, K         AAA,AAG
-        codonMap["AAA"] = 'K';
-        codonMap["AAG"] = 'K';
-        
-        //Met, M         ATG
-        codonMap["ATG"] = 'M';
-        
-        //Phe, F         TTT,TTC
-        codonMap["TTT"] = 'F';
-        codonMap["TTC"] = 'F';
-        
-        //Pro, P         CCT,CCC,CCA,CCG
-        codonMap["CCT"] = 'P';
-        codonMap["CCC"] = 'P';
-        codonMap["CCA"] = 'P';
-        codonMap["CCG"] = 'P';
-        
-        //Ser, S         TCT,TCC,TCA,TCG; AGT,AGC
-        codonMap["TCT"] = 'S';
-        codonMap["TCC"] = 'S';
-        codonMap["TCA"] = 'S';
-        codonMap["TCG"] = 'S';
-        codonMap["AGT"] = 'S';
-        codonMap["AGC"] = 'S';
-        
-        //Thr, T         ACT,ACC,ACA,ACG
-        codonMap["ACT"] = 'T';
-        codonMap["ACC"] = 'T';
-        codonMap["ACA"] = 'T';
-        codonMap["ACG"] = 'T';
-        
-        //Trp, W         TGG
-        codonMap["TGG"] = 'W';
-        
-        //Tyr, Y         TAT,TAC
-        codonMap["TAT"] = 'Y';
-        codonMap["TAC"] = 'Y';
-        
-        //Val, V         GTT,GTC,GTA,GTG
-        codonMap["GTT"] = 'V';
-        codonMap["GTC"] = 'V';
-        codonMap["GTA"] = 'V';
-        codonMap["GTG"] = 'V';
-        
-        //TODO::resolve codons assigned to multiple aminoacids
-        //TODO::start and stop ???
-        
-        //Gln or Glu, Z  CAA,CAG; GAA,GAG
-        codonMap["CAA"] = 'Z';
-        codonMap["CAG"] = 'Z';
-        codonMap["GAA"] = 'Z';
-        codonMap["GAG"] = 'Z';
-        
-        //Asn or Asp, B AAT,AAC; GAT,GAC
-        codonMap["AAT"] = 'B';
-        codonMap["AAC"] = 'B';
-        codonMap["GAT"] = 'B';
-        codonMap["GAC"] = 'B';
-        condonMap["."] = '.';
-        condonMap["-"] = '-';
-        
+        return amino;
     }
     catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "fillCodons");
+        m->errorOut(e, "AminoAcid", "findAmino");
         exit(1);
     }
 }
@@ -185,86 +124,42 @@ void AminoAcid::fillCodons() {
      try {
          string aminoName = "unknown"; aminoNum = unk;
          
-         if (aminoBase == 'A')          { aminoName = "Alanine";        aminoNum = ala; } //0
-         else if (aminoBase == 'R')     { aminoName = "Arginine";       aminoNum = arg; } //1
+         if (aminoBase == 'A')          { aminoName = "Alanine";        aminoNum = ala;  } //0
+         else if (aminoBase == 'R')     { aminoName = "Arginine";       aminoNum = arg;  } //1
          else if (aminoBase == 'N')     { aminoName = "Asparagine";     aminoNum = asn; } //2
-         else if (aminoBase == 'D')     { aminoName = "Aspartic";       aminoNum = asp; } //3
+         else if (aminoBase == 'D')     { aminoName = "Aspartic";       aminoNum = asp;  } //3
          
-         else if (aminoBase == 'B')     { aminoName = "Asparagine or Aspartic"; aminoNum = asx; } //23
-         else if (aminoBase == 'C')     { aminoName = "Cysteine";               aminoNum = cys; } //4
-         else if (aminoBase == 'Q')     { aminoName = "Glutamine";              aminoNum = gln; } //5
-         else if (aminoBase == 'E')     { aminoName = "Glutamic";               aminoNum = glu; } //6
+         else if (aminoBase == 'B')     { aminoName = "Asparagine or Aspartic"; aminoNum = asx;  } //23
+         else if (aminoBase == 'C')     { aminoName = "Cysteine";               aminoNum = cys;  } //4
+         else if (aminoBase == 'Q')     { aminoName = "Glutamine";              aminoNum = gln;  } //5
+         else if (aminoBase == 'E')     { aminoName = "Glutamic";               aminoNum = glu;  } //6
          
          else if (aminoBase == 'Z')     { aminoName = "Glutamine or Glutamic_Acid"; aminoNum = glx; } //24
          else if (aminoBase == 'G')     { aminoName = "Glycine";        aminoNum = gly;     } //7
-         else if (aminoBase == 'H')     { aminoName = "Histidine";      aminoNum = his;     } //8
+         else if (aminoBase == 'H')     { aminoName = "Histidine";      aminoNum = his;    } //8
          else if (aminoBase == 'I')     { aminoName = "Isoleucine";     aminoNum = ileu;    } //9
          
-         else if (aminoBase == 'L')     { aminoName = "Leucine";        aminoNum = leu;     } //10
-         else if (aminoBase == 'K')     { aminoName = "Lysine";         aminoNum = lys;     } //11
-         else if (aminoBase == 'M')     { aminoName = "Methionine";     aminoNum = met;     } //12
+         else if (aminoBase == 'L')     { aminoName = "Leucine";        aminoNum = leu;   } //10
+         else if (aminoBase == 'K')     { aminoName = "Lysine";         aminoNum = lys;    } //11
+         else if (aminoBase == 'M')     { aminoName = "Methionine";     aminoNum = met;    } //12
          else if (aminoBase == 'F')     { aminoName = "Phenylalanine";  aminoNum = phe;     } //13
          
-         else if (aminoBase == 'P')     { aminoName = "Proline";        aminoNum = pro;     } //14
+         else if (aminoBase == 'P')     { aminoName = "Proline";        aminoNum = pro;      } //14
          else if (aminoBase == 'S')     { aminoName = "Serine";         aminoNum = ser1;    } //15
-         else if (aminoBase == 'T')     { aminoName = "Threonine";      aminoNum = thr;     } //17
+         else if (aminoBase == 'T')     { aminoName = "Threonine";      aminoNum = thr;       } //17
          else if (aminoBase == 'W')     { aminoName = "Tryptophan";     aminoNum = trp;     } //18
          
-         else if (aminoBase == 'Y')     { aminoName = "Tyrosine";       aminoNum = tyr;     } //19
+         else if (aminoBase == 'Y')     { aminoName = "Tyrosine";       aminoNum = tyr;       } //19
          else if (aminoBase == 'V')     { aminoName = "Valine";         aminoNum = val;     } //20
-         else if ((aminoBase == '.') || (aminoBase == '-'))     { aminoName = "Gap"; aminoNum = del;  } //21
-         else if (aminoBase == '*')     { aminoName = "STOP";           aminoNum = stop;    } //22
+         else if ((aminoBase == '.') || (aminoBase == '-'))     { aminoName = "Gap"; aminoNum = del;    } //21
+         else if ((aminoBase == '*') || (aminoBase == 'X'))     { aminoName = "STOP";           aminoNum = stop;     } //22
          else if (aminoBase == '?')     { aminoName = "QUESTION";       aminoNum = quest;   } //27
          
-         
          return aminoName;
-         
      }
      catch(exception& e) {
          m->errorOut(e, "AminoAcid", "getName");
          exit(1);
      }
  }
-/******************************************************************************************************************/
-void AminoAcid::fillValidAminoAcid() {
-    try {
-        validAminoAcids.insert('A');
-        validAminoAcids.insert('R');
-        validAminoAcids.insert('N');
-        validAminoAcids.insert('D');
-        
-        validAminoAcids.insert('B');
-        validAminoAcids.insert('C');
-        validAminoAcids.insert('Q');
-        validAminoAcids.insert('E');
-        
-        validAminoAcids.insert('Z');
-        validAminoAcids.insert('G');
-        validAminoAcids.insert('H');
-        validAminoAcids.insert('I');
-        
-        validAminoAcids.insert('L');
-        validAminoAcids.insert('K');
-        validAminoAcids.insert('M');
-        validAminoAcids.insert('F');
-        
-        validAminoAcids.insert('P');
-        validAminoAcids.insert('S');
-        validAminoAcids.insert('T');
-        validAminoAcids.insert('W');
-        
-        validAminoAcids.insert('Y');
-        validAminoAcids.insert('V');
-        validAminoAcids.insert('-');
-        validAminoAcids.insert('.');
-        
-        validAminoAcids.insert('*');
-        validAminoAcids.insert('?');
-        
-    }
-    catch(exception& e) {
-        m->errorOut(e, "AminoAcid", "fillValidAminoAcid");
-        exit(1);
-    }
-}
 /******************************************************************************************************************/

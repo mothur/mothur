@@ -160,6 +160,59 @@ void Alignment::traceBack(bool createBaseMap){			//	This traceback routine is us
 	}
 }
 /**************************************************************************************************/
+//disables start and end postions and pairwise length
+void Alignment::proteinTraceBack(vector<string> seqA, vector<AminoAcid> seqB){            //    This traceback routine is used by the dynamic programming algorithms
+    try {
+        BBaseMap.clear();
+        ABaseMap.clear(); //    to fill the values of seqAaln and seqBaln
+        seqAaln = "";
+        seqBaln = "";
+        int row = lB-1;
+        int column = lA-1;
+        
+        AlignmentCell currentCell = alignment[row][column];    //    Start the traceback from the bottom-right corner of the
+        //    matrix
+        
+        if(currentCell.prevCell == 'x'){    seqAaln = seqBaln = "NOALIGNMENT";        }//If there's an 'x' in the bottom-
+        else{    //    right corner bail out because it means nothing got aligned
+            int count = 0;
+            while(currentCell.prevCell != 'x'){                //    while the previous cell isn't an 'x', keep going...
+                
+                if(currentCell.prevCell == 'u'){            //    if the pointer to the previous cell is 'u', go up in the
+                    seqAaln = "---" + seqAaln;                //    matrix.  this indicates that we need to insert a gap in
+                    seqBaln = seqB[row].getAmino() + seqBaln;            //    seqA and a base in seqB
+                    --row;
+                }
+                else if(currentCell.prevCell == 'l'){        //    if the pointer to the previous cell is 'l', go to the left
+                    seqBaln = '-' + seqBaln;                //    in the matrix.  this indicates that we need to insert a gap
+                    seqAaln = seqA[column] + seqAaln;        //    in seqB and a base in seqA
+                    --column;
+                }
+                else{
+                    seqAaln = seqA[column] + seqAaln;        //    otherwise we need to go diagonally up and to the left,
+                    seqBaln = seqB[row].getAmino() + seqBaln;            //    here we add a base to both alignments
+                    --row; --column;
+                }
+                if ((row >= 0) && (column >= 0)) { currentCell = alignment[row][column]; }
+                else { break; }
+                count++;
+            }
+        }
+        
+        
+        pairwiseLength = 0;
+        seqAstart = 0;
+        seqBstart = 0;
+        seqAend = 0;
+        seqBend = 0;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Alignment", "proteinTraceBack");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
 
 Alignment::~Alignment(){
 	try {

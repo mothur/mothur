@@ -572,11 +572,11 @@ int MGClusterCommand::runMothurCluster(){
                         return 0;
                     }
                     
-                    temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
+                    temp->setLabel(toString(rndPreviousDist));
                     printData(temp, counts, printHeaders);
                     delete temp;
                 }else{
-                    oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
+                    oldList.setLabel(toString(rndPreviousDist));
                     printData(&oldList, counts, printHeaders);
                 }
             }
@@ -603,11 +603,11 @@ int MGClusterCommand::runMothurCluster(){
                     return 0;
                 }
                 
-                temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
+                temp->setLabel(toString(rndPreviousDist));
                 printData(temp, counts, printHeaders);
                 delete temp;
             }else{
-                oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
+                oldList.setLabel(toString(rndPreviousDist));
                 printData(&oldList, counts, printHeaders);
             }
         }

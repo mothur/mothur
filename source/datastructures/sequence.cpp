@@ -8,6 +8,7 @@
  */
 
 #include "sequence.hpp"
+#include "protein.hpp"
 
 /***********************************************************************/
 Sequence::Sequence(){
@@ -223,6 +224,52 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 		m->errorOut(e, "Sequence", "Sequence");
 		exit(1);
 	}							
+}
+/***********************************************************************/
+Protein Sequence::getProtein() {
+    try {
+        Protein thisProtein = getProtein(1, false);
+        return thisProtein;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getProtein");
+        exit(1);
+    }
+}
+/***********************************************************************/
+//startFrame options: 1,2,3,-1,-2,-3. 1 -> start at 0, 2 start at 1, 3 start at 2.
+Protein Sequence::getProtein(int sf, bool trim) {
+    try {
+        vector<AminoAcid> aa;
+        
+        int startFrame = sf; int length = unaligned.length();
+        if (sf < 1) { //-1,-2,-3
+            startFrame = (length+(sf+1)) % 3;
+        }else { startFrame--; }
+        
+        for (int i = startFrame; i <= length-3;) {
+            if (m->getControl_pressed()) { break; }
+            
+            string codon = ""; codon += unaligned[i]; i++; codon += unaligned[i]; i++; codon += unaligned[i]; i++;
+           
+            AminoAcid thisAA(codon);
+            
+            if (thisAA.getNum() == stop) {
+                if (trim) {  break;  }
+                else {  thisAA.setAmino('*'); }
+            }
+            
+            aa.push_back(thisAA);
+        }
+        
+        Protein thisProtein(name, aa);
+        
+        return thisProtein;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Protein", "getSequence");
+        exit(1);
+    }
 }
 //********************************************************************************************************************
 string Sequence::getSequenceName(ifstream& fastaFile) {
@@ -544,7 +591,14 @@ void Sequence::setAligned(string sequence){
 void Sequence::setPairwise(string sequence){
 	pairwise = sequence;
 }
-
+//********************************************************************************************************************
+bool Sequence::isAligned(){
+    
+    for (int i = 0; i < aligned.length(); i++) {
+        if ((aligned[i] == '.') || (aligned[i] == '-')) { return true; }
+    }
+    return false;
+}
 //********************************************************************************************************************
 
 string Sequence::convert2ints() {

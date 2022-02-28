@@ -853,6 +853,8 @@
 		F4A866D1266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A866D2266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A86713268F5CCE0010479A /* kimura.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A86711268F5CCE0010479A /* kimura.cpp */; };
+		F4B4B0DC27396EF7003B2133 /* translateseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */; };
+		F4B4B0DD27396EF7003B2133 /* translateseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1828,6 +1830,8 @@
 		F4A86707268E3AFA0010479A /* pam.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pam.hpp; sourceTree = "<group>"; };
 		F4A86711268F5CCE0010479A /* kimura.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kimura.cpp; sourceTree = "<group>"; };
 		F4A86712268F5CCE0010479A /* kimura.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kimura.hpp; sourceTree = "<group>"; };
+		F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = translateseqscommand.cpp; sourceTree = "<group>"; };
+		F4B4B0DB27396EF7003B2133 /* translateseqscommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = translateseqscommand.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2712,6 +2716,8 @@
 				A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */,
 				A7E9B85C12D37EC400DA6239 /* systemcommand.h */,
 				A7E9B85B12D37EC400DA6239 /* systemcommand.cpp */,
+				F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */,
+				F4B4B0DB27396EF7003B2133 /* translateseqscommand.hpp */,
 				A7E9B86312D37EC400DA6239 /* treesharedcommand.h */,
 				A7E9B86212D37EC400DA6239 /* treesharedcommand.cpp */,
 				A7E9B86912D37EC400DA6239 /* trimflowscommand.h */,
@@ -3308,6 +3314,7 @@
 				481FB59E1AC1B71B0076CFF3 /* classifyseqscommand.cpp in Sources */,
 				4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */,
 				481FB5CF1AC1B75C0076CFF3 /* indicatorcommand.cpp in Sources */,
+				F4B4B0DD27396EF7003B2133 /* translateseqscommand.cpp in Sources */,
 				481FB64F1AC1B8100076CFF3 /* consensus.cpp in Sources */,
 				481FB5441AC1B6140076CFF3 /* goodscoverage.cpp in Sources */,
 				481FB5DD1AC1B77E0076CFF3 /* distsharedcommand.cpp in Sources */,
@@ -3694,6 +3701,7 @@
 				A7E9B90C12D37EC400DA6239 /* optionparser.cpp in Sources */,
 				A7E9B90D12D37EC400DA6239 /* ordervector.cpp in Sources */,
 				A7E9B90E12D37EC400DA6239 /* otuhierarchycommand.cpp in Sources */,
+				F4B4B0DC27396EF7003B2133 /* translateseqscommand.cpp in Sources */,
 				A7E9B90F12D37EC400DA6239 /* overlap.cpp in Sources */,
 				A7E9B91012D37EC400DA6239 /* pairwiseseqscommand.cpp in Sources */,
 				A7E9B91112D37EC400DA6239 /* parsefastaqcommand.cpp in Sources */,

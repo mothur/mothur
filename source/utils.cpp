@@ -188,7 +188,7 @@ void Utils::mothurRandomShuffle(vector<string>& randomize){
 
 }
 /***********************************************************************/
-void Utils::mothurRandomShuffle(vector<item>& randomize){
+void Utils::mothurRandomShuffle(vector<intPair>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
     }
@@ -4326,14 +4326,6 @@ char* Utils::mothurConvert(string item){
         char* converted = new char[item.length()+1];
         
         *converted = '\0'; strncat(converted, item.c_str(), item.length());
-        
-        //size_t size = item.length()+1;
-        
-        //strncat(converted, item.c_str(), size-strlen(converted)-1);
-        
-        //converted[size-1] = '\0';
-        
-        //if (m->getDebug()) { m->mothurOut("[DEBUG]: converting string " + item + " to char* " + converted + "\n"); }
         
         return converted;
     }
