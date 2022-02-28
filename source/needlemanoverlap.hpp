@@ -32,6 +32,7 @@ public:
 	NeedlemanOverlap(float, float, float, int);
 	~NeedlemanOverlap();
 	void align(string, string, bool createBaseMap=false);
+    void align(Sequence, Protein);
     void alignPrimer(string, string);
 	
 private:	

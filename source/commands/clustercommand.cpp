@@ -658,7 +658,7 @@ int ClusterCommand::runMothurCluster(){
             float rndDist = util.ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist))  {  printData("unique", counts, printHeaders);                               }
-            else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+            else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist), counts, printHeaders);    }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
@@ -674,7 +674,7 @@ int ClusterCommand::runMothurCluster(){
         }
         
         if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
-        else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
+        else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist), counts, printHeaders); }
         
         delete matrix;
         delete list;

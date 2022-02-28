@@ -30,6 +30,29 @@ Protein::Protein(string newName, vector<AminoAcid> sequence) {
         exit(1);
     }
 }
+/***********************************************************************/
+Protein::Protein(string newName, string seq) {
+    try {
+        m = MothurOut::getInstance();
+        initialize();
+        name = newName;
+        
+        util.checkName(name);
+        
+        vector<AminoAcid> sequence;
+        for (int i = 0; i < seq.size(); i++) {
+            AminoAcid temp(seq[i]);
+            sequence.push_back(temp);
+        }
+        
+        setUnaligned(sequence); //setUnaligned removes any gap characters for us
+        setAligned(sequence);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Protein", "Protein");
+        exit(1);
+    }
+}
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Protein::Protein(istringstream& fastaString){
@@ -462,7 +485,17 @@ void Protein::setUnaligned(vector<AminoAcid> protein){
     startPos = -1;
     endPos = -1;
 }
+//********************************************************************************************************************
 
+void Protein::setAligned(string seq){
+    vector<AminoAcid> sequence;
+    for (int i = 0; i < seq.size(); i++) {
+        AminoAcid temp(seq[i]);
+        sequence.push_back(temp);
+    }
+    
+    setAligned(sequence);
+}
 //********************************************************************************************************************
 
 void Protein::setAligned(vector<AminoAcid> sequence){
@@ -484,7 +517,14 @@ void Protein::setAligned(vector<AminoAcid> sequence){
         }
     }
 }
-
+//********************************************************************************************************************
+bool Protein::isAligned(){
+    
+    for (int i = 0; i < aligned.size(); i++) {
+        if ((aligned[i].getAmino() == '.') || (aligned[i].getAmino() == '-')) { return true; }
+    }
+    return false;
+}
 //********************************************************************************************************************
 
 void Protein::setPairwise(vector<AminoAcid> sequence){ pairwise = sequence; }

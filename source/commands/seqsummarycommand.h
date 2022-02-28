@@ -10,7 +10,6 @@
  *
  */
 
-#include "mothur.h"
 #include "command.hpp"
 #include "sequence.hpp"
 

@@ -16,6 +16,8 @@
 #include "mothur.h"
 #include "alignmentcell.hpp"
 #include "currentfile.h"
+#include "protein.hpp"
+#include "sequence.hpp"
 
 /**************************************************************************************************/
 
@@ -28,6 +30,7 @@ public:
 	virtual ~Alignment();
 	virtual void align(string, string, bool createBaseMap=false) = 0;
     virtual void alignPrimer(string, string) {}
+    virtual void align(Sequence, Protein) {}
 	
 	string getSeqAAln();
 	string getSeqBAln();
@@ -43,7 +46,9 @@ public:
 	int getnRows() { return nRows; }
 
 protected:
+    
 	void traceBack(bool createBaseMap);
+    void proteinTraceBack(vector<string>, vector<AminoAcid>);
 	string seqA, seqAaln;
 	string seqB, seqBaln;
 	int seqAstart, seqAend;

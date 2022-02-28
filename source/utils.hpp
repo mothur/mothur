@@ -47,7 +47,7 @@ public:
     void mothurRandomShuffle(vector<long long>&);
     void mothurRandomShuffle(vector< vector<double> >&);
     void mothurRandomShuffle(vector<string>&);
-    void mothurRandomShuffle(vector<item>&);
+    void mothurRandomShuffle(vector<intPair>&);
     void mothurRandomShuffle(vector<PCell*>&);
     void mothurRandomShuffle(vector<PDistCellMin>&);
     void mothurRandomShuffle(vector<colDist>&);
