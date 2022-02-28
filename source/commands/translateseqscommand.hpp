@@ -12,6 +12,8 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "protein.hpp"
+#include "needlemanoverlap.hpp"
+
 
 /*
  This command would take...
@@ -58,7 +60,7 @@ public:
     void help() { m->mothurOut(getHelpString()); }
     
 private:
-    bool abort, stop, aminoAligned, dnaAligned;
+    bool abort, stop;
     string fastafile, aminofile;
     int processors;
     vector<string> outputNames;
@@ -83,7 +85,7 @@ struct translateSeqsStruct {
     
     linePair filePos;
     MothurOut* m; Utils util;
-    
+
     translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, int f) {
         
         //passed in
@@ -93,7 +95,7 @@ struct translateSeqsStruct {
         inputFilename = fname;
         frame = f;
         stop = st;
-        
+                
         //initialized
         numSeqs = 0;
         m = MothurOut::getInstance();
@@ -104,14 +106,15 @@ struct translateSeqsStruct {
 struct alignAminoStruct {
     OutputWriter* outputWriter;
     string fastaFilename, aminoFilename;
-    bool stop, aminoAligned, dnaAligned;
+    bool stop;
     double numSeqs;
         
     linePair fastaPos;
     linePair aminoPos;
     MothurOut* m; Utils util;
+    Alignment* alignment;
         
-    alignAminoStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st, bool da, bool aa) {
+    alignAminoStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st) {
             
         //passed in
         fastaPos.start = fP.start;
@@ -121,10 +124,10 @@ struct alignAminoStruct {
         outputWriter = oFName;
         fastaFilename = fname;
         aminoFilename = aname;
-        dnaAligned = da;
-        aminoAligned = aa;
         stop = st;
             
+        alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, 5000);
+
         //initialized
         numSeqs = 0;
         m = MothurOut::getInstance();

@@ -7,7 +7,6 @@
 //
 
 #include "translateseqscommand.hpp"
-#include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
 vector<string> TranslateSeqsCommand::setParameters(){
@@ -25,7 +24,6 @@ vector<string> TranslateSeqsCommand::setParameters(){
         
         vector<string> tempOutNames;
         outputTypes["fasta"] = tempOutNames;
-        outputTypes["amino"] = tempOutNames;
         
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {    myArray.push_back(parameters[i].name);        }
@@ -40,14 +38,14 @@ vector<string> TranslateSeqsCommand::setParameters(){
 string TranslateSeqsCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The translate.seqs command reads a fastafile containing dna and translates it to amino acids, .....\n";
+        helpString += "The translate.seqs command reads a fastafile containing dna and translates it to amino acids. Alternatively, you can provide an amino file with aligned amino acids and fasta file with unaligned dna sequences and mothur will align the dna to the amino acid. Mothur expects the aligned amino acids and the fasta file to contain the same sequence names.\n";
         helpString += "The translate.seqs command parameters are fasta, amino, frames, stop and processors.\n";
         helpString += "The fasta parameter is used to provide a file containing DNA sequences. It is required.\n";
         helpString += "The amino parameter is used to provide a file related to the fasta file containing amino acid sequences. Either the fasta or the amino file should be aligned and mothur will align the reads in the other file. Mothur assumes both files are in the same frame.\n";
         helpString += "The frames parameter is used to indicate the reading frames you want to use. Options are 1, 2, 3, -1, -2, -3. You can select multiple frames by separating them with '|' characters. For example: frames=1|-1|2.\n";
         helpString += "The stop parameter is used to indicate when to stop the translation. If T, then if the translation hits a stop codon, it stops before that codon. If F, it returns the full translation with a * as the stop codon. Default=t.\n";
         helpString += "The translate.seqs command should be in the following format: \n";
-        helpString += "translate.seqs(fasta=yourFastaFile, processors=2) \n";
+        helpString += "translate.seqs(fasta=yourFastaFile, processors=2) or translate.seqs(amino=yourProteinSeqs, fasta=yourDNASeqs)\n";
             
         getCommonQuestions();
         
@@ -78,7 +76,6 @@ string TranslateSeqsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta") {  pattern = "[filename],align-[filename],[tag],fasta"; }
-        else if (type == "amino") {  pattern = "[filename],align"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -127,9 +124,7 @@ TranslateSeqsCommand::TranslateSeqsCommand(string option) : Command()  {
             
             temp = validParameter.valid(parameters, "stop");        if (temp == "not found") { temp = "T"; }
             stop = util.isTrue(temp);
-            
-            dnaAligned = false; aminoAligned = false;
-            
+                        
         }
     }
     catch(exception& e) {
@@ -144,7 +139,7 @@ int TranslateSeqsCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-        if (aminofile != "")    { alignDNAAmino();          }  //if amino file is provided then we are aligning
+        if (aminofile != "")    { alignDNAAmino();          }  //if amino file is provided then we are aligning dna to aligned amino acids, assumes same frame
         else                    { translateDNAtoAmino();    }
         
         //set accnos file as new current accnosfile
@@ -166,6 +161,78 @@ int TranslateSeqsCommand::execute(){
     }
 }
 //**********************************************************************************************************************
+void align(Alignment* alignment, Sequence& seq, Protein& prot, MothurOut* m) {
+    try {
+        
+        int alignmentSize = max(prot.getAligned().size(), (seq.getUnaligned().size() / 3)+1);
+        
+        if (alignmentSize+1 > alignment->getnRows()) {
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: " + seq.getName() + " " + toString(seq.getUnaligned().length()) + " " + toString(alignment->getnRows()) + " \n"); }
+            alignment->resize(alignmentSize+2);
+        }
+        
+        alignment->align(seq, prot);
+        
+        seq.setAligned(alignment->getSeqAAln());
+                
+        delete alignment;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "TranslateSeqsCommand", "alignDNA");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+//aligns dna to aligned amino acids
+void alignAminoDriver(alignAminoStruct* params) {
+    try {
+        ifstream inFASTA; params->util.openInputFile(params->fastaFilename, inFASTA);
+        inFASTA.seekg(params->fastaPos.start);
+        
+        ifstream inAMINO; params->util.openInputFile(params->aminoFilename, inAMINO);
+        inAMINO.seekg(params->aminoPos.start);
+
+        bool done = false; long long count = 0;
+        
+        while (!done) {
+            
+            if (params->m->getControl_pressed()) {  break; }
+            
+            Sequence seq(inFASTA); params->util.gobble(inFASTA);
+            Protein prot(inAMINO); params->util.gobble(inAMINO);
+            
+            if ((seq.getName() != "") && (prot.getName() != "") && (seq.getName() == prot.getName()))  {
+                
+                align(params->alignment, seq, prot, params->m); count++;
+                
+                params->outputWriter->write('>' + seq.getName() + '\n' + seq.getAligned() + '\n');
+            }
+            
+            #if defined NON_WINDOWS
+                unsigned long long pos = inFASTA.tellg();
+                if ((pos == -1) || (pos >= params->fastaPos.end)) { break; }
+                unsigned long long pos2 = inAMINO.tellg();
+                if ((pos2 == -1) || (pos2 >= params->aminoPos.end)) { break; }
+            #else
+                if (count == params->fastaPos.end) { break; }
+                if (count == params->aminoPos.end) { break; }
+            #endif
+
+            //report progress
+            if((count) % 1000 == 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
+
+        }
+        //report progress
+        if((count) % 1000 != 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
+        params->numSeqs = count; inFASTA.close(); inAMINO.close();
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "TranslateSeqsCommand", "alignAminoDriver");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void TranslateSeqsCommand::alignDNAAmino() {
     try {
         long start = time(NULL);
@@ -173,34 +240,47 @@ void TranslateSeqsCommand::alignDNAAmino() {
         //fills lines and alines. Also sets dnaAligned and aminoAligned
         setLines();
         
-        //error checks
-        if (dnaAligned && aminoAligned) {
-            m->mothurOut("\nThe reads in " + fastafile + " are aligned. The reads in " + aminofile + " are also aligned, unsure which file you wish to align, quitting.\n"); m->setControl_pressed(true); return;
-
-        }else if (!dnaAligned && !aminoAligned) {
-            m->mothurOut("\nThe reads in " + fastafile + " are unaligned. The reads in " + aminofile + " are also unaligned. One of the files must be aligned to proceed, quitting.\n"); m->setControl_pressed(true); return;
-        }
-        
         //create output file names
         string thisOutputDir = outputdir; string outputFileName = "";
         map<string, string> variables;
-        if (aminoAligned) { //amino is aligned so we want to output a dna file aligned to the amino acids
-            if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
-            outputFileName = getOutputFileName("fasta", variables);
-            outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        outputFileName = getOutputFileName("fasta", variables);
+        outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        //create array of worker threads
+        vector<std::thread*> workerThreads;
+        vector<alignAminoStruct*> data;
+        
+        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(outputFileName);
+        
+        for (int i = 0; i < processors-1; i++) {
             
-        }else if (dnaAligned) { //fasta file is aligned so we want to align amino acids to dna
-            if (outputdir == "") {  thisOutputDir += util.hasPath(aminofile);  }
-            variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(aminofile));
-            outputFileName = getOutputFileName("amino", variables);
-            outputTypes["amino"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-          
-        }else { m->setControl_pressed(true); return; }
+            OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+            
+            alignAminoStruct* dataBundle = new alignAminoStruct(lines[i+1], aLines[i+1], threadOutputWriter, fastafile, aminofile, stop);
+            data.push_back(dataBundle);
+
+            workerThreads.push_back(new std::thread(alignAminoDriver, dataBundle));
+         }
         
-        double numSeqs = createProcessesAlign(outputFileName);
+        OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
+        alignAminoStruct* dataBundle = new alignAminoStruct(lines[0], aLines[0], threadOutputWriter, fastafile, aminofile, stop);
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(numSeqs) + " sequences.\n");
+        alignAminoDriver(dataBundle);
+        double num = dataBundle->numSeqs;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+            num += data[i]->numSeqs;
+            
+            delete data[i]->outputWriter;
+            delete data[i];
+            delete workerThreads[i];
+        }
+        synchronizedOutputFile->close(); delete threadOutputWriter;  delete dataBundle;
+                            
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(num) + " sequences.\n");
         
     }
     catch(exception& e) {
@@ -297,78 +377,7 @@ void translateToAminoAcidDriver(translateSeqsStruct* params) {
         exit(1);
     }
 }
-//**********************************************************************************************************************
-void align(Sequence& seq, Protein& prot, MothurOut* m) {
-    try {
-        
-        int alignmentSize = max(prot.getAligned().size(), (seq.getAligned().size() / 3)+1);
-        
-        Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, alignmentSize+1);
-        
-        alignment->align(seq, prot);
-        
-        seq.setAligned(alignment->getSeqAAln());
-        prot.setAligned(alignment->getSeqBAln());
-                
-        delete alignment;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TranslateSeqsCommand", "alignDNA");
-        exit(1);
-    }
-}
-//**********************************************************************************************************************
-void alignAminoDriver(alignAminoStruct* params) {
-    try {
-        ifstream inFASTA; params->util.openInputFile(params->fastaFilename, inFASTA);
-        inFASTA.seekg(params->fastaPos.start);
-        
-        ifstream inAMINO; params->util.openInputFile(params->aminoFilename, inAMINO);
-        inAMINO.seekg(params->aminoPos.start);
 
-        bool done = false; long long count = 0;
-        
-        while (!done) {
-            
-            if (params->m->getControl_pressed()) {  break; }
-            
-            Sequence seq(inFASTA); params->util.gobble(inFASTA);
-            Protein prot(inAMINO); params->util.gobble(inAMINO);
-            
-            if ((seq.getName() != "") && (prot.getName() != "") && (seq.getName() == prot.getName()))  {
-                
-                align(seq, prot, params->m); count++;
-                
-                if (params->dnaAligned) {
-                    params->outputWriter->write('>' + prot.getName() + '\n' + prot.getAlignedString() + '\n');
-                }else {
-                    params->outputWriter->write('>' + seq.getName() + '\n' + seq.getAligned() + '\n');
-                }
-            }
-            
-            #if defined NON_WINDOWS
-                unsigned long long pos = inFASTA.tellg();
-                if ((pos == -1) || (pos >= params->fastaPos.end)) { break; }
-                unsigned long long pos2 = inAMINO.tellg();
-                if ((pos2 == -1) || (pos2 >= params->aminoPos.end)) { break; }
-            #else
-                if (count == params->fastaPos.end) { break; }
-                if (count == params->aminoPos.end) { break; }
-            #endif
-
-            //report progress
-            if((count) % 1000 == 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
-
-        }
-        //report progress
-        if((count) % 1000 != 0){    params->m->mothurOutJustToScreen(toString(count) + "\n");         }
-        params->numSeqs = count; inFASTA.close(); inAMINO.close();
-    }
-    catch(exception& e) {
-        params->m->errorOut(e, "TranslateSeqsCommand", "alignAminoDriver");
-        exit(1);
-    }
-}
 //***************************************************************************************************************
 //    translateSeqsStruct (linePair fP, OutputWriter* oFName, string fname, bool st, bool dn, int frame) {
 double TranslateSeqsCommand::createProcessesTranslateDNAtoAminoAcids(string outputFileName, vector<linePair> lines, int frame) {
@@ -413,50 +422,6 @@ double TranslateSeqsCommand::createProcessesTranslateDNAtoAminoAcids(string outp
     }
 }
 //***************************************************************************************************************
-//    alignStruct (linePair fP, linePair aP, OutputWriter* oFName, string fname, string aname, bool st) 
-
-double TranslateSeqsCommand::createProcessesAlign(string outputFileName) {
-    try {
-        //create array of worker threads
-        vector<std::thread*> workerThreads;
-        vector<alignAminoStruct*> data;
-        
-        auto synchronizedOutputFile = std::make_shared<SynchronizedOutputFile>(outputFileName);
-        
-        for (int i = 0; i < processors-1; i++) {
-            
-            OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
-            
-            alignAminoStruct* dataBundle = new alignAminoStruct(lines[i+1], aLines[i+1], threadOutputWriter, fastafile, aminofile, stop, dnaAligned, aminoAligned);
-            data.push_back(dataBundle);
-
-            workerThreads.push_back(new std::thread(alignAminoDriver, dataBundle));
-         }
-        
-        OutputWriter* threadOutputWriter = new OutputWriter(synchronizedOutputFile);
-        alignAminoStruct* dataBundle = new alignAminoStruct(lines[0], aLines[0], threadOutputWriter, fastafile, aminofile, stop, dnaAligned, aminoAligned);
-        
-        alignAminoDriver(dataBundle);
-        double num = dataBundle->numSeqs;
-        
-        for (int i = 0; i < processors-1; i++) {
-            workerThreads[i]->join();
-            num += data[i]->numSeqs;
-            
-            delete data[i]->outputWriter;
-            delete data[i];
-            delete workerThreads[i];
-        }
-        synchronizedOutputFile->close(); delete threadOutputWriter;  delete dataBundle;
-        
-        return num;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "TranslateSeqsCommand", "createProcessesAlign");
-        exit(1);
-    }
-}
-//***************************************************************************************************************
 
 bool TranslateSeqsCommand::setLines() {
     try {
@@ -480,9 +445,7 @@ bool TranslateSeqsCommand::setLines() {
             
             Sequence temp(in);
             firstSeqNames[temp.getName()] = i;
-            
-            dnaAligned = temp.isAligned();
-            
+                        
             in.close();
         }
         
@@ -572,18 +535,7 @@ bool TranslateSeqsCommand::setLines() {
             if (aminofile != "") {  aLines.push_back(linePair(afileFilePos[startIndex], numSeqsPerProcessor)); }
         }
         
-        //set aminoAligned
-        ifstream in; util.openInputFile(fastafile, in);
-        Sequence temp(in);
-        dnaAligned = temp.isAligned();
-        in.close();
-        
 #endif
-        //set aminoAligned
-        ifstream inAmino; util.openInputFile(aminofile, inAmino);
-        Protein temp(inAmino);
-        aminoAligned = temp.isAligned();
-        inAmino.close();
         
         return true;
     }
