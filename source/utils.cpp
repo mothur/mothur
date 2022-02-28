@@ -4357,14 +4357,6 @@ char* Utils::mothurConvert(string item){
         
         *converted = '\0'; strncat(converted, item.c_str(), item.length());
         
-        //size_t size = item.length()+1;
-        
-        //strncat(converted, item.c_str(), size-strlen(converted)-1);
-        
-        //converted[size-1] = '\0';
-        
-        //if (m->getDebug()) { m->mothurOut("[DEBUG]: converting string " + item + " to char* " + converted + "\n"); }
-        
         return converted;
     }
     catch(exception& e) {

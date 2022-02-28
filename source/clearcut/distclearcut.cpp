@@ -151,8 +151,11 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
       fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
       return(NULL);
     }
-
-    strncpy(dmat->taxaname[i], alignment->titles[i], sizeof dmat->taxaname[i] - strlen (dmat->taxaname[i]) - 1);
+      
+      *dmat->taxaname[i] = '\0'; strncat(dmat->taxaname[i], alignment->titles[i], strlen(alignment->titles[i])+1);
+      
+    //strncpy(dmat->taxaname[i], alignment->titles[i], sizeof dmat->taxaname[i] - strlen (dmat->taxaname[i]) - 1);
+      
   }
 
   /* allocate val matrix in dmat */
