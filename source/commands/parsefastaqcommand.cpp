@@ -9,6 +9,7 @@
 
 #include "parsefastaqcommand.h"
 #include "sequence.hpp"
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> ParseFastaQCommand::setParameters(){	
@@ -38,7 +39,7 @@ vector<string> ParseFastaQCommand::setParameters(){
         outputTypes["fasta"] = tempOutNames;
         outputTypes["qfile"] = tempOutNames;
         outputTypes["fastq"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
 		
 		vector<string> myArray;
 		for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
@@ -81,10 +82,10 @@ string ParseFastaQCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],fasta-[filename],[group],[tag],fasta-[filename],[group],fasta"; }
-        else if (type == "group") {  pattern = "[filename],group"; }
-        else if (type == "qfile") {  pattern = "[filename],qual-[filename],[group],[tag],qual-[filename],[group],qual"; }
-        else if (type == "fastq") {  pattern = "[filename],[group],fastq-[filename],[group],[tag],fastq"; } //make.sra assumes the [filename],[group],[tag],fastq format for the 4 column file option. If this changes, may have to modify fixMap function. 
+        if (type == "fasta") {  pattern = "[filename],fasta-[filename],[sample],[tag],fasta-[filename],[sample],fasta"; }
+        else if (type == "count") {  pattern = "[filename],count_table"; }
+        else if (type == "qfile") {  pattern = "[filename],qual-[filename],[sample],[tag],qual-[filename],[sample],qual"; }
+        else if (type == "fastq") {  pattern = "[filename],[sample],fastq-[filename],[sample],[tag],fastq"; } //make.sra assumes the [filename],[sample],[tag],fastq format for the 4 column file option. If this changes, may have to modify fixMap function.
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -219,13 +220,10 @@ int ParseFastaQCommand::execute(){
             //groupfile name for pacbio with option 2
             map<string, string> variables;
             variables["[filename]"] = util.getRootName(file);
-            string pacbioGroupFileName = getOutputFileName("group", variables);
             string pacbioFastaFileName = getOutputFileName("fasta", variables);
             string pacbioQualFileName = getOutputFileName("qfile", variables);
             if ((fileOption == 2) && pacbio) {
-                ofstream temppb; util.openOutputFile(pacbioGroupFileName, temppb);
-                temppb.close();
-                outputNames.push_back(pacbioGroupFileName); outputTypes["group"].push_back(pacbioGroupFileName);
+                seqGroups.clear();
                 
                 if (fasta) {
                     ofstream temppbf; util.openOutputFile(pacbioFastaFileName, temppbf);
@@ -255,7 +253,7 @@ int ParseFastaQCommand::execute(){
                         ofstream temp;
                         map<string, string> variables;
                         variables["[filename]"] = util.getRootName(files[i][0]);
-                        variables["[group]"] = file2Group[i];
+                        variables["[sample]"] = file2Group[i];
                         variables["[tag]"] = "";
                         string newfqFile = getOutputFileName("fastq", variables);
                         util.openOutputFile(newfqFile, temp);        temp.close();
@@ -270,12 +268,10 @@ int ParseFastaQCommand::execute(){
                     if (fasta || qual) {  seqNames = processFile(inputFile, trimOligos, rtrimOligos); }  //split = 1, so no parsing by group will be done.
                     
                     if (seqNames.size() != 0) {
-                        ofstream outGroupPacBio; util.openOutputFileAppend(pacbioGroupFileName, outGroupPacBio);
                         string pacbioGroup = file2Group[i];
                         for (set<string>::iterator it = seqNames.begin(); it != seqNames.end(); it++) {
-                            outGroupPacBio << *it << '\t' << pacbioGroup << endl;
+                            seqGroups[*it] = pacbioGroup;
                         }
-                        outGroupPacBio.close();
                         groupCounts[pacbioGroup] = seqNames.size();
                         
                         map<string, string> variables;
@@ -291,7 +287,7 @@ int ParseFastaQCommand::execute(){
                         ofstream temp, temp2;
                         map<string, string> variables;
                         variables["[filename]"] = util.getRootName(files[i][0]);
-                        variables["[group]"] = file2Group[i];
+                        variables["[sample]"] = file2Group[i];
                         variables["[tag]"] = "forward";
                         string newffqFile = getOutputFileName("fastq", variables);
                         util.openOutputFile(newffqFile, temp);		temp.close();
@@ -299,7 +295,7 @@ int ParseFastaQCommand::execute(){
                         outputNames.push_back(newffqFile); outputTypes["fastq"].push_back(newffqFile);
                         
                         variables["[filename]"] = util.getRootName(files[i][1]);
-                        variables["[group]"] = file2Group[i];
+                        variables["[sample]"] = file2Group[i];
                         variables["[tag]"] = "reverse";
                         string newfrqFile = getOutputFileName("fastq", variables);
                         util.openOutputFile(newfrqFile, temp2);		temp2.close();
@@ -317,6 +313,16 @@ int ParseFastaQCommand::execute(){
             vector<string> filesFakeOut; filesFakeOut.push_back(fastaQFile);
             files.push_back(filesFakeOut);
         }
+        
+        if ((fileOption == 2) && pacbio) {
+            map<string, string> variables;
+            variables["[filename]"] = util.getRootName(file);
+            string pacbioGroupFileName = getOutputFileName("count", variables);
+            outputNames.push_back(pacbioGroupFileName); outputTypes["count"].push_back(pacbioGroupFileName);
+
+            CountTable ct; ct.createTable(seqGroups);
+            ct.printCompressedTable(pacbioGroupFileName);
+        }
 		
         if (split > 1) {
             
@@ -324,16 +330,13 @@ int ParseFastaQCommand::execute(){
             if (outputdir == "") {  thisOutputDir = util.hasPath(inputFile); }
             map<string, string> vars;
             vars["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(inputFile));
-            string outputGroupFileName = getOutputFileName("group",vars);
+            string outputGroupFileName = getOutputFileName("count",vars);
 
-            if (seqGroups.size() != 0) { //Create group file
-                outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
+            if (seqGroups.size() != 0) { //Create count file
+                outputNames.push_back(outputGroupFileName); outputTypes["count"].push_back(outputGroupFileName);
                 
-                ofstream outGroup; util.openOutputFile(outputGroupFileName, outGroup);
-                for (map<string, string>::iterator itGroup = seqGroups.begin(); itGroup != seqGroups.end(); itGroup++) {
-                    outGroup << itGroup->first << '\t' << itGroup->second << endl; //print group file
-                }
-                outGroup.close();
+                CountTable ct; ct.createTable(seqGroups);
+                ct.printCompressedTable(outputGroupFileName);
             }
             
             for (int i = 0; i < files.size(); i++) { //process each pair
@@ -398,6 +401,11 @@ int ParseFastaQCommand::execute(){
 		if (itTypes != outputTypes.end()) {
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFastaFile(currentName); }
 		}
+        
+        itTypes = outputTypes.find("count");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+        }
 		
 		itTypes = outputTypes.find("qfile");
 		if (itTypes != outputTypes.end()) {
@@ -420,7 +428,7 @@ map<string, vector<string> > ParseFastaQCommand::splitFastqFile(string outputGro
         
         //run split.groups command
         //use unique.seqs to create new name and fastafile
-        string inputString = "fastq=" + resultFastqfile + ", group=" + outputGroupFile;
+        string inputString = "fastq=" + resultFastqfile + ", count=" + outputGroupFile;
         m->mothurOut("/******************************************/\n");
         m->mothurOut("Generating parsed files... Running command: split.groups(" + inputString + ")\n");
         current->setMothurCalling(true);
@@ -1088,7 +1096,7 @@ bool ParseFastaQCommand::readOligos(string oligoFile){
         ofstream temp, tempff, tempfq, rtemp, temprf, temprq;
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputfile));
-        variables["[group]"] = "scrap";
+        variables["[sample]"] = "scrap";
         if (fileOption > 0) {  variables["[tag]"] = "forward"; }
         ffqnoMatchFile = getOutputFileName("fastq", variables);
         util.openOutputFile(ffqnoMatchFile, temp);		temp.close();
