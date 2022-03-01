@@ -26,7 +26,7 @@ public:
     string getHelpString();
     string getCommonQuestions();
     string getOutputPattern(string);
-    string getCitation() { return "muscle Edgar, R.C. MUSCLE: a multiple sequence alignment method with reduced time and space complexity. BMC Bioinformatics 5, 113 (2004). https://doi.org/10.1186/1471-2105-5-113\nhttp://www.mothur.org/wiki/align.muscle\n"; }
+    string getCitation() { return "R.C. Edgar (2021) MUSCLE v5 enables improved estimates of phylogenetic tree confidence by ensemble bootstrapping. (https://www.biorxiv.org/content/10.1101/2021.06.20.449169v1.full.pdf)\nhttp://www.mothur.org/wiki/align.muscle\n"; }
     string getDescription()        { return "align protein sequences"; }
     
     int execute();
@@ -38,7 +38,7 @@ private:
     int processors;
     vector<string> outputNames;
     
-    void driver();
+    void wrapperFunction();
     
 };
 /**************************************************************************************************/

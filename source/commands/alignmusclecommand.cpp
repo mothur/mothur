@@ -48,6 +48,7 @@ string AlignMuscleCommand::getHelpString(){
         helpString += "This command is a wrapper for muscle written by Robert C. Edgar.\n";
         helpString += "The align.muscle command parameters are fasta, method, perturb, perm, stratified, diversified, replicates, consiters, refineiters, processors and muscle.\n";
         helpString += "The fasta parameter allows you to enter the fasta file containing your sequences, and is required, unless you have a valid current fasta file. \n";
+        helpString += "The method parameter allows you select between align and super5 methods. Default=super5.\n";
         helpString += "The perturb parameter allows you to provide a random number seed for generating HMM perturbations. Default=0. https://drive5.com/muscle5/manual/hmm_perturbations.html\n";
         helpString += "The perm parameter specifies the guide tree permutation. PERM can be none, abc, acb and bca, default=none. https://drive5.com/muscle5/manual/guide_tree_permutations.html.\n";
         helpString += "The stratified parameter allows you to indicate you would like to generate a stratified ensemble. https://drive5.com/muscle5/manual/stratified_ensemble.html\n";
@@ -87,7 +88,7 @@ string AlignMuscleCommand::getOutputPattern(string type) {
     try {
         string pattern = "";
         
-        if (type == "fasta") {  pattern = "[filename],[tag].fasta-[filename].fasta"; }
+        if (type == "fasta") {  pattern = "[filename],[tag],fasta-[filename],fasta"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
         return pattern;
@@ -125,10 +126,10 @@ AlignMuscleCommand::AlignMuscleCommand(string option) : Command()  {
             perturb = validParameter.valid(parameters, "perturb");    if (perturb == "not found"){  usePerturb = false;  perturb = "0";    }else{  usePerturb = true;  }
             
             method = validParameter.valid(parameters, "method");
-            if (method == "not found") {  method = "align";}
+            if (method == "not found") {  method = "super5";}
             
             if ((method == "align") || (method == "super5")) {}
-            else { m->mothurOut("[WARNING]: " + method + " is not a valid method. Options are align or super5, using align.\n"); method = "align"; }
+            else { m->mothurOut("[WARNING]: " + method + " is not a valid method. Options are align or super5, using super5.\n"); method = "super5"; }
               
             perm = validParameter.valid(parameters, "perm");
             if (perm == "not found") {  perm = "none";  usePerm = false; } else { usePerm = true; }
@@ -150,7 +151,10 @@ AlignMuscleCommand::AlignMuscleCommand(string option) : Command()  {
             
             refineiters = validParameter.valid(parameters, "refineiters");   if (refineiters == "not found")            { useRefineiters = false; refineiters = "100";                }    else{ useRefineiters = true;            }
 
-                    
+#if defined OSX
+            m->mothurOut("\n[ERROR]: The align.muscle command is unavailable for our OSX version of mothur. You can use the command with our linux or windows versions.\n\n"); abort=true;
+#else
+
             vector<string> versionOutputs;
             bool foundTool = false;
             string programName = "muscle"; programName += EXECUTABLE_EXT;
@@ -174,6 +178,9 @@ AlignMuscleCommand::AlignMuscleCommand(string option) : Command()  {
             
             muscleLocation = util.getFullPathName(muscleLocation);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: muscle location using " + muscleLocation + "\n"); }
+            
+#endif
+
         }
     }
     catch(exception& e) {
@@ -193,9 +200,9 @@ int AlignMuscleCommand::execute(){
         
         long start = time(NULL);
         
-        
-        
+        wrapperFunction();
              
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align your sequences.\n");
         
         //set accnos file as new current accnosfile
         string currentName = "";
@@ -217,11 +224,11 @@ int AlignMuscleCommand::execute(){
     }
 }
 //**********************************************************************************************************************
-void AlignMuscleCommand::driver(){
+void AlignMuscleCommand::wrapperFunction(){
     try {
         
-        
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
+        
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
         variables["[tag]"] = "muscle";
@@ -295,7 +302,7 @@ void AlignMuscleCommand::driver(){
            
     }
     catch(exception& e) {
-        m->errorOut(e, "AlignMuscleCommand", "driver");
+        m->errorOut(e, "AlignMuscleCommand", "wrapperFunction");
         exit(1);
     }
 }
