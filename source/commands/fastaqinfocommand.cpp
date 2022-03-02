@@ -7,7 +7,7 @@
  *
  */
 
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 #include "sequence.hpp"
 #include "counttable.h"
 

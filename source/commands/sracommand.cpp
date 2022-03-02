@@ -8,7 +8,7 @@
 
 #include "sracommand.h"
 #include "sffinfocommand.h"
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 
 //**********************************************************************************************************************
 vector<string> SRACommand::setParameters(){

@@ -82,7 +82,7 @@
 #include "clusterfragmentscommand.h"
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
