@@ -222,6 +222,7 @@ CommandFactory::CommandFactory(){
 	commands["set.logfile"]			= "set.logfile";
 	commands["phylo.diversity"]		= "phylo.diversity";
 	commands["make.group"]			= "make.group";
+    commands["make.count"]          = "make.count";
 	commands["chop.seqs"]			= "chop.seqs";
 	commands["clearcut"]			= "clearcut";
 	commands["split.abund"]			= "split.abund";
@@ -499,7 +500,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
-		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
+		else if((commandName == "make.group") || (commandName == "make.count"))			{	command = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
 		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
@@ -676,7 +677,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	pipecommand = new PhyloDiversityCommand(optionString);			}
-		else if(commandName == "make.group")			{	pipecommand = new MakeGroupCommand(optionString);				}
+		else if((commandName == "make.group") || (commandName == "make.count"))			{	pipecommand = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	pipecommand = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	pipecommand = new ClearcutCommand(optionString);				}
 		else if(commandName == "split.abund")			{	pipecommand = new SplitAbundCommand(optionString);				}
