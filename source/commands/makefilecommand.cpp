@@ -46,7 +46,7 @@ string MakeFileCommand::getHelpString(){
         helpString += "The delim parameter allow you to enter the character you would like to use to create the sample name. Default='_'. For example, M6D7_S163_L001_R2_001.fastq.gz would produce the sample name M6D7. Set delim=* to indicate you want mothur to create unique names for each file pair. (no pooling)\n";
         helpString += "The make.file command should be in the following format: \n";
         helpString += "make.file(inputdir=yourInputDirectory). \n";
-        helpString += "Example make.group(inputdir=fastqFiles)\n";
+        helpString += "Example make.file(inputdir=fastqFiles)\n";
         return helpString;
     }
     catch(exception& e) {
