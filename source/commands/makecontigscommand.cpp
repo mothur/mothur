@@ -367,7 +367,7 @@ MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
             temp = validParameter.valid(parameters, "maxlength");    if (temp == "not found") { temp = "-1"; }
             util.mothurConvert(temp, maxLength);
             
-            if ((maxLength == -1) && (maxLength == -1) && (maxLength == -1)) { screenSequences = false; }
+            if ((maxLength == -1) && (maxHomoP == -1) && (maxAmbig == -1)) { screenSequences = false; }
             else { screenSequences = true; }
         }
 
