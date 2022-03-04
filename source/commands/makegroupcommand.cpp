@@ -122,7 +122,7 @@ int MakeGroupCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        util.checkNames(groupsNames);
+        util.checkGroupNames(groupsNames);
 		
         map<string, string> seqGroup; map<string, long long> groupCounts;
 		for (int i = 0; i < fastaFileNames.size(); i++) {
