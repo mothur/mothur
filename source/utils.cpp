@@ -3953,6 +3953,18 @@ int Utils::checkName(string& name) {
     }
 }
 /************************************************************/
+bool Utils::checkGroupNames(vector<string>& names) {
+    try {
+        bool goodNames = true;
+        for (auto& name : names) { bool goodName = checkGroupName(name);  goodNames = goodName && goodNames; }
+        return goodNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkGroupNames");
+        exit(1);
+    }
+}
+/************************************************************/
 bool Utils::checkGroupName(string& name) {
     try {
 
