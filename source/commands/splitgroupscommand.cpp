@@ -524,7 +524,7 @@ int driverSplitFlow(splitGroupsStruct* params){
             if (groupMap != NULL) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            }else if (ct != NULL) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 
@@ -598,7 +598,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             if (groupMap != NULL) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            }else if (ct != NULL) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 

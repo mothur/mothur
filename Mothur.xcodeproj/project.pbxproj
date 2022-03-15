@@ -3968,7 +3968,7 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release/;/Users/swestcott/Desktop/mothurbugs/\\\"\"",
 					"VERSION=\"\\\"1.46.0\\\"\"",
@@ -4020,7 +4020,7 @@
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = "${SRCROOT}/mothur_resources_10.14/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.46.1\\\"\"",
@@ -4091,7 +4091,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.47.0\\\"\"",
@@ -4182,7 +4182,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.47.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
