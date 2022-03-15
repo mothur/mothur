@@ -11,6 +11,11 @@
 
 #include "report.hpp"
 
+/*
+ This class stores information for one line in the contigs report file
+ 
+ 
+ */
 /******************************************************************************************************************/
 
 class ContigsReport : public Report {

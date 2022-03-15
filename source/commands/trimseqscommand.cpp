@@ -120,8 +120,6 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         
         if (type == "qfile") {  pattern = "[filename],[tag],qual"; }
         else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; }
-        //else if (type == "group") {  pattern = "[filename],groups"; }
-        //else if (type == "name") {  pattern = "[filename],[tag],names"; }
         else if (type == "count") {  pattern = "[filename],[tag],count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
@@ -571,6 +569,7 @@ int driverTrim(trimData* params) {
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
             for (map<int, oligosPair>::iterator it = params->pairedPrimers.begin(); it != params->pairedPrimers.end(); it++) {
                   oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+
                 rpairedPrimers[it->first] = tempPair;
             }
             for (map<int, oligosPair>::iterator it = params->pairedBarcodes.begin(); it != params->pairedBarcodes.end(); it++) {
@@ -861,7 +860,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
             if (groupNames.size() == 0) { allFiles = 0;   }
             else { createGroup = true; }
         }
-        
+       
         //create array of worker threads
         vector<std::thread*> workerThreads;
         vector<trimData*> data;
@@ -1018,6 +1017,9 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
                 
                 string tempTrimCountfile = removeScrapCommand->getOutputFiles()["count"][0];
                 util.renameFile(tempTrimCountfile, trimCountFileName);
+                outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+                outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
+
                 util.mothurRemove(tempTrimCountfile);
                 util.mothurRemove(fullCountFile);
             }else {
@@ -1025,6 +1027,9 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
                 util.renameFile(fullCountFile, trimCountFileName);
                 CountTable newScrapCt; //scrap file
                 newScrapCt.printTable(scrapCountFileName);
+                outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+                outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
+
             }
             
         }else { //create a count file without groups
@@ -1032,11 +1037,14 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
             CountTable newScrapCt; //scrap file
             
             for (map<string, int>::iterator itCount = nameCount.begin(); itCount != nameCount.end(); itCount++) {
-                if (badNames.count(itCount->first) != 0) { newCt.push_back(itCount->first, itCount->second); }
+                if (badNames.count(itCount->first) == 0) { newCt.push_back(itCount->first, itCount->second); }
                 else { newScrapCt.push_back(itCount->first, itCount->second); }
             }
             newCt.printTable(trimCountFileName);
             newScrapCt.printTable(scrapCountFileName);
+            outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+            outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
+
         }
         
         
