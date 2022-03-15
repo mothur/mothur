@@ -44,12 +44,13 @@ private:
 	map<string, string> uniqueToRedundant; //if a namefile is given and the first column name is not selected
 										   //then the other files need to change the unique name in their file to match.
 										   //only add the names that need to be changed to keep the map search quick
-	string sets, accnosfile, countfile, fastafile, namefile, groupfile, listfile, designfile, taxfile,  groups, sharedfile, phylipfile, columnfile;
+	string sets, accnosfile, countfile, fastafile, namefile, groupfile, listfile, designfile, taxfile,  groups, sharedfile, phylipfile, columnfile, flowfile;
 	bool abort;
 	vector<string> outputNames, Groups, Sets;
 	GroupMap* groupMap;
 	
 	void readFasta();
+    void readFlow();
 	void readName();
 	void readGroup();
 	void readList();

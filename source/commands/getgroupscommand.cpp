@@ -24,6 +24,7 @@ vector<string> GetGroupsCommand::setParameters(){
 		CommandParameter pgroup("group", "InputTypes", "", "", "CountGroup", "sharedGroup", "FNGLT","group",false,false, true); parameters.push_back(pgroup);		
         CommandParameter pdesign("design", "InputTypes", "", "", "none", "sharedGroup", "FNGLT","design",false,false, true); parameters.push_back(pdesign);
 		CommandParameter plist("list", "InputTypes", "", "", "none", "none", "FNGLT","list",false,false, true); parameters.push_back(plist);
+        CommandParameter pflow("flow", "InputTypes", "", "", "none", "none", "FNGLT","flow",false,false, true); parameters.push_back(pflow);
 		CommandParameter ptaxonomy("taxonomy", "InputTypes", "", "", "none", "none", "FNGLT","taxonomy",false,false, true); parameters.push_back(ptaxonomy);
         CommandParameter pphylip("phylip", "InputTypes", "", "", "none", "PhylipColumn", "none","phylip",false,false,true); parameters.push_back(pphylip);
         CommandParameter pcolumn("column", "InputTypes", "", "", "none", "PhylipColumn", "none","column",false,false,true); parameters.push_back(pcolumn);
@@ -38,6 +39,7 @@ vector<string> GetGroupsCommand::setParameters(){
         
         vector<string> tempOutNames;
         outputTypes["fasta"] = tempOutNames;
+        outputTypes["flow"] = tempOutNames;
         outputTypes["taxonomy"] = tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["group"] = tempOutNames;
@@ -84,6 +86,7 @@ string GetGroupsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "fasta")            {   pattern = "[filename],pick,[extension]";    }
+        else if (type == "flow")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],pick,[extension]";    }
         else if (type == "name")        {   pattern = "[filename],pick,[extension]";    }
         else if (type == "group")       {   pattern = "[filename],pick,[extension]";    }
@@ -127,6 +130,11 @@ GetGroupsCommand::GetGroupsCommand(string option) : Command()  {
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }
 			else { current->setFastaFile(fastafile); }
+            
+            flowfile = validParameter.validFile(parameters, "flow");
+            if (flowfile == "not open") { flowfile = ""; abort = true; }
+            else if (flowfile == "not found") {  flowfile = "";  }
+            else { current->setFlowFile(flowfile); }
 			
             phylipfile = validParameter.validFile(parameters, "phylip");
             if (phylipfile == "not open") { phylipfile = ""; abort = true; }
@@ -236,8 +244,8 @@ GetGroupsCommand::GetGroupsCommand(string option) : Command()  {
             
             if ((Sets.size() != 0) && (designfile == "")) { m->mothurOut("[ERROR]: You must provide a design file when using the sets parameter.\n"); abort = true;  }
 			
-			if ((phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("[ERROR]: You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list.\n");  abort = true; }
-			if (((groupfile == "") && (countfile == "")) && ((namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("[ERROR]: If using a fasta, name, taxonomy, group or list, then you must provide a group or count file.\n");  abort = true; }
+			if ((flowfile == "") && (phylipfile == "") && (columnfile == "") && (fastafile == "") && (namefile == "") && (countfile == "") && (groupfile == "")  && (designfile == "") && (sharedfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("[ERROR]: You must provide at least one of the following: fasta, name, taxonomy, group, shared, design, count, phylip, column or list.\n");  abort = true; }
+			if (((groupfile == "") && (countfile == "")) && ((flowfile != "") || (namefile != "") || (fastafile != "") || (listfile != "") || (taxfile != "")))  { m->mothurOut("[ERROR]: If using a fasta, flow, name, taxonomy, group or list, then you must provide a group or count file.\n");  abort = true; }
 		}
 		
 	}
@@ -299,6 +307,7 @@ int GetGroupsCommand::execute(){
 		//read through the correct file and output lines you want to keep
 		if (namefile != "")			{		readName();		}
 		if (fastafile != "")		{		readFasta();	}
+        if (flowfile != "")        {        readFlow();    }
 		if (groupfile != "")		{		readGroup();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
@@ -432,6 +441,65 @@ void GetGroupsCommand::readFasta(){
 		m->errorOut(e, "GetGroupsCommand", "readFasta");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void GetGroupsCommand::readFlow(){
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(flowfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(flowfile));
+        variables["[extension]"] = util.getExtension(flowfile);
+        string outputFileName = getOutputFileName("flow", variables);
+        
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(flowfile, in);
+        string name, flows;
+        
+        bool wroteSomething = false;
+        int selectedCount = 0;
+        
+        in >> flows; util.gobble(in); //read numflows
+        out << flows << endl;
+        
+        while(!in.eof()){
+            if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
+            
+            in >> name; util.gobble(in);
+            flows = util.getline(in); util.gobble(in);
+
+            if (name != "") {
+                //if this name is in the accnos file
+                if (names.count(name) != 0) {
+                    wroteSomething = true;
+                    
+                    out << name << '\t' << flows << endl;
+                    selectedCount++;
+                }else{
+                    //if you are not in the accnos file check if you are a name that needs to be changed
+                    map<string, string>::iterator it = uniqueToRedundant.find(name);
+                    if (it != uniqueToRedundant.end()) {
+                        wroteSomething = true;
+                        name = it->second;
+                        out << name << '\t' << flows << endl;
+                        selectedCount++;
+                    }
+                }
+            }
+            util.gobble(in);
+        }
+        in.close();
+        out.close();
+        
+        if (wroteSomething == false) {  m->mothurOut("Your file does NOT contain sequences from the groups you wish to get.\n");   }
+        outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from your flow file.\n");
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetGroupsCommand", "readFasta");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void GetGroupsCommand::readShared(){
