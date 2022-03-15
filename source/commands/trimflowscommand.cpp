@@ -9,7 +9,7 @@
 
 #include "trimflowscommand.h"
 #include "needlemanoverlap.hpp"
-
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> TrimFlowsCommand::setParameters(){	
@@ -39,7 +39,7 @@ vector<string> TrimFlowsCommand::setParameters(){
         outputTypes["flow"] = tempOutNames;
         outputTypes["fasta"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
         
         abort = false; calledHelp = false;    comboStarts = 0;
 		
@@ -81,7 +81,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "flow") {  pattern = "[filename],[tag],flow"; }
-        else if (type == "group") {  pattern = "[filename],flow.groups"; }
+        else if (type == "count") {  pattern = "[filename],flow.count_table"; }
         else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
         else if (type == "file") {  pattern = "[filename],flow.files"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -118,16 +118,11 @@ TrimFlowsCommand::TrimFlowsCommand(string option) : Command()  {
 			
 			if (outputdir == ""){	 outputdir += util.hasPath(flowFileName);  }
 			
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			
-			string temp;
-			temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
+			string temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
 			util.mothurConvert(temp, minFlows);  
 
 			temp = validParameter.valid(parameters, "maxflows");	if (temp == "not found") { temp = "450"; }
 			util.mothurConvert(temp, maxFlows);  
-			
 			
 			temp = validParameter.validFile(parameters, "oligos");
 			if (temp == "not found")	{	oligoFileName = "";		}
@@ -231,13 +226,14 @@ int TrimFlowsCommand::execute(){
         outputNames.push_back(flowFilesFileName);
         
 		if((allFiles) && (groupMap.size() != 0)) {
-            //print group file
-            string groupFileName = getOutputFileName("group",variables);
-            ofstream out; util.openOutputFile(groupFileName, out);
-            for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {  out << it->first << '\t' << it->second << endl;  } out.close();
-            
+            //print count file
+            string countFileName = getOutputFileName("count",variables);
+            CountTable ct; ct.createTable(groupMap);
+            ct.printCompressedTable(countFileName);
+            outputNames.push_back(countFileName); outputTypes["count"].push_back(countFileName);
+
             //run split.groups command
-            string inputString = "flow=" + trimFlowFileName + ", group=" + groupFileName;
+            string inputString = "flow=" + trimFlowFileName + ", count=" + countFileName;
             m->mothurOut("\n/******************************************/\n");
             m->mothurOut("Generating flow files for each sample...\n\nRunning command: split.groups(" + inputString + ")\n");
             current->setMothurCalling(true);
@@ -274,10 +270,22 @@ int TrimFlowsCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
+        //set group file as new current groupfile
+        string currentName = "";
+        itTypes = outputTypes.find("count");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("file");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFileFile(currentName); }
+        }
+        
 		return 0;	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "execute");
+		m->errorOut(e, "TrimFlowsCommand", "execute");
 		exit(1);
 	}
 }
