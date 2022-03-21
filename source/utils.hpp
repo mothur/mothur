@@ -220,10 +220,9 @@ public:
     string trimTax(string tax, int trimLevel);
     bool checkGroupName(string& name);
     bool checkGroupNames(vector<string>& name);
-    int checkName(string&);
+    void checkName(string&);
     void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
     int getNumNames(string);
-    int getNumChar(string, char);
     string getSimpleLabel(string);
     string toUpper(string);
     string toLower(string);

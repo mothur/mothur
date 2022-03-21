@@ -20,11 +20,9 @@ string getLabelTag(string label){
     
     string tag = "";
     
-    //remove OTU or phylo tag
-    string newLabel1 = "";
-    for (int i = 0; i < label.length(); i++) {
-        if(label[i]>47 && label[i]<58) { //is a digit
-        }else {  tag += label[i];  }
+    for (auto n : label) {
+        if(n >47 && n <58) { //is a digit
+        }else {  tag += n;  }
     }
     
     return tag;
@@ -97,7 +95,7 @@ vector<float> Utils::randomDirichlet(vector<float> alphas) {
         float sum = 0.0000;
         for(int i=0;i<nAlphas;i++){
             dirs[i] = randomGamma(alphas[i]);
-						while(isinf(dirs[i])) { dirs[i] = randomGamma(alphas[i]);	}
+            while(isinf(dirs[i])) { dirs[i] = randomGamma(alphas[i]);	}
             sum += dirs[i];
         }
 
@@ -1245,23 +1243,6 @@ int Utils::renameFile(string oldName, string newName){
         int renameOk = rename(oldName.c_str(), newName.c_str());
         
         if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
-        /*
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
-        
-        string command = "mv " + oldName + " " + newName;
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command mv " + oldName + " " + newName + "\n"); }
-        
-        int returnCode = system(command.c_str());
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command mv " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
-        
-        if (returnCode != 0) {
-            int renameOk = rename(oldName.c_str(), newName.c_str());
-        
-            if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
-        }
-         */
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
@@ -1294,15 +1275,6 @@ int Utils::copyFile(string oldName, string newName){
             mothurRemove(newName);
         }
         appendFiles(oldName, newName);
-        //if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
-        
-        //string command = "cp " + oldName + " " + newName;
-        
-        //if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
-        
-        //int returnCode = system(command.c_str());
-        
-       // if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
 #else
         mothurRemove(newName);
         appendFiles(oldName, newName);
@@ -2024,7 +1996,7 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 string Utils::removeNs(string seq){
     try {
         string newSeq = "";
-        for (int i = 0; i < seq.length(); i++) { if (seq[i] != 'N') {  newSeq += seq[i]; } }
+        for (auto n : seq) { if (n != 'N') {  newSeq += n; } }
         return newSeq;
     }
     catch(exception& e) {
@@ -2337,8 +2309,8 @@ void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay)
 bool Utils::isASCII(string input){
     try {
         
-        for (int i = 0; i < input.length(); i++) {
-            if (isascii(input[i]) == 0) { return false; } //non ascii
+        for (auto it = input.cbegin(); it != input.cend(); it++) {
+            if (isascii(*it) == 0) { return false; } //non ascii
         }
         return true;
     }
@@ -2543,7 +2515,7 @@ bool Utils::isBlank(string fileName){
 /***********************************************************************/
 bool Utils::stringBlank(string input){
     try {
-        for (int i = 0; i < input.length(); i++) { if (!isspace(input[i])) { return false; } }
+        for (auto i : input) { if (!isspace(i)) { return false; } }
         return true;
     }
     catch(exception& e) {
@@ -3178,7 +3150,7 @@ int Utils::divideFile(string filename, int& proc, vector<string>& files) {
 bool Utils::isTrue(string f){
     try {
 
-        for (int i = 0; i < f.length(); i++) { f[i] = toupper(f[i]); }
+        for (auto& i : f) { i = toupper(i); }
 
         if ((f == "TRUE") || (f == "T")) {	return true;	}
         else {	return false;  }
@@ -3938,14 +3910,13 @@ int Utils::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filena
     }
 }
 /************************************************************/
-int Utils::checkName(string& name) {
+void Utils::checkName(string& name) {
     try {
         if (modifyNames) {
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->setChangedSeqNames(true); }
+            for (auto& n : name) {
+                if (n == ':') { n = '_'; m->setChangedSeqNames(true); }
             }
         }
-        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "checkName");
@@ -3967,28 +3938,25 @@ bool Utils::checkGroupNames(vector<string>& names) {
 /************************************************************/
 bool Utils::checkGroupName(string& name) {
     try {
-
+    
         bool goodName = true;
+        
         if (modifyNames) {
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') {  goodName = false; break;  }
-                else if (name[i] == '-') {  goodName = false; break;  }
-                else if (name[i] == '/') {  goodName = false; break;  }
-            }
+            
+            string oldName = name;
+            
+            for_each(name.begin(), name.end(), [&goodName](char& n){
+                if ((n == ':') || (n == '-') || (n == '/')) {
+                    n = '_'; goodName = false;
+                }
+            });
             
             if (!goodName) {
                 m->setChangedGroupNames(true);
-                m->mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n");
-                
-                string newName = "";
-                for (int i = 0; i < name.length(); i++) {
-                    if ((name[i] == ':') || (name[i] == '-') || (name[i] == '/')) { newName += "_";  }
-                    else { newName += name[i]; }
-                }
-                m->mothurOut("\n[NOTE] Updating " + name + " to " + newName + " to avoid downstream issues.\n\n");
-                name = newName;
+                m->mothurOut("\n[WARNING]: group " + oldName + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n\n[NOTE] Updating " + oldName + " to " + name + " to avoid downstream issues.\n\n");
             }
         }
+        
         return goodName;
     }
     catch(exception& e) {
@@ -4104,11 +4072,11 @@ void Utils::printAccnos(string accnosfile, vector<string>& names){
         ofstream out; openOutputFile(accnosfile, out);
         
         //output to .accnos file
-        for (int i = 0; i < names.size(); i++) {
+        for (auto name : names) {
             
             if (m->getControl_pressed()) { break; }
             
-            out << names[i] << endl;
+            out << name << endl;
         }
         out.close();
     }
@@ -4123,7 +4091,7 @@ void Utils::printAccnos(string accnosfile, set<string>& names){
         ofstream out; openOutputFile(accnosfile, out);
         
         //output to .accnos file
-        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+        for (auto it = names.begin(); it != names.end(); it++) {
             
             if (m->getControl_pressed()) { break; }
             
@@ -4195,42 +4163,18 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
 
 int Utils::getNumNames(string names){
     try {
-        int count = 0;
-
-        if(names != ""){
-            count = 1;
-            for(int i=0;i<names.size();i++){
-                if(names[i] == ','){
-                    count++;
-                }
-            }
-        }
-
+        
+        if(names == ""){ return 0; }
+        
+        int count = 1;
+        for_each(names.begin(), names.end(),[&count](char n){
+            if(n == ','){ count++; }
+        });
+        
         return count;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getNumNames");
-        exit(1);
-    }
-}
-/***********************************************************************/
-
-int Utils::getNumChar(string line, char c){
-    try {
-        int count = 0;
-
-        if(line != ""){
-            for(int i=0;i<line.size();i++){
-                if(line[i] == c){
-                    count++;
-                }
-            }
-        }
-
-        return count;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "getNumChar");
         exit(1);
     }
 }
@@ -4391,7 +4335,6 @@ bool Utils::mothurConvert(char item, int& num){
 /***********************************************************************/
 bool Utils::mothurConvert(char item, string& output){
     try {
-
         stringstream ss;
         ss << item;
         ss >> output;
@@ -4974,6 +4917,8 @@ int  Utils::average(vector<int> x) {
         exit(1);
     }
 }
+/***********************************************************************/
+
 int Utils::factorial(int num){
     try {
         int total = 1;
@@ -4981,6 +4926,7 @@ int Utils::factorial(int num){
         for (int i = 1; i <= num; i++) {
             total *= i;
         }
+        
 
         return total;
     }
