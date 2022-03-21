@@ -22,7 +22,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		threadID = tid;
 		Utils util;
         
-        long start = time(NULL);
+        long start = time(nullptr);
         m->mothurOut("\nReading in the " + fastaFileName + " template sequences...\t");	cout.flush();
         //bool aligned = false;
         int tempLength = 0;
@@ -52,7 +52,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
         
         m->mothurOut("DONE.\n");
         cout.flush();
-        m->mothurOut("It took " + toString(time(NULL) - start) + " to read  " + toString(templateSequences.size()) + " sequences.\n");   
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " to read  " + toString(templateSequences.size()) + " sequences.\n");   
 
 		
 		//in case you delete the seqs and then ask for them

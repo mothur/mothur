@@ -28,7 +28,7 @@ vector<double> IGRarefaction::getValues(int numSeqs, vector<mcmcSample>& samplin
         DiversityUtils dutils("igrarefaction");
         
         int nSamples = sampling.size();
-        double*     adMu = NULL;
+        double*     adMu = nullptr;
         double dLower = 0.0, dMedian = 0.0, dUpper = 0.0;
         
         gsl_set_error_handler_off();

@@ -274,7 +274,7 @@ int RemoveRareCommand::processList(){
 			set<string> userLabels; userLabels.insert(thisLabel);
 			set<string> processedLabels;
 			string lastLabel = list->getLabel();
-			while((list != NULL) && (userLabels.size() != 0)) {
+			while((list != nullptr) && (userLabels.size() != 0)) {
 				if(userLabels.count(list->getLabel()) == 1){
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -336,7 +336,7 @@ int RemoveRareCommand::processList(){
             }
         }
         
-		if (list != NULL) {
+		if (list != nullptr) {
             
             vector<string> binLabels = list->getLabels();
             vector<string> newLabels;
@@ -473,7 +473,7 @@ void RemoveRareCommand::processSabund(){
         
         SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
         
-        while (sabund != NULL) {
+        while (sabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete sabund; break; }
                    
@@ -515,7 +515,7 @@ void RemoveRareCommand::processRabund(){
         
         RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
         
-        while (rabund != NULL) {
+        while (rabund != nullptr) {
             
             if (m->getControl_pressed()) { delete rabund; break; }
             
@@ -550,7 +550,7 @@ void RemoveRareCommand::processShared(){
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

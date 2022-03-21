@@ -151,7 +151,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
@@ -220,7 +220,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		printData(newFastaFile, newNamesFile);
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");  
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");  
 		
 		if (m->getControl_pressed()) { util.mothurRemove(newFastaFile); util.mothurRemove(newNamesFile); return 0; }
 		

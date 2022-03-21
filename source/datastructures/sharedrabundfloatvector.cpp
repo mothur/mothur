@@ -280,7 +280,7 @@ SAbundVector SharedRAbundFloatVector::getSAbundVector() {
 
 /***********************************************************************/
 
-OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = NULL) {
+OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = nullptr) {
     try {
  m->mothurOut("[ERROR]: can not convert SharedRAbundVectors to an ordervector, ordervectors assume no zero OTUS.\n"); m->setControl_pressed(true);
  OrderVector o; return o; 

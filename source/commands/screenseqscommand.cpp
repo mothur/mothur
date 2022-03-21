@@ -340,7 +340,7 @@ int ScreenSeqsCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
         map<string, string> badSeqNames;
-        long start = time(NULL);
+        long start = time(nullptr);
         long long numFastaSeqs = 0;
         
         //use the namefile to optimize correctly
@@ -489,7 +489,7 @@ int ScreenSeqsCommand::execute(){
             if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setAccnosFile(currentName); }
         }
 
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
 
 		return 0;
 	}

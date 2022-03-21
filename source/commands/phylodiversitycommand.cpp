@@ -245,7 +245,7 @@ int PhyloDiversityCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
 		current->setTreeFile(treefile);
         TreeReader* reader;
@@ -346,7 +346,7 @@ int PhyloDiversityCommand::execute(){
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run phylo.diversity.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run phylo.diversity.\n");
         
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();

@@ -19,7 +19,7 @@ struct vsearchVariables {
     bool dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, hasCount, useMindiffs;
     string abskew, minh, mindiv, xn, dn, mindiffs;
     
-    vsearchVariables() {}
+    vsearchVariables() = default;
     void setBooleans(bool dps, bool Abskew, bool calns, bool MinH, bool Mindiv, bool Xn, bool Dn, bool mindif, bool hc) {
         useAbskew = Abskew;
         chimealns = calns;

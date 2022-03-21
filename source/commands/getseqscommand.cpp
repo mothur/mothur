@@ -630,7 +630,7 @@ void GetSeqsCommand::readList(string listfile){
         
         if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
 		
-		while(list != NULL) {
+		while(list != nullptr) {
 			
             set<string> uniqueNames;
 			selectedCount = 0;

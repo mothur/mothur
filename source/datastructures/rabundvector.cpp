@@ -344,7 +344,7 @@ SAbundVector RAbundVector::getSAbundVector() {
 
 /***********************************************************************/
 
-OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
+OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = nullptr) {
 	try {
 		
         vector<int> ovData;

@@ -362,7 +362,7 @@ void driverColumn(distanceData* params){
         }
             
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
        
         params->count = 0;
         string buffer = "";
@@ -390,12 +390,12 @@ void driverColumn(distanceData* params){
                 }
             }
             
-            if(i % 100 == 0){ params->threadWriter->write(buffer);  buffer = ""; params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            if(i % 100 == 0){ params->threadWriter->write(buffer);  buffer = ""; params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
             
         }
         params->threadWriter->write(buffer);
         
-        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
         
         delete distCalculator;
     }
@@ -434,7 +434,7 @@ void driverLt(distanceData* params){
             }
         }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         long long numSeqs = params->db->getNumSeqs();
         
         //column file
@@ -469,11 +469,11 @@ void driverLt(distanceData* params){
             
             outFile << endl;
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
             
         }
         
-        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
         
         outFile.close();
         delete distCalculator;
@@ -513,7 +513,7 @@ void driverSquare(distanceData* params){
             }
         }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         //column file
         ofstream outFile;
@@ -551,10 +551,10 @@ void driverSquare(distanceData* params){
             
             outFile << endl; 
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n");  }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n");  }
         }
         
-        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
         
         outFile.close();
         delete distCalculator;
@@ -593,7 +593,7 @@ void driverFitCalc(distanceData* params){
             }
         }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         params->count = 0;
         string buffer = "";
         for(int i=params->startLine;i<params->endLine;i++){
@@ -618,12 +618,12 @@ void driverFitCalc(distanceData* params){
                 }
             }
             
-            if(i % 100 == 0){ params->threadWriter->write(buffer);  buffer = ""; params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+            if(i % 100 == 0){ params->threadWriter->write(buffer);  buffer = ""; params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
             
         }
         params->threadWriter->write(buffer);
         
-        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime) + "\t" + toString(params->count) +"\n"); }
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(nullptr) - startTime) + "\t" + toString(params->count) +"\n"); }
         
         delete distCalculator;
 
@@ -689,8 +689,8 @@ void DistanceCommand::createProcesses(string filename) {
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            OutputWriter* threadWriter = NULL;
-            distanceData* dataBundle = NULL;
+            OutputWriter* threadWriter = nullptr;
+            distanceData* dataBundle = nullptr;
             string extension = toString(i+1) + ".temp";
             if (output == "column") {
                 threadWriter = new OutputWriter(synchronizedOutputFile);
@@ -699,7 +699,7 @@ void DistanceCommand::createProcesses(string filename) {
             dataBundle->setVariables(lines[i+1].start, lines[i+1].end, cutoff, db, oldFastaDB, calc, prot, numNewFasta, countends);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = NULL;
+            std::thread* thisThread = nullptr;
             if (output == "column")     {
                 if (fitCalc)    { thisThread = new std::thread(driverFitCalc, dataBundle);   }
                 else            {  thisThread = new std::thread(driverColumn, dataBundle);   }
@@ -709,8 +709,8 @@ void DistanceCommand::createProcesses(string filename) {
             workerThreads.push_back(thisThread);
         }
         
-        OutputWriter* threadWriter = NULL;
-        distanceData* dataBundle = NULL;
+        OutputWriter* threadWriter = nullptr;
+        distanceData* dataBundle = nullptr;
         if (output == "column") {
             threadWriter = new OutputWriter(synchronizedOutputFile);
             dataBundle = new distanceData(threadWriter);

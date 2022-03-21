@@ -527,10 +527,10 @@ SAbundVector ListVector::getSAbundVector(){
 
 /***********************************************************************/
 
-OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
+OrderVector ListVector::getOrderVector(map<string,int>* orderMap = nullptr){
 	try {
         Utils util;
-		if(orderMap == NULL){
+		if(orderMap == nullptr){
 			
             vector<int> ovData;
 			for(int i=0;i<data.size();i++){

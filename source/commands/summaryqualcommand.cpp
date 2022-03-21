@@ -118,7 +118,7 @@ int SummaryQualCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		long long numSeqs = 0;
         hasNameMap = false;
 		
@@ -158,7 +158,7 @@ int SummaryQualCommand::execute(){
 		}
 		
         outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
-		m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n\n");
+		m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n\n");
 		m->mothurOut("Output File Names: \n");
 		m->mothurOut(summaryFile+"\n\n");
         

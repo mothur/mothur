@@ -167,7 +167,7 @@ int PCACommand::execute(){
 		}
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != nullptr) && (userLabels.size() != 0)) {
 			
             if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } delete input; delete lookupFloat; return 0;  }
 			

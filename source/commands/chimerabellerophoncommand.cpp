@@ -133,7 +133,7 @@ int ChimeraBellerophonCommand::execute(){
 		
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
 
         MothurChimera* chimera = new Bellerophon(fastafile, filter, correction, window, increment, outputdir);
         
@@ -159,7 +159,7 @@ int ChimeraBellerophonCommand::execute(){
         
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} outputTypes.clear(); 	return 0;	}
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
         
         if (removeChimeras) {
             if (!util.isBlank(accnosFileName)) {

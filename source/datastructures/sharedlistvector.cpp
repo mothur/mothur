@@ -23,7 +23,7 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups, stri
         
         CurrentFile* current = CurrentFile::getInstance();
         groupMode = current->getGroupMode();
-        groupmap = NULL; countTable = NULL;
+        groupmap = nullptr; countTable = nullptr;
 		//set up groupmap for later.
         if (groupMode == "group") {
             groupmap = new GroupMap(current->getGroupFile());
@@ -402,11 +402,11 @@ SharedRAbundFloatVectors* SharedListVector::getSharedRAbundFloatVector() {
 
 /***********************************************************************/
 
-OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
+OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = nullptr){
 	
 	try {
         Utils util;
-		if(orderMap == NULL){
+		if(orderMap == nullptr){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){

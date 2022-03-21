@@ -480,7 +480,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
         string fileroot = params->outputDir + params->util.getRootName(params->util.getSimpleName(params->fastafile));
         
         for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
-            long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
+            long start = time(nullptr);	 if (params->m->getControl_pressed()) {  break; }
             
             string thisGroup = it->first;
             
@@ -532,7 +532,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
                 params->util.appendFiles(params->newNFile+thisGroup, params->newNFile+params->extension); params->util.mothurRemove(params->newNFile+thisGroup);
                 params->mapfileNames.push_back(params->newMFile+thisGroup+".map");
                 
-                params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + thisGroup + ".\n");
+                params->m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to process group " + thisGroup + ".\n");
             }
         }
     }

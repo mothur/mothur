@@ -209,7 +209,7 @@ int FilterSharedCommand::execute(){
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
 		
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

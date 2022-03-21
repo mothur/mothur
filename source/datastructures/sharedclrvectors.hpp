@@ -58,7 +58,7 @@ public:
     void removeGroups(vector<string> g);
     int removeGroups(int minSize, bool silent=false);  // removes any groups with numSeqs < minSize
     void resize(int n) { m->mothurOut("[ERROR]: can not use resize for SharedCLRVectors.\n"); }
-    void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
+    void clear() { for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != nullptr) { delete lookup[i];  lookup[i] = nullptr; } }  lookup.clear(); groupNames.clear(); numBins = 0; currentLabels.clear(); }
     int size() { return (int)lookup.size();  }
     int getNumGroups() { return (int)lookup.size(); }
     int getNumBins() { return numBins; }
@@ -70,7 +70,7 @@ public:
     
     RAbundVector getRAbundVector() { m->mothurOut("[ERROR]: can not use getRAbundVector for SharedCLRVectors.\n"); RAbundVector r; return r; }
     SAbundVector getSAbundVector() { m->mothurOut("[ERROR]: can not use getSAbundVector for SharedCLRVectors.\n"); SAbundVector s; return s; }
-    OrderVector getOrderVector(map<string,int>* hold = NULL) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedCLRVectors.\n"); OrderVector o; return o; }
+    OrderVector getOrderVector(map<string,int>* hold = nullptr) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedCLRVectors.\n"); OrderVector o; return o; }
     
 private:
     void printHeaders(ostream&, bool&);

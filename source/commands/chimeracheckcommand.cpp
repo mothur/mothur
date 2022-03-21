@@ -133,14 +133,14 @@ int ChimeraCheckCommand::execute(){
 		
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         numSeqs = checkChimeras();
         
         if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} outputTypes.clear();   return 0; }
        
         m->mothurOut("\nThis method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values.\n");
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n\n");
         
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	

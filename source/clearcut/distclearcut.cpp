@@ -80,7 +80,7 @@ NJ_build_distance_matrix(NJ_ARGS *nj_args) {
     NJ_read_fasta(nj_args);
  
   if(!alignment) {
-    return(NULL);
+    return(nullptr);
   }
 
   /* 
@@ -131,7 +131,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
   dmat = (DMAT *)calloc(1, sizeof(DMAT));
   if(!dmat) {
     fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
-    return(NULL);
+    return(nullptr);
   }
   
   dmat->ntaxa = alignment->nseq;
@@ -141,7 +141,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
   dmat->taxaname = (char **)calloc(alignment->nseq, sizeof(char *));
   if(!dmat->taxaname) {
     fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
-    return(NULL);
+    return(nullptr);
   }
   
   /* copy sequence titles */
@@ -149,7 +149,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
     dmat->taxaname[i] = (char *)calloc(strlen(alignment->titles[i])+1, sizeof(char));
     if(!dmat->taxaname[i]) {
       fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
-      return(NULL);
+      return(nullptr);
     }
       
       *dmat->taxaname[i] = '\0'; strncat(dmat->taxaname[i], alignment->titles[i], strlen(alignment->titles[i])+1);
@@ -163,7 +163,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
 
   if(!dmat->val) {
     fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
-    return(NULL);
+    return(nullptr);
   }
 
   /* now lets allocate space for the r and r2 columns */
@@ -186,7 +186,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
       NJ_PROTEIN_jc_correction(dmat, alignment);
     } else {
       fprintf(stderr, "Clearcut: Need to know sequence type for Jukes-Cantor model correction.\n");
-      return(NULL);
+      return(nullptr);
     }
 
     break;
@@ -199,7 +199,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
       NJ_PROTEIN_kimura_correction(dmat, alignment);
     } else {
       fprintf(stderr, "Clearcut: Need to know sequence type for Kimura model correction.\n");
-      return(NULL);
+      return(nullptr);
     }
 
     break;
@@ -212,7 +212,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
 
   default:
     fprintf(stderr, "Clearcut: Invalid distance correction model.\n");
-    return(NULL);
+    return(nullptr);
   }
  
   return(dmat);

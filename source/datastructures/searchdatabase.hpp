@@ -23,7 +23,7 @@
 struct seqMatch {  //used to select top n matches
 		int seq;
 		int match;
-		seqMatch() {}
+    seqMatch()=default;
 		seqMatch(int s, int m) : seq(s), match(m) {}
 };
 /**************************************************************************************************/

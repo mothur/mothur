@@ -284,7 +284,7 @@ GetOTURepCommand::GetOTURepCommand(string option) : Command()  {
 			
 			temp = validParameter.valid(parameters, "precision");			if (temp == "not found") { temp = "100"; } util.mothurConvert(temp, precision);
 			
-            matrix = NULL;
+            matrix = nullptr;
 			
 		}
 	}
@@ -336,7 +336,7 @@ int GetOTURepCommand::execute(){
                 
                 InputData input(listfile, "list", Groups);
                 ListVector* list = input.getListVector(*it);
-                if (list != NULL) {
+                if (list != nullptr) {
                     string lastLabel = list->getLabel();
                 
                     process(list, groupMap); delete list;
@@ -407,7 +407,7 @@ int GetOTURepCommand::readDist() {
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
-        if (matrix != NULL) { delete matrix; }
+        if (matrix != nullptr) { delete matrix; }
         
         matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
         

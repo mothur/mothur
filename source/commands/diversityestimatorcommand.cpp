@@ -434,7 +434,7 @@ int EstimatorSingleCommand::processSharedFile() {
             *out[0] << "label\tgroup\tnum\t" << calc << "\n";
         }
         
-        while (shared != NULL) {
+        while (shared != nullptr) {
             
             if (m->getControl_pressed()) { delete shared; break; }
             
@@ -516,7 +516,7 @@ int EstimatorSingleCommand::processSingleSample() {
             *out[0] << "label\tnum\t" << calc << "\n";
         }
          
-        while (sabund != NULL) {
+        while (sabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete sabund; break; }
                    

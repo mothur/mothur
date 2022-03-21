@@ -470,7 +470,7 @@ int GetOtusCommand::getListVector(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
@@ -540,8 +540,8 @@ SharedRAbundVectors* GetOtusCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {   delete lookup; return NULL;  }
+		while((lookup != nullptr) && (userLabels.size() != 0)) {
+			if (m->getControl_pressed()) {   delete lookup; return nullptr;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());

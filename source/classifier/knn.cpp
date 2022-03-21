@@ -42,7 +42,7 @@ void Knn::setDistName(string s) {
 Knn::~Knn() {
 	try {
 		 delete phyloTree; 
-		 if (database != NULL) {  delete database; }
+		 if (database != nullptr) {  delete database; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Knn", "~Knn");

@@ -150,7 +150,7 @@ int GetRelAbundCommand::execute(){
         out << "label\tGroup\tnumOtus";
         for (int i = 0; i < binLabels.size(); i++) { out  << '\t' << binLabels[i]; } out << endl;
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

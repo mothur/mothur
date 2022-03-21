@@ -18,7 +18,7 @@ SharedRAbundVectors::SharedRAbundVectors(ifstream& f, vector<string>& userGroups
         string holdLabel, groupN;
         int numUserGroups = userGroups.size();
         
-        for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
+        for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != nullptr) { delete lookup[i];  lookup[i] = nullptr; } }  lookup.clear();
         
         //are we at the beginning of the file??
         if (nextLabel == "") {
@@ -529,7 +529,7 @@ void SharedRAbundVectors::removeGroups(vector<string> g){
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.inUsersGroups((*it)->getGroup(), g)) {
                 remove = true;
-                delete (*it); (*it) = NULL;
+                delete (*it); (*it) = nullptr;
                 it = lookup.erase(it);
             }else { ++it; }
         }
@@ -552,7 +552,7 @@ int SharedRAbundVectors::removeGroups(int minSize, bool silent){
         for (vector<SharedRAbundVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
                 if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating.\n");  }
-                delete (*it); (*it) = NULL;
+                delete (*it); (*it) = nullptr;
                 it = lookup.erase(it);
                 remove = true;
             }else {

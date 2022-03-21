@@ -245,7 +245,7 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 int Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, float& BSB, int numIters) {
 	try {
 
-		m->setRandomSeed((unsigned)time( NULL ));
+		m->setRandomSeed((unsigned)time( nullptr ));
 
 		int count_A = 0; // sceneario QLA,QRB supported
 		int count_B = 0; // sceneario QLB,QRA supported

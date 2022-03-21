@@ -284,7 +284,7 @@ struct preClusterData {
 				// double indel_prob = 0.01;indel_prob
 				// double max_indels = 3;max_indels
 
-  ~preClusterData() { if (alignment != NULL) { delete alignment; } }
+  ~preClusterData() { if (alignment != nullptr) { delete alignment; } }
 
   preClusterData(){}
 
@@ -331,7 +331,7 @@ struct preClusterData {
           m->mothurOutEndLine();
           alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
       }
-    } else { alignment = NULL; }
+    } else { alignment = nullptr; }
   }
 };
 
@@ -861,7 +861,7 @@ int PreClusterCommand::execute(){
             }
         }
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         string numProcessors = current->getProcessors();
         
@@ -906,14 +906,14 @@ int PreClusterCommand::execute(){
             
             if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
             
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
+            m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run pre.cluster.\n");
             
         }else {
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
             
             vector<string> groups;
             map<string, vector<string> > group2Files;
-            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, clump, NULL, newMapFile, nullVector);
+            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, clump, nullptr, newMapFile, nullVector);
             params->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
             
             //reads fasta file and return number of seqs
@@ -937,7 +937,7 @@ int PreClusterCommand::execute(){
             
             print(newFastaFile, newCountFile, params);
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
+            m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
         }
         
         current->setProcessors(numProcessors);
@@ -1114,7 +1114,7 @@ long long driverGroups(preClusterData* params){
             string thisGroup = it->first;
             params->m->mothurOut("\nProcessing group " + thisGroup + ":\n");
             
-            time_t start = time(NULL);
+            time_t start = time(nullptr);
             bool aligned = false;
             
             string thisGroupsFasta = it->second[0];
@@ -1162,7 +1162,7 @@ long long driverGroups(preClusterData* params){
             
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             
-            params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
+            params->m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(num) + " sequences.\n");
         }
         
         return numSeqs;
@@ -1199,7 +1199,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
          
          */
         
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         long long count = 0;
         
         string group, unique_sequence;
@@ -1226,8 +1226,8 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         inNames.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
-        start = time(NULL);
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to merge " + toString(count) + " sequences group data.");
+        start = time(nullptr);
         
         ct.printTable(newcount);
         util.mothurRemove(newname);

@@ -191,7 +191,7 @@ int MakeLefseCommand::runRelabund(map<int, consTax2>& consTax, SharedRAbundFloat
         ofstream out;
         util.openOutputFile(outputFile, out);
 
-        DesignMap* designMap = NULL;
+        DesignMap* designMap = nullptr;
         vector<string> namesOfGroups = lookup->getNamesGroups();
         if (designfile != "") {
             designMap = new DesignMap(designfile);  if (m->getControl_pressed()) { out.close(); delete designMap; return 0; }
@@ -278,8 +278,8 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             set<string> userLabels = labels;
             
             //as long as you are not at the end of the file or done wih the lines you want
-            while((templookup != NULL) && (userLabels.size() != 0)) {
-                if (m->getControl_pressed()) {  delete templookup; return NULL;  }
+            while((templookup != nullptr) && (userLabels.size() != 0)) {
+                if (m->getControl_pressed()) {  delete templookup; return nullptr;  }
                 
                 if(labels.count(templookup->getLabel()) == 1){
                     processedLabels.insert(templookup->getLabel());
@@ -310,7 +310,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getSharedRelabund(){
             }
             
             
-            if (m->getControl_pressed()) { delete templookup; return NULL;  }
+            if (m->getControl_pressed()) { delete templookup; return nullptr;  }
             
             //output error messages about any remaining user labels
             set<string>::iterator it;
@@ -401,7 +401,7 @@ SharedRAbundFloatVectors* MakeLefseCommand::getRelabund(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != nullptr) && (userLabels.size() != 0)) {
 			
 			if (m->getControl_pressed()) {  return lookupFloat;  }
 			

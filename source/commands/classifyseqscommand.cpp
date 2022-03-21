@@ -327,15 +327,15 @@ int ClassifySeqsCommand::execute(){
         outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
         outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
         
-        long start = time(NULL);
+        long start = time(nullptr);
         int numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, newaccnosFile, fastafile);
         
         if (!util.isBlank(newaccnosFile)) { m->mothurOut("\n[WARNING]: mothur reversed some your sequences for a better classification.  If you would like to take a closer look, please check " + newaccnosFile + " for the list of the sequences.\n");
             outputNames.push_back(newaccnosFile); outputTypes["accnos"].push_back(newaccnosFile);
         }else { util.mothurRemove(newaccnosFile); }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.\n\n");
-        start = time(NULL);
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.\n\n");
+        start = time(nullptr);
         
         //read namefile
         map<string, vector<string> > nameMap;
@@ -360,8 +360,8 @@ int ClassifySeqsCommand::execute(){
         
         //read taxfile - this reading and rewriting is done to preserve the confidence scores.
         string name, taxon;
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         PhyloSummary* taxaSum;
         
         if (hasCount) {
@@ -374,7 +374,7 @@ int ClassifySeqsCommand::execute(){
         }
         
         while (!inTax.eof()) {
-            if (m->getControl_pressed()) { outputTypes.clear(); if (ct != NULL) { delete ct; }  if (groupMap != NULL) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
+            if (m->getControl_pressed()) { outputTypes.clear(); if (ct != nullptr) { delete ct; }  if (groupMap != nullptr) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
             
             inTax >> name; util.gobble(inTax);
             taxon = util.getline(inTax); util.gobble(inTax);
@@ -402,7 +402,7 @@ int ClassifySeqsCommand::execute(){
         util.mothurRemove(newTaxonomyFile);
         util.renameFile(unclass, newTaxonomyFile);
         
-        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != NULL) { delete ct; } if (groupMap != NULL) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; delete taxaSum;  return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (ct != nullptr) { delete ct; } if (groupMap != nullptr) { delete groupMap; } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; delete taxaSum;  return 0; }
         
         //print summary file
         ofstream outTaxTree;
@@ -410,12 +410,12 @@ int ClassifySeqsCommand::execute(){
         taxaSum->print(outTaxTree, output);
         outTaxTree.close();
         
-        if (ct != NULL) { delete ct; }
-        if (groupMap != NULL) { delete groupMap; } delete taxaSum;
+        if (ct != nullptr) { delete ct; }
+        if (groupMap != nullptr) { delete groupMap; } delete taxaSum;
         util.mothurRemove(tempTaxonomyFile);
         delete classify;
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences.\n\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences.\n\n");
 
         m->mothurOut("\nOutput File Names: \n");
         for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

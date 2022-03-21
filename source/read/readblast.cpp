@@ -19,7 +19,7 @@ inline bool compareOverlap(seqDist left, seqDist right){
 ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(ms) {
 	try {
 		m = MothurOut::getInstance();
-		matrix = NULL;
+		matrix = nullptr;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReadBlast", "ReadBlast");

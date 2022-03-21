@@ -499,7 +499,7 @@ void RemoveGroupsCommand::readShared(){
 		bool wroteSomething = false;
         bool printHeaders = true;
 		
-		while(lookup != NULL) {
+		while(lookup != nullptr) {
 			
 			variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
@@ -547,7 +547,7 @@ void RemoveGroupsCommand::readList(){
         bool wroteSomething = false;
 		int removedCount = 0;
 		
-		while(list != NULL) {
+		while(list != nullptr) {
 			
 			removedCount = 0;
 			

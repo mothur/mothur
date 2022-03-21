@@ -195,7 +195,7 @@ int GetCoreMicroBiomeCommand::execute(){
             if ((samples < 1) || (samples > lookup->size())) { m->mothurOut(toString(samples) + " is not a valid number for samples. Must be an integer between 1 and the number of samples in your file. Your file contains " + toString(lookup->size()) + " samples, so I will use that.\n"); samples = lookup->size(); }
         }
             
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
                 
             if (m->getControl_pressed()) { delete lookup; break; }
                 

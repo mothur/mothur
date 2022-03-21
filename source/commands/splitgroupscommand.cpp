@@ -492,8 +492,8 @@ void SplitGroupCommand::splitCountOrGroup(bool isCount){
 //**********************************************************************************************************************
 int driverSplitFlow(splitGroupsStruct* params){
     try {
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         vector<string> namesGroups;
         if (params->groupfile != "") {
             groupMap = new GroupMap(params->groupfile);
@@ -507,7 +507,7 @@ int driverSplitFlow(splitGroupsStruct* params){
         
         if (params->Groups.size() == 0) { params->Groups = namesGroups; }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         string name, flows;
         int count = 0;
@@ -521,10 +521,10 @@ int driverSplitFlow(splitGroupsStruct* params){
             flows = params->util.getline(in); params->util.gobble(in);
             
             vector<string> thisSeqsGroups;
-            if (groupMap != NULL) {
+            if (groupMap != nullptr) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
+            }else if (ct != nullptr) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 
@@ -556,7 +556,7 @@ int driverSplitFlow(splitGroupsStruct* params){
             }
         }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         return count;
     }
@@ -569,8 +569,8 @@ int driverSplitFlow(splitGroupsStruct* params){
 //**********************************************************************************************************************
 int driverSplitFastq(splitGroupsStruct* params){
     try {
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         vector<string> namesGroups;
         if (params->groupfile != "") {
             groupMap = new GroupMap(params->groupfile);
@@ -582,7 +582,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             namesGroups = ct->getNamesOfGroups();
         }else { params->m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); params->m->setControl_pressed(true);  return 0; }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         int count = 0;
         ifstream in; params->util.openInputFile(params->inputFileName, in);
@@ -595,10 +595,10 @@ int driverSplitFastq(splitGroupsStruct* params){
             string name = thisRead.getName();
             
             vector<string> thisSeqsGroups;
-            if (groupMap != NULL) {
+            if (groupMap != nullptr) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
+            }else if (ct != nullptr) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 
@@ -633,7 +633,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             }
         }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         return count;
         

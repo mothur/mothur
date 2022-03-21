@@ -37,9 +37,9 @@ void MothurOut::setLogFileName(string filename, bool append)  {
         if ((filename == "silent")) { silenceLog = true; }
         else {
             logFileName = filename;
-            if (outLog != NULL) {
+            if (outLog != nullptr) {
                 closeLog();
-                delete outLog; outLog = NULL;
+                delete outLog; outLog = nullptr;
             }
             outLog = new ofstream();
             silenceLog = false;
@@ -123,7 +123,7 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-        if (outLog == NULL) { appendLogBuffer(output);  return; }
+        if (outLog == nullptr) { appendLogBuffer(output);  return; }
         
         if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) {
@@ -203,7 +203,7 @@ void MothurOut::mothurOutJustToScreen(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
-        if (outLog == NULL) { appendLogBuffer("\n"); return; }
+        if (outLog == nullptr) { appendLogBuffer("\n"); return; }
         
 		if (!quietMode) {
             if (!silenceLog) { *outLog << buffer << endl; }
@@ -219,7 +219,7 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
-        if (outLog == NULL) { appendLogBuffer(output); return; }
+        if (outLog == nullptr) { appendLogBuffer(output); return; }
         
         if (buffer != "") { output = buffer + output; buffer = ""; }
         if (output.find("[ERROR]") != string::npos) {

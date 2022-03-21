@@ -15,7 +15,7 @@
 /***********************************************/
 struct logger {
     
-    logger() {}
+    logger() = default;
     ~logger() {}
     
     template< class T >
@@ -92,7 +92,7 @@ class MothurOut {
             logFileName = "";
             buffer = "";
             homePath = "";
-            outLog = NULL;
+            outLog = nullptr;
             seed = std::chrono::system_clock::now().time_since_epoch().count();
             
             initialize(); //fills validAminoAcids and codons

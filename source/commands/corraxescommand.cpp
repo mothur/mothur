@@ -171,7 +171,7 @@ int CorrAxesCommand::execute(){
 			delete input;
 			
             if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
+			if (lookupFloat == nullptr) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
 			
 		}else if (relabundfile != "") { 
 			InputData* input = new InputData(relabundfile, "relabund", Groups);
@@ -179,12 +179,12 @@ int CorrAxesCommand::execute(){
 			delete input;
 			
 			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
+			if (lookupFloat == nullptr) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
 			
 		}else if (metadatafile != "") { 
 			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
 			if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
-			if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading metadata file.\n");  return 0; }
+			if (lookupFloat == nullptr) { m->mothurOut("[ERROR] reading metadata file.\n");  return 0; }
 		}else {	m->mothurOut("[ERROR]: no file given.\n");  return 0; }
 		
 		if (m->getControl_pressed()) {  delete lookupFloat; return 0; }
@@ -673,7 +673,7 @@ int CorrAxesCommand::getSharedFloat(InputData* input){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+		while((lookupFloat != nullptr) && (userLabels.size() != 0)) {
 			
 			if (m->getControl_pressed()) {  return 0;  }
 			

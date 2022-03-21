@@ -269,7 +269,7 @@ int ChimeraSlayerCommand::execute(){
 
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -359,7 +359,7 @@ int ChimeraSlayerCommand::execute(){
             }
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         if (removeChimeras) {
             if (!util.isBlank(accnosFileName)) {
@@ -667,7 +667,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			
 			if (m->getControl_pressed()) {  return 0;  }
 			
-			long start = time(NULL);
+			long start = time(nullptr);
 			string thisFastaName = itFile->first;
 			map<string, int> thisPriority = itFile->second;
 			string thisoutputFileName = outputdir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
@@ -724,7 +724,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			
 			totalSeqs += numSeqs;
 			
-			m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".\n");
+			m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".\n");
 		}
 		
         if (hasCount && dups) { outCountList.close(); }

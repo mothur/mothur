@@ -285,7 +285,7 @@ int MakeBiomCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        SharedRAbundVectors* lookup = NULL; SharedRAbundFloatVectors* lookupRel = NULL;
+        SharedRAbundVectors* lookup = nullptr; SharedRAbundFloatVectors* lookupRel = nullptr;
         
 		InputData input(inputFileName, fileFormat, Groups);
         set<string> processedLabels;
@@ -306,14 +306,14 @@ int MakeBiomCommand::execute(){
         //if user did not specify a label, then use first one
         if ((contaxonomyfile != "") && (labels.size() == 0)) { allLines = false; labels.insert(lastLabel); }
         
-        Picrust* piCrust = NULL;
+        Picrust* piCrust = nullptr;
         if (picrust) { piCrust = new Picrust(referenceTax, picrustOtuFile); }
         
         vector<Taxonomy> consTax;
         if (contaxonomyfile != "") { util.readConsTax(contaxonomyfile, consTax); }
         
         if (fileFormat == "sharedfile") {
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -322,7 +322,7 @@ int MakeBiomCommand::execute(){
                 lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             }
         }else {
-            while (lookupRel != NULL) {
+            while (lookupRel != nullptr) {
                             
                 if (m->getControl_pressed()) { delete lookupRel; break; }
                 

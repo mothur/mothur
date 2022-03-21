@@ -33,7 +33,7 @@ struct pairFastqRead {
     FastqRead findex;
     FastqRead rindex;
 
-	pairFastqRead() {};
+	pairFastqRead()=default;
 	pairFastqRead(FastqRead f, FastqRead r) : forward(f), reverse(r){};
     pairFastqRead(FastqRead f, FastqRead r, FastqRead fi, FastqRead ri) : forward(f), reverse(r), findex(fi), rindex(ri) {};
 	~pairFastqRead() {};

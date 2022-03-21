@@ -273,7 +273,7 @@ int driverCorrect(correctData* params){
         
         if(params->startLine == 0){ distFile << params->sequences.size() << endl; }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         params->m->mothurOut("\nCalculating distances for (" + toString(params->startLine+1) + " to " + toString(params->endLine+1) + ")... \n");
         
         for(int i = params->startLine;i < params->endLine; i++){
@@ -283,11 +283,11 @@ int driverCorrect(correctData* params){
             for(int j=0;j<i;j++){ distFile << ' ' << getDist(params->sequences[i], params->sequences[j], params->correctMatrix, params->m); }
             distFile << endl;
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime)+"\n"); }
         }
         distFile.close();
         
-        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(NULL) - startTime)+"\n"); }
+        if((params->endLine-1) % 100 != 0){ params->m->mothurOutJustToScreen(toString(params->endLine-1) + "\t" + toString(time(nullptr) - startTime)+"\n"); }
         params->m->mothurOut("Done.\n");
         
         return 0;

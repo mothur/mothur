@@ -62,7 +62,7 @@ void DiversityUtils::loadAbundance(t_Data *ptData, SAbundVector* rank) {
         
         for(int i = 1; i <= maxRank; i++){ if (rank->get(i) != 0) { nNA++; } }
         
-        int **aanAbund = NULL;
+        int **aanAbund = nullptr;
         aanAbund = (int **) malloc(nNA*sizeof(int*));
         
         int count = 0;
@@ -728,7 +728,7 @@ int DiversityUtils::minimiseSimplex(gsl_vector* ptX, size_t nP, void* pvData, do
     try {
         const gsl_multimin_fminimizer_type *T =
         gsl_multimin_fminimizer_nmsimplex;
-        gsl_multimin_fminimizer *s = NULL;
+        gsl_multimin_fminimizer *s = nullptr;
         gsl_vector *ss;
         gsl_multimin_function minex_func;
         size_t iter = 0;
@@ -1086,12 +1086,12 @@ vector<double> DiversityUtils::mcmc(t_Params *ptParams, t_Data *ptData, gsl_vect
         if ((method == "metrols") || (method == "metrosichel")) { m->mothurOut(toString(atMetroInit[2].nThread) + ": a = " + toString(gsl_vector_get(ptX3, 0)) +  " b = " + toString(gsl_vector_get(ptX3, 1)) +  " g = " + toString(gsl_vector_get(ptX3, 2)) +  " S = " + toString(gsl_vector_get(ptX3, 3)) + "\n"); }
         else { m->mothurOut(toString(atMetroInit[2].nThread) + ": a = " + toString(gsl_vector_get(ptX3, 0)) +  " b = " + toString(gsl_vector_get(ptX3, 1)) +  " S = " + toString(gsl_vector_get(ptX3, 2)) + "\n"); }
         
-        iret1 = pthread_create(&thread1, NULL, f, (void*) &atMetroInit[0]);
-        iret2 = pthread_create(&thread2, NULL, f, (void*) &atMetroInit[1]);
-        iret3 = pthread_create(&thread3, NULL, f, (void*) &atMetroInit[2]);
-        pthread_join(thread1, NULL);
-        pthread_join(thread2, NULL);
-        pthread_join(thread3, NULL);
+        iret1 = pthread_create(&thread1, nullptr, f, (void*) &atMetroInit[0]);
+        iret2 = pthread_create(&thread2, nullptr, f, (void*) &atMetroInit[1]);
+        iret3 = pthread_create(&thread3, nullptr, f, (void*) &atMetroInit[2]);
+        pthread_join(thread1, nullptr);
+        pthread_join(thread2, nullptr);
+        pthread_join(thread3, nullptr);
         
         m->mothurOut(toString(atMetroInit[0].nThread) +": accept. ratio " + toString(atMetroInit[0].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[0].nAccepted)/((double) ptParams->nIter)) +  "\n");
         m->mothurOut(toString(atMetroInit[1].nThread) +": accept. ratio " + toString(atMetroInit[1].nAccepted) + "/" + toString(ptParams->nIter) +  " = " + toString(((double) atMetroInit[1].nAccepted)/((double) ptParams->nIter)) +  "\n");

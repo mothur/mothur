@@ -148,7 +148,7 @@ int SparccCommand::execute(){
 
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
-        long start = time(NULL);
+        long start = time(nullptr);
 
         InputData input(sharedfile, "sharedfile", Groups);
         set<string> processedLabels;
@@ -158,7 +158,7 @@ int SparccCommand::execute(){
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         Groups = lookup->getNamesGroups();
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -169,7 +169,7 @@ int SparccCommand::execute(){
 
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to process.\n\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " seconds to process.\n\n");
 
         //output files created by command
 		m->mothurOut("\nOutput File Names: \n");

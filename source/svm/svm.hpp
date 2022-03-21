@@ -335,8 +335,8 @@ private:
 
 class RowCache {
 public:
-    RowCache(int d)  { //: cache(d, NULL)
-        for (int i = 0; i < d; i++) {  cache.push_back(NULL);  }
+    RowCache(int d)  { //: cache(d, nullptr)
+        for (int i = 0; i < d; i++) {  cache.push_back(nullptr);  }
     }
     
     virtual ~RowCache() {
@@ -362,7 +362,7 @@ public:
     }
 
     bool rowNotCached(int i) {
-        return cache[i] == NULL;
+        return cache[i] == nullptr;
     }
 
     virtual double calculateValueForCache(int, int) = 0;
@@ -400,7 +400,7 @@ public:
 
     KernelFunction(const LabeledObservationVector& _obs) :
         obs(_obs),
-        cache(_obs.size(), NULL) {}
+        cache(_obs.size(), nullptr) {}
 
     virtual ~KernelFunction() {
         for (int i = 0; i < cache.size(); i++) {
@@ -430,7 +430,7 @@ public:
     }
 
     bool rowNotCached(int i) {
-        return cache[i] == NULL;
+        return cache[i] == nullptr;
     }
 
 private:
@@ -663,7 +663,7 @@ class KernelFunctionCache {
 public:
     KernelFunctionCache(KernelFunction& _k, const LabeledObservationVector& _obs) :
         k(_k), obs(_obs),
-        cache(_obs.size(), NULL) {}
+        cache(_obs.size(), nullptr) {}
     ~KernelFunctionCache() {
         
         for (int i = 0; i < cache.size(); i++) {
@@ -690,7 +690,7 @@ public:
     }
 
     bool rowNotCached(int i) {
-        return cache[i] == NULL;
+        return cache[i] == nullptr;
     }
 
 private:

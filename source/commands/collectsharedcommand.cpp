@@ -428,7 +428,7 @@ int CollectSharedCommand::execute(){
         
         SharedOrderVector* order = util.getNextSharedOrder(input, allLines, userLabels, processedLabels, lastLabel);
         
-        while (order != NULL) {
+        while (order != nullptr) {
             
             if (m->getControl_pressed()) { delete order; break; }
             

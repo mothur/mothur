@@ -30,7 +30,7 @@ private:
 class SharedCollectorsCurveData : public Observable {
 	
 public:
-	SharedCollectorsCurveData() {}
+    SharedCollectorsCurveData()=default;
 	
 	void registerDisplay(Display* o)		    {	displays.insert(o);			                       }
     void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ displays.insert(o[i]); } }

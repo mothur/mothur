@@ -119,11 +119,11 @@ int DegapSeqsCommand::execute(){
         string degapFile = getOutputFileName("fasta", variables);
         outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         int numSeqs = createProcesses(fastafile, degapFile);
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		

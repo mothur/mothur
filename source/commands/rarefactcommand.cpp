@@ -247,7 +247,7 @@ int RareFactCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
         map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
@@ -278,7 +278,7 @@ int RareFactCommand::execute(){
             
             OrderVector* order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
                    
-            while (order != NULL) {
+            while (order != nullptr) {
                 
                 if (m->getControl_pressed()) { delete order; break; }
                 
@@ -305,7 +305,7 @@ int RareFactCommand::execute(){
 
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to run rarefaction.single.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to run rarefaction.single.\n");
 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -574,7 +574,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
             files[group] = (sharedFileRoot + group + ".rabund");
         }
         
-        while(lookup != NULL) {
+        while(lookup != nullptr) {
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;

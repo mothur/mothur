@@ -324,7 +324,7 @@ inline bool compareFileSizes(map<string, string> left, map<string, string> right
 	string filename = left.begin()->first;
 	pFile = fopen (filename.c_str(),"rb");
 	string error = "Error opening " + filename;
-	if (pFile==NULL) perror (error.c_str());
+	if (pFile==nullptr) perror (error.c_str());
 	else{
 		fseek (pFile, 0, SEEK_END);
 		leftsize=ftell (pFile);
@@ -338,7 +338,7 @@ inline bool compareFileSizes(map<string, string> left, map<string, string> right
 	filename = right.begin()->first;
 	pFile2 = fopen (filename.c_str(),"rb");
 	error = "Error opening " + filename;
-	if (pFile2==NULL) perror (error.c_str());
+	if (pFile2==nullptr) perror (error.c_str());
 	else{
 		fseek (pFile2, 0, SEEK_END);
 		rightsize=ftell (pFile2);

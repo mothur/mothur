@@ -262,7 +262,7 @@ int CreateDatabaseCommand::execute(){
             
             if (m->getControl_pressed()) { delete list; return 0; }
             
-            GroupMap* groupmap = NULL;
+            GroupMap* groupmap = nullptr;
             if (groupfile != "") {
                 groupmap = new GroupMap(groupfile);
                 groupmap->readMap();
@@ -575,7 +575,7 @@ ListVector* CreateDatabaseCommand::getList(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  delete input; return list;  }
 			
 			if(labels.count(list->getLabel()) == 1){
@@ -647,7 +647,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && (userLabels.size() != 0)) {
+		while((lookup != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return lookup;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
@@ -715,7 +715,7 @@ SharedRAbundFloatVectors* CreateDatabaseCommand::getRelabund(){
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+        while((lookupFloat != nullptr) && (userLabels.size() != 0)) {
             
             if (m->getControl_pressed()) {  return 0;  }
             

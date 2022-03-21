@@ -17,7 +17,7 @@ ReadCluster::ReadCluster(string distfile, float c, string o, bool s){
 		cutoff = c;
 		outputDir = o;
 		sortWanted = s;
-		list = NULL;
+		list = nullptr;
 }
 
 /***********************************************************************/
@@ -88,7 +88,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		rowToName[0] = name;
 		matrixNames.push_back(name);
 		
-		if(nameMap == NULL){
+		if(nameMap == nullptr){
 			list = new ListVector(nseqs);
 			list->set(0, name);
 		}
@@ -122,7 +122,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 				matrixNames.push_back(name);
 				
 				//there's A LOT of repeated code throughout this method...
-				if(nameMap == NULL){
+				if(nameMap == nullptr){
 					list->set(i, name);
 					
 					for(int j=0;j<i;j++){
@@ -163,7 +163,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 				rowToName[i] = name;
 				matrixNames.push_back(name);
 		
-				if(nameMap == NULL){
+				if(nameMap == nullptr){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
 						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
@@ -200,7 +200,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 		in.close();
 		out.close();
 	
-		if(nameMap == NULL){
+		if(nameMap == nullptr){
 			nameMap = new NameAssignment();
 			for(int i=0;i<matrixNames.size();i++){
 				nameMap->push_back(matrixNames[i]);
@@ -267,7 +267,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		rowToName[0] = name;
 		matrixNames.push_back(name);
 		
-		if(ct == NULL){
+		if(ct == nullptr){
 			list = new ListVector(nseqs);
 			list->set(0, name);
 		}
@@ -298,7 +298,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				matrixNames.push_back(name);
 				
 				//there's A LOT of repeated code throughout this method...
-				if(ct == NULL){
+				if(ct == nullptr){
 					list->set(i, name);
 					
 					for(int j=0;j<i;j++){
@@ -338,7 +338,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 				rowToName[i] = name;
 				matrixNames.push_back(name);
                 
-				if(ct == NULL){
+				if(ct == nullptr){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
 						if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(tempFile); return 0; }
@@ -373,7 +373,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 		in.close();
 		out.close();
         
-		if(ct == NULL){
+		if(ct == nullptr){
 			ct = new CountTable();
 			for(int i=0;i<matrixNames.size();i++){
 				ct->push_back(matrixNames[i]);

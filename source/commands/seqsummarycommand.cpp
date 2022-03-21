@@ -156,7 +156,7 @@ int SeqSummaryCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
         map<string, string> variables; 
 		variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -237,8 +237,8 @@ int SeqSummaryCommand::execute(){
         if ((namefile == "") && (countfile == "") && (summaryfile == "")) {  m->mothurOut("# of Seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); }
         else { m->mothurOut("# of unique seqs:\t" + toString(numUniques)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
         
-        if (((namefile == "") && (countfile == "")) && (summaryfile == "")) {  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
-        else{  m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
+        if (((namefile == "") && (countfile == "")) && (summaryfile == "")) {  m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to summarize " + toString(numUniques) + " sequences.\n");  }
+        else{  m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to summarize " + toString(size) + " sequences.\n");   }
         
         m->mothurOut("\nOutput File Names:\n");
         if ((summaryfile == "") && (contigsfile == "") && (alignfile == "")) {

@@ -459,7 +459,7 @@ int ChimeraVsearchCommand::execute(){
 
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -558,7 +558,7 @@ int ChimeraVsearchCommand::execute(){
                 long long numRedund = 0;
                 int totalChimeras = deconvoluteResults(outputFileName, accnosFileName, alnsFileName, numRedund);
                 
-                m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(totalChimeras) + " chimeras were found.\n");
+                m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check your sequences. " + toString(totalChimeras) + " chimeras were found.\n");
                 m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples.\n");
             }else {
                 
@@ -610,7 +610,7 @@ int ChimeraVsearchCommand::execute(){
             //remove file made for vsearch
             if (templatefile == "self") {  util.mothurRemove(newFasta); }
             
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
+            m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
         
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
@@ -985,7 +985,7 @@ void driverGroups(vsearchData* params){
         
         Utils util;
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
-            long start = time(NULL);
+            long start = time(nullptr);
             
             if (params->m->getControl_pressed()) {  return; }
             
@@ -1055,7 +1055,7 @@ void driverGroups(vsearchData* params){
             util.appendFiles((params->accnos+thisGroup), params->accnos); util.mothurRemove((params->accnos+thisGroup));
             if (params->vars->chimealns) { util.appendFiles((params->alns+thisGroup), params->alns); util.mothurRemove((params->alns+thisGroup)); }
             
-            params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
+            params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
         }
         params->count = totalSeqs;
     }

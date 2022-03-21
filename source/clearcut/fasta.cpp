@@ -297,10 +297,10 @@ NJ_is_protein_ambiguity(char c) {
 NJ_alignment *
 NJ_read_fasta(NJ_ARGS *nj_args) {
 
-  FILE *fp  = NULL;
-  char *buf = NULL;
-  char *ptr = NULL;
-  NJ_alignment *alignment = NULL;
+  FILE *fp  = nullptr;
+  char *buf = nullptr;
+  char *ptr = nullptr;
+  NJ_alignment *alignment = nullptr;
 
   char c;
   int state;
@@ -608,7 +608,7 @@ NJ_read_fasta(NJ_ARGS *nj_args) {
   
   NJ_free_alignment(alignment);
 
-  return(NULL);
+  return(nullptr);
 }
 
 

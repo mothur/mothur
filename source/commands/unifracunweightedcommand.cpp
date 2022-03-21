@@ -216,7 +216,7 @@ int UnifracUnweightedCommand::execute() {
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
-        TreeReader* reader = NULL;
+        TreeReader* reader = nullptr;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
         else { reader = new TreeReader(treefile, countfile); }
         
@@ -231,7 +231,7 @@ int UnifracUnweightedCommand::execute() {
 		outputNames.push_back(sumFile); outputTypes["uwsummary"].push_back(sumFile);
 		util.openOutputFile(sumFile, outSum);
 
-		long start = time(NULL);
+		long start = time(nullptr);
         
         //set or check size
         if (subsample) {
@@ -293,7 +293,7 @@ int UnifracUnweightedCommand::execute() {
 			
 			if (m->getControl_pressed()) { break; }
             
-            int startSubsample = time(NULL);
+            int startSubsample = time(nullptr);
             
             //subsample loop
             SubSample sample;
@@ -306,13 +306,13 @@ int UnifracUnweightedCommand::execute() {
                  
                 //uses method of setting groups to doNotIncludeMe
                 int sampleTime = 0;
-                if (m->getDebug()) { sampleTime = time(NULL); }
+                if (m->getDebug()) { sampleTime = time(nullptr); }
                 
                 Tree* subSampleTree;
                 if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[i], ct, newCt, subsampleSize, Groups);  }
                 else                    { subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);                 }
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(nullptr) - sampleTime) + " seconds to sample tree.\n"); }
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
@@ -327,7 +327,7 @@ int UnifracUnweightedCommand::execute() {
                 
                 if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 		}
             }
-            if (subsample) { m->mothurOut("It took " + toString(time(NULL) - startSubsample) + " secs to run the subsampling.\n");  }
+            if (subsample) { m->mothurOut("It took " + toString(time(nullptr) - startSubsample) + " secs to run the subsampling.\n");  }
             
             if (m->getControl_pressed()) { break; }
 
@@ -348,7 +348,7 @@ int UnifracUnweightedCommand::execute() {
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  }	return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted.\n");
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run unifrac.unweighted.\n");
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";
@@ -519,7 +519,7 @@ int UnifracUnweightedCommand::getConsensusTrees(vector< vector<double> >& dists,
         ofstream outTree;
         util.openOutputFile(conFile, outTree);
         
-        if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; }
+        if (conTree != nullptr) { conTree->print(outTree, "boot"); delete conTree; }
         outTree.close();
         
         return 0;
@@ -580,7 +580,7 @@ vector<Tree*> UnifracUnweightedCommand::buildTrees(vector< vector<double> >& dis
         
         outAll.close();
         
-        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } util.mothurRemove(outputFile); }
+        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = nullptr; } util.mothurRemove(outputFile); }
         
         return trees;
     }

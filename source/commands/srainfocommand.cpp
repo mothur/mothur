@@ -251,7 +251,7 @@ int SRAInfoCommand::execute(){
 //***************************************************************************************************************
 string SRAInfoCommand::runPreFetch(string sampleName){
     try{
-        double_t start = time(NULL);
+        double_t start = time(nullptr);
         vector<char*> cPara;
         string prefetchCommand = prefetchLocation;
         prefetchCommand = "\"" + prefetchCommand + "\" " + sampleName + " ";
@@ -301,7 +301,7 @@ string SRAInfoCommand::runPreFetch(string sampleName){
             m->mothurOut("\n\n[ERROR]: prefetch was unable to download sample " + sampleName + ", skipping.\n\n"); return "fail";
         }else { outputNames.push_back(outputFileName); outputTypes["sra"].push_back(outputFileName); }
         
-        m->mothurOut("It took " + toString(time(NULL)-start)+ " seconds to download sample " + sampleName + ".\n");
+        m->mothurOut("It took " + toString(time(nullptr)-start)+ " seconds to download sample " + sampleName + ".\n");
         
         return outputFileName;
     }

@@ -192,7 +192,7 @@ int ParseFastaQCommand::execute(){
         
         if (m->getControl_pressed()) { return 0; }
         
-        TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
+        TrimOligos* trimOligos = nullptr; TrimOligos* rtrimOligos = nullptr;
         pairedOligos = false; numBarcodes = 0; numPrimers= 0; numLinkers= 0; numSpacers = 0; numRPrimers = 0;
         if (oligosfile != "")       {
             readOligos(oligosfile);

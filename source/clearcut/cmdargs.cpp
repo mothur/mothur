@@ -76,11 +76,11 @@ NJ_handle_args(int argc,
   struct option NJ_long_options[] = {
 
     /* These options don't set a flag */
-    {"in",        required_argument, NULL, 'i'},
-    {"out",       required_argument, NULL, 'o'},
-    {"seed",      required_argument, NULL, 's'},
-    {"matrixout", required_argument, NULL, 'm'},
-    {"ntrees",    required_argument, NULL, 'n'},
+    {"in",        required_argument, nullptr, 'i'},
+    {"out",       required_argument, nullptr, 'o'},
+    {"seed",      required_argument, nullptr, 's'},
+    {"matrixout", required_argument, nullptr, 'm'},
+    {"ntrees",    required_argument, nullptr, 'n'},
 
     /* These options set a flag */
     {"verbose",      no_argument, &(nj_args.verbose_flag),  1},
@@ -108,9 +108,9 @@ NJ_handle_args(int argc,
   };
   
   /* initializes options to their default */
-  nj_args.infilename       = NULL;
-  nj_args.outfilename      = NULL;
-  nj_args.matrixout        = NULL;
+  nj_args.infilename       = nullptr;
+  nj_args.outfilename      = nullptr;
+  nj_args.matrixout        = nullptr;
   nj_args.seed             = time(0);
   nj_args.verbose_flag     = 0;
   nj_args.quiet_flag       = 0;

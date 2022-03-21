@@ -610,7 +610,7 @@ void RemoveSeqsCommand::readList(string listfile){
 		
 		bool wroteSomething = false; int removedCount = 0;
         
-		while(list != NULL) {
+		while(list != nullptr) {
 			
 			removedCount = 0;
             set<string> uniqueNames;

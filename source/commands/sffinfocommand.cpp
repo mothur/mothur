@@ -218,7 +218,7 @@ int SffInfoCommand::execute(){
 	
         if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         sffFilename = util.getFullPathName(sffFilename);
         m->mothurOut("Extracting info from " + sffFilename + " ...\n" );
@@ -229,7 +229,7 @@ int SffInfoCommand::execute(){
         
         int numReads = extractSffInfo(sffFilename, accnosName, oligos);
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to extract " + toString(numReads) + ".\n");
 		
 		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
@@ -274,7 +274,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos, string oligos){
         if (accnos != "")	{  seqNames.clear(); seqNames = util.readAccnos(accnos);    }
 		else				{	seqNames.clear();		}
         
-        TrimOligos* trimOligos = NULL; TrimOligos* rtrimOligos = NULL;
+        TrimOligos* trimOligos = nullptr; TrimOligos* rtrimOligos = nullptr;
         if (hasOligos)   {
             readOligos(oligos);    split = 2;
             if (m->getControl_pressed()) { delete oligosObject; return 0; }

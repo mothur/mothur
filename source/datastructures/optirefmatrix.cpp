@@ -454,7 +454,7 @@ set<long long> OptiRefMatrix::getCloseRefSeqs(long long index){
 //only used in open reference clustering
 ListVector* OptiRefMatrix::getFitListSingle() {
     try {
-        ListVector* singlelist = NULL;
+        ListVector* singlelist = nullptr;
         
         if (singletons.size() == 0) { }
         else {

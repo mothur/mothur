@@ -45,15 +45,15 @@ public:
     virtual void randomizeRefs() {}
     virtual vector<string> getRefSingletonNames() { vector<string> temp; return temp;  }
     virtual vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&) { vector<long long> temp; return temp;  }
-    virtual OptiData* extractRefMatrix() { OptiData* temp = NULL; return temp;  }
-    virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = NULL; return temp;  }
-    virtual OptiData* extractMatrixSubset(set<string>&) { OptiData* temp = NULL; return temp;  }
+    virtual OptiData* extractRefMatrix() { OptiData* temp = nullptr; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = nullptr; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<string>&) { OptiData* temp = nullptr; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
     
     virtual long long getNumFitDists() { return 0; } //user distances under cutoff
     virtual long long getNumRefDists() { return 0; } //ref distances under cutoff
     
-    virtual ListVector* getFitListSingle() { ListVector* list = NULL; return list; }
+    virtual ListVector* getFitListSingle() { ListVector* list = nullptr; return list; }
     virtual long long getNumFitTrueSingletons() { return 0; }
     
     virtual vector<long long> getRefSeqs() { vector<long long> temp; return temp;  }

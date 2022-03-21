@@ -192,7 +192,7 @@ void OTUAssociationCommand::processShared(){
             if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the shared file.\n");  m->setControl_pressed(true); error=true; }
         }
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -293,7 +293,7 @@ void OTUAssociationCommand::processRelabund(){
             if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the relabund file.\n");  m->setControl_pressed(true); error=true;}
         }
 		
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

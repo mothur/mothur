@@ -40,7 +40,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		ifstream* probFileTest = new ifstream(probFileName.c_str());   files.push_back(probFileTest);
 		ifstream* probFileTest3 = new ifstream(phyloTreeSumName.c_str()); files.push_back(probFileTest3);
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		
 		//if they are there make sure they were created after this release date
 		bool FilesGood = false;
@@ -163,7 +163,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         for (int i = 0; i < files.size(); i++) { delete files[i]; }
 			
 		m->mothurOut("DONE.\n");
-		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities.\n"); 
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " seconds get probabilities.\n"); 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "Bayesian");
@@ -173,8 +173,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 /**************************************************************************************************/
 Bayesian::~Bayesian() {
 	try {
-        if (phyloTree != NULL) { delete phyloTree; }
-        if (database != NULL) {  delete database; }
+        if (phyloTree != nullptr) { delete phyloTree; }
+        if (database != nullptr) {  delete database; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "~Bayesian");

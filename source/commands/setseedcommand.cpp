@@ -59,7 +59,7 @@ SetSeedCommand::SetSeedCommand(string option) : Command()  {
             string temp = validParameter.valid(parameters, "seed");
             if (temp == "not found") { random = 0;  m->mothurOut("[ERROR]: You must provide a seed value or set seed to clear.\n");  abort = true;}
             else if (temp == "clear") {
-                random = time(NULL);
+                random = time(nullptr);
                 seed = true;
             }else {
                 if (util.isInteger(temp)) { util.mothurConvert(temp, random); seed = true; }

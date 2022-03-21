@@ -171,7 +171,7 @@ int GetRAbundCommand::execute(){
             
             RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
             
-            while (rabund != NULL) {
+            while (rabund != nullptr) {
                        
                 if (m->getControl_pressed()) { delete rabund; break; }
                        
@@ -218,7 +218,7 @@ int GetRAbundCommand::processList(ofstream& out){
         
         if (m->getControl_pressed()) {  delete list;  return 0; }
         
-        while (list != NULL) {
+        while (list != nullptr) {
                    
             if (m->getControl_pressed()) { delete list; break; }
                    

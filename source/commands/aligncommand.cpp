@@ -207,7 +207,7 @@ int AlignCommand::execute(){
         
         if (m->getControl_pressed()) { outputTypes.clear(); return 0; }
         
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         m->mothurOut("\nAligning sequences from " + fastafile + " ...\n" );
         
         if (outputdir == "") {  outputdir += util.hasPath(fastafile); }
@@ -241,7 +241,7 @@ int AlignCommand::execute(){
         outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
         if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
 		
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(numFastaSeqs) + " sequences.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to align " + toString(numFastaSeqs) + " sequences.\n");
         
 		//set align file as new current fastafile
 		string currentFasta = "";

@@ -277,7 +277,7 @@ RAbundVector SharedOrderVector::getRAbundVector(){
 }
 /***********************************************************************/
 
-OrderVector SharedOrderVector::getOrderVector(map<string,int>* nameMap = NULL) {
+OrderVector SharedOrderVector::getOrderVector(map<string,int>* nameMap = nullptr) {
 	try {
 		OrderVector ov;
 	

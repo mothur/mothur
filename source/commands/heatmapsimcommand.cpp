@@ -289,7 +289,7 @@ int HeatMapSimCommand::runCommandShared() {
 			
 		if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command, quitting\n"); return 0;}
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -397,7 +397,7 @@ int HeatMapSimCommand::runCommandDist() {
                     names.push_back(nameMap->get(i));
                 }
              }else if (countfile != "") {
-                nameMap = NULL;
+                nameMap = nullptr;
                 ct.readTable(countfile, true, false);
                 names = ct.getNamesOfSeqs();
             }

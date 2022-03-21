@@ -226,7 +226,7 @@ int GetMetaCommunityCommand::execute(){
             m->mothurOut("\n\n");
         }
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
@@ -362,7 +362,7 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
                 }
             }
             
-            CommunityTypeFinder* finder = NULL;
+            CommunityTypeFinder* finder = nullptr;
             if (method == "dmm")            {   finder = new qFinderDMM(sharedMatrix, numPartitions);   }
             else if (method == "kmeans")    {   finder = new KMeans(sharedMatrix, numPartitions);       }
             else if (method == "pam")       {   finder = new Pam(sharedMatrix, dists, numPartitions);                 }

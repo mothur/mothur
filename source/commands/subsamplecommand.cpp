@@ -339,7 +339,7 @@ int SubSampleCommand::execute(){
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleTree() {
     try {
-        TreeReader* reader = NULL;
+        TreeReader* reader = nullptr;
         string cinputfile = countfile;
         if (countfile == "") {
             reader = new TreeReader(treefile, groupfile, namefile);
@@ -725,7 +725,7 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group.\n");
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -972,7 +972,7 @@ int SubSampleCommand::getSubSampleList() {
             sampledCt.printTable(countOutputFileName);
         }
 			
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             
@@ -981,7 +981,7 @@ int SubSampleCommand::getSubSampleList() {
             list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
 		
-		if (list != NULL) { delete list; }
+		if (list != nullptr) { delete list; }
         
         if (taxonomyfile != "") {
             if (namefile == "") {
@@ -1175,7 +1175,7 @@ void SubSampleCommand::getSubSampleRabund() {
         ofstream out; util.openOutputFile(outputFileName, out);
         outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
                
-        while (rabund != NULL) {
+        while (rabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete rabund; break; }
                    
@@ -1238,7 +1238,7 @@ void SubSampleCommand::getSubSampleSabund() {
         ofstream out; util.openOutputFile(outputFileName, out);
         outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
                
-        while (sabund != NULL) {
+        while (sabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete sabund; break; }
                    

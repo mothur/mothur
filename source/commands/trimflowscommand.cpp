@@ -373,11 +373,11 @@ void driverCreateTrim(trimFlowData* params){
         int numSpacers = params->spacer.size();
         int numFPrimers = 0;
         int numRPrimers = 0;
-        TrimOligos* trimOligos = NULL;
+        TrimOligos* trimOligos = nullptr;
         if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); numFPrimers = params->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer); numBarcodes = params->barcodes.size();  numFPrimers = params->primers.size();  numRPrimers = params->revPrimer.size(); }
         
-        TrimOligos* rtrimOligos = NULL;
+        TrimOligos* rtrimOligos = nullptr;
         if (params->reorient) {
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
@@ -642,7 +642,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		//get num bytes in file
         flowFileName = util.getFullPathName(flowFileName);
 		pFile = fopen (flowFileName.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
+		if (pFile==nullptr) perror ("Error opening file");
 		else{
 			fseek (pFile, 0, SEEK_END);
 			size=ftell (pFile);
@@ -704,7 +704,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName){
 
 	try {
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
         
         vector<linePair> lines;
@@ -745,7 +745,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         for (int i = 0; i < processors-1; i++) {
             OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
             OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
-            OutputWriter* threadFastaWriter = NULL;
+            OutputWriter* threadFastaWriter = nullptr;
             
             if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
             
@@ -759,7 +759,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         
         OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
         OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
-        OutputWriter* threadFastaWriter = NULL;
+        OutputWriter* threadFastaWriter = nullptr;
         
         if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
         
@@ -793,7 +793,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         if (fasta) { delete threadFastaWriter; }
         delete dataBundle;
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".\n");  } 
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".\n");  } 
         
 		return num;
 	}

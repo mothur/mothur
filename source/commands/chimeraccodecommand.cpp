@@ -149,7 +149,7 @@ int ChimeraCcodeCommand::execute(){
 		
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" ); 
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         string outputFileName, accnosFileName;
@@ -178,7 +178,7 @@ int ChimeraCcodeCommand::execute(){
         outputNames.push_back(mapInfo);	outputTypes["mapinfo"].push_back(mapInfo);
         outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         if (removeChimeras) {
             if (!util.isBlank(accnosFileName)) {

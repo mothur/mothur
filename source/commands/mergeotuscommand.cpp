@@ -258,7 +258,7 @@ int MergeOTUsCommand::mergeSharedOTUs(vector<TaxNode>& nodes){
         Groups = lookup->getNamesGroups();
         bool printHeaders = true;
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -381,7 +381,7 @@ int MergeOTUsCommand::mergeListOTUs(vector<TaxNode>& nodes){
         ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         bool printHeaders = true;
         
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             
@@ -503,7 +503,7 @@ int MergeOTUsCommand::mergeRelabundOTUs(vector<TaxNode>& nodes){
         Groups = lookup->getNamesGroups();
         
         bool printHeaders = true;
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

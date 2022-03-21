@@ -47,7 +47,7 @@ public:
     
     RAbundVector getRAbundVector() { m->mothurOut("[ERROR]: can not use getRAbundVector for SharedCLRVector.\n"); RAbundVector r; return r; }
     SAbundVector getSAbundVector() { m->mothurOut("[ERROR]: can not use getSAbundVector for SharedCLRVector.\n"); SAbundVector s; return s; }
-    OrderVector getOrderVector(map<string,int>* hold = NULL) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedCLRVector.\n"); OrderVector o; return o; }
+    OrderVector getOrderVector(map<string,int>* hold = nullptr) { m->mothurOut("[ERROR]: can not use getOrderVector for SharedCLRVector.\n"); OrderVector o; return o; }
     
 private:
     vector<float> data;

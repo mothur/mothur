@@ -235,7 +235,7 @@ void alignAminoDriver(alignAminoStruct* params) {
 //**********************************************************************************************************************
 void TranslateSeqsCommand::alignDNAAmino() {
     try {
-        long start = time(NULL);
+        long start = time(nullptr);
         
         //fills lines and alines. Also sets dnaAligned and aminoAligned
         setLines();
@@ -280,7 +280,7 @@ void TranslateSeqsCommand::alignDNAAmino() {
         }
         synchronizedOutputFile->close(); delete threadOutputWriter;  delete dataBundle;
                             
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to align " + toString(num) + " sequences.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to align " + toString(num) + " sequences.\n");
         
     }
     catch(exception& e) {
@@ -291,7 +291,7 @@ void TranslateSeqsCommand::alignDNAAmino() {
 //**********************************************************************************************************************
 void TranslateSeqsCommand::translateDNAtoAmino() {
     try {
-        long start = time(NULL);
+        long start = time(nullptr);
         
         string thisOutputDir = outputdir;
         if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -329,7 +329,7 @@ void TranslateSeqsCommand::translateDNAtoAmino() {
             numSeqs = createProcessesTranslateDNAtoAminoAcids(outputFileName, lines, frames[i]);
         }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to translate " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to translate " + toString(numSeqs) + " sequences.\n");
         
     }
     catch(exception& e) {
@@ -495,7 +495,7 @@ bool TranslateSeqsCommand::setLines() {
             //get num bytes in file
             aminofile = util.getFullPathName(aminofile);
             pFile = fopen (aminofile.c_str(),"rb");
-            if (pFile==NULL) perror ("Error opening file");
+            if (pFile==nullptr) perror ("Error opening file");
             else{
                 fseek (pFile, 0, SEEK_END);
                 size=ftell (pFile);

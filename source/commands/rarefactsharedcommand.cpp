@@ -306,7 +306,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			delete lookup; delete subset; return 0;
 		}
         
-        while (subset != NULL) {
+        while (subset != nullptr) {
             
             if (m->getControl_pressed()) { delete subset; delete lookup; break; }
             
@@ -319,14 +319,14 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
            delete lookup; delete subset;
            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel, thisSet);
            
-           if (lookup != NULL) {
+           if (lookup != nullptr) {
                subset = new SharedRAbundVectors();
                data = lookup->getSharedRAbundVectors();
                if (thisSet != "") {//remove unwanted groups
                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                    subset->eliminateZeroOTUS();
                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-           }else {  subset = NULL; }
+           }else {  subset = nullptr; }
         }
         
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}

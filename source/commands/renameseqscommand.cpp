@@ -309,8 +309,8 @@ void RenameSeqsCommand::processNameGroupCountFiles(map<string, string>& oldMap, 
         bool oldMapEmpty = true;
         if (oldMap.size() != 0) { oldMapEmpty = false; }
         
-        GroupMap* groupMap = NULL;
-        CountTable* countTable = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* countTable = nullptr;
         
         bool hasGroups = false;
         vector<string> Groups;
@@ -497,8 +497,8 @@ void RenameSeqsCommand::processNameGroupCountFiles(map<string, string>& oldMap, 
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } }
         
-        if (groupMap != NULL) { delete groupMap; }
-        if (countTable != NULL) { delete countTable; }
+        if (groupMap != nullptr) { delete groupMap; }
+        if (countTable != nullptr) { delete countTable; }
             
         return;
     }
@@ -803,7 +803,7 @@ void RenameSeqsCommand::readList(map<string, string>& oldMap){
         
         ListVector* list = util.getNextList(input, true, userLabels, processedLabels, lastLabel);
         
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             

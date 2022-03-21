@@ -181,7 +181,7 @@ int BiomInfoCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         Biom* biom;
         if (format == "hdf5")   { biom = new BiomHDF5(biomfile, label);   }
@@ -199,7 +199,7 @@ int BiomInfoCommand::execute(){
         CountTable ct;
         vector< map<string, bool> > otuContainsGroups;
         
-        if (shared != NULL) {
+        if (shared != nullptr) {
             map<string, string> variables;
             variables["[filename]"] = fileroot;
             variables["[tag]"] = label;
@@ -247,7 +247,7 @@ int BiomInfoCommand::execute(){
             outputNames.push_back(taxFilename); outputTypes["taxonomy"].push_back(taxFilename);
             ofstream outTax; util.openOutputFile(taxFilename, outTax);
             
-            GroupMap* g = NULL; PhyloSummary taxSum(g, relabund, printlevel);
+            GroupMap* g = nullptr; PhyloSummary taxSum(g, relabund, printlevel);
             
             //print group taxonomy if given
             for (map<string, string>::iterator it = groupTaxonomies.begin(); it!= groupTaxonomies.end(); it++) {
@@ -309,7 +309,7 @@ int BiomInfoCommand::execute(){
         
         delete biom;
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " create mothur files from your biom file.\n\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " create mothur files from your biom file.\n\n");
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } }
         

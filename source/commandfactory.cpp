@@ -407,7 +407,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
             bool seed = false; int random;
             if (intputOption == "clear") {
-                random = (int)time(NULL);
+                random = (int)time(nullptr);
                 seed = true;
             }else {
                 if (util.isNumeric1(intputOption)) { util.mothurConvert(intputOption, random); seed=true; }
@@ -436,7 +436,7 @@ int CommandFactory::checkForRedirects(string optionString) {
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 
-        Command* command = NULL;
+        Command* command = nullptr;
         
         if ((commandName != "help") && (commandName != "system")) { checkForRedirects(optionString); }
         
@@ -600,7 +600,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
-		Command* pipecommand = NULL;   //delete the old command
+		Command* pipecommand = nullptr;   //delete the old command
         
         if (commandName != "help") {
             checkForRedirects(optionString);

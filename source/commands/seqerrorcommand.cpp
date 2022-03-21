@@ -196,7 +196,7 @@ int SeqErrorCommand::execute(){
 	try{
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		maxLength = 5000;
 		totalBases = 0;
 		totalMatches = 0;
@@ -262,7 +262,7 @@ int SeqErrorCommand::execute(){
 		}
         megAlignmentFile.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         
         bool extraOutput = false;

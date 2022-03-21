@@ -255,7 +255,7 @@ int NewCommand::execute(){
              SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
          Groups = lookup->getNamesGroups();
              
-             while (lookup != NULL) {
+             while (lookup != nullptr) {
                  
                  if (m->getControl_pressed()) { delete lookup; break; }
                  
@@ -271,7 +271,7 @@ int NewCommand::execute(){
              SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
          Groups = lookup->getNamesGroups();
              
-             while (lookup != NULL) {
+             while (lookup != nullptr) {
                  
                  if (m->getControl_pressed()) { delete lookup; break; }
                  
@@ -284,7 +284,7 @@ int NewCommand::execute(){
          }else if (format == "list") {
              ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                     
-             while (list != NULL) {
+             while (list != nullptr) {
                         
                  if (m->getControl_pressed()) { delete list; break; }
                         
@@ -296,7 +296,7 @@ int NewCommand::execute(){
          }else if (format == "rabund") {
              RAbundVector* rabund = util.getNextRAbund(input, allLines, userLabels, processedLabels, lastLabel);
                     
-             while (rabund != NULL) {
+             while (rabund != nullptr) {
                         
                  if (m->getControl_pressed()) { delete rabund; break; }
                         

@@ -24,7 +24,7 @@ CalcSparcc::CalcSparcc(vector<vector<float> > sharedVector, int maxIterations, i
         vector<vector<vector<float> > > allCorrelations(numSamplings);
 
         //    float cycClockStart = clock();
-        //    unsigned long long cycTimeStart = time(NULL);
+        //    unsigned long long cycTimeStart = time(nullptr);
 
         for(int i=0;i<numSamplings;i++){
 

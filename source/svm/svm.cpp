@@ -96,7 +96,7 @@ private:
     double mean;
 
 public:
-    MeanAndStd() {}
+    MeanAndStd() = default;
     ~MeanAndStd() {}
 
     void initialize() {

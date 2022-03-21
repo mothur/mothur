@@ -227,7 +227,7 @@ ListVector* OptiCluster::getList() {
         ListVector* list = new ListVector();
         ListVector* singleton = matrix->getListSingle();
         
-        if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+        if (singleton != nullptr) { //add in any sequences above cutoff in read. Removing these saves clustering time.
             for (int i = 0; i < singleton->getNumBins(); i++) {
                 if (singleton->get(i) != "") {
                     list->push_back(singleton->get(i));

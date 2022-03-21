@@ -260,7 +260,7 @@ int GetSharedOTUCommand::execute(){
             
             ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
             
-            while (list != NULL) {
+            while (list != nullptr) {
                 
                 if (m->getControl_pressed()) { delete list; break; }
                 
@@ -477,7 +477,7 @@ int GetSharedOTUCommand::runShared() {
         //put groups in map to find easier
         for(int i = 0; i < Groups.size(); i++) { groupFinder[Groups[i]] = Groups[i];}
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

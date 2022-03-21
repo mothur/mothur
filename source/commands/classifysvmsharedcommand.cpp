@@ -330,7 +330,7 @@ int ClassifySvmSharedCommand::execute() {
         //read design file
         designMap.read(designfile);
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -369,7 +369,7 @@ void ClassifySvmSharedCommand::readSharedAndDesignFiles(const string& sharedFile
     DesignMap designMap;
     designMap.read(designFilePath); if (m->getControl_pressed()) { return ; }
 
-    while ( lookup != NULL ) {
+    while ( lookup != nullptr ) {
         vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
         readSharedRAbundVectors(data, designMap, labeledObservationVector, featureVector, lookup->getOTUNames());
         for (int i = 0; i < data.size(); i++) { delete data[i]; } data.clear();

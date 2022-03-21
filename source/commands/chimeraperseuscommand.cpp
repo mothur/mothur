@@ -363,7 +363,7 @@ int ChimeraPerseusCommand::execute(){
         
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -461,7 +461,7 @@ int ChimeraPerseusCommand::execute(){
         
         if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
         outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
         
@@ -661,7 +661,7 @@ void driverGroups(perseusGroupsData* params){
         if (params->hasCount && params->dups) { params->util.openOutputFile(params->countlist, outCountList); }
 		
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
-            long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
+            long start = time(nullptr);	 if (params->m->getControl_pressed()) {  break; }
             
             
             string thisGroup = it->first;
@@ -704,7 +704,7 @@ void driverGroups(perseusGroupsData* params){
 			params->util.appendFiles(driverParams->chimeraFileName, params->chimeraFileName); params->util.mothurRemove(driverParams->chimeraFileName);
 			params->util.appendFiles(driverParams->accnosFileName, params->accnosFileName); params->util.mothurRemove(driverParams->accnosFileName);
 			
-			params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(driverParams->count) + " sequences from group " + thisGroup + ".\n");
+			params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(driverParams->count) + " sequences from group " + thisGroup + ".\n");
             delete driverParams;
 		}	
 		

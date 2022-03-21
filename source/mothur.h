@@ -215,7 +215,7 @@ struct mcmcSample {
     double dNu;
     int ns;
     
-    mcmcSample() {}
+    mcmcSample()=default;
     mcmcSample(double a, double b, double d, int n) : alpha(a), beta(b), dNu(d), ns(n) {}
     
 };
@@ -314,7 +314,7 @@ struct IntNode {
 	IntNode* right;
 	
 	IntNode(int lv, int rv, IntNode* l, IntNode* r) : lvalue(lv), rvalue(rv), left(l), right(r) {};
-	IntNode() {};
+	IntNode() =default;
 };
 
 struct ThreadNode {
@@ -364,8 +364,8 @@ struct PCell{
     ull column;
     float dist;
     PCell** vectorMap;
-    PCell() : row(0), column(0), dist(0), vectorMap(NULL) {};
-    PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(NULL) {};
+    PCell() : row(0), column(0), dist(0), vectorMap(nullptr) {};
+    PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(nullptr) {};
 };
 
 /* For each distance in a sparse matrix we have a row, column and distance.
@@ -453,7 +453,7 @@ struct seqDist {
 	int seq1;
 	int seq2;
 	double dist;
-	seqDist() {}
+    seqDist() = default;
 	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
 };
@@ -472,7 +472,7 @@ struct seqPriorityNode {
 	int numIdentical;
 	string seq;
 	string name;
-	seqPriorityNode() {}
+    seqPriorityNode() = default;
 	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
 	~seqPriorityNode() {}
 };
@@ -480,7 +480,7 @@ struct seqPriorityNode {
 struct compGroup {
 	string group1;
 	string group2;
-	compGroup() {}
+    compGroup() = default;
 	compGroup(string s, string nm) : group1(s), group2(nm) {}
     string getCombo() { return group1+"-"+group2; }
 	~compGroup() {}

@@ -466,8 +466,8 @@ string Utils::getFullPathName(string fileName){
                 else { newFileName = fileName.substr(fileName.rfind(pattern)+2); } //save the complete part of the name
 
                 if (cwd == "") {
-                    char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
-                    if (cwdpath != NULL)    { cwd = cwdpath;    }
+                    char *cwdpath = nullptr; cwdpath = getcwd(nullptr, 0); // or _getcwd
+                    if (cwdpath != nullptr)    { cwd = cwdpath;    }
                     else                    { cwd = "";         }
                     currentWorkingDirectory = cwd;
                 }
@@ -565,7 +565,7 @@ string Utils::findProgramPath(string programName){
 #else
         if (pPath == "") {
             char buffer[MAX_PATH];
-            GetModuleFileName(NULL, buffer, MAX_PATH) ;
+            GetModuleFileName(nullptr, buffer, MAX_PATH) ;
 
             pPath = buffer;
             pPath = getPathName(pPath);
@@ -2079,7 +2079,7 @@ bool Utils::dirCheckWritable(string& dirName){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
-        string outTemp = dirName + "temp"+ toString(time(NULL));
+        string outTemp = dirName + "temp"+ toString(time(nullptr));
         ofstream out;
         out.open(outTemp.c_str(), ios::trunc);
         if(!out) { m->mothurOut(dirName + " directory does not exist or is not writable.\n");  }
@@ -2166,7 +2166,7 @@ bool Utils::mkDir(string& dirName){
         
     #else
         
-        if (CreateDirectory(dirName.c_str(), NULL) ||
+        if (CreateDirectory(dirName.c_str(), nullptr) ||
             ERROR_ALREADY_EXISTS == GetLastError()) { }
         else { return false; }
         
@@ -2566,7 +2566,7 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2605,7 +2605,7 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num) {
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2783,7 +2783,7 @@ vector<double> Utils::setFilePosEachLine(string filename, long long& num) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2835,7 +2835,7 @@ vector<double> Utils::setFilePosEachLine(string filename, unsigned long long& nu
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2866,7 +2866,7 @@ vector<double> Utils::divideFile(string filename, int& proc) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2946,7 +2946,7 @@ vector<double> Utils::divideFile(string filename, int& proc, char delimChar) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -3048,7 +3048,7 @@ vector<double> Utils::divideFilePerLine(string filename, int& proc) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -5394,9 +5394,9 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5428,13 +5428,13 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5449,7 +5449,7 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5470,9 +5470,9 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5504,13 +5504,13 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5525,7 +5525,7 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5546,9 +5546,9 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
         SharedCLRVectors* lookup = input.getSharedCLRVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5580,13 +5580,13 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             lookup = input.getSharedCLRVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5601,7 +5601,7 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedCLRVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5622,9 +5622,9 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         ListVector* list = input.getListVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((list != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete list;  return NULL; }
+            if (m->getControl_pressed()) {  delete list;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = list->getLabel();  }
             
@@ -5656,13 +5656,13 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
             //prevent memory leak
             delete list;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             list = input.getListVector();
         }
         
-        if (m->getControl_pressed()) { delete list;  return NULL; }
+        if (m->getControl_pressed()) { delete list;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5677,7 +5677,7 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         if (needToRun )  {
             delete list;
             list = input.getListVector(lastLabel);
-            if (list != NULL) {
+            if (list != nullptr) {
                 m->mothurOut(list->getLabel()+"\n");
                 processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
             }
@@ -5698,9 +5698,9 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
         RAbundVector* rabund = input.getRAbundVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((rabund != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            if (m->getControl_pressed()) {  delete rabund;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = rabund->getLabel();  }
             
@@ -5732,13 +5732,13 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete rabund;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             rabund = input.getRAbundVector();
         }
         
-        if (m->getControl_pressed()) { delete rabund;  return NULL; }
+        if (m->getControl_pressed()) { delete rabund;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5753,7 +5753,7 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete rabund;
             rabund = input.getRAbundVector(lastLabel);
-            if (rabund != NULL) {
+            if (rabund != nullptr) {
                 m->mothurOut(rabund->getLabel()+"\n");
                 processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
             }
@@ -5774,9 +5774,9 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
         SAbundVector* sabund = input.getSAbundVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((sabund != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            if (m->getControl_pressed()) {  delete sabund;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = sabund->getLabel();  }
             
@@ -5808,13 +5808,13 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete sabund;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             sabund = input.getSAbundVector();
         }
         
-        if (m->getControl_pressed()) { delete sabund;  return NULL; }
+        if (m->getControl_pressed()) { delete sabund;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5829,7 +5829,7 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete sabund;
             sabund = input.getSAbundVector(lastLabel);
-            if (sabund != NULL) {
+            if (sabund != nullptr) {
                 m->mothurOut(sabund->getLabel()+"\n");
                 processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
             }
@@ -5850,9 +5850,9 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
         OrderVector* order = input.getOrderVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((order != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {  delete order;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = order->getLabel();  }
             
@@ -5884,13 +5884,13 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             order = input.getOrderVector();
         }
         
-        if (m->getControl_pressed()) { delete order;  return NULL; }
+        if (m->getControl_pressed()) { delete order;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5905,7 +5905,7 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
         if (needToRun )  {
             delete order;
             order = input.getOrderVector(lastLabel);
-            if (order != NULL) {
+            if (order != nullptr) {
                 m->mothurOut(order->getLabel()+"\n");
                 processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
             }
@@ -5926,9 +5926,9 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
         SharedOrderVector* order = input.getSharedOrderVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((order != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {  delete order;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = order->getLabel();  }
             
@@ -5960,13 +5960,13 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             order = input.getSharedOrderVector();
         }
         
-        if (m->getControl_pressed()) { delete order;  return NULL; }
+        if (m->getControl_pressed()) { delete order;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5981,7 +5981,7 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
         if (needToRun )  {
             delete order;
             order = input.getSharedOrderVector(lastLabel);
-            if (order != NULL) {
+            if (order != nullptr) {
                 m->mothurOut(order->getLabel()+"\n");
                 processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
             }
@@ -6176,8 +6176,8 @@ int Utils::getTimeStamp(string filename) {
 #else
         HANDLE hFile;
 
-        hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
-                           OPEN_EXISTING, 0, NULL);
+        hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, 0, nullptr);
 
         if(hFile == INVALID_HANDLE_VALUE) {
             m->mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); m->setControl_pressed(true);

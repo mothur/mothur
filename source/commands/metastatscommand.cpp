@@ -190,7 +190,7 @@ int MetaStatsCommand::execute(){
 		set<string> userLabels = labels;
         string lastLabel = "";
         
-        SharedRAbundVectors* lookup = NULL; SharedCLRVectors* clr = NULL;
+        SharedRAbundVectors* lookup = nullptr; SharedCLRVectors* clr = nullptr;
         
         if (format == "sharedfile") {
             lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
@@ -212,9 +212,9 @@ int MetaStatsCommand::execute(){
 		if (numGroups == 2) { processors = 1; }
 		else if (numGroups < 2)	{ m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete command.\n");  m->setControl_pressed(true); }
         
-        while ((lookup != NULL) || (clr != NULL)){
+        while ((lookup != nullptr) || (clr != nullptr)){
             
-            if (m->getControl_pressed()) { if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; }break; }
+            if (m->getControl_pressed()) { if (lookup != nullptr) { delete lookup; } if (clr != nullptr) { delete clr; }break; }
             
             if (format == "sharedfile") {
                 process(lookup, designMap); delete lookup;
@@ -227,7 +227,7 @@ int MetaStatsCommand::execute(){
         }
         
         delete designMap;
-        if (m->getControl_pressed()) {  outputTypes.clear(); if (lookup != NULL) { delete lookup; } if (clr != NULL) { delete clr; } for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
+        if (m->getControl_pressed()) {  outputTypes.clear(); if (lookup != nullptr) { delete lookup; } if (clr != nullptr) { delete clr; } for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0; }
 		
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -262,7 +262,7 @@ struct metastatsData {
         iters = i;
         threshold = thr;
         count=0;
-        thisCLR = NULL;
+        thisCLR = nullptr;
     }
     
     metastatsData(int st, int en, vector<string> on, vector< vector<string> > ns, SharedCLRVectors*& lu, vector<string> dg, int i, float thr) {
@@ -276,7 +276,7 @@ struct metastatsData {
         iters = i;
         threshold = thr;
         count=0;
-        thisLookUp = NULL;
+        thisLookUp = nullptr;
     }
 };
 //**********************************************************************************************************************

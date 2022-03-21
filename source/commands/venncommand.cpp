@@ -243,7 +243,7 @@ int VennCommand::execute(){
 		
 		string lastLabel;
 		
-        SharedRAbundVectors* lookup = NULL;
+        SharedRAbundVectors* lookup = nullptr;
 		if (format == "sharedfile") {
 			lookup = input.getSharedRAbundVectors();
 			lastLabel = lookup->getLabel();
@@ -262,7 +262,7 @@ int VennCommand::execute(){
 		if (format != "list") {	
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
                 vector<string> otuLabels = lookup->getOTUNames();
                 
 				if (m->getControl_pressed()) {
@@ -396,7 +396,7 @@ int VennCommand::execute(){
 			
 		}else{
 		
-			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			while((sabund != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 				if (m->getControl_pressed()) {
 					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
@@ -461,7 +461,7 @@ int VennCommand::execute(){
 		
 			//run last label if you need to
 			if (needToRun )  {
-				if (sabund != NULL) {	delete sabund;	}
+				if (sabund != nullptr) {	delete sabund;	}
 				sabund = input.getSAbundVector(lastLabel);
 					
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();

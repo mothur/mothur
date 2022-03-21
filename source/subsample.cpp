@@ -68,7 +68,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
 //**********************************************************************************************************************
 Tree* SubSample::getSampleWithReplacement(Tree* T, CountTable* ct, CountTable* newCt, int size, vector<string>& mGroups) {
     try {
-        Tree* newTree = NULL;
+        Tree* newTree = nullptr;
         
         //remove seqs not in sample from counttable
         vector<string> Groups = ct->getNamesOfGroups();
@@ -460,7 +460,7 @@ int SubSample::getSample(RAbundVector*& rabund, int size) {
         int numBins = rabund->getNumBins();
         int thisSize = rabund->getNumSeqs();
         
-        OrderVector order = rabund->getOrderVector(NULL);
+        OrderVector order = rabund->getOrderVector(nullptr);
         
         if (thisSize > size) {
             util.mothurRandomShuffle(order);
@@ -496,7 +496,7 @@ int SubSample::getSampleWithReplacement(RAbundVector*& rabund, int size) {
         int numBins = rabund->getNumBins();
         int thisSize = rabund->getNumSeqs();
         
-        OrderVector order = rabund->getOrderVector(NULL);
+        OrderVector order = rabund->getOrderVector(nullptr);
         
         if (thisSize > size) {
             RAbundVector sampledRabund(numBins);

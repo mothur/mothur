@@ -22,7 +22,7 @@ struct seqRNode {
 	Sequence seq;
 	string names;
 	bool active;
-	seqRNode() {}
+    seqRNode() = default;
 	seqRNode(int n, Sequence s, string nm, int l) : numIdentical(n), seq(s), names(nm), active(1), length(l) {}
 	~seqRNode() {}
 };

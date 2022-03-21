@@ -210,7 +210,7 @@ int UnifracWeightedCommand::execute() {
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
         TreeReader* reader;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
@@ -281,13 +281,13 @@ int UnifracWeightedCommand::execute() {
                 //uses method of setting groups to doNotIncludeMe
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
-                int sampleTime = time(NULL);
+                int sampleTime = time(nullptr);
                 
                 Tree* subSampleTree;
                 if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[i], ct, newCt, subsampleSize, Groups);  }
                 else                    { subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);                 }
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(nullptr) - sampleTime) + " seconds to sample tree.\n"); }
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
@@ -311,7 +311,7 @@ int UnifracWeightedCommand::execute() {
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.weighted.\n"); 
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run unifrac.weighted.\n"); 
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";
@@ -454,7 +454,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         ofstream outTree;
         util.openOutputFile(conFile, outTree);
         
-        if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; } outTree.close();
+        if (conTree != nullptr) { conTree->print(outTree, "boot"); delete conTree; } outTree.close();
         
         return 0;
     }
@@ -506,7 +506,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
         }
         outAll.close();
         
-        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } util.mothurRemove(outputFile); }
+        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = nullptr; } util.mothurRemove(outputFile); }
         
         return trees;
     }

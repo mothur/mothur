@@ -329,7 +329,7 @@ int TrimSeqsCommand::execute(){
 
         if (m->getControl_pressed()) { return 0; }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         set<string> badNames;
         long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, badNames);
@@ -343,7 +343,7 @@ int TrimSeqsCommand::execute(){
             outputTypes["count"].push_back(trimCountFile); outputTypes["count"].push_back(scrapCountFile);
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
         
         if (m->getControl_pressed()) {    for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0;    }
 
@@ -559,11 +559,11 @@ int driverTrim(trimData* params) {
         
         bool moreSeqs = 1;
         int numBarcodes = params->barcodes.size();
-        TrimOligos* trimOligos = NULL;
+        TrimOligos* trimOligos = nullptr;
         if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); numFPrimers = params->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer);  }
         
-        TrimOligos* rtrimOligos = NULL;
+        TrimOligos* rtrimOligos = nullptr;
         if (params->reorient) {
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
@@ -877,8 +877,8 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         for (int i = 0; i < processors-1; i++) {
             OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
             OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
-            OutputWriter* threadQTrimWriter = NULL;
-            OutputWriter* threadQScrapWriter = NULL;
+            OutputWriter* threadQTrimWriter = nullptr;
+            OutputWriter* threadQScrapWriter = nullptr;
             if (qFileName != "") {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
@@ -895,8 +895,8 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         
         OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
-        OutputWriter* threadQTrimWriter = NULL;
-        OutputWriter* threadQScrapWriter = NULL;
+        OutputWriter* threadQTrimWriter = nullptr;
+        OutputWriter* threadQScrapWriter = nullptr;
         if (qFileName != "") {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
@@ -1150,7 +1150,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             //get num bytes in file
             qfilename = util.getFullPathName(qfilename);
             pFile = fopen (qfilename.c_str(),"rb");
-            if (pFile==NULL) perror ("Error opening file");
+            if (pFile==nullptr) perror ("Error opening file");
             else{
                 fseek (pFile, 0, SEEK_END);
                 size=ftell (pFile);

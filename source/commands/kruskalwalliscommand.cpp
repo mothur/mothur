@@ -140,7 +140,7 @@ int KruskalWallisCommand::execute(){
         SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
         vector<string> currentLabels = lookup->getOTUNames();
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

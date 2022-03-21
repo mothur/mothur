@@ -256,7 +256,7 @@ int SplitAbundCommand::splitList() {
         
         if (m->getControl_pressed()) { delete list; return 0; }
         
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             
