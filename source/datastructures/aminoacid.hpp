@@ -61,7 +61,7 @@ public:
     AminoAcid();
     AminoAcid(char);    //AminoAcid character
     AminoAcid(string);    //dna codon length of 3
-    ~AminoAcid() {}
+    ~AminoAcid() = default;
     
     string getName();
     char getAmino()          { return aminoBase;    }

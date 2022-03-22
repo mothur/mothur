@@ -16,7 +16,7 @@ class Libshuff {
 	
 public:
 	Libshuff(FullMatrix*, int, float, float);
-    virtual ~Libshuff() {}
+    virtual ~Libshuff() = default;
 	virtual vector<vector<double> > evaluateAll() = 0;
 	virtual float evaluatePair(int,int) = 0;
 	void randomizeGroups(int, int);

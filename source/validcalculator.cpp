@@ -125,7 +125,7 @@ ValidCalculators::ValidCalculators() {
 	}
 }
 /********************************************************************/
-ValidCalculators::~ValidCalculators() {}
+ValidCalculators::~ValidCalculators() = default;
 /********************************************************************/
 void ValidCalculators::printCitations(vector<string> Estimators) {
 	try {

@@ -24,7 +24,7 @@ class GetSharedOTUCommand : public Command {
 	public:
 	
 		GetSharedOTUCommand(string);	
-		~GetSharedOTUCommand() {}
+		~GetSharedOTUCommand() = default;
 	
 		vector<string> setParameters();
 		string getCommandName()			{ return "get.sharedseqs";			}

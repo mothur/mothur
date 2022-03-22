@@ -51,7 +51,7 @@ struct data_results {
 	//results malignerResults;
 	
 	data_results(vector<data_struct> d, string f, map<int, int> s, Sequence t) : results(d), flag(f), trimQuery(t) {}
-	data_results() {}
+	data_results() = default;
 };
 /***********************************************************************/
 //sorts lowest to highest first by bsMax, then if tie by chimeraMax
@@ -71,7 +71,7 @@ struct Preference {
 		float closestRight; //keep the closest right 
 		int midpoint;
 		Preference() { name = ""; leftParent = ""; rightParent = ""; score = 0.0; closestLeft = 10000.0; closestRight = 10000.0; midpoint = 0;  }
-		~Preference() {}
+		~Preference() = default;
 };
 /***********************************************************************/
 struct score_struct {

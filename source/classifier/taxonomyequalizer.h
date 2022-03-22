@@ -25,7 +25,7 @@ class TaxEqualizer  {
 	
 public:
 	TaxEqualizer(string, int, string);
-	~TaxEqualizer() {};
+	~TaxEqualizer() = default;;
 	
 	string getEqualizedTaxFile()	{	return equalizedFile;	}
 	int getHighestLevel()			{	return highestLevel;	}

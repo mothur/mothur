@@ -16,7 +16,7 @@
 struct logger {
     
     logger() = default;
-    ~logger() {}
+    ~logger() = default;
     
     template< class T >
     logger& operator <<( const T& o ) {

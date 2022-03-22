@@ -23,7 +23,7 @@ class ContigsReport : public Report {
 public:
     
     ContigsReport();
-    ~ContigsReport() {}
+    ~ContigsReport() = default;
     
     //io functions, note - printHeaders / readHeaders / getHeaders in Report parent class
     void read(ifstream&); //read line in report file

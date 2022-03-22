@@ -18,7 +18,7 @@ class StorageDatabase {
 public:
     
     StorageDatabase() {  m = MothurOut::getInstance();  length = 0; samelength = true; }
-    virtual ~StorageDatabase() {}             //loops through data and delete each sequence
+    virtual ~StorageDatabase() = default;             //loops through data and delete each sequence
 
     virtual int getNumSeqs() = 0;
     virtual void print(string) = 0;

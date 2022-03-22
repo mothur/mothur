@@ -18,7 +18,7 @@ class FilterSharedCommand : public Command {
     
 public:
 	FilterSharedCommand(string);
-	~FilterSharedCommand() {}
+	~FilterSharedCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "filter.shared";	}

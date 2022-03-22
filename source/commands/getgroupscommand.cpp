@@ -515,7 +515,7 @@ void GetGroupsCommand::readShared(){
 		
 		bool wroteSomething = false;
         bool printHeaders = true;
-		while(lookup != NULL) {
+		while(lookup != nullptr) {
 			
             variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
@@ -564,7 +564,7 @@ void GetGroupsCommand::readList(){
 		bool wroteSomething = false;
 		int selectedCount = 0;
 		
-        while(list != NULL) {
+        while(list != nullptr) {
 			
             selectedCount = 0;
             

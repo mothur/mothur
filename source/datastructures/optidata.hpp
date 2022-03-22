@@ -42,7 +42,7 @@ public:
     virtual vector< set<long long> > getBlastOverlap() { vector< set<long long> > blank; return blank; }
     virtual string getOverlapName(long long) { return ""; } //name from nameMap index
     
-    virtual void randomizeRefs() {}
+    virtual void randomizeRefs(){};
     virtual vector<string> getRefSingletonNames() { vector<string> temp; return temp;  }
     virtual vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&) { vector<long long> temp; return temp;  }
     virtual OptiData* extractRefMatrix() { OptiData* temp = nullptr; return temp;  }

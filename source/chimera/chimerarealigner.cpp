@@ -14,7 +14,7 @@
 //***************************************************************************************************************
 ChimeraReAligner::ChimeraReAligner()  {  m = MothurOut::getInstance(); }
 //***************************************************************************************************************
-ChimeraReAligner::~ChimeraReAligner() {}	
+ChimeraReAligner::~ChimeraReAligner() = default;	
 //***************************************************************************************************************
 void ChimeraReAligner::reAlign(Sequence* query, vector<string> parents) {
 	try {

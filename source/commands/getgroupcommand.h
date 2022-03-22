@@ -15,7 +15,7 @@
 class GetgroupCommand : public Command {
 public:
 	GetgroupCommand(string);
-	~GetgroupCommand() {}
+	~GetgroupCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "get.group";				}

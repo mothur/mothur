@@ -20,7 +20,7 @@ class Parsimony : public TreeCalculator  {
 	
 	public:
         Parsimony(vector<string> G);
-		~Parsimony() {};
+		~Parsimony() = default;;
 		EstOutput getValues(Tree*, int, string);
 		
 	private:

@@ -24,7 +24,7 @@ struct seqRNode {
 	bool active;
     seqRNode() = default;
 	seqRNode(int n, Sequence s, string nm, int l) : numIdentical(n), seq(s), names(nm), active(1), length(l) {}
-	~seqRNode() {}
+	~seqRNode() = default;
 };
 /************************************************************/
 
@@ -32,7 +32,7 @@ class ClusterFragmentsCommand : public Command {
 	
 public:
 	ClusterFragmentsCommand(string);
-	~ClusterFragmentsCommand() {}
+	~ClusterFragmentsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster.fragments";		}

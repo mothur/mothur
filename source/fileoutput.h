@@ -41,7 +41,7 @@ class ThreeColumnFile : public FileOutput {
 	
 public:
     ThreeColumnFile(string n) : FileOutput(n) { }
-    ~ThreeColumnFile() {}
+    ~ThreeColumnFile() = default;
     
 	void setLabelName(string);
 	void updateOutput(int, vector<double>);
@@ -57,7 +57,7 @@ class OneColumnFile : public FileOutput {
 	
 public:
 	OneColumnFile(string n) : FileOutput(n) { }
-	~OneColumnFile() {}
+	~OneColumnFile() = default;
     
     void setLabelName(string);
     void updateOutput(int, vector<double>);
@@ -72,7 +72,7 @@ class SharedOneColumnFile : public FileOutput {
 	
 public:
 	SharedOneColumnFile(string n) : FileOutput(n) {}
-	~SharedOneColumnFile() {}
+	~SharedOneColumnFile() = default;
 	
     void setLabelName(string);
     void updateOutput(int, vector<double>);
@@ -87,7 +87,7 @@ class SharedThreeColumnFile : public FileOutput {
 	
 public:
     SharedThreeColumnFile(string n, string groups) : FileOutput(n), groupLabel(groups), numGroup(1) { }
-    ~SharedThreeColumnFile() {}
+    ~SharedThreeColumnFile() = default;
     
     void setLabelName(string);
     void updateOutput(int, vector<double>);
@@ -103,7 +103,7 @@ class ColumnFile : public FileOutput {
 	
 public:
 	ColumnFile(string n, string i) : FileOutput(n) {}
-    ~ColumnFile() {}
+    ~ColumnFile() = default;
 		
 	void setLabelName(string, vector<string>);
 	void updateOutput(vector<double>);

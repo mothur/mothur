@@ -19,7 +19,7 @@ class OptiDB : public SearchDatabase {
 public:
     
     OptiDB(string, string); //reference file name for shortcut file name generation, version
-    ~OptiDB() {}
+    ~OptiDB() = default;
     
     void addSequence(Sequence);
     void generateDB();

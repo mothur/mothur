@@ -18,7 +18,7 @@ class NormalizeSharedCommand : public Command {
 
 public:
 	NormalizeSharedCommand(string);
-	~NormalizeSharedCommand() {}
+	~NormalizeSharedCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "normalize.shared";		}

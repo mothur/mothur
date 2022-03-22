@@ -104,7 +104,7 @@ RAbundFloatVector::RAbundFloatVector(ifstream& f, string l, string g) : DataVect
 
 /***********************************************************************/
 
-RAbundFloatVector::~RAbundFloatVector() {}
+RAbundFloatVector::~RAbundFloatVector() = default;
 
 /***********************************************************************/
 

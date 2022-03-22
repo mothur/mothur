@@ -27,7 +27,7 @@ struct quanMember {
 	int member1;
 	int member2;
 	quanMember (float s, int m, int n) : score(s), member1(m),  member2(n) {}
-	quanMember() {}
+	quanMember() = default;
 	
 };
 		
@@ -37,7 +37,7 @@ class DeCalculator {
 	public:
 		
 		DeCalculator() { m = MothurOut::getInstance(); }
-		~DeCalculator() {};
+		~DeCalculator() = default;;
 		
 		vector<Sequence> findClosest(Sequence, vector<Sequence*>&, vector<Sequence*>&, int, int);  //takes querySeq, a reference db, filteredRefDB, numWanted, minSim 
 		Sequence* findClosest(Sequence*, vector<Sequence*>);

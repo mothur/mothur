@@ -20,7 +20,7 @@ class Unweighted : public TreeCalculator  {
 	
 	public:
         Unweighted(bool r, vector<string> g);
-		~Unweighted() {};
+		~Unweighted() = default;;
 		EstOutput getValues(Tree*, int, string);
 		EstOutput getValues(Tree*, vector<vector<int> >&, int, string);
 		

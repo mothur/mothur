@@ -669,7 +669,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
 	}
 }
 /************************************************************/
-int CountTable::readTable(string file, bool readGroups, bool mothurRunning, set<string> selectedSeqs) {
+int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unordered_set<string> selectedSeqs) {
     try {
         filename = file; isCompressed = true;
         ifstream in; util.openInputFile(filename, in);

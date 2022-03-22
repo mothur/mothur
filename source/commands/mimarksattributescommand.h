@@ -17,7 +17,7 @@ struct Package {
     string name;
     Package() { required=false; groupName=""; name=""; }
     Package(bool r, string g, string n) : required(r), groupName(g), name(n) {}
-    ~Package() {}
+    ~Package() = default;
     
     string getPackageString() {
         string r = "mandatory";
@@ -33,7 +33,7 @@ struct Value {
     
     Value() { format=""; description=""; required=false; }
     Value(bool r, string d, string f) : format(f), description(d), required(r) {}
-    ~Value() {}
+    ~Value() = default;
 
 };
 
@@ -43,7 +43,7 @@ struct Group {
     
     Group() { packageName = ""; }
     Group(string p) :  packageName(p) {}
-    ~Group() {}
+    ~Group() = default;
 };
 
 struct Attribute {
@@ -60,7 +60,7 @@ struct Attribute {
     
     Attribute() { format=""; description=""; harmonizedName=""; name=""; }
     Attribute(string hn, string d, string n, string f) : format(f), harmonizedName(hn), name(n), description(d) {}
-    ~Attribute() {}
+    ~Attribute() = default;
 };
 
 /**************************************************************************************************/

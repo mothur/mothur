@@ -372,7 +372,7 @@ int ClusterFitCommand::execute(){
                 
             }else { //reference with accnos file or reference list file assigning references
                 
-                set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
+                unordered_set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
                 
                 if (accnosfile != "") { //use accnos file to assign references
                     

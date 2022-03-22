@@ -25,7 +25,7 @@ ValidParameters::ValidParameters() {
 }
 /***********************************************************************/
 
-ValidParameters::~ValidParameters() {}
+ValidParameters::~ValidParameters() = default;
 
 /***********************************************************************/
 bool ValidParameters::isValidParameter(string parameter, vector<string> cParams, string value) {

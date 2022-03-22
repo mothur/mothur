@@ -18,7 +18,7 @@ class RemoveSeqsCommand : public Command {
 	
 		RemoveSeqsCommand(string);
         RemoveSeqsCommand(string, string dupsFile, string dupsFileType, string output);
-        RemoveSeqsCommand(set<string>, string dupsFile, string dupsFileType, string output);
+        RemoveSeqsCommand(unordered_set<string>, string dupsFile, string dupsFileType, string output);
 		~RemoveSeqsCommand(){}
 	
 		vector<string> setParameters();
@@ -34,7 +34,7 @@ class RemoveSeqsCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }	
 	
 	private:
-		set<string> names;
+        unordered_set<string> names;
         vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles, outputNames;
 		string accnosfile, format;
 		bool abort, dups;

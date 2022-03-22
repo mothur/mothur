@@ -22,7 +22,7 @@ class ReadMatrix {
 
 public:
 	ReadMatrix(){ DMatrix = new SparseDistanceMatrix(); m = MothurOut::getInstance();  }
-	virtual ~ReadMatrix() {}
+	virtual ~ReadMatrix() = default;
 	virtual int read(NameAssignment*){ return 1; }
     virtual int read(CountTable*){ return 1; }
 	

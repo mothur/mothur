@@ -39,7 +39,7 @@ public:
 	
 	
 private:
-	set<string> names;
+    unordered_set<string> names;
 	string accnosfile, fastafile, namefile, groupfile, countfile, designfile, listfile, taxfile,  groups, sharedfile, phylipfile, columnfile, sets;
 	bool abort;
 	vector<string> outputNames, Groups, Sets;

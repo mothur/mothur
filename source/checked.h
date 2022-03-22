@@ -270,7 +270,7 @@ namespace utf8
       octet_iterator range_start;
       octet_iterator range_end;
       public:
-      iterator () {}
+      iterator () = default;
       explicit iterator (const octet_iterator& octet_it,
                          const octet_iterator& rangestart,
                          const octet_iterator& rangeend) :

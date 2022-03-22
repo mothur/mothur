@@ -37,7 +37,7 @@ public:
 	PhyloSummary(string, GroupMap*, bool, int);
     PhyloSummary(CountTable*, bool, int);
 	PhyloSummary(string, CountTable*, bool, int);
-	~PhyloSummary() {}
+	~PhyloSummary() = default;
 	
 	int summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
 	int addSeqToTree(string, string);

@@ -69,7 +69,7 @@ struct uchimeVariables {
 class ChimeraUchimeCommand : public Command {
 public:
 	ChimeraUchimeCommand(string);
-	~ChimeraUchimeCommand() {}
+	~ChimeraUchimeCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.uchime";		}

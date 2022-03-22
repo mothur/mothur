@@ -21,7 +21,7 @@ class UniqueSeqsCommand : public Command {
 
 public:
     UniqueSeqsCommand(string);
-	~UniqueSeqsCommand() {}
+	~UniqueSeqsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "unique.seqs";		}

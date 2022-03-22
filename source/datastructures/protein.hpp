@@ -35,7 +35,7 @@ public:
 #ifdef USE_BOOST
     Protein(boost::iostreams::filtering_istream&);
 #endif
-    ~Protein() {}
+    ~Protein() = default;
     
     void setName(string);
     string getName();

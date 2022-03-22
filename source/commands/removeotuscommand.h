@@ -38,7 +38,7 @@ private:
     bool abort;
     string  accnosfile, constaxonomyfile, otucorrfile, corraxesfile, listfile, sharedfile, label;
     vector<string> outputNames;
-    set<string> otulabels;
+    unordered_set<string> otulabels;
     ListVector* list;
     
     int readClassifyOtu();

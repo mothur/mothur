@@ -148,8 +148,8 @@ int GetOtusCommand::execute(){
         //get labels you want to keep
 		labels = util.readAccnos(accnosfile);
         //simplfy labels
-        set<string> newLabels;
-        for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
+        unordered_set<string> newLabels;
+        for (auto it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
         labels = newLabels;
         
 		if (m->getControl_pressed()) { return 0; }

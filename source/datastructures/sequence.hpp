@@ -42,7 +42,7 @@ public:
     #ifdef USE_BOOST
     Sequence(boost::iostreams::filtering_istream&);
     #endif
-    ~Sequence() {}
+    ~Sequence() = default;
 	
 	void setName(string);
     string getName();

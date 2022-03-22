@@ -31,7 +31,7 @@ class Utils {
 public:
     
     Utils(); 
-    ~Utils() {}
+    ~Utils() = default;
     
     //random operations
     int getRandomIndex(int); //highest
@@ -146,10 +146,10 @@ public:
     void gobble(istream&);
     void gobble(istringstream&);
     vector<string> parseTreeFile(string filename); //returns treenames
-    set<string> readAccnos(string);
+    unordered_set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
-    void printAccnos(string, set<string>&);
+    void printAccnos(string, unordered_set<string>&);
     void printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
     void readConsTax(string, vector<Taxonomy>&);
@@ -208,7 +208,7 @@ public:
     bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(char, string&);
-    set<string> mothurConvert(vector<string>&);
+    unordered_set<string> mothurConvert(vector<string>&);
     vector<string> mothurConvert(set<string>&);
     set<long long> mothurConvert(vector<long long>&);
     vector<long long > mothurConvert(set<long long>&);
@@ -232,7 +232,7 @@ public:
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
-    set<string> getSetFromList(ListVector*&, vector< vector<string> >&); 
+    unordered_set<string> getSetFromList(ListVector*&, vector< vector<string> >&);
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
     string trimStringEnd(string, int); //string, number of chars to remove from end.
     

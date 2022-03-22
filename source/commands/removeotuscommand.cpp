@@ -148,8 +148,8 @@ int RemoveOtusCommand::execute(){
         //get labels you want to keep
 		otulabels = util.readAccnos(accnosfile);
         //simplfy labels
-        set<string> newLabels;
-        for (set<string>::iterator it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
+        unordered_set<string> newLabels;
+        for (auto it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
         otulabels = newLabels;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: numlabels = " + toString(otulabels.size()) + "\n"); }

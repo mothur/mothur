@@ -22,7 +22,7 @@
 class ChimeraSlayerCommand : public Command {
 public:
 	ChimeraSlayerCommand(string);
-	~ChimeraSlayerCommand() {}
+	~ChimeraSlayerCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "chimera.slayer";		}

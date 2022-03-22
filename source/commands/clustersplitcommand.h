@@ -32,7 +32,7 @@ class ClusterSplitCommand : public Command {
 	
 public:
 	ClusterSplitCommand(string);
-	~ClusterSplitCommand() {}
+	~ClusterSplitCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "cluster.split";		}

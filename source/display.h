@@ -21,7 +21,7 @@ public:
 	virtual bool getAll()	{	bool a; return a;	}
 	virtual bool calcNeedsAll()    { bool a; return a;	}
 	virtual string getName() { return ""; };
-    virtual ~Display() {}
+    virtual ~Display() = default;
 	Display() {  m = MothurOut::getInstance();  }
 	
 protected:

@@ -62,7 +62,7 @@ class CountTable {
     public:
 
         CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = true; }
-        ~CountTable() {}
+        ~CountTable() = default;
 
         //reads and creates smart enough to eliminate groups with zero counts
         int createTable(map<string, string>&); //seqName->group
@@ -72,7 +72,7 @@ class CountTable {
         int readTable(ifstream&, bool, bool); //filehandler, readGroups, mothurRunning
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(ifstream&, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
-        int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
+        int readTable(string, bool, bool, unordered_set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table. if format=name, use namefile to create count table
     
         int zeroOutTable(); //turn all counts to zeros

@@ -428,12 +428,12 @@ int ChimeraPerseusCommand::execute(){
                     vector<string> namesInTable = newCount.printTable(newCountFile);  //returns non zeroed names
                     outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
                     
-                    set<string> doNotRemove = util.mothurConvert(namesInTable);
+                    unordered_set<string> doNotRemove = util.mothurConvert(namesInTable);
                    
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
                     out2.close();
                 }
                 
@@ -859,7 +859,7 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 	try {
         int total = 0;
 		
-        set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
+        unordered_set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
         util.printAccnos(accnosFileName, chimerasInFile);
     
 		//edit chimera file
@@ -906,12 +906,12 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 				
 				
                 //is this name already in the file
-                set<string>::iterator itNames = namesInFile.find((name));
+                auto itNames = namesInFile.find((name));
                 
                 if (itNames == namesInFile.end()) { //no not in file
                     if (flag == "good") { //are you really a no??
                         //is this sequence really not chimeric??
-                        set<string>::iterator itChimeras = chimerasInFile.find(name);
+                        auto itChimeras = chimerasInFile.find(name);
                         
                         //then you really are a no so print, otherwise skip
                         if (itChimeras == chimerasInFile.end()) { print = true; }

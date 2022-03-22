@@ -21,7 +21,7 @@ class GetSeqsCommand : public Command {
 	public:
 	
 		GetSeqsCommand(string);
-        GetSeqsCommand(set<string>, string fasta, string list, string dupsFile, string dupsFileType, string output);
+        GetSeqsCommand(unordered_set<string>, string fasta, string list, string dupsFile, string dupsFileType, string output);
 		~GetSeqsCommand(){}
 	
 		vector<string> setParameters();
@@ -39,7 +39,7 @@ class GetSeqsCommand : public Command {
 	
 	
 	private:
-		set<string> names;
+        unordered_set <string> names;
         vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles, outputNames;
 		string accnosfile, accnosfile2, format, inputFileName;
 		bool abort, dups;

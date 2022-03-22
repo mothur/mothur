@@ -15,7 +15,7 @@
 
 /***********************************************************************/
 
-SequenceDB::SequenceDB() : StorageDatabase() {}
+SequenceDB::SequenceDB() : StorageDatabase(){};
 /***********************************************************************/
 //the clear function free's the memory
 SequenceDB::~SequenceDB() { data.clear(); }
@@ -98,7 +98,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) : StorageDatabase() {
 }
 /***********************************************************************/
 
-SequenceDB::SequenceDB(const SequenceDB& sdb, set<string> names) : StorageDatabase() {
+SequenceDB::SequenceDB(const SequenceDB& sdb, unordered_set<string> names) : StorageDatabase() {
     try{
        
         int numSeqs = sdb.data.size();
@@ -120,7 +120,7 @@ SequenceDB::SequenceDB(const SequenceDB& sdb, set<string> names) : StorageDataba
 }
 /***********************************************************************/
 
-SequenceDB::SequenceDB(const SequenceDB& sdb, set<string> names, int kmerSize, vector< vector< int > >& kmerDB, vector< int >& lengths) : StorageDatabase() {
+SequenceDB::SequenceDB(const SequenceDB& sdb, unordered_set<string> names, int kmerSize, vector< vector< int > >& kmerDB, vector< int >& lengths) : StorageDatabase() {
     try{
        
         int numSeqs = sdb.data.size();

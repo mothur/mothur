@@ -188,7 +188,7 @@ int SRAInfoCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-        set<string> samples = util.readAccnos(accnosfile);
+        unordered_set<string> samples = util.readAccnos(accnosfile);
 
         map<string, string> variables;
         string thisOutputDir = outputdir;
@@ -202,7 +202,7 @@ int SRAInfoCommand::execute(){
         ofstream outSingle; util.openOutputFile(singleFileFileName, outSingle);
         
         int count = 0;
-        for (set<string>::iterator it = samples.begin(); it != samples.end(); it++) {
+        for (auto it = samples.begin(); it != samples.end(); it++) {
             
             m->mothurOut("\n>>>>>\tProcessing sample " + *it + " (" + toString(count+1) + " of " + toString(samples.size()) + ")\t<<<<<\n"); count++;
             

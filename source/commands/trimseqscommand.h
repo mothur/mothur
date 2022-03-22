@@ -56,8 +56,8 @@ private:
     vector<linePair> lines;
     vector<linePair> qLines;
     
-    long long createProcessesCreateTrim(string, string, string, string, string, string, set<string>&);
-    int processNamesCountFiles(string trimFasta, set<string> badNames, string trimCountFileName, string scrapCountFileName);
+    long long createProcessesCreateTrim(string, string, string, string, string, string, unordered_set<string>&);
+    int processNamesCountFiles(string trimFasta, unordered_set<string> badNames, string trimCountFileName, string scrapCountFileName);
     int setLines(string, string);
 };
 

@@ -24,7 +24,7 @@ class Tree;
 class ReadTree {
 	public:
 		ReadTree(); 
-		virtual ~ReadTree() {};
+		virtual ~ReadTree() = default;;
 		
 		virtual int read(CountTable*) = 0;
 		int readSpecialChar(istream&, char, string);
@@ -50,7 +50,7 @@ class ReadNewickTree : public ReadTree {
 	
 public:
     ReadNewickTree(string file, vector<string> T) : treeFile(file), Treenames(T) { Utils util; util.openInputFile(file, filehandle); readOk = 0; if (Treenames.size() == 0) { Treenames = util.parseTreeFile(treeFile); } }
-	~ReadNewickTree() {};
+	~ReadNewickTree() = default;;
 	int read(CountTable*);
 	
 private:

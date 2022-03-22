@@ -126,7 +126,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dups
 }
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(set<string> n, string dupsFile, string dupsFileType, string output) {
+RemoveSeqsCommand::RemoveSeqsCommand(unordered_set<string> n, string dupsFile, string dupsFileType, string output) {
     try {
         names = n;
     
@@ -575,7 +575,7 @@ void RemoveSeqsCommand::readCount(string countfile){
 		
         CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
-        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+        for (auto it = names.begin(); it != names.end(); it++) {
             ct.zeroOutSeq(*it);
             if (m->getControl_pressed()) {  return; }
         }

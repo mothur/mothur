@@ -24,7 +24,7 @@ class MetaStatsCommand : public Command {
 
 public:
 	MetaStatsCommand(string);
-	~MetaStatsCommand() {}
+	~MetaStatsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "metastats";				}

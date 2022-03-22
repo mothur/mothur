@@ -20,7 +20,7 @@ class MetroSichel : public DiversityCalculator {
 public:
     
     MetroSichel(int af, double siga, double sigb, double sigg, double sigS, int n, string st);
-    ~MetroSichel() {}
+    ~MetroSichel() = default;
     
     vector<string> getValues(SAbundVector* rank);
     

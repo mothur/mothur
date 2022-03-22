@@ -24,7 +24,7 @@ struct acceptRatioPos  {
     
     acceptRatioPos() { pos = 0; acceptRatio = 1.0; high = false; }
     acceptRatioPos(double ac, int po, bool h) : acceptRatio(ac), pos(po), high(h) {}
-    ~acceptRatioPos() {}
+    ~acceptRatioPos() = default;
 };
 
 /***********************************************************************/

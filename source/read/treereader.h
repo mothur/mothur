@@ -19,7 +19,7 @@ public:
     
     TreeReader(string tf, string cf);
     TreeReader(string tf, string gf, string nf);
-	~TreeReader() {}	
+	~TreeReader() = default;	
     
     vector<Tree*> getTrees()            { return trees;     }
     

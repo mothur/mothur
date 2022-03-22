@@ -42,7 +42,7 @@ public:
     OptiCluster(OptiData* mt, ClusterMetric* met, long long ns) : Cluster() {
         m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
     }
-    ~OptiCluster() {}
+    ~OptiCluster() = default;
     bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
     string getTag() { string tag = "opti_" + metric->getName(); return tag; }
     long long getNumBins();

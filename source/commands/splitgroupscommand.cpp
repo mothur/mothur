@@ -403,7 +403,7 @@ int driverRunCount(splitGroups2Struct* params){
             ct.printCompressedTable(newCountFile, tempGroups);
             params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
             vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
-            set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
+            unordered_set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
             
             params->m->mothurOut("/******************************************/\n");
             params->m->mothurOut("Selecting sequences for group " + params->Groups[i] + "\n\n");

@@ -19,7 +19,7 @@ class AlignmentCell {
 	
 public:
 	AlignmentCell();
-    ~AlignmentCell() {}
+    ~AlignmentCell() = default;
 	char prevCell;
 	float cValue;
 	float dValue;

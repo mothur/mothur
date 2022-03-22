@@ -29,7 +29,7 @@ public:
 	SuffixDB();
 	~SuffixDB();
 	
-	void generateDB() {}; //adding sequences generates the db
+	void generateDB(){}; //adding sequences generates the db
 	void addSequence(Sequence);
 	vector<int> findClosestSequences(Sequence*, int, vector<float>&) const;
 

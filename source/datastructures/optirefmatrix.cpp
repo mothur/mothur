@@ -27,11 +27,11 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     
     square = false;
     
-    set<string> noRefNamesSet;
+    unordered_set<string> noRefNamesSet;
     readFiles(distFile, distFormat, dupsFile, dupsFormat, noRefNamesSet);
 }
 /***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, set<string> accnosRefFileNames) : OptiData(c) {
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, unordered_set<string> accnosRefFileNames) : OptiData(c) {
     
     numFitSingletons = 0;
     numRefSingletons = 0;
@@ -520,7 +520,7 @@ void OptiRefMatrix::randomizeRefs() {
 }
 /***********************************************************************/
 //for denovo method
-int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, set<string>& optionalRefNames) {
+int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, unordered_set<string>& optionalRefNames) {
     try {
         string namefile, countfile;
         if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; }

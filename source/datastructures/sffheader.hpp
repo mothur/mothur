@@ -19,7 +19,6 @@
  
  https://www.ncbi.nlm.nih.gov/Traces/trace.cgi?cmd=show&f=formats&m=doc&s=format#sff
  
- /*
   magic_number               uint32_t
  
  version                    char[4]

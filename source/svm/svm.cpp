@@ -97,7 +97,7 @@ private:
 
 public:
     MeanAndStd() = default;
-    ~MeanAndStd() {}
+    ~MeanAndStd() = default;
 
     void initialize() {
         n = 0.0;
@@ -980,7 +980,7 @@ double OneVsOneMultiClassSvmTrainer::trainOnKFolds(SmoTrainer& smoTrainer, Kerne
 class UnrankedFeature {
 public:
     UnrankedFeature(const Feature& f) : feature(f), rankingCriterion(0.0) {}
-    ~UnrankedFeature() {}
+    ~UnrankedFeature() = default;
 
     Feature getFeature() const { return feature; }
 

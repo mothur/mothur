@@ -25,7 +25,7 @@ class SuffixNode {
 	
 public:
 	SuffixNode(int, int, int);
-	virtual ~SuffixNode() {}
+	virtual ~SuffixNode() = default;
 	virtual void print(string, int)	= 0;
 	virtual void setChildren(char, int);
 	virtual int getNumChildren();
@@ -52,7 +52,7 @@ class SuffixLeaf : public SuffixNode {	//	most of the methods are already set in
 	
 public:
 	SuffixLeaf(int, int, int);		//	we just need to define a constructor and
-	~SuffixLeaf() {}
+	~SuffixLeaf() = default;
 	void print(string, int);		//	print method
 };
 
@@ -62,7 +62,7 @@ class SuffixBranch : public SuffixNode {
 	
 public:
 	SuffixBranch(int, int, int);
-	~SuffixBranch() {}
+	~SuffixBranch() = default;
 	void print(string, int);		//	need a special method for printing the node because there are children
 	void eraseChild(char);			//	need a special method for erasing the children
 	void setChildren(char, int);	//	need a special method for setting children

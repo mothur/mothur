@@ -684,7 +684,7 @@ int ChimeraUchimeCommand::execute(){
                 m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples.\n");
             }else {
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -692,9 +692,9 @@ int ChimeraUchimeCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
                     out2.close();
                 }
             }

@@ -340,7 +340,7 @@ int ChimeraSlayerCommand::execute(){
                 m->mothurOut("\n" + toString(totalChimeras) + " chimera found.\n");
             }else {
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -349,9 +349,9 @@ int ChimeraSlayerCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) {
                         if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                     }
                     out2.close();
@@ -432,14 +432,13 @@ int ChimeraSlayerCommand::execute(){
 //**********************************************************************************************************************
 int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accnosFileName, string trimFileName){
 	try {
-        set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
-        set<string>::iterator itChimeras;
-
-		set<string>::iterator itUnique;
+        unordered_set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
+        unordered_set<string>::iterator itChimeras;
+        unordered_set<string>::iterator itUnique;
 		int total = 0;
         
         if (trimera) { //add in more potential uniqueNames
-            set<string> newUniqueNames = chimerasInFile;
+            unordered_set<string> newUniqueNames = chimerasInFile;
             for (itUnique = chimerasInFile.begin(); itUnique != chimerasInFile.end(); itUnique++) {
                 newUniqueNames.insert(*itUnique+"_LEFT");
                 newUniqueNames.insert(*itUnique+"_RIGHT");

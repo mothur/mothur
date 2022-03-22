@@ -35,7 +35,7 @@ class ShhherCommand : public Command {
 	
 public:
 	ShhherCommand(string);
-	~ShhherCommand() {}
+	~ShhherCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "shhh.flows";	}

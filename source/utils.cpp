@@ -1816,9 +1816,9 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
     }
 }
 //**********************************************************************************************************************
-set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
+unordered_set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
     try {
-        set<string> results; otus.clear();
+        unordered_set<string> results; otus.clear();
 
         if (list->getNumSeqs() == 0) { return results; }
 
@@ -4041,9 +4041,9 @@ int Utils::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<s
     }
 }
 //**********************************************************************************************************************
-set<string> Utils::readAccnos(string accnosfile){
+unordered_set<string> Utils::readAccnos(string accnosfile){
     try {
-        set<string> names;
+        unordered_set<string> names;
         ifstream in;
         bool ableToOpen = openInputFile(accnosfile, in, "");
         if (!ableToOpen) {  m->mothurOut("[ERROR]: Could not open " + accnosfile + "\n"); return names; }
@@ -4086,7 +4086,7 @@ void Utils::printAccnos(string accnosfile, vector<string>& names){
     }
 }
 //**********************************************************************************************************************
-void Utils::printAccnos(string accnosfile, set<string>& names){
+void Utils::printAccnos(string accnosfile, unordered_set<string>& names){
     try {
         ofstream out; openOutputFile(accnosfile, out);
         
@@ -4394,9 +4394,9 @@ vector<long long> Utils::mothurConvert(set<long long>& input){
     }
 }
 /***********************************************************************/
-set<string> Utils::mothurConvert(vector<string>& input){
+unordered_set<string> Utils::mothurConvert(vector<string>& input){
     try {
-        set<string> output(input.begin(), input.end());
+        unordered_set<string> output(input.begin(), input.end());
         
         
         return output;

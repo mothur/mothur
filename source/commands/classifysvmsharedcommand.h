@@ -20,7 +20,7 @@ class ClassifySvmSharedCommand : public Command {
 public:
   
   ClassifySvmSharedCommand(string);
-  ~ClassifySvmSharedCommand() {};
+  ~ClassifySvmSharedCommand() = default;;
   
   vector<string> setParameters();
   string getCommandName()			{ return "classify.svm";     }

@@ -23,7 +23,7 @@ class MergeGroupsCommand : public Command {
 	
 public:
 	MergeGroupsCommand(string);
-	~MergeGroupsCommand() {}
+	~MergeGroupsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "merge.groups";	}

@@ -154,7 +154,7 @@ ListSeqsCommand::ListSeqsCommand(string option) : Command()  {
 	}
 }
 //**********************************************************************************************************************
-void addName(bool empty, string name, set<string>& names, set<string>& newNames) {
+void addName(bool empty, string name, unordered_set<string>& names, unordered_set<string>& newNames) {
     if (empty) { newNames.insert(name); } //for first file or single file
     else {
         if (names.count(name) != 0) { newNames.insert(name); } //present in files so far so add to newNames
@@ -162,9 +162,9 @@ void addName(bool empty, string name, set<string>& names, set<string>& newNames)
 }
 #ifdef USE_BOOST
 //**********************************************************************************************************************
-void readFastq(set<string>& names, boost::iostreams::filtering_istream& inBoost, MothurOut*& m){
+void readFastq(unordered_set<string>& names, boost::iostreams::filtering_istream& inBoost, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         Utils util;
@@ -188,9 +188,9 @@ void readFastq(set<string>& names, boost::iostreams::filtering_istream& inBoost,
 }
 #endif
 //**********************************************************************************************************************
-void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
+void readFastq(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         Utils util;
@@ -213,9 +213,9 @@ void readFastq(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readQual(set<string>& names, ifstream& in, MothurOut*& m){
+void readQual(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         Utils util;
@@ -237,9 +237,9 @@ void readQual(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readFasta(set<string>& names, ifstream& in, MothurOut*& m){
+void readFasta(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         Utils util;
@@ -261,9 +261,9 @@ void readFasta(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readList(set<string>& names, ifstream& in, MothurOut*& m){
+void readList(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         
@@ -291,9 +291,9 @@ void readList(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readNameTaxGroup(set<string>& names, ifstream& in, MothurOut*& m){
+void readNameTaxGroup(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
 
@@ -316,9 +316,9 @@ void readNameTaxGroup(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readCount(set<string>& names, ifstream& in, MothurOut*& m){
+void readCount(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         
@@ -338,9 +338,9 @@ void readCount(set<string>& names, ifstream& in, MothurOut*& m){
     }
 }
 //**********************************************************************************************************************
-void readAlignContigs(set<string>& names, ifstream& in, MothurOut*& m){
+void readAlignContigs(unordered_set<string>& names, ifstream& in, MothurOut*& m){
     try {
-        set<string> newNames;
+        unordered_set<string> newNames;
         bool empty = true;
         if (names.size() != 0) { empty=false; }
         string name;
@@ -369,7 +369,7 @@ int ListSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        set<string> names;
+        unordered_set<string> names;
         
 		//read functions fill names vector
 		if (fastafiles.size() != 0)		    {   process(fastafiles, names, &readFasta);	                }
@@ -415,7 +415,7 @@ int ListSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-void ListSeqsCommand::process(vector<string> files, set<string>& names){
+void ListSeqsCommand::process(vector<string> files, unordered_set<string>& names){
     try {
         Utils util;
         
@@ -446,7 +446,7 @@ void ListSeqsCommand::process(vector<string> files, set<string>& names){
     }
 }
 //**********************************************************************************************************************
-void ListSeqsCommand::process(vector<string> files, set<string>& names, void f(set<string>&, ifstream&, MothurOut*&)){
+void ListSeqsCommand::process(vector<string> files, unordered_set<string>& names, void f(unordered_set<string>&, ifstream&, MothurOut*&)){
     try {
         Utils util;
         for (int i = 0; i < files.size(); i++) {

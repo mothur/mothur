@@ -30,7 +30,7 @@ class Slayer {
 	public:
 		
 		Slayer(int, int, int, float, int, int, int);
-		~Slayer() {};
+		~Slayer() = default;;
 		
 		string getResults(Sequence, vector<Sequence>);
 		vector<data_struct> getOutput()  {	return outputResults;			}

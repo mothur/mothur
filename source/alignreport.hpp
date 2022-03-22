@@ -22,7 +22,7 @@ class AlignReport : public Report {
 public:
 	
 	AlignReport();
-    ~AlignReport() {}
+    ~AlignReport() = default;
     
     //io functions, note - printHeaders / readHeaders / getHeaders in Report parent class
     void read(ifstream&); //read line in report file

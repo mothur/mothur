@@ -128,7 +128,7 @@ string GetSeqsCommand::getCommonQuestions(){
 }
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
+GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
     try {
         names = n; dups = true; outputdir = output;
         
@@ -1164,7 +1164,7 @@ int GetSeqsCommand::compareAccnos(string namefile){
 		
 		set<string> namesAccnos2;
 		set<string> namesDups;
-		set<string> namesAccnos = names;
+        unordered_set<string> namesAccnos = names;
 		
 		map<string, int> nameCount;
 		
@@ -1222,7 +1222,7 @@ int GetSeqsCommand::compareAccnos(string namefile){
 		out << "Names unique to " + accnosfile + " : " + toString(namesAccnos.size()) << endl;
 		m->mothurOut("Names unique to " + accnosfile + " : " + toString(namesAccnos.size())); m->mothurOutEndLine();
 		
-		for (set<string>::iterator it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
+		for (auto it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
 			out << (*it);
 			if (namefile != "") { out << '\t' << nameCount[(*it)]; }
 			out << endl;

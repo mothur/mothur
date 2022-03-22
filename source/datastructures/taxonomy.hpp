@@ -24,7 +24,7 @@ public:
     Taxonomy(string, string, int); //name, tax, abund
     Taxonomy(string, string);
     Taxonomy(ifstream&);
-    ~Taxonomy() {}
+    ~Taxonomy() = default;
     
     void setName(string n)          { name = n;         }
     void setNumSeqs(int n)          { numReps = n;      }

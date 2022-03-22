@@ -20,7 +20,7 @@ class Weighted : public TreeCalculator  {
 	
 	public:
         Weighted( bool r, vector<string> G);
-		~Weighted() {};
+		~Weighted() = default;;
 		
 		EstOutput getValues(Tree*, string, string);
 		EstOutput getValues(Tree*, int, string);

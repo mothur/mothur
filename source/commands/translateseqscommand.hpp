@@ -100,7 +100,7 @@ struct translateSeqsStruct {
         numSeqs = 0;
         m = MothurOut::getInstance();
     }
-    ~translateSeqsStruct() {}
+    ~translateSeqsStruct() = default;
 };
 //**********************************************************************************************************************
 struct alignAminoStruct {
@@ -132,7 +132,7 @@ struct alignAminoStruct {
         numSeqs = 0;
         m = MothurOut::getInstance();
     }
-    ~alignAminoStruct() {}
+    ~alignAminoStruct() = default;
 };
 //**********************************************************************************************************************
 

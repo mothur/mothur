@@ -19,7 +19,7 @@ class Report {
 public:
     
     Report() { m = MothurOut::getInstance(); }
-    virtual ~Report() {}
+    virtual ~Report() = default;
     
     virtual void read(ifstream&) = 0;
     

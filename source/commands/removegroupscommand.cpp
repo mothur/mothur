@@ -300,7 +300,7 @@ int RemoveGroupsCommand::execute(){
             
             vector<string> newSeqs = ct.getNamesOfSeqs(); //names of seqs left after removing groups
             
-            set<string> goodNames = util.mothurConvert(newSeqs);
+            unordered_set<string> goodNames = util.mothurConvert(newSeqs);
             
             for (int i = 0; i < namesOfSeqs.size(); i++) {
                 if (goodNames.count(namesOfSeqs[i]) == 0) { //you aren't on good list

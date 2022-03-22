@@ -35,7 +35,7 @@ class PairwiseSeqsCommand : public Command {
 public:
 	PairwiseSeqsCommand(string);
     PairwiseSeqsCommand(StorageDatabase*&, vector< vector< int > > kmerDB, vector< int > lengths, string, double, string, int); //used by mothur's splitMatrix class to avoid rereading files
-	~PairwiseSeqsCommand() {}
+	~PairwiseSeqsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "pairwise.seqs";		}

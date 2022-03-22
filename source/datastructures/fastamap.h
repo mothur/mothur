@@ -23,7 +23,7 @@ class FastaMap  {
 
 public:
 	FastaMap() { m = MothurOut::getInstance(); }
-	~FastaMap() {};
+	~FastaMap() = default;;
 	
 	string getGroupName(string);  //pass a sequence name get its group
 	string getNames(string);	//pass a sequence get the string of names in the group separated by ','s.

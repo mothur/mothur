@@ -331,7 +331,7 @@ int TrimSeqsCommand::execute(){
         
         int startTime = time(nullptr);
         
-        set<string> badNames;
+        unordered_set<string> badNames;
         long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, badNames);
         
         m->mothurOut("\nCreating count files...\n");
@@ -463,7 +463,7 @@ struct trimData {
     OutputWriter* scrapFileName;
     OutputWriter* trimQFileName;
     OutputWriter* scrapQFileName;
-    set<string> badNames;
+    unordered_set<string> badNames;
     unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
     bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient, logtransform;
     int maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
@@ -844,7 +844,7 @@ int driverTrim(trimData* params) {
 }
 
 /**************************************************************************************************/
-long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, set<string>& badNames) {
+long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, unordered_set<string>& badNames) {
     try {
         string groupFile;
         Oligos oligos;
@@ -957,7 +957,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
     }
 }
 /**************************************************************************************************/
-int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNames, string trimCountFileName, string scrapCountFileName) {
+int TrimSeqsCommand::processNamesCountFiles(string trimFasta, unordered_set<string> badNames, string trimCountFileName, string scrapCountFileName) {
     try {
        
         if (groupCounts.size() != 0) {

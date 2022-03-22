@@ -563,7 +563,7 @@ int ChimeraVsearchCommand::execute(){
             }else {
                 
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -572,10 +572,10 @@ int ChimeraVsearchCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2;
                     util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) {
                         if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                     }
                     out2.close();

@@ -24,7 +24,7 @@ class SubSampleCommand : public Command {
 
 public:
 	SubSampleCommand(string);
-	~SubSampleCommand() {}
+	~SubSampleCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "sub.sample";	}

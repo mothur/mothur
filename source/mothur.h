@@ -44,6 +44,7 @@
 #include <string>
 #include <list>
 #include <string.h>
+#include <unordered_set>
 
 //math
 #include <cmath>
@@ -189,7 +190,7 @@ struct classifierOTU {
     void readSeqs(vector<vector<char> > otu, int num) { otuData = otu; numSeqs = num; } //for shortcut files
     
     void readSeqs(vector<string> otu) {
-        int alignedLength = 0;
+        auto alignedLength = 0;
         bool error = false;
         if (otu.size() != 0) { alignedLength = otu[0].length(); }
         for (int j = 0; j < otu.size(); j++) { if (otu[j].length() != alignedLength) { error = true;} }
@@ -342,7 +343,7 @@ struct intPair {
     
     intPair() { abund = 0; group = -1; }
     intPair(int a, int g) : abund(a), group(g) {}
-    ~intPair() {}
+    ~intPair() = default;
 };
 
 struct kmerCount {
@@ -398,7 +399,7 @@ struct seqPNode {
     
     seqPNode() { diffs = 0; numIdentical = 0; name = ""; sequence = "";  }
     seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
-    ~seqPNode() {}
+    ~seqPNode() = default;
 };
 
 /**********************************************************/
@@ -455,7 +456,7 @@ struct seqDist {
 	double dist;
     seqDist() = default;
 	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
-	~seqDist() {}
+	~seqDist() = default;
 };
 /************************************************************/
 struct oligosPair {
@@ -464,7 +465,7 @@ struct oligosPair {
 	
 	oligosPair() { forward = ""; reverse = "";  }
 	oligosPair(string f, string r) : forward(f), reverse(r) {}
-	~oligosPair() {}
+	~oligosPair() = default;
 };
 
 /************************************************************/
@@ -474,7 +475,7 @@ struct seqPriorityNode {
 	string name;
     seqPriorityNode() = default;
 	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
-	~seqPriorityNode() {}
+	~seqPriorityNode() = default;
 };
 /************************************************************/
 struct compGroup {
@@ -483,7 +484,7 @@ struct compGroup {
     compGroup() = default;
 	compGroup(string s, string nm) : group1(s), group2(nm) {}
     string getCombo() { return group1+"-"+group2; }
-	~compGroup() {}
+	~compGroup() = default;
 };
 /***************************************************************/
 struct spearmanRank {

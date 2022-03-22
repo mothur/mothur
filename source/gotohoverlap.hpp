@@ -31,7 +31,7 @@ public:
 	GotohOverlap(float, float, float, float, int);
 	void align(string, string, bool createBaseMap=false);
 	
-	~GotohOverlap() {}
+	~GotohOverlap() = default;
 	
 private:
 	float gapOpen;

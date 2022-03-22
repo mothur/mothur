@@ -104,7 +104,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             
             if (m->getControl_pressed()) { outNonSingleton.close(); util.mothurRemove(nonSingletonsFile); for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
-            set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
+            unordered_set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + ")\nNumber of unique sequences: " + toString(seqGroups[i].size()) + "\n\n");
@@ -261,7 +261,7 @@ int SplitMatrix::createFastaFilesFromTax(vector<vector<string> >& seqGroups, vec
             
             if (m->getControl_pressed()) {  for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
-            set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
+            unordered_set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + ")\nNumber of unique sequences: " + toString(seqGroups[i].size()) + "\n\n");

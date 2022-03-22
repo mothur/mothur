@@ -13,8 +13,8 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
-    Cluster(){}
-    virtual ~Cluster() {}
+    Cluster()=default;
+    virtual ~Cluster() = default;
     virtual bool update(double&);
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  

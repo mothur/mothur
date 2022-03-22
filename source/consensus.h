@@ -23,7 +23,7 @@ class Consensus {
 	
 public:
 	Consensus() { m = MothurOut::getInstance(); }	
-	~Consensus() {}
+	~Consensus() = default;
 	
     Tree* getTree(vector<Tree*>&);
 		

@@ -34,8 +34,8 @@ typedef vector<double> Observation;
 /*
 class Observation {
 public:
-    Observation() {}
-    ~Observation() {}
+    Observation() = default;
+    ~Observation() = default;
 
 private:
     vector<double> obs;
@@ -83,7 +83,7 @@ typedef set<LabelPair> LabelPairSet;
 class LabeledObservation {
 public:
     LabeledObservation(int _datasetIndex, Label _label, Observation* _o) : datasetIndex(_datasetIndex), first(_label), second(_o) {}
-    ~LabeledObservation() {}
+    ~LabeledObservation() = default;
 
     void removeFeatureAtIndex(int n) {
         int m = 0;
@@ -125,7 +125,7 @@ class Feature {
 public:
     Feature(int i, const string& l) : index(i), label(l) {}
     Feature(const Feature& f) : index(f.index), label(f.label) {}
-    ~Feature() {}
+    ~Feature() = default;
 
     int getFeatureIndex() const { return index; }
     void setFeatureIndex(int i) { index = i; }
@@ -150,7 +150,7 @@ FeatureVector applyStdThreshold(double, LabeledObservationVector&, FeatureVector
 class RankedFeature {
 public:
     RankedFeature(const Feature& f, int r) : feature(f), rank(r) {}
-    ~RankedFeature() {}
+    ~RankedFeature() = default;
 
     Feature getFeature() const { return feature; }
     int getRank() const { return rank; }
@@ -168,7 +168,7 @@ typedef list<RankedFeature> RankedFeatureList;
 class SvmDataset {
 public:
     SvmDataset(const LabeledObservationVector& v, const FeatureVector& f) : labeledObservationVector(v), featureVector(f) {}
-    ~SvmDataset() {}
+    ~SvmDataset() = default;
 
     LabeledObservationVector& getLabeledObservationVector() { return labeledObservationVector; }
     FeatureVector& getFeatureVector() { return featureVector; }
@@ -193,7 +193,7 @@ class OutputFilter {
 public:
     OutputFilter(int v) : verbosity(v) {}
     OutputFilter(const OutputFilter& of) : verbosity(of.verbosity) {}
-    ~OutputFilter() {}
+    ~OutputFilter() = default;
 
     bool info()  const { return verbosity >= INFO; }
     bool debug() const { return verbosity >= mDEBUG; }
@@ -323,7 +323,7 @@ public:
             }
         }
     }
-    ~ParameterSetBuilder() {}
+    ~ParameterSetBuilder() = default;
 
     const ParameterMapVector& getParameterSetList() { return parameterSetVector; }
 
@@ -375,7 +375,7 @@ private:
 class InnerProductRowCache : public RowCache {
 public:
     InnerProductRowCache(const LabeledObservationVector& _obs) : obs(_obs), RowCache(_obs.size()) {}
-    virtual ~InnerProductRowCache() {}
+    virtual ~InnerProductRowCache() = default;
 
     double getInnerProduct(const LabeledObservation& obs_i, const LabeledObservation& obs_j) {
         return getCachedValue(
@@ -445,7 +445,7 @@ class LinearKernelFunction : public KernelFunction {
 public:
     // parameters must be set before using a KernelFunction is used
     LinearKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), constant(0.0) {}
-    ~LinearKernelFunction() {}
+    ~LinearKernelFunction() = default;
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         return getCachedParameterFreeSimilarity(i, j) + constant;
@@ -479,7 +479,7 @@ class RbfKernelFunction : public KernelFunction {
 public:
     // parameters must be set before a KernelFunction is used
     RbfKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), gamma(0.0) {}
-    ~RbfKernelFunction() {}
+    ~RbfKernelFunction() = default;
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         //double sumOfSquaredDifs = 0.0;
@@ -526,7 +526,7 @@ class PolynomialKernelFunction : public KernelFunction {
 public:
     // parameters must be set before using a KernelFunction is used
     PolynomialKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), c(0.0), gamma(0.0), d(0) {}
-    ~PolynomialKernelFunction() {}
+    ~PolynomialKernelFunction() = default;
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         return pow((gamma * getCachedParameterFreeSimilarity(i, j) + c), d);
@@ -569,7 +569,7 @@ class SigmoidKernelFunction : public KernelFunction {
 public:
     // parameters must be set before using a KernelFunction is used
     SigmoidKernelFunction(const LabeledObservationVector& _obs) : KernelFunction(_obs), alpha(0.0), c(0.0) {}
-    ~SigmoidKernelFunction() {}
+    ~SigmoidKernelFunction() = default;
 
     double similarity(const LabeledObservation& i, const LabeledObservation& j) {
         return tanh(alpha * getCachedParameterFreeSimilarity(i, j) + c);
@@ -713,7 +713,7 @@ class SVM {
 public:
     SVM(const vector<double>& yy, const vector<double>& aa, const LabeledObservationVector& oo, double bb, const NumericClassToLabel& mm) :
         y(yy), a(aa), x(oo), b(bb), discriminantToLabel(mm) {}
-    ~SVM() {}
+    ~SVM() = default;
 
     // the classify method should accept a list of observations?
     int discriminant(const Observation&) const;
@@ -741,7 +741,7 @@ public:
 
 class SvmPerformanceSummary {
 public:
-    SvmPerformanceSummary() {}
+    SvmPerformanceSummary() = default;
     // this constructor should be used by clients other than tests
     SvmPerformanceSummary(const SVM& svm, const LabeledObservationVector& actual) {
         init(svm, actual, svm.classify(actual));
@@ -777,7 +777,7 @@ private:
 class MultiClassSvmClassificationTie : public exception {
 public:
     MultiClassSvmClassificationTie(LabelVector& t, int c) : tiedLabels(t), tiedVoteCount(c) {}
-    ~MultiClassSvmClassificationTie() throw() {}
+    ~MultiClassSvmClassificationTie() throw() = default;
 
     virtual const char* what() const throw() {
         return "classification tie";
@@ -829,7 +829,7 @@ private:
 //class SvmTrainingInterruptedException : public exception {
 //public:
 //    SvmTrainingInterruptedException(const string& m) : message(m) {}
-//    ~SvmTrainingInterruptedException() throw() {}
+//    ~SvmTrainingInterruptedException() throw() = default;
 //    virtual const char* what() const throw() {
 //        return message.c_str();
 //    }
@@ -841,7 +841,7 @@ private:
 class SmoTrainerException : public exception {
 public:
     SmoTrainerException(const string& m) : message(m) {}
-    ~SmoTrainerException() throw() {}
+    ~SmoTrainerException() throw() = default;
     virtual const char* what() const throw() {
         return message.c_str();
     }
@@ -852,8 +852,8 @@ private:
 
 //class ExternalSvmTrainingInterruption {
 //public:
-//    ExternalSvmTrainingInterruption() {}
-//    virtual ~ExternalSvmTrainingInterruption() throw() {}
+//    ExternalSvmTrainingInterruption() = default;
+//    virtual ~ExternalSvmTrainingInterruption() throw() = default;
 //    virtual bool interruptTraining() { return false; }
 //};
 
@@ -865,7 +865,7 @@ class SmoTrainer {
 public:
     SmoTrainer(OutputFilter of) : outputFilter(of), C(1.0) {}
 
-    ~SmoTrainer() {}
+    ~SmoTrainer() = default;
 
     double getC()       { return C; }
     void setC(double C) { this->C = C; }
@@ -918,7 +918,7 @@ public:
     KFoldLabeledObservationsDivider(int _K, const LabeledObservationVector& l) : K(_K), k(_K) {
         buildLabelToLabeledObservationVector(labelToLabeledObservationVector, l);
     }
-    ~KFoldLabeledObservationsDivider() {}
+    ~KFoldLabeledObservationsDivider() = default;
 
     void start() {
         k = 0;
@@ -991,7 +991,7 @@ private:
 class OneVsOneMultiClassSvmTrainer {
 public:
     OneVsOneMultiClassSvmTrainer(SvmDataset&, int, int, OutputFilter&);
-    ~OneVsOneMultiClassSvmTrainer() {}
+    ~OneVsOneMultiClassSvmTrainer() = default;
 
     MultiClassSVM* train(const KernelParameterRangeMap&);
     double trainOnKFolds(SmoTrainer&, KernelFunctionCache&, KFoldLabeledObservationsDivider&);
@@ -1026,8 +1026,8 @@ private:
 // DNA microarray data", Zhou and Tuck, 2007, Bioinformatics
 class SvmRfe {
 public:
-    SvmRfe() {}
-    ~SvmRfe() {}
+    SvmRfe() = default;
+    ~SvmRfe() = default;
 
     RankedFeatureList getOrderedFeatureList(SvmDataset&, OneVsOneMultiClassSvmTrainer&, const ParameterRange&, const ParameterRange&);
 };

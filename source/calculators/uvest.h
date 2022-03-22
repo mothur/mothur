@@ -22,7 +22,7 @@ typedef vector<double> EstOutput;
 class UVEst {
 	public:
 		UVEst() { m = MothurOut::getInstance(); }
-        ~UVEst() {}
+        ~UVEst() = default;
     
 		EstOutput getUVest(vector<SharedRAbundVector*>);
     

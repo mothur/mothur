@@ -38,8 +38,8 @@ class ListSeqsCommand : public Command {
         string  format, inputFileName;
         bool abort;
         
-        void process(vector<string> files, set<string>&);
-        void process(vector<string> files, set<string>&, void f(set<string>&, ifstream&, MothurOut*&));
+        void process(vector<string> files, unordered_set<string>&);
+        void process(vector<string> files, unordered_set<string>&, void f(unordered_set<string>&, ifstream&, MothurOut*&));
 
 };
 
