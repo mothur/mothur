@@ -224,8 +224,6 @@ public:
     void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
     int getNumNames(string);
     string getSimpleLabel(string);
-    string toUpper(string);
-    string toLower(string);
     
     string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.

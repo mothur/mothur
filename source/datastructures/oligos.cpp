@@ -229,7 +229,7 @@ int Oligos::readOligos(){
 			else{
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
-                type = util.toUpper(pieces[0]); //make type case insensitive
+                toUpper(pieces[0]); type = pieces[0];//make type case insensitive
                 
                 oligo = pieces[1]; formatOligo(oligo);
                 

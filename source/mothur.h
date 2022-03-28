@@ -154,6 +154,34 @@ const vector<int> nullIntVector; //used to pass blank ints
 const vector<char> nullCharVector; //used to pass blank char
 const map<int, int> nullIntMap;
 
+// trim from start (in place)
+static inline void ltrim(string &s) {
+    s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+static inline void rtrim(string &s) {
+    s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
+static inline void toUpper(string &s) {
+    for_each(s.begin(), s.end(), [](char & c) { c = ::toupper(c); });
+}
+
+static inline void toLower(string &s) {
+    for_each(s.begin(), s.end(), [](char & c) { c = ::tolower(c); });
+}
+
 /**************************************************************************************************/
 struct classifierOTU {
     vector<vector<char> > otuData; //otuData[0] -> vector of first characters from each sequence in the OTU, otuData[1] -> vector of second characters from each sequence in the OTU

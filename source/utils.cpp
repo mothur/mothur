@@ -4490,36 +4490,6 @@ string Utils::trimTax(string tax, int trimLevel) {
         exit(1);
     }
 }
-/**************************************************************************************************/
-string Utils::toUpper(string item) {
-    try{
-        string newItem = "";
-        
-        for (int i = 0; i < item.length(); i++) {
-            newItem += toupper(item[i]);
-        }
-        return newItem;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "toUpper");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-string Utils::toLower(string item) {
-    try{
-        string newItem = "";
-        
-        for (int i = 0; i < item.length(); i++) {
-            newItem += tolower(item[i]);
-        }
-        return newItem;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "toLower");
-        exit(1);
-    }
-}
 /***********************************************************************/
 bool Utils::isNumeric1(string stringToCheck){
     try {

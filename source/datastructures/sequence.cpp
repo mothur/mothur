@@ -342,27 +342,27 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
 //********************************************************************************************************************
 string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	try {
-		char letter;
 		string sequence = "";	
 		numAmbig = 0;
-		
-		while(fastaFile){
-			letter= fastaFile.get();
-			if(letter == '>'){
-				fastaFile.putback(letter);
-				break;
-			}else if (letter == ' ') {;}
-			else if(isprint(letter)){
-				letter = toupper(letter);
-				if(letter == 'U'){letter = 'T';}
-				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
-					letter = 'N';
-					numAmbig++;
-				}
-				sequence += letter;
-			}
-		}
-		
+        
+        while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
+            if (m->getControl_pressed()) { break; }
+            
+            string line = "";
+            getline(fastaFile, line); util.gobble(fastaFile);
+            rtrim(line); //remove extra line endings
+            
+            //iterate through string
+            for_each(line.begin(), line.end(), [&numAmbig](char & c) {
+                    c = ::toupper(c);
+                    if(c != '.' && c != '-' && c != 'A' && c != 'T' && c != 'G'  && c != 'C' && c != 'N'){
+                        c = 'N';
+                        numAmbig++;
+                    }
+                });
+            sequence += line;
+        }
+
 		return sequence;
 	}
 	catch(exception& e) {
@@ -456,27 +456,26 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
 //********************************************************************************************************************
 string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 	try {
-		char letter;
 		string sequence = "";
 		numAmbig = 0;
 		
-		while(!fastaFile.eof()){
-			letter= fastaFile.get();
-	
-			if(letter == '>'){
-				fastaFile.putback(letter);
-				break;
-			}else if (letter == ' ') {;}
-			else if(isprint(letter)){
-				letter = toupper(letter);
-				if(letter == 'U'){letter = 'T';}
-				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
-					letter = 'N';
-					numAmbig++;
-				}
-				sequence += letter;
-			}
-		}
+        while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
+            if (m->getControl_pressed()) { break; }
+            
+            string line = "";
+            getline(fastaFile, line); util.gobble(fastaFile);
+            rtrim(line); //remove extra line endings
+            
+            //iterate through string
+            for_each(line.begin(), line.end(), [&numAmbig](char & c) {
+                    c = ::toupper(c);
+                    if(c != '.' && c != '-' && c != 'A' && c != 'T' && c != 'G'  && c != 'C' && c != 'N'){
+                        c = 'N';
+                        numAmbig++;
+                    }
+                });
+            sequence += line;
+        }
 		
 		return sequence;
 	}
@@ -561,6 +560,8 @@ void Sequence::setUnaligned(string sequence){
 
 void Sequence::setAligned(string sequence){
 	
+    toUpper(sequence);
+    
 	//if the alignment starts or ends with a gap, replace it with a period to indicate missing data
 	aligned = sequence;
 	alignmentLength = aligned.length();
@@ -605,16 +606,20 @@ string Sequence::convert2ints() {
 	
 	if(unaligned == "")	{	/* need to throw an error */	}
 	
-	string processed;
+	string processed = unaligned;
+    
+    
+    //iterate through string - replace bases with ints
+    for_each(processed.begin(), processed.end(),
+    [](char & c) {
+        if(c == 'A')                {    c = '0';    }
+        else if(c == 'C')           {    c = '1';    }
+        else if(c == 'G')           {    c = '2';    }
+        else if(c == 'T')           {    c = '3';    }
+        else if(c == 'U')           {    c = '3';    }
+        else                        {    c = '4';    }
+    });
 	
-	for(int i=0;i<unaligned.length();i++) {
-		if(toupper(unaligned[i]) == 'A')		{	processed += '0';	}
-		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
-		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
-		else if(toupper(unaligned[i]) == 'T')	{	processed += '3';	}
-		else if(toupper(unaligned[i]) == 'U')	{	processed += '3';	}
-		else									{	processed += '4';	}
-	}
 	return processed;
 }
 
@@ -663,15 +668,13 @@ int Sequence::getNumBases(){
 int Sequence::getNumNs(){
     int numNs = 0;
 	for (int i = 0; i < unaligned.length(); i++) {
-        if(toupper(unaligned[i]) == 'N') { numNs++; }
+        if(unaligned[i] == 'N') { numNs++; }
     }
     return numNs;
 }
 //********************************************************************************************************************
 void Sequence::printSequence(OutputWriter* out){
-    string seqOutput = ">";
-    seqOutput += name + comment + '\n';
-    seqOutput += aligned + '\n';
+    const string seqOutput = '>' + name + comment + '\n' + aligned + '\n';
     out->write(seqOutput);
 }
 //********************************************************************************************************************
