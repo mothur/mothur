@@ -209,6 +209,7 @@ public:
     bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(char, string&);
     unordered_set<string> mothurConvert(vector<string>&);
+    void mothurConvert(vector<string>&, set<string>&);
     vector<string> mothurConvert(set<string>&);
     set<long long> mothurConvert(vector<long long>&);
     vector<long long > mothurConvert(set<long long>&);
@@ -261,22 +262,20 @@ public:
     SAbundVector* getNextSAbund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     OrderVector* getNextOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
 
-    
-    void splitAtComma(string&, string&);
-    void splitAtComma(string&, vector<string>&);
-    void splitAtComma(string&, vector<int>&);
     void splitAtDash(string&, set<int>&);
     void splitAtDash(string&, set<string>&);
     void splitAtDash(string&, vector<string>&);
-    void splitAtChar(string&, set<string>&, char);
-    void splitAtChar(string&, vector<string>&, char);
+    void splitAtComma(string&, string&);
+    void splitAtComma(string& s, vector<string>& container);
+    void splitAtComma(string& s, vector<int>& container);
+    void splitAtChar(string& s, set<string>& container, char delim);
+    void splitAtChar(string& s, vector<string>& container, char delim);
     void splitAtChar(string&, string&, char);
     void splitAtEquals(string&, string&);
     vector<string> splitWhiteSpaceWithQuotes(string);
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);
-    string trimWhiteSpace(string input);
     
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename

@@ -350,7 +350,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
-            outputOption = util.trimWhiteSpace(outputOption);
+            trimWhiteSpace(outputOption);
             outputOption = util.removeQuotes(outputOption);
             if(util.mkDir(outputOption)){
                 current->setOutputDir(outputOption);
@@ -368,7 +368,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            intputOption = util.trimWhiteSpace(intputOption);
+            trimWhiteSpace(intputOption);
             intputOption = util.removeQuotes(intputOption);
     
             vector<string> inputPaths;

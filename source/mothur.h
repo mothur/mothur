@@ -154,6 +154,8 @@ const vector<int> nullIntVector; //used to pass blank ints
 const vector<char> nullCharVector; //used to pass blank char
 const map<int, int> nullIntMap;
 
+/**************************************************************************************************/
+
 // trim from start (in place)
 static inline void ltrim(string &s) {
     s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
@@ -169,10 +171,41 @@ static inline void rtrim(string &s) {
 }
 
 // trim from both ends (in place)
-static inline void trim(string &s) {
+static inline void trimWhiteSpace(string &s) {
     ltrim(s);
     rtrim(s);
 }
+
+/**************************************************************************************************/
+
+template <typename Out>
+void split(const string &s, char delim, Out result) {
+    istringstream iss(s);
+    string item;
+    while (getline(iss, item, delim)) {
+        if (!item.empty()) { //ignore white space
+            *result++ = item;
+        }
+    }
+}
+
+/**************************************************************************************************/
+
+template <typename Out>
+void split(const string &s, Out result) {
+    istringstream iss(s);
+    string item; char d;
+    while (iss) {
+        iss >> item;
+        while(isspace(d=iss.get()))        {;}
+        if(!iss.eof()) { iss.putback(d); }
+        if (!item.empty()) { //ignore white space
+            *result++ = item;
+        }
+    }
+}
+
+/**************************************************************************************************/
 
 static inline void toUpper(string &s) {
     for_each(s.begin(), s.end(), [](char & c) { c = ::toupper(c); });

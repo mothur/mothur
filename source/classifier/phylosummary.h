@@ -47,7 +47,6 @@ public:
 	int getMaxLevel() { return maxLevel; }
 	
 private:
-	string getNextTaxon(string&);
 	vector<rawTaxNode> tree;
 	void print(int, ofstream&, string);
     void print(int, ofstream&, bool);

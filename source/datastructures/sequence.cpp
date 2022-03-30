@@ -348,9 +348,7 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
         while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
             if (m->getControl_pressed()) { break; }
             
-            string line = "";
-            getline(fastaFile, line); util.gobble(fastaFile);
-            rtrim(line); //remove extra line endings
+            string line = util.getline(fastaFile);
             
             //iterate through string
             for_each(line.begin(), line.end(), [&numAmbig](char & c) {
@@ -462,9 +460,7 @@ string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
         while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
             if (m->getControl_pressed()) { break; }
             
-            string line = "";
-            getline(fastaFile, line); util.gobble(fastaFile);
-            rtrim(line); //remove extra line endings
+            string line = util.getline(fastaFile);
             
             //iterate through string
             for_each(line.begin(), line.end(), [&numAmbig](char & c) {

@@ -118,33 +118,6 @@ PhyloTree::PhyloTree(string tfile){
 		exit(1);
 	}
 }
-
-/**************************************************************************************************/
-
-string PhyloTree::getNextTaxon(string& heirarchy, string seqname){
-	try {
-		string currentLevel = "";
-		if(heirarchy != ""){
-			int pos = heirarchy.find_first_of(';');
-			
-			if (pos == -1) { //you can't find another ;
-				currentLevel = heirarchy;
-				heirarchy = "";
-				m->mothurOut(seqname + " is missing a ;, please check for other errors.\n"); 
-			}else{
-				currentLevel=heirarchy.substr(0,pos);
-				if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
-				else { heirarchy = ""; }
-			}
-			
-		}
-		return currentLevel;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloTree", "getNextTaxon");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 
 vector<string> PhyloTree::getSeqs(string seqTaxonomy){
@@ -161,9 +134,7 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
         for(string taxon : taxons) {
 			
 			if (m->getControl_pressed()) { return names; }
-			
-			//taxon = getNextTaxon(seqTaxonomy, "");
-            
+			            
             if (m->getDebug()) { m->mothurOut(taxon +'\n'); }
 			
 			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;\n"); break;  }
@@ -255,10 +226,12 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		util.removeConfidences(seqTaxonomy);
         vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
         
-        int level = taxons.size();
+        int level = 0;
         int currentNode = 0;
         
         for(string taxon : taxons) {
+            
+            level++;
 					
 			if (m->getControl_pressed()) { return 0; }
             

@@ -1651,15 +1651,8 @@ void Utils::zapGremlins(istringstream& f){
 string Utils::getline(istringstream& fileHandle) {
     try {
         string line = "";
-        while (!fileHandle.eof())	{
-            //get next character
-            char c = fileHandle.get();
-
-            //are you at the end of the line
-            if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}
-            else {		line += c;		}
-        }
-
+        std::getline(fileHandle, line); gobble(fileHandle);
+        rtrim(line); //remove extra line endings
         return line;
     }
     catch(exception& e) {
@@ -1682,15 +1675,8 @@ void Utils::getline(ifstream& fileHandle, vector<string>& headers) {
 string Utils::getline(ifstream& fileHandle) {
     try {
         string line = "";
-        while (fileHandle)	{
-            //get next character
-            char c = fileHandle.get();
-
-            //are you at the end of the line
-            if ((c == '\n') || (c == '\r') || (c == '\f') || (c == EOF)){  break;	}
-            else {		line += c;		}
-        }
-
+        std::getline(fileHandle, line); gobble(fileHandle);
+        rtrim(line); //remove extra line endings
         return line;
     }
     catch(exception& e) {
@@ -3150,17 +3136,17 @@ int Utils::divideFile(string filename, int& proc, vector<string>& files) {
 bool Utils::isTrue(string f){
     try {
 
-        for (auto& i : f) { i = toupper(i); }
+        toUpper(f);
 
         if ((f == "TRUE") || (f == "T")) {	return true;	}
-        else {	return false;  }
+        
+        return false;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "isTrue");
         exit(1);
     }
 }
-
 /***********************************************************************/
 
 float Utils::roundDist(float dist, int precision){
@@ -3208,51 +3194,12 @@ vector<string> Utils::splitWhiteSpace(string& rest, char buffer[], int size){
     }
 }
 /***********************************************************************/
-string Utils::trimWhiteSpace(string input){
-    try {
-       
-        int start, end; start = 0; end = input.length();
-        
-        //no spaces
-        if (input.find_first_of(' ') == string::npos) { return input; }
-        
-        for (int i = 0; i < input.length(); i++) {
-            if (input[i] != ' ') { start = i; break; }
-        }
-        
-        end = start;
-        for (int i = input.length()-1; i > start; i--) {
-            if (input[i] != ' ') { end = i; break; }
-        }
-        
-        string trimmed = input.substr(start, end-start+1);
-        
-        return trimmed;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "trimWhiteSpace");
-        exit(1);
-    }
-}
-/***********************************************************************/
 vector<string> Utils::splitWhiteSpace(string input){
     try {
         vector<string> pieces;
-        string rest = "";
-
-        for (int i = 0; i < input.length(); i++) {
-            if (!isspace(input[i]))  { rest += input[i];  }
-            else {
-                if (rest != "") { pieces.push_back(rest);  rest = ""; }
-                while (i < input.length()) {  //gobble white space
-                    if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; }
-                }
-            }
-        }
-
-        if (rest != "") { pieces.push_back(rest); }
-
+        
+        split(input, back_inserter(pieces));
+        
         return pieces;
     }
     catch(exception& e) {
@@ -3263,24 +3210,16 @@ vector<string> Utils::splitWhiteSpace(string input){
 /***********************************************************************/
 int Utils::splitWhiteSpace(string input, vector<float>& pieces, int index){
     try {
-        pieces.clear();
-        string rest = "";
-        int count = 0;
-
-        for (int i = 0; i < input.length(); i++) {
-            if (!isspace(input[i]))  { rest += input[i];  }
-            else {
-                if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
-                while (i < input.length()) {  //gobble white space
-                    if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; }
-                }
-                if (count > index) { return 0; }
-            }
-        }
-
-        if (rest != "") { float tdist; mothurConvert(rest, tdist); count++; pieces.push_back(tdist); }
-
+        
+        pieces.clear(); int count = 0;
+        
+        vector<string> temp;  split(input, back_inserter(temp));
+        
+        for(string item : temp){
+            float tdist; mothurConvert(item, tdist); pieces.push_back(tdist); count++;
+            if (count > index) { return 0; }
+        };
+        
         return 0;
     }
     catch(exception& e) {
@@ -4146,7 +4085,9 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            string line = trimWhiteSpace(getline(in));
+            string line = getline(in);
+            trimWhiteSpace(line);
+            
             checkName(line);
             if (line != "") { names.push_back(line); }
         }
@@ -4400,6 +4341,17 @@ unordered_set<string> Utils::mothurConvert(vector<string>& input){
         
         
         return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void Utils::mothurConvert(vector<string>& input, set<string>& output){
+    try {
+        //insert each item in vector into set
+        for_each(input.begin(), input.end(), [&output](string i){ output.insert(i); });
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
@@ -4893,11 +4845,8 @@ int Utils::factorial(int num){
     try {
         int total = 1;
 
-        for (int i = 1; i <= num; i++) {
-            total *= i;
-        }
+        for (int i = 1; i <= num; i++) { total *= i; }
         
-
         return total;
     }
     catch(exception& e) {
@@ -4953,26 +4902,42 @@ void Utils::getNumSeqs(ifstream& file, int& numSeqs){
     }
 }
 /***********************************************************************/
-
-//This function parses the estimator options and puts them in a vector
-void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
+//This function splits up the various option parameters
+void Utils::splitAtChar(string& prefix, string& suffix, char c){
     try {
 
-        if (symbol == '-') { splitAtDash(estim, container); return; }
-
         string individual = "";
-        int estimLength = estim.size();
+        int estimLength = prefix.size();
         for(int i=0;i<estimLength;i++){
-            if(estim[i] == symbol){
-                container.push_back(individual);
-                individual = "";
+            if(prefix[i] == c){
+                suffix = prefix.substr(i+1);
+                prefix = individual;
+                break;
             }
             else{
-                individual += estim[i];
+                individual += prefix[i];
             }
         }
-        container.push_back(individual);
 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+//This function parses the estimator options and puts them in a vector
+void Utils::splitAtChar(string& s, vector<string>& container, char symbol) {
+    try {
+        
+        //special case to escape things
+        if (symbol == '-') { splitAtDash(s, container); return; }
+        
+        //parse string by delim and store in vector
+        split(s, symbol, back_inserter(container));
+        return;
+        
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");
@@ -4982,27 +4947,54 @@ void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
 /***********************************************************************/
 
 //This function parses the estimator options and puts them in a vector
-void Utils::splitAtChar(string& estim, set<string>& container, char symbol) {
+void Utils::splitAtChar(string& s, set<string>& container, char symbol) {
     try {
         
-        if (symbol == '-') { splitAtDash(estim, container); return; }
+        if (symbol == '-') { splitAtDash(s, container); return; }
         
-        string individual = "";
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == symbol){
-                container.insert(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.insert(individual);
+        //parse string by delim and store in vector
+        vector<string> temp;
+        split(s, symbol, back_inserter(temp));
         
+        mothurConvert(temp, container);
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+
+void Utils::splitAtComma(string& s, vector<string>& container) {
+    try {
+        
+        
+        //parse string by delim and store in vector
+        split(s, ',', back_inserter(container));
+        return;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtComma");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+void Utils::splitAtComma(string& s, vector<int>& container) {
+    try {
+        
+        vector<string> items; splitAtComma(s, items);
+        for (string i : items) {
+            int num; mothurConvert(i, num);
+            container.push_back(num);
+        }
+        return;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtComma");
         exit(1);
     }
 }
@@ -5127,83 +5119,6 @@ string Utils::makeList(vector<string>& names) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "makeList");
-        exit(1);
-    }
-}
-
-/***********************************************************************/
-//This function parses the a string and puts peices in a vector
-void Utils::splitAtComma(string& estim, vector<string>& container) {
-    try {
-        string individual = "";
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == ','){
-                container.push_back(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.push_back(individual);
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtComma");
-        exit(1);
-    }
-}
-/***********************************************************************/
-//This function parses the a string and puts peices in a vector
-void Utils::splitAtComma(string& estim, vector<int>& convertedContainer) {
-    try {
-        string individual = "";
-        vector<string> container;
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == ','){
-                container.push_back(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.push_back(individual);
-
-        for (int i = 0; i < container.size(); i++) {
-            int temp;
-            if (mothurConvert(container[i], temp)) { convertedContainer.push_back(temp); }
-        }
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtComma");
-        exit(1);
-    }
-}
-/***********************************************************************/
-//This function splits up the various option parameters
-void Utils::splitAtChar(string& prefix, string& suffix, char c){
-    try {
-
-        string individual = "";
-        int estimLength = prefix.size();
-        for(int i=0;i<estimLength;i++){
-            if(prefix[i] == c){
-                suffix = prefix.substr(i+1);
-                prefix = individual;
-                break;
-            }
-            else{
-                individual += prefix[i];
-            }
-        }
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtChar");
         exit(1);
     }
 }

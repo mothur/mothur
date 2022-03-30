@@ -141,25 +141,6 @@ int PhyloSummary::summarize(string userTfile){
 
 /**************************************************************************************************/
 
-string PhyloSummary::getNextTaxon(string& heirarchy){
-	try {
-		string currentLevel = "";
-		if(heirarchy != ""){
-			int pos = heirarchy.find_first_of(';');
-			currentLevel=heirarchy.substr(0,pos);
-			if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
-			else { heirarchy = ""; }
-		}
-		return currentLevel;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloSummary", "getNextTaxon");
-		exit(1);
-	}
-}
-
-/**************************************************************************************************/
-
 int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 	try {
 				
@@ -172,18 +153,14 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 		
 		int level = 0;
 		
-		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  util.removeConfidences(seqTaxonomy);	}
-		
-		while (seqTaxonomy != "") {
+        util.removeConfidences(seqTaxonomy);
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
+        
+        for(string taxon : taxons) {
 			
             level++;
             
 			if (m->getControl_pressed()) { return 0; }
-			
-			//somehow the parent is getting one too many accnos
-			//use print to reassign the taxa id
-			taxon = getNextTaxon(seqTaxonomy);
 			
 			childPointer = tree[currentNode].children.find(taxon);
 			
@@ -313,18 +290,14 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, map<string, bool> containsGro
 		
 		int level = 0;
 		
-		//are there confidence scores, if so remove them
-		if (seqTaxonomy.find_first_of('(') != -1) {  util.removeConfidences(seqTaxonomy);	}
-		
-		while (seqTaxonomy != "") {
-			
+        util.removeConfidences(seqTaxonomy);
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
+        
+        for(string taxon : taxons) {
+            
             level++;
             
 			if (m->getControl_pressed()) { return 0; }
-			
-			//somehow the parent is getting one too many accnos
-			//use print to reassign the taxa id
-			taxon = getNextTaxon(seqTaxonomy);
 			
 			childPointer = tree[currentNode].children.find(taxon);
 			
