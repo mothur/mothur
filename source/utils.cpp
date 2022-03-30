@@ -4425,7 +4425,7 @@ string Utils::addUnclassifieds(string tax, int maxlevel, bool probs) {
         string newTax, taxon;
 
         string savedTax = tax;
-        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+        vector<string> taxons; splitAtChar(tax, taxons, ';');
         vector<int> confidences;
 
         if (taxons.size() == maxlevel) { return savedTax; }

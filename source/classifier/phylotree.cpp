@@ -156,13 +156,13 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 		int currentNode = 0;
 
         util.removeConfidences(seqTaxonomy);
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
         
-        string taxon;
-        while(seqTaxonomy != ""){
+        for(string taxon : taxons) {
 			
 			if (m->getControl_pressed()) { return names; }
 			
-			taxon = getNextTaxon(seqTaxonomy, "");
+			//taxon = getNextTaxon(seqTaxonomy, "");
             
             if (m->getDebug()) { m->mothurOut(taxon +'\n'); }
 			
@@ -176,9 +176,10 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 			else{											//otherwise, error this taxonomy is not in tree
 				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct.\n"); m->setControl_pressed(true); return names;
 			}
-            
-			if (seqTaxonomy == "") {   names = tree[currentNode].accessions;	}
 		}
+        
+        //return names in this taxonomy
+        names = tree[currentNode].accessions;
         
         return names;
     }
@@ -249,23 +250,17 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		numSeqs++;
 		
 		map<string, int>::iterator childPointer;
-		
-		int currentNode = 0;
-		int level = 0;
-		
+
 		tree[0].accessions.push_back(seqName);
 		util.removeConfidences(seqTaxonomy);
-        string taxon;// = getNextTaxon(seqTaxonomy);
-	
-		while(seqTaxonomy != ""){
-			
-			level++;
-		
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
+        
+        int level = taxons.size();
+        int currentNode = 0;
+        
+        for(string taxon : taxons) {
+					
 			if (m->getControl_pressed()) { return 0; }
-			
-			//somehow the parent is getting one too many accnos
-			//use print to reassign the taxa id
-			taxon = getNextTaxon(seqTaxonomy, seqName);
             
             if (m->getDebug()) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
 			
@@ -290,11 +285,10 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				tree[currentNode].accessions.push_back(seqName);
 				name2Taxonomy[seqName] = currentNode;
 			}
-	
-			if (seqTaxonomy == "") {   uniqueTaxonomies.insert(currentNode);	}
-
 		}
         
+        uniqueTaxonomies.insert(currentNode);
+
         //save maxLevel for binning the unclassified seqs
         if (level > maxLevel) { maxLevel = level; }
         
