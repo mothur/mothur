@@ -375,7 +375,7 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			
 			if (seq.getName() != "") {
 				correct->addSeq(seq.getName(), seq.getAligned());
@@ -499,7 +499,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
                 while (!in.eof()) {
                     if (params->m->getControl_pressed()) { break; }
                     
-                    Sequence seq(in); params->util.gobble(in);
+                    Sequence seq(in); gobble(in);
                     
                     if (seq.getName() != "") { thisSeqs.push_back(seq); }
                 }

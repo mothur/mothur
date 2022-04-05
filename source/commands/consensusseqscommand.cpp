@@ -565,7 +565,7 @@ int ConsensusSeqsCommand::readFasta(){
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			string name = seq.getName();
 			
 			if (name != "") {

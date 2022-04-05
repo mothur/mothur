@@ -499,8 +499,8 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             sizes.push_back(size);
             taxonomies.push_back(tax);
@@ -529,7 +529,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             if (m->getControl_pressed()) { break; }
             
             string binInfo;
-            Sequence seq(in, binInfo, true);  util.gobble(in);
+            Sequence seq(in, binInfo, true);  gobble(in);
             
             //the binInfo should look like - binNumber|size ie. 1|200 if it is binNumber|size|group then the user gave us the wrong repfasta file
             vector<string> info;

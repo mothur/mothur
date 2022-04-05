@@ -174,7 +174,7 @@ void readFastq(unordered_set<string>& names, boost::iostreams::filtering_istream
             if (m->getControl_pressed()) { break; }
             
             bool ignore;
-            FastqRead fread(inBoost, ignore, "illumina1.8+");  util.gobble(inBoost);
+            FastqRead fread(inBoost, ignore, "illumina1.8+");  gobble(inBoost);
             
             if (!ignore) { addName(empty, fread.getName(), names, newNames); }
         }
@@ -200,7 +200,7 @@ void readFastq(unordered_set<string>& names, ifstream& in, MothurOut*& m){
             if (m->getControl_pressed()) { break; }
             
             bool ignore;
-            FastqRead fread(in, ignore, "illumina1.8+"); util.gobble(in);
+            FastqRead fread(in, ignore, "illumina1.8+"); gobble(in);
             
             if (!ignore) { addName(empty, fread.getName(), names, newNames); }
         }
@@ -224,7 +224,7 @@ void readQual(unordered_set<string>& names, ifstream& in, MothurOut*& m){
             
             if (m->getControl_pressed()) { break; }
             
-            QualityScores currSeq(in); util.gobble(in);
+            QualityScores currSeq(in); gobble(in);
             
             if (currSeq.getName() != "") { addName(empty, currSeq.getName(), names, newNames); }
         }
@@ -248,7 +248,7 @@ void readFasta(unordered_set<string>& names, ifstream& in, MothurOut*& m){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence currSeq(in); util.gobble(in);
+            Sequence currSeq(in); gobble(in);
             
             if (currSeq.getName() != "") { addName(empty, currSeq.getName(), names, newNames); }
         }
@@ -303,7 +303,7 @@ void readNameTaxGroup(unordered_set<string>& names, ifstream& in, MothurOut*& m)
         
             if (m->getControl_pressed()) { break; }
 
-            in >> name; util.getline(in); util.gobble(in);
+            in >> name; util.getline(in); gobble(in);
             
             addName(empty, name, names, newNames);
         }
@@ -345,12 +345,12 @@ void readAlignContigs(unordered_set<string>& names, ifstream& in, MothurOut*& m)
         if (names.size() != 0) { empty=false; }
         string name;
         
-        Utils util; util.getline(in);  util.gobble(in);
+        Utils util; util.getline(in);  gobble(in);
         
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
 
-            in >> name; util.getline(in); util.gobble(in);
+            in >> name; util.getline(in); gobble(in);
             
             addName(empty, name, names, newNames);
         }

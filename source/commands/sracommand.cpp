@@ -566,8 +566,8 @@ int SRACommand::readContactFile(){
             if (m->getControl_pressed()) { break; }
             
             string key, value;
-            in >> key; util.gobble(in);
-            value = util.getline(in); util.gobble(in);
+            in >> key; gobble(in);
+            value = util.getline(in); gobble(in);
             
             if (!util.isASCII(value)) { m->mothurOut("[ERROR]: " + value + " contains non ASCII characters. Submission entries cannot contains non ASCII characters, please correct.\n"); m->setControl_pressed(true); }
             
@@ -674,7 +674,7 @@ int SRACommand::readMIMarksFile(){
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
-            temp = util.getline(in); util.gobble(in);
+            temp = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
@@ -730,7 +730,7 @@ int SRACommand::readMIMarksFile(){
             
             if (m->getControl_pressed()) { break; }
             
-            temp = util.getline(in);  util.gobble(in);
+            temp = util.getline(in);  gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
@@ -1788,7 +1788,7 @@ int SRACommand::findFileOption(){
             
             if (m->getControl_pressed()) { return 0; }
             
-            string line = util.getline(in);  util.gobble(in);
+            string line = util.getline(in);  gobble(in);
             vector<string> pieces = util.splitWhiteSpace(line);
             
             if (pieces.size() == 2) { //good pair and sff or fastq and oligos

@@ -390,7 +390,7 @@ int driver(uchimeData* params){
             while (!in.eof()) {
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seq(in); params->util.gobble(in);
+                Sequence seq(in); gobble(in);
                 
                 if (seq.getName() != "") { seq.printSequence(out); }
             }
@@ -539,7 +539,7 @@ int driver(uchimeData* params){
             
             string name = ""; string chimeraFlag = "";
             
-            string line = params->util.getline(in); params->util.gobble(in);
+            string line = params->util.getline(in); gobble(in);
             
             vector<string> pieces = params->util.splitWhiteSpace(line);
             if (pieces.size() > 2) {
@@ -836,7 +836,7 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
                 
-                in2 >> name; util.gobble(in2);
+                in2 >> name; gobble(in2);
                 
                 itChimeras = chimerasInFile.find(name);
                     
@@ -877,12 +877,12 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
-			in >> temp1;	util.gobble(in);
-			in >> name;		util.gobble(in);
-			in >> parent1;	util.gobble(in);
-			in >> parent2;	util.gobble(in);
+			in >> temp1;	gobble(in);
+			in >> name;		gobble(in);
+			in >> parent1;	gobble(in);
+			in >> parent2;	gobble(in);
 			in >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> temp9 >> temp10 >> temp11 >> temp12 >> temp13 >> flag;
-			util.gobble(in);
+			gobble(in);
 			
 			//parse name - name will look like U68590/ab=1/
 			string restOfName = "";
@@ -1064,7 +1064,7 @@ int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			seqs[seq.getName()] = seq.getAligned();
 		}
 		in.close();
@@ -1121,7 +1121,7 @@ int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename,
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             itNameMap = nameMap.find(seq.getName());
             
@@ -1193,7 +1193,7 @@ void driverGroups(uchimeData* params){
                     if (params->vars->hasCount) {
                         vector<string> namesOfChimeras;
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             namesOfChimeras.push_back(name);
                         }
                         in.close();
@@ -1204,7 +1204,7 @@ void driverGroups(uchimeData* params){
                         ofstream out;
                         params->util.openOutputFile(params->accnos+thisGroup+".temp", out);
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
                                 vector<string> tempNames; params->util.splitAtComma(itN->second, tempNames);

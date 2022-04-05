@@ -403,7 +403,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
             
 			ifstream in; util.openInputFile(outputNames[i], in);
 			
-            string labels = util.getline(in); util.gobble(in);
+            string labels = util.getline(in); gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);
             
             vector< vector<string> > allLabels;
@@ -461,14 +461,14 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				util.openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
-				string dummy = util.getline(temp);	util.gobble(temp);
+				string dummy = util.getline(temp);	gobble(temp);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dummy + "\t" + toString(fileLabels[combineFileName].size()) + "\n");  } //
 				
 				map<int, vector< vector<string> > > thisFilesLines; //numSampled ->
 				while (!temp.eof()){
                     float numSampled = 0;
-                    string thisLineInfo = util.getline(temp); util.gobble(temp);
+                    string thisLineInfo = util.getline(temp); gobble(temp);
                     vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
                     util.mothurConvert(parsedLine[0], numSampled);
                 
@@ -487,7 +487,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(reads, " ") + "\n");  }
                     }
                     thisFilesLines[numSampled] = theseReads;
-                    util.gobble(temp);
+                    gobble(temp);
                    
                     numSampledSet.insert(numSampled);
 				}

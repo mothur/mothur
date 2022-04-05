@@ -210,7 +210,7 @@ int RemoveOtusCommand::readClassifyOtu(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -220,8 +220,8 @@ int RemoveOtusCommand::readClassifyOtu(){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
             
@@ -263,7 +263,7 @@ int RemoveOtusCommand::readOtuAssociation(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -273,7 +273,7 @@ int RemoveOtusCommand::readOtuAssociation(){
             string otu1 = ""; 
             string otu2 = ""; 
             in >> otu1 >> otu2;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if ((otulabels.count(util.getSimpleLabel(otu1)) == 0) && (otulabels.count(util.getSimpleLabel(otu2)) == 0)){
 				wroteSomething = true;
@@ -314,7 +314,7 @@ int RemoveOtusCommand::readCorrAxes(){
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -323,7 +323,7 @@ int RemoveOtusCommand::readCorrAxes(){
             
             string otu = ""; 
             in >> otu;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (otulabels.count(util.getSimpleLabel(otu)) == 0) {
 				wroteSomething = true;

@@ -23,7 +23,7 @@ void NameAssignment::readMap(){
 		int rowIndex = 0;
 		
 		while(fileHandle){
-			fileHandle >> firstCol;	util.gobble(fileHandle);			//read from first column
+			fileHandle >> firstCol;	gobble(fileHandle);			//read from first column
 			fileHandle >> secondCol;			//read from second column
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: firstCol = " + firstCol + ", secondCol= " + secondCol + "\n"); }
@@ -37,7 +37,7 @@ void NameAssignment::readMap(){
 				
 			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition.\n");   }
 			
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 		}
 		fileHandle.close();
 	

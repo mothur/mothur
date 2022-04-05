@@ -368,7 +368,7 @@ void RemoveSeqsCommand::readFasta(string fastafile){
                     }
 				}else {  removedCount++;  }
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	out.close();
 		
@@ -411,7 +411,7 @@ void RemoveSeqsCommand::readGZFastq(string fastqfile){
             
             //read sequence name
             bool ignore;
-            FastqRead fread(inBoost, ignore, format);  util.gobble(inBoost);
+            FastqRead fread(inBoost, ignore, format);  gobble(inBoost);
             
             if (!ignore) {
                 string name = fread.getName();
@@ -426,7 +426,7 @@ void RemoveSeqsCommand::readGZFastq(string fastqfile){
                     }
                 }else { removedCount++; }
             }
-            util.gobble(inBoost);
+            gobble(inBoost);
         }
         in.close(); inBoost.pop();
         boost::iostreams::close(outBoost);
@@ -476,7 +476,7 @@ void RemoveSeqsCommand::readFastq(string fastqfile){
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName); return; }
 			
             //read sequence name
-            bool ignore; FastqRead fread(in, ignore, format); util.gobble(in);
+            bool ignore; FastqRead fread(in, ignore, format); gobble(in);
             
             if (!ignore) {
                 string name = fread.getName();
@@ -493,7 +493,7 @@ void RemoveSeqsCommand::readFastq(string fastqfile){
                 }else { removedCount++; }
             }
             
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -527,7 +527,7 @@ void RemoveSeqsCommand::readQual(string qualfile){
         
 		while(!in.eof()){	
 			
-            QualityScores qual(in); util.gobble(in);
+            QualityScores qual(in); gobble(in);
 			
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(qual.getName());
@@ -546,7 +546,7 @@ void RemoveSeqsCommand::readQual(string qualfile){
                 }
 			}else {  removedCount++;  }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -706,8 +706,8 @@ void RemoveSeqsCommand::readName(string namefile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> firstCol;		util.gobble(in);		
-			in >> secondCol;	util.gobble(in);
+			in >> firstCol;		gobble(in);		
+			in >> secondCol;	gobble(in);
 			
 			vector<string> parsedNames;
 			util.splitAtComma(secondCol, parsedNames);
@@ -800,7 +800,7 @@ void RemoveSeqsCommand::readGroup(string groupfile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;			util.gobble(in);		//read from first column
+			in >> name;			gobble(in);		//read from first column
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
@@ -814,7 +814,7 @@ void RemoveSeqsCommand::readGroup(string groupfile){
                 }
 			}else {  removedCount++;  }
 					
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -849,8 +849,8 @@ void RemoveSeqsCommand::readTax(string taxfile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -900,12 +900,12 @@ void RemoveSeqsCommand::readAlign(string alignfile){
 		bool wroteSomething = false; int removedCount = 0;
         set<string> uniqueNames;
 		
-        AlignReport report; report.readHeaders(in); util.gobble(in); report.printHeaders(out);
+        AlignReport report; report.readHeaders(in); gobble(in); report.printHeaders(out);
 		
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			report.read(in); util.gobble(in);
+			report.read(in); gobble(in);
             string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
@@ -957,13 +957,13 @@ void RemoveSeqsCommand::readContigs(string contigsreportfile){
         bool wroteSomething = false; int removedCount = 0;
         set<string> uniqueNames;
 
-        ContigsReport report; report.readHeaders(in); util.gobble(in); report.printHeaders(out);
+        ContigsReport report; report.readHeaders(in); gobble(in); report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
 
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             string name = report.getName();
             
             if (!dups) {//adjust name if needed

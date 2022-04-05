@@ -74,7 +74,7 @@ int OptiBlastMatrix::readBlast(){
         if (!fileHandle.eof()) {
             //read in line from file
             fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            util.gobble(fileHandle);
+            gobble(fileHandle);
             
             currentRow = firstName;
             lengthThisSeq = numBases;
@@ -112,7 +112,7 @@ int OptiBlastMatrix::readBlast(){
             
             //read in line from file
             fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            util.gobble(fileHandle);
+            gobble(fileHandle);
             
             string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
             
@@ -287,7 +287,7 @@ int OptiBlastMatrix::readBlast(){
         if (!in.eof()) {
             //read in line from file
             in >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            util.gobble(fileHandle);
+            gobble(fileHandle);
             
             currentRow = firstName;
             lengthThisSeq = numBases;
@@ -337,7 +337,7 @@ int OptiBlastMatrix::readBlast(){
             
             //read in line from file
             in >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-            util.gobble(fileHandle);
+            gobble(fileHandle);
             
             string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
             
@@ -516,7 +516,7 @@ int OptiBlastMatrix::readBlastNames(map<string, long long>& nameAssignment) {
         in >> prevName;
         
         for (int i = 0; i < 11; i++) {  in >> hold;  }
-        util.gobble(in);
+        gobble(in);
         
         //save name in nameMap
         nameAssignment[prevName] = num; num++;
@@ -529,7 +529,7 @@ int OptiBlastMatrix::readBlastNames(map<string, long long>& nameAssignment) {
             in >> name;
             
             for (int i = 0; i < 11; i++) {  in >> hold;  }
-            util.gobble(in);
+            gobble(in);
             
             //is this a new name?
             if (name != prevName) {

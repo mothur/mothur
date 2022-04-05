@@ -39,8 +39,8 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 				if (m->getControl_pressed()) {  break; }
 				
-                in >> name;   util.gobble(in);
-                tax = util.getline(in); util.gobble(in);
+                in >> name;   gobble(in);
+                tax = util.getline(in); gobble(in);
 				
 				if (containsConfidence) {  util.removeConfidences(tax);	}
 				
@@ -73,8 +73,8 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 		int level = 0; string name, tax;
 		
 		while (in) {
-            in >> name;   util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name;   gobble(in);
+            tax = util.getline(in); gobble(in);
 		
 			//count levels in this taxonomy
 			int thisLevel = 0;

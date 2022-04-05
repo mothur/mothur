@@ -177,12 +177,12 @@ void driverDegap(degapData* params){
         
         inFASTA.seekg(params->start);
         
-        if (params->start == 0) {  params->util.zapGremlins(inFASTA); params->util.gobble(inFASTA); }
+        if (params->start == 0) {  params->util.zapGremlins(inFASTA); gobble(inFASTA); }
         
         while(!inFASTA.eof()){
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             if (currSeq.getName() != "") {
                 params->threadWriter->write(">"+currSeq.getName()+"\n"+currSeq.getUnaligned()+"\n");
                 params->count++;

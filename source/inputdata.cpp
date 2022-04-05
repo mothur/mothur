@@ -46,7 +46,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 			ofHandle >> name;
 			orderMap[name] = count;
 			count++;
-			util.gobble(ofHandle);
+			gobble(ofHandle);
 		}
 		ofHandle.close();
 	
@@ -74,7 +74,7 @@ ListVector* InputData::getListVector(){
                 }
 			}else{ list = nullptr;  }
 					
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			return list;
 		}
 		else{
@@ -112,7 +112,7 @@ ListVector* InputData::getListVector(string label){
 					if (nextDistanceLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete list;	}
-					util.gobble(in);
+					gobble(in);
 				}
 			}else{ list = nullptr;  }
 			
@@ -141,7 +141,7 @@ ListVector* InputData::getListVector(string label, bool resetFP){
 			
 				while (fileHandle.eof() != true) {
 					
-					list = new ListVector(fileHandle, nextDistanceLabel, otuTag); util.gobble(fileHandle);
+					list = new ListVector(fileHandle, nextDistanceLabel, otuTag); gobble(fileHandle);
 					nextDistanceLabel = list->getLabel();
                     
                      if (list != nullptr) {
@@ -181,7 +181,7 @@ SharedListVector* InputData::getSharedListVector(){
 
 			}else{ SharedList = nullptr;  }
 					
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			return SharedList;
 		}
 		else{ return nullptr; }
@@ -218,7 +218,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedList;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}else{ SharedList = nullptr;  }
@@ -246,7 +246,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
                 if (SharedOrder->getNumBins() == 0) { delete SharedOrder; SharedOrder =  nullptr; } //no valid groups
 			}else{ SharedOrder = nullptr;  }
 				
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			return SharedOrder;
 			
 		}else{
@@ -281,7 +281,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedOrder;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}else{ SharedOrder = nullptr;  }
@@ -322,7 +322,7 @@ OrderVector* InputData::getOrderVector(){
 				input = new SAbundVector(fileHandle);
 			}
 						
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			
 			output = new OrderVector();	
 			*output = (input->getOrderVector());
@@ -358,7 +358,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -372,7 +372,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -387,7 +387,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -402,7 +402,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -417,7 +417,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 					
 				}
 
@@ -464,7 +464,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(){
                     return SharedList->getSharedRAbundVector();
                 }
             }
-            util.gobble(fileHandle);
+            gobble(fileHandle);
         }
         
         //this is created to signal to calling function that the input file is at eof
@@ -507,7 +507,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 							delete SharedRAbund;
 						}
 					}else{  break;  }
-					util.gobble(in);
+					gobble(in);
 					
 				}
 			}else if (format == "shared") {
@@ -528,7 +528,7 @@ SharedRAbundVectors* InputData::getSharedRAbundVectors(string label){
 							delete SharedList;
 						}
 					}else{  break;  }
-					util.gobble(in);
+					gobble(in);
 					
 				}
 			
@@ -576,7 +576,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(){
 				}
 						
 			}
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 		}
 				
 		//this is created to signal to calling function that the input file is at eof
@@ -613,7 +613,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
 						if (thisLabel == label) {  in.close(); return SharedRelAbund;  }
 						else { delete SharedRelAbund; }
 					}else{  break;  }
-					util.gobble(in);
+					gobble(in);
 				}
 			}else if (format == "sharedfile")  {
 				while (!in.eof()) {
@@ -637,7 +637,7 @@ SharedRAbundFloatVectors* InputData::getSharedRAbundFloatVectors(string label){
                             return SharedRelAbund;
 						}else { delete SharedRAbund; }
 					}else{  break;  }
-					util.gobble(in);
+					gobble(in);
 				}
 			}	
 		}
@@ -668,7 +668,7 @@ SharedCLRVectors* InputData::getSharedCLRVectors(){
                 }
                 return SharedCLR;
             }
-            util.gobble(fileHandle);
+            gobble(fileHandle);
         }
                 
         //this is created to signal to calling function that the input file is at eof
@@ -705,7 +705,7 @@ SharedCLRVectors* InputData::getSharedCLRVectors(string label){
                         if (thisLabel == label) {  in.close(); return SharedCLR;  }
                         else { delete SharedCLR; }
                     }else{  break;  }
-                    util.gobble(in);
+                    gobble(in);
                 }
             }
         }
@@ -741,7 +741,7 @@ SAbundVector* InputData::getSAbundVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}					
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 
 			sabund = new SAbundVector();
 			*sabund = (input->getSAbundVector());
@@ -776,7 +776,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -790,7 +790,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -805,7 +805,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -820,7 +820,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -835,7 +835,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 					
 				}
 
@@ -886,7 +886,7 @@ RAbundVector* InputData::getRAbundVector(){
                     if (shared->getNumBins() == 0) { delete shared; shared = nullptr;  return nullptr; } //no valid groups
                 }
                 
-                util.gobble(fileHandle);
+                gobble(fileHandle);
                 
                 rabund = new RAbundVector();
                 *rabund = (shared->getRAbundVector());
@@ -895,7 +895,7 @@ RAbundVector* InputData::getRAbundVector(){
                 return rabund;
             }
 
-			util.gobble(fileHandle);
+			gobble(fileHandle);
             
 			rabund = new RAbundVector();
 			*rabund = (input->getRAbundVector());
@@ -932,7 +932,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -947,7 +947,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -962,7 +962,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -977,7 +977,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 				}
 
 			}
@@ -992,7 +992,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					util.gobble(in);
+					gobble(in);
 					
 				}
 
@@ -1022,7 +1022,7 @@ RAbundVector* InputData::getRAbundVector(string label){
                         }
                         else { delete shared;  }
                     }else{ in.close(); return nullptr;  }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 
             }

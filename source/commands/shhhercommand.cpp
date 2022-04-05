@@ -130,7 +130,7 @@ ShhherCommand::ShhherCommand(string option) : Command() {
                 ifstream flowFilesFile;
                 util.openInputFile(flowFilesFileName, flowFilesFile);
                 while(flowFilesFile){
-                    string fName = util.getline(flowFilesFile); util.gobble(flowFilesFile);
+                    string fName = util.getline(flowFilesFile); gobble(flowFilesFile);
                     
                     //check to make sure both are able to be opened
                     bool ableToOpen = util.checkLocations(fName, current->getLocations());
@@ -307,7 +307,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
         ifstream in; util.openInputFile(filename, in);
         
         int thisNumFLows = 0;
-        in >> thisNumFLows; util.gobble(in);
+        in >> thisNumFLows; gobble(in);
         
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
@@ -321,7 +321,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
             int numLinesWrote = 0;
             for (int i = 0; i < largeSize; i++) {
                 if (in.eof()) { break; }
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 out << line << endl;
                 numLinesWrote++;
             }
@@ -624,7 +624,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 				int intI = int(100 * intensity + 0.0001);
 				thisFlowDataIntI.push_back(intI);
 			}
-			util.gobble(flowFile);
+			gobble(flowFile);
 		}
 		flowFile.close();
 		

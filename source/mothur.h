@@ -176,6 +176,14 @@ static inline void trimWhiteSpace(string &s) {
     rtrim(s);
 }
 
+//skip over white space
+template <typename In>
+static inline void gobble(In& f) {
+    char d;
+    while(isspace(d=f.get()))        { ;}
+    if(!f.eof()) { f.putback(d); }
+}
+
 /**************************************************************************************************/
 
 template <typename Out>

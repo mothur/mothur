@@ -723,7 +723,7 @@ int driverPcr(pcrData* params){
             
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             
             if (params->fileAligned) { //assume aligned until proven otherwise
                 lengths.insert(currSeq.getAligned().length());
@@ -975,7 +975,7 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
         while(!inFasta.eof()) {
             if(m->getControl_pressed()) { break; }
             
-            Sequence seq(inFasta); util.gobble(inFasta);
+            Sequence seq(inFasta); gobble(inFasta);
             
             string name = seq.getName();
             int thisStart = -1; int thisEnd = -1;

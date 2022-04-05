@@ -27,7 +27,7 @@ ProteinDB::ProteinDB(ifstream& filehandle) : StorageDatabase() {
         //read through file
         while (!filehandle.eof()) {
             
-            Protein newProteinSequence(filehandle);  util.gobble(filehandle);
+            Protein newProteinSequence(filehandle);  gobble(filehandle);
             
             if (newProteinSequence.getName() != "") {
                 if (length == 0) { length = newProteinSequence.getAligned().size(); }

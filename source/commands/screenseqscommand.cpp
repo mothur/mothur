@@ -583,7 +583,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
         ifstream in; util.openInputFile(alignreport, in);
         
         AlignReport report;
-        report.readHeaders(in); util.gobble(in);
+        report.readHeaders(in); gobble(in);
         report.printHeaders(out);
         
         int count = 0;
@@ -592,7 +592,7 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             
             string trashCode = ""; bool goodSeq = true;		//	innocent until proven guilty
             
@@ -627,14 +627,14 @@ int ScreenSeqsCommand::screenAlignReport(map<string, string>& badSeqNames){
             ofstream out2; util.openOutputFile(outSummary, out2);
             ifstream in2;  util.openInputFile(outSummary+".temp", in2);
             
-            report.readHeaders(in2); util.gobble(in2);
+            report.readHeaders(in2); gobble(in2);
             report.printHeaders(out2);
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
-                report.read(in2); util.gobble(in2);
+                report.read(in2); gobble(in2);
                 
                 //are you good?
                 if (badSeqNames.count(report.getQueryName()) == 0) { report.print(out2); }
@@ -666,7 +666,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
         ifstream in;util.openInputFile(contigsreport, in);
         
         ContigsReport report;
-        report.readHeaders(in); util.gobble(in);
+        report.readHeaders(in); gobble(in);
         report.printHeaders(out);
         
         int count = 0;
@@ -675,7 +675,7 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             
             bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
@@ -702,14 +702,14 @@ int ScreenSeqsCommand::screenContigs(map<string, string>& badSeqNames){
             ofstream out2; util.openOutputFile(outSummary, out2);
             ifstream in2; util.openInputFile(outSummary+".temp", in2);
             
-            report.readHeaders(in2); util.gobble(in2);
+            report.readHeaders(in2); gobble(in2);
             report.printHeaders(out2);
             
             while (!in2.eof()) {
                 
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
-                report.read(in2); util.gobble(in2);
+                report.read(in2); gobble(in2);
                 
                 if (badSeqNames.count(report.getName()) == 0) { report.print(out2); }
             }
@@ -748,7 +748,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; util.gobble(in);
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; gobble(in);
             
             bool goodSeq = true;		//	innocent until proven guilty
             string trashCode = "";
@@ -788,7 +788,7 @@ int ScreenSeqsCommand::screenSummary(map<string, string>& badSeqNames){
                 if (m->getControl_pressed()) { in2.close(); out2.close(); return 0; }
                 
                 //seqname	start	end	nbases	ambigs	polymer	numSeqs
-                in2 >> name >> start >> end >> length >> ambigs >> polymer >> numReps; util.gobble(in2);
+                in2 >> name >> start >> end >> length >> ambigs >> polymer >> numReps; gobble(in2);
                 
                 if (badSeqNames.count(name) == 0) { //are you good?
                     out2 << name << '\t' << start  << '\t' << end  << '\t' << length  << '\t' << ambigs  << '\t' << polymer  << '\t' << numReps << endl;	
@@ -935,7 +935,7 @@ void driverScreen(sumScreenData* params){
         inFASTA.seekg(params->start);
 
         //print header if you are process 0
-        if (params->start == 0) { params->util.zapGremlins(inFASTA); params->util.gobble(inFASTA); }
+        if (params->start == 0) { params->util.zapGremlins(inFASTA); gobble(inFASTA); }
 
 		bool done = false;
 		params->count = 0;
@@ -944,7 +944,7 @@ void driverScreen(sumScreenData* params){
 		
 			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+			Sequence currSeq(inFASTA); gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = true;		//	innocent until proven guilty
                 string trashCode = "";

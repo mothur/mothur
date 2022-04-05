@@ -668,7 +668,7 @@ int SffInfoCommand::parseSffTxt() {
 		string flowgramCode = util.getline(inSFF);
 		string flowChars = util.getline(inSFF);
 		string keySequence = util.getline(inSFF);
-		util.gobble(inSFF);
+		gobble(inSFF);
 		
 		string seqName;
 		
@@ -684,18 +684,18 @@ int SffInfoCommand::parseSffTxt() {
 			//parse read header
 			inSFF >> seqName;
 			seqName = seqName.substr(1);
-			util.gobble(inSFF);
+			gobble(inSFF);
 			read.setName(seqName);
 			
 			string runPrefix = parseHeaderLineToString(inSFF);		read.setTimeStamp(runPrefix);
 			string regionNumber = parseHeaderLineToString(inSFF);	read.setRegion(regionNumber);
 			string xyLocation = parseHeaderLineToString(inSFF);		read.setXY(xyLocation);
-			util.gobble(inSFF);
+			gobble(inSFF);
 				
 			string runName = parseHeaderLineToString(inSFF);
 			string analysisName = parseHeaderLineToString(inSFF);
 			string fullPath = parseHeaderLineToString(inSFF);
-			util.gobble(inSFF);
+			gobble(inSFF);
 			
             unsigned short readHeaderLen = parseHeaderLineToShort(inSFF); read.setHeaderLength(readHeaderLen);
             unsigned short nameLength = parseHeaderLineToShort(inSFF); read.setNameLength(nameLength);
@@ -704,7 +704,7 @@ int SffInfoCommand::parseSffTxt() {
 			unsigned short clipQualRight = parseHeaderLineToShort(inSFF); read.setClipQualRight(clipQualRight);
             unsigned short clipAdapLeft = parseHeaderLineToShort(inSFF); read.setClipAdapterLeft(clipAdapLeft);
             unsigned short clipAdapRight = parseHeaderLineToShort(inSFF); read.setClipAdapterRight(clipAdapRight);
-			util.gobble(inSFF);
+			gobble(inSFF);
 				
 			//parse read
             vector<unsigned short> flowVector = parseHeaderLineToFloatVector(inSFF, numFlows);	read.setFlowgrams(flowVector);
@@ -717,7 +717,7 @@ int SffInfoCommand::parseSffTxt() {
 			
 			string bases = parseHeaderLineToString(inSFF); read.setBases(bases);
 			vector<unsigned int> qualityScores = parseHeaderLineToIntVector(inSFF, numBases); read.setQualScores(qualityScores);
-			util.gobble(inSFF);
+			gobble(inSFF);
 					
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			bool print = true;
@@ -761,7 +761,7 @@ int SffInfoCommand::parseHeaderLineToInt(ifstream& file){
 			char c = file.get(); 
 			if (c == ':'){ file >> number; break; }
 		}
-		util.gobble(file);
+		gobble(file);
 		return number;
 	}
 	catch(exception& e) {
@@ -780,7 +780,7 @@ unsigned short SffInfoCommand::parseHeaderLineToShort(ifstream& file){
             
             if (c == ':'){ file >> text; break; }
         }
-        util.gobble(file);
+        gobble(file);
         
         unsigned short value;
         util.mothurConvert(text, value);
@@ -801,7 +801,7 @@ string SffInfoCommand::parseHeaderLineToString(ifstream& file){
 			
 			if (c == ':'){ file >> text; break; }
 		}
-		util.gobble(file);
+		gobble(file);
 		
 		return text;
 	}
@@ -823,7 +823,7 @@ vector<unsigned short> SffInfoCommand::parseHeaderLineToFloatVector(ifstream& fi
 				break;
 			}
 		}
-		util.gobble(file);	
+		gobble(file);	
 		return floatVector;
 	}
 	catch(exception& e) {
@@ -844,7 +844,7 @@ vector<unsigned int> SffInfoCommand::parseHeaderLineToIntVector(ifstream& file, 
 				break;
 			}
 		}
-		util.gobble(file);	
+		gobble(file);	
 		return intVector;
 	}
 	catch(exception& e) {

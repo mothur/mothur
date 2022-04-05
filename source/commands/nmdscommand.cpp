@@ -465,7 +465,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 	try {
 		ifstream in; util.openInputFile(axesfile, in);
 		
-		string headerLine = util.getline(in); util.gobble(in);
+		string headerLine = util.getline(in); gobble(in);
 		
 		//count the number of axis you are reading
 		bool done = false;
@@ -495,7 +495,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
-			in >> group; util.gobble(in);
+			in >> group; gobble(in);
 			
 			bool ignore = false;
 			if (!util.inUsersGroups(group, names)) { ignore = true; m->mothurOut(group + " is in your axes file and not in your distance file, ignoring.\n");  }
@@ -511,7 +511,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 			
 			if (!ignore) {	orderedAxes[group] = thisGroupsAxes; }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 				

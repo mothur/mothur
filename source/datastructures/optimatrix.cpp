@@ -132,14 +132,14 @@ int OptiMatrix::readPhylip(){
                 
                 if (m->getControl_pressed()) {  in.close();   return 0; }
                 
-                in >> name; util.gobble(in);
+                in >> name; gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(long long j=0;j<i;j++){
                     
-                    in >> distance; util.gobble(in);
+                    in >> distance; gobble(in);
                     
                     if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -155,18 +155,18 @@ int OptiMatrix::readPhylip(){
         }else{
             long long index = nseqs;
             
-            for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
+            for(long long i=0;i<nseqs;i++){ in >> distance;  } gobble(in);
             
             for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  in.close();   return 0; }
                 
-                in >> name; util.gobble(in);
+                in >> name; gobble(in);
                 
                 if (namefile != "") { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(long long j=0;j<nseqs;j++){
-                    in >> distance; util.gobble(in);
+                    in >> distance; gobble(in);
 
                     if (util.isEqual(distance,-1)) { distance = 1000000; } else if (sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
                     
@@ -217,9 +217,9 @@ int OptiMatrix::readColumn(){
         map<long long, long long> singletonIndexSwap;
         while(fileHandle){  //let's assume it's a triangular matrix...
             
-            fileHandle >> firstName; util.gobble(fileHandle);
-            fileHandle >> secondName; util.gobble(fileHandle);
-            fileHandle >> distance;	util.gobble(fileHandle); // get the row and column names and distance
+            fileHandle >> firstName; gobble(fileHandle);
+            fileHandle >> secondName; gobble(fileHandle);
+            fileHandle >> distance;	gobble(fileHandle); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
@@ -269,9 +269,9 @@ int OptiMatrix::readColumn(){
         
         while(in){  //let's assume it's a triangular matrix...
             
-            in >> firstName; util.gobble(in);
-            in >> secondName; util.gobble(in);
-            in >> distance;	util.gobble(in); // get the row and column names and distance
+            in >> firstName; gobble(in);
+            in >> secondName; gobble(in);
+            in >> distance;	gobble(in); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             

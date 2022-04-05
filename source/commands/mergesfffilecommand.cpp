@@ -330,7 +330,7 @@ void MergeSfffilesCommand::readFile(){
             
             if (m->getControl_pressed()) { return; }
             
-            in >> filename; util.gobble(in);
+            in >> filename; gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
             

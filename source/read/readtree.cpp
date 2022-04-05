@@ -37,14 +37,14 @@ int ReadTree::AssembleTrees() {
 int ReadTree::readSpecialChar(istream& f, char c, string name) {
     try {
         Utils util;
-		util.gobble(f);
+		gobble(f);
 		char d = f.get();
 	
 		if(d == EOF){ m->mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n"); exit(1); }
         
 		if(d != c){ m->mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n"); exit(1); }
         
-		if(d == ')' && f.peek() == '\n'){ util.gobble(f); }
+		if(d == ')' && f.peek() == '\n'){ gobble(f); }
 		return d;
 	}
 	catch(exception& e) {
@@ -57,7 +57,7 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 int ReadTree::readNodeChar(istream& f) {
 	try {
         Utils util;
-		util.gobble(f);
+		gobble(f);
 		char d = f.get();
 
 		if(d == EOF){ m->mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n"); exit(1); }
@@ -77,7 +77,7 @@ float ReadTree::readBranchLength(istream& f) {
 		float b;
 	
 		if(!(f >> b)){ m->mothurOut("Error: Missing branch length in input tree.\n"); exit(1); }
-		util.gobble(f);
+		gobble(f);
 		return b;
 	}
 	catch(exception& e) {
@@ -125,7 +125,7 @@ int ReadNewickTree::read(CountTable* ct) {
 				
 				//save trees for later commands
 				Trees.push_back(T); 
-				util.gobble(filehandle);
+				gobble(filehandle);
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {

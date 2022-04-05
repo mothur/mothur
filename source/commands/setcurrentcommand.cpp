@@ -383,7 +383,7 @@ int SetCurrentCommand::readCurrentFiles(){
             
             if (m->getControl_pressed()) { break; }
             
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             vector<string> pieces;
             util.splitAtChar(line, pieces, '=');

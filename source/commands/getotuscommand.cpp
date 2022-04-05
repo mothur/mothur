@@ -218,8 +218,8 @@ int GetOtusCommand::readClassifyOtu(){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("Otu=" + otu + ", size=" + toString(size) + ", tax=" + tax + "\n"); }
             
@@ -273,7 +273,7 @@ int GetOtusCommand::readOtuAssociation(){
             string otu1 = ""; 
             string otu2 = ""; 
             in >> otu1 >> otu2;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if ((labels.count(util.getSimpleLabel(otu1)) != 0) && (labels.count(util.getSimpleLabel(otu2)) != 0)){
 				wroteSomething = true;
@@ -324,7 +324,7 @@ int GetOtusCommand::readCorrAxes(){
             
             string otu = ""; 
             in >> otu;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (labels.count(util.getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;

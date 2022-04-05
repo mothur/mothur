@@ -181,8 +181,8 @@ int SummaryTaxCommand::execute(){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; util.gobble(in);
-            taxon = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            taxon = util.getline(in); gobble(in);
             
             string newTax = util.addUnclassifieds(taxon, maxLevel, true);
             

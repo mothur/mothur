@@ -138,7 +138,7 @@ int MakeGroupCommand::execute(){
 				
                 if (m->getControl_pressed()) { break; }
                 
-				Sequence seq(in); util.gobble(in);
+				Sequence seq(in); gobble(in);
 								
                 if (seq.getName() != "") {	seqGroup[seq.getName()] = groupsNames[i];	count++;	}
 			}

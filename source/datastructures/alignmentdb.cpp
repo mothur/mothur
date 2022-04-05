@@ -30,7 +30,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
         ifstream fastaFile; util.openInputFile(fastaFileName, fastaFile);
         
         while (!fastaFile.eof()) {
-            Sequence temp(fastaFile);  util.gobble(fastaFile);
+            Sequence temp(fastaFile);  gobble(fastaFile);
             
             if (m->getControl_pressed()) {  templateSequences.clear(); break;  }
             

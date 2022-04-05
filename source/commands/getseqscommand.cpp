@@ -366,7 +366,7 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
             
             //read sequence name
             bool ignore;
-            FastqRead fread(inBoost, ignore, format);  util.gobble(inBoost);
+            FastqRead fread(inBoost, ignore, format);  gobble(inBoost);
             
             if (!ignore) {
                 string name = fread.getName();
@@ -382,7 +382,7 @@ void GetSeqsCommand::readGZFastq(string fastqfile){
                     }
                 }
             }
-            util.gobble(inBoost);
+            gobble(inBoost);
         }
         in.close(); inBoost.pop();
         boost::iostreams::close(outBoost);
@@ -426,7 +426,7 @@ void GetSeqsCommand::readFastq(string fastqfile){
 			
 			//read sequence name
             bool ignore;
-            FastqRead fread(in, ignore, format); util.gobble(in);
+            FastqRead fread(in, ignore, format); gobble(in);
             
 			if (!ignore) {
                 string name = fread.getName();
@@ -443,7 +443,7 @@ void GetSeqsCommand::readFastq(string fastqfile){
                 }
             }
             
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
         
@@ -508,7 +508,7 @@ void GetSeqsCommand::readFasta(string fastafile){
                     }
                 }
             }
-            util.gobble(in);
+            gobble(in);
         }
         in.close(); out.close();
         
@@ -546,7 +546,7 @@ void GetSeqsCommand::readQual(string qualfile){
         set<string> uniqueNames;
 		while(!in.eof()){
             
-			QualityScores qual(in); util.gobble(in);
+			QualityScores qual(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(qual.getName());
@@ -568,7 +568,7 @@ void GetSeqsCommand::readQual(string qualfile){
                 }
             }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		out.close();
@@ -733,8 +733,8 @@ void GetSeqsCommand::readName(string namefile){
         
             if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-            in >> firstCol;            util.gobble(in);
-            in >> secondCol;        util.gobble(in);
+            in >> firstCol;            gobble(in);
+            in >> secondCol;        gobble(in);
             
             string hold = "";
             if (dups) { hold = secondCol; }
@@ -848,8 +848,8 @@ void GetSeqsCommand::readGroup(string groupfile){
 
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			in >> name;		util.gobble(in);		//read from first column
-            in >> group;	util.gobble(in);		//read from second column
+			in >> name;		gobble(in);		//read from first column
+            in >> group;	gobble(in);		//read from second column
             
             if (names.count(name) != 0) {
                 if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
@@ -900,8 +900,8 @@ void GetSeqsCommand::readTax(string taxfile){
 
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -953,7 +953,7 @@ void GetSeqsCommand::readAlign(string alignfile){
         ofstream out; util.openOutputFile(outputFileName, out);
         ifstream in; util.openInputFile(alignfile, in);
 		
-        AlignReport report; report.readHeaders(in); util.gobble(in);
+        AlignReport report; report.readHeaders(in); gobble(in);
         report.printHeaders(out);
 		
         bool wroteSomething = false; int selectedCount = 0;
@@ -963,7 +963,7 @@ void GetSeqsCommand::readAlign(string alignfile){
 		
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			report.read(in); util.gobble(in);
+			report.read(in); gobble(in);
             string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
@@ -1015,14 +1015,14 @@ void GetSeqsCommand::readContigs(string contigsreportfile){
         set<string> uniqueNames;
         ifstream in; util.openInputFile(contigsreportfile, in);
         
-        ContigsReport report; report.readHeaders(in); util.gobble(in);
+        ContigsReport report; report.readHeaders(in); gobble(in);
         report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
             
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             string name = report.getName();
             
             if (!dups) {//adjust name if needed
@@ -1177,13 +1177,13 @@ int GetSeqsCommand::compareAccnos(string namefile){
 				
 				string thisname, repnames;
 				
-				inName >> thisname;		util.gobble(inName);		//read from first column
+				inName >> thisname;		gobble(inName);		//read from first column
 				inName >> repnames;			//read from second column
 				
 				int num = util.getNumNames(repnames);
 				nameCount[thisname] = num;
 				
-				util.gobble(inName);
+				gobble(inName);
 			}
 			inName.close();	
 		}
@@ -1206,7 +1206,7 @@ int GetSeqsCommand::compareAccnos(string namefile){
 				namesDups.insert(name);
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		

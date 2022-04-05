@@ -122,12 +122,12 @@ bool CountTable::testGroups(string file, vector<string>& groups) {
         m = MothurOut::getInstance(); hasGroups = false; total = 0; isCompressed = true;
         ifstream in; util.openInputFile(file, in);
 
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         
         if (headers[0] == '#') { //is this a count file in compressed form
             //read headers
-            headers = util.getline(in); util.gobble(in); //gets compressed group name map line
-            headers = util.getline(in); util.gobble(in);
+            headers = util.getline(in); gobble(in); //gets compressed group name map line
+            headers = util.getline(in); gobble(in);
         }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
@@ -222,7 +222,7 @@ int CountTable::createTable(string namefile, string groupfile, vector<string> se
                 if (m->getControl_pressed()) { break; }
                 
                 string firstCol, secondCol;
-                in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
+                in >> firstCol; gobble(in); in >> secondCol; gobble(in);
                 
                 util.checkName(firstCol);
                 util.checkName(secondCol);
@@ -350,7 +350,7 @@ int CountTable::readTable(string file, string format) {
 
                 if (m->getControl_pressed()) { break; }
 
-                Sequence seq(in); util.gobble(in);
+                Sequence seq(in); gobble(in);
                 string name = seq.getName();
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(1) + "\n"); }
 
@@ -420,12 +420,12 @@ bool CountTable::isCountTable(string file) {
         filename = file; isCompressed = true;
         ifstream in; util.openInputFile(filename, in);
         
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         
         if (headers[0] == '#') { //is this a count file in compressed form
             //read headers
-            headers = util.getline(in); util.gobble(in); //gets compressed group name map line
-            headers = util.getline(in); util.gobble(in);
+            headers = util.getline(in); gobble(in); //gets compressed group name map line
+            headers = util.getline(in); gobble(in);
         }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
@@ -470,13 +470,13 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
     try {
         if (!readGroups) { selectedGroups.clear(); } isCompressed = true;
 
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         
         map<string, int> headerIndex2Group;
         //#1,F003D000	2,F003D002	3,F003D004	4,F003D006	5,F003D008	6,F003D142	7,F003D144	8,F003D146	9,F003D148	10,F003D150
         if (headers[0] == '#') { //is this a count file in compressed form
             //read headers
-            headers = util.getline(in); util.gobble(in); //gets compressed group name map line
+            headers = util.getline(in); gobble(in); //gets compressed group name map line
             headers = headers.substr(1);
             
             vector<string> groupNameHeaders = util.splitWhiteSpace(headers);
@@ -488,7 +488,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                 headerIndex2Group[groupName] = a-1;
             }
             
-            headers = util.getline(in); util.gobble(in);
+            headers = util.getline(in); gobble(in);
         }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
@@ -540,7 +540,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
 
             if (m->getControl_pressed()) { break; }
 
-            in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
+            in >> name; gobble(in); in >> thisTotal; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
 
             if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct.\n"); 
@@ -554,7 +554,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                         //read this seqs groups abundances
                         thisTotal = 0;
                         if (isCompressed) {
-                            string groupInfo = util.getline(in); util.gobble(in);
+                            string groupInfo = util.getline(in); gobble(in);
                             vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                             
                             vector<intPair> abunds;
@@ -578,7 +578,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                         }else {
                             for (int i = 0; i < numGroupsInFile; i++) {
                                 int thisGroupAbund = 0;
-                                in >> thisGroupAbund; util.gobble(in);
+                                in >> thisGroupAbund; gobble(in);
                                 string groupName = originalGroupIndexes[i]; //order of groups in file may not be sorted
                                 
                                 if (setOfSelectedGroups.count(groupName) != 0) { //we selected this group
@@ -592,7 +592,7 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                     }else {
                         
                             if (isCompressed) {
-                                string groupInfo = util.getline(in); util.gobble(in);
+                                string groupInfo = util.getline(in); gobble(in);
                                 vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                                 
                                 vector<intPair> abunds;
@@ -614,14 +614,14 @@ int CountTable::readTable(ifstream& in, bool readGroups, bool mothurRunning, vec
                             else {
                                 for (int i = 0; i < numGroupsInFile; i++) {
                                     int thisIndex = indexGroupMap[originalGroupIndexes[i]];
-                                    in >> groupCounts[thisIndex]; util.gobble(in);
+                                    in >> groupCounts[thisIndex]; gobble(in);
                                     totalGroups[thisIndex] += groupCounts[thisIndex];
                                 }
                             }
                         
                     }
                 }else { //read and discard
-                    util.getline(in); util.gobble(in);
+                    util.getline(in); gobble(in);
                 }
             }
             
@@ -674,13 +674,13 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unor
         filename = file; isCompressed = true;
         ifstream in; util.openInputFile(filename, in);
         
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         
         map<string, int> headerIndex2Group;
         //#1,F003D000	2,F003D002	3,F003D004	4,F003D006	5,F003D008	6,F003D142	7,F003D144	8,F003D146	9,F003D148	10,F003D150
         if (headers[0] == '#') { //is this a count file in compressed form
             //read headers
-            headers = util.getline(in); util.gobble(in); //gets compressed group name map line
+            headers = util.getline(in); gobble(in); //gets compressed group name map line
             headers = headers.substr(1);
             
             vector<string> groupNameHeaders = util.splitWhiteSpace(headers);
@@ -692,7 +692,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unor
                 headerIndex2Group[groupName] = a-1;
             }
             
-            headers = util.getline(in); util.gobble(in);
+            headers = util.getline(in); gobble(in);
         }else { isCompressed = false; }
         
         vector<string> columnHeaders = util.splitWhiteSpace(headers);
@@ -735,7 +735,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unor
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; util.gobble(in); in >> thisTotal; util.gobble(in);
+            in >> name; gobble(in); in >> thisTotal; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + name + '\t' + toString(thisTotal) + "\n"); }
             
             if ((thisTotal == 0) && !mothurRunning) { error=true; m->mothurOut("[ERROR]: Your count table contains a sequence named " + name + " with a total=0. Please correct.\n");
@@ -754,7 +754,7 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unor
             if (columnHeaders.size() > 2) { //file contains groups
                 if (readGroups && saveSeq) { //user wants to save them
                     if (isCompressed) {
-                        string groupInfo = util.getline(in); util.gobble(in);
+                        string groupInfo = util.getline(in); gobble(in);
                         vector<string> groupNodes = util.splitWhiteSpace(groupInfo);
                         
                         vector<intPair> abunds;
@@ -775,9 +775,9 @@ int CountTable::readTable(string file, bool readGroups, bool mothurRunning, unor
                         groupCounts = expandAbunds(abunds);
                     }
                     else {
-                        for (int i = 0; i < numGroupsInFile; i++) { int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; util.gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex]; }
+                        for (int i = 0; i < numGroupsInFile; i++) { int thisIndex = indexGroupMap[originalGroupIndexes[i]]; in >> groupCounts[thisIndex]; gobble(in); totalGroups[thisIndex] += groupCounts[thisIndex]; }
                     }
-                }else { util.getline(in); util.gobble(in); }//read and discard
+                }else { util.getline(in); gobble(in); }//read and discard
             }
             
             if (saveSeq) {

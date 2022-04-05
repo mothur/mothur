@@ -113,7 +113,7 @@ int MergeTaxSummaryCommand::execute(){
         for (int i = 0; i < fileNames.size(); i++) {
             
             ifstream in; util.openInputFile(fileNames[i], in);
-            string temp = util.getline(in); util.gobble(in);
+            string temp = util.getline(in); gobble(in);
             vector<string> headers = util.splitWhiteSpace(temp);
             
             vector<string> thisFilesGroups;
@@ -129,9 +129,9 @@ int MergeTaxSummaryCommand::execute(){
                 
                 if (m->getControl_pressed()) {   return 0;  }
                 
-                in >> level >> rankId; util.gobble(in);
+                in >> level >> rankId; gobble(in);
                
-                string rest = util.getline(in); util.gobble(in);
+                string rest = util.getline(in); gobble(in);
                 vector<string> pieces = util.splitWhiteSpaceWithQuotes(rest);
                 
                 map<string, int> groupCounts;

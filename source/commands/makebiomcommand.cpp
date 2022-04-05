@@ -432,7 +432,7 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
             vector<string> groupNames, metadataLabels;
             map<string, vector<string> > lines;
             
-            string headerLine = util.getline(in); util.gobble(in);
+            string headerLine = util.getline(in); gobble(in);
             vector<string> pieces = util.splitWhiteSpace(headerLine);
             
             //save names of columns you are reading
@@ -447,10 +447,10 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
                 if (m->getControl_pressed()) { break; }
                 
                 string group = "";
-                in >> group; util.gobble(in);
+                in >> group; gobble(in);
                 groupNames.push_back(group);
                 
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 vector<string> thisPieces = util.splitWhiteSpaceWithQuotes(line);
                 
                 if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + group + " " + util.getStringFromVector(thisPieces, ", ") + "\n"); }
@@ -458,7 +458,7 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundVectors*& lookup){
                 if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
                 else {  if (util.inUsersGroups(group, Groups)) { lines[group] = thisPieces; } }
                 
-                util.gobble(in);
+                gobble(in);
             }
             in.close();
             
@@ -506,7 +506,7 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& loo
             vector<string> groupNames, metadataLabels;
             map<string, vector<string> > lines;
             
-            string headerLine = util.getline(in); util.gobble(in);
+            string headerLine = util.getline(in); gobble(in);
             vector<string> pieces = util.splitWhiteSpace(headerLine);
             
             //save names of columns you are reading
@@ -521,16 +521,16 @@ vector<string> MakeBiomCommand::getSampleMetaData(SharedRAbundFloatVectors*& loo
                 if (m->getControl_pressed()) { break; }
                 
                 string group = "";
-                in >> group; util.gobble(in);
+                in >> group; gobble(in);
                 groupNames.push_back(group);
                 
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 vector<string> thisPieces = util.splitWhiteSpaceWithQuotes(line);
                 
                 if (thisPieces.size() != count) { m->mothurOut("[ERROR]: expected " + toString(count) + " items of data for sample " + group + " read " + toString(thisPieces.size()) + ", quitting.\n"); }
                 else {  if (util.inUsersGroups(group, Groups)) { lines[group] = thisPieces; } }
                 
-                util.gobble(in);
+                gobble(in);
             }
             in.close();
             

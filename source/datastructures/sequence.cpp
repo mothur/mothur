@@ -411,7 +411,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){
-				util.gobble(fastaFile);  //in case its a \r\n situation
+				gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;
@@ -436,7 +436,7 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
         while(fastaFile){
             letter=fastaFile.get();
             if((letter == '\r') || (letter == '\n') || letter == -1){
-                util.gobble(fastaFile);  //in case its a \r\n situation
+                gobble(fastaFile);  //in case its a \r\n situation
                 break;
             }else {
                 temp += letter;
@@ -490,7 +490,7 @@ string Sequence::getCommentString(istringstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){  
-				util.gobble(fastaFile);  //in case its a \r\n situation
+				gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;

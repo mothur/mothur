@@ -427,7 +427,7 @@ void GetGroupsCommand::readFasta(){
 					}
 				}
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -459,14 +459,14 @@ void GetGroupsCommand::readFlow(){
         bool wroteSomething = false;
         int selectedCount = 0;
         
-        in >> flows; util.gobble(in); //read numflows
+        in >> flows; gobble(in); //read numflows
         out << flows << endl;
         
         while(!in.eof()){
             if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
             
-            in >> name; util.gobble(in);
-            flows = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            flows = util.getline(in); gobble(in);
 
             if (name != "") {
                 //if this name is in the accnos file
@@ -486,7 +486,7 @@ void GetGroupsCommand::readFlow(){
                     }
                 }
             }
-            util.gobble(in);
+            gobble(in);
         }
         in.close();
         out.close();
@@ -658,7 +658,7 @@ void GetGroupsCommand::readName(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> firstCol;		util.gobble(in);		
+			in >> firstCol;		gobble(in);		
 			in >> secondCol;			
 			
 			vector<string> parsedNames;
@@ -701,7 +701,7 @@ void GetGroupsCommand::readName(){
 				}
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		out.close();
@@ -737,7 +737,7 @@ void GetGroupsCommand::readGroup(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;		util.gobble(in);		//read from first column
+			in >> name;		gobble(in);		//read from first column
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
@@ -747,7 +747,7 @@ void GetGroupsCommand::readGroup(){
 				selectedCount++;
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		out.close();
@@ -817,8 +817,8 @@ void GetGroupsCommand::readTax(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
 			
 			//if this name is in the accnos file
 			if (names.count(name) != 0) {
@@ -984,7 +984,7 @@ void GetGroupsCommand::readPhylip(){
             
             ifstream in3;
             util.openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; util.gobble(in3);
+            in3 >> nseqs; gobble(in3);
             char buffer[4096];
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -1023,7 +1023,7 @@ void GetGroupsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return; }
             
-            in >> firstName >> secondName >> distance; util.gobble(in);
+            in >> firstName >> secondName >> distance; gobble(in);
             
             //are both names in the accnos file
             if ((names.count(firstName) != 0) && (names.count(secondName) != 0)) {

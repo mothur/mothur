@@ -109,7 +109,7 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
             
             if (m->getControl_pressed()) { return container; }
             
-            Sequence* current = new Sequence(in);  util.gobble(in);
+            Sequence* current = new Sequence(in);  gobble(in);
             
             if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
             else if (length != current->getAligned().length()) {   unaligned = true;	}

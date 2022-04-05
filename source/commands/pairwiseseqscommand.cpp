@@ -897,7 +897,7 @@ bool PairwiseSeqsCommand::sanityCheck() {
         while (!inFasta.eof()) {
             if (m->getControl_pressed()) {  inFasta.close(); return good;  }
             
-            Sequence temp(inFasta);  util.gobble(inFasta);
+            Sequence temp(inFasta);  gobble(inFasta);
             
             if (temp.getName() != "") {
                 namesOldFasta.insert(temp.getName());  //save name
@@ -918,7 +918,7 @@ bool PairwiseSeqsCommand::sanityCheck() {
         while (!inDist.eof()) {
             if (m->getControl_pressed()) {  inDist.close(); outDist.close(); util.mothurRemove(outputFile); return good;  }
             
-            inDist >> name1; util.gobble(inDist); inDist >> name2; util.gobble(inDist); inDist >> dist; util.gobble(inDist);
+            inDist >> name1; gobble(inDist); inDist >> name2; gobble(inDist); inDist >> dist; gobble(inDist);
             
             //both names are in fasta file and distance is below cutoff
             if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }

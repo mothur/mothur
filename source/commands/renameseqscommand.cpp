@@ -528,7 +528,7 @@ void RenameSeqsCommand::readFasta(map<string, string>& oldMap){
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             it = oldMap.find(seq.getName());
             if (it == oldMap.end()) { //not in other files, create name
@@ -597,10 +597,10 @@ string RenameSeqsCommand::readFastq(map<string, string>& oldMap){
             
             if (gz) {
 #ifdef USE_BOOST
-            fread = new FastqRead(inFastqBoost, tignore, format);  util.gobble(inFastqBoost);
+            fread = new FastqRead(inFastqBoost, tignore, format);  gobble(inFastqBoost);
 #endif
             }else {
-                fread = new FastqRead(inFastq, tignore, format);  util.gobble(inFastq);
+                fread = new FastqRead(inFastq, tignore, format);  gobble(inFastq);
             }
             string newName = toString(count);
             
@@ -674,7 +674,7 @@ void RenameSeqsCommand::readQual(map<string, string>& oldMap){
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
             
-            QualityScores qual(in); util.gobble(in);
+            QualityScores qual(in); gobble(in);
             
             it = oldMap.find(qual.getName());
             if (it == oldMap.end()) {
@@ -716,8 +716,8 @@ void RenameSeqsCommand::readTax(map<string, string>& oldMap){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             it = oldMap.find(name);
             if (it == oldMap.end()) {
@@ -753,7 +753,7 @@ void RenameSeqsCommand::readContigs(map<string, string>& oldMap){
 
         ifstream in; util.openInputFile(contigsfile, in);
         ContigsReport report;
-        report.readHeaders(in); util.gobble(in);
+        report.readHeaders(in); gobble(in);
         report.printHeaders(out);
         
         map<string, string>::iterator it;
@@ -762,7 +762,7 @@ void RenameSeqsCommand::readContigs(map<string, string>& oldMap){
             
             if (m->getControl_pressed()) { break; }
             
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             
             it = oldMap.find(report.getName());
             
@@ -856,8 +856,8 @@ int RenameSeqsCommand::readMapFile(map<string, string>& readMap){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> oldname; util.gobble(in);
-            in >> newname; util.gobble(in);
+            in >> oldname; gobble(in);
+            in >> newname; gobble(in);
             
             it = readMap.find(oldname);
             if (it != readMap.end()) {

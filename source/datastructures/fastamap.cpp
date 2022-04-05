@@ -44,7 +44,7 @@ void FastaMap::readFastaFile(string inFileName) {
 					//				data[sequence].groupnumber++;
 				}	
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();		
 	}
@@ -67,10 +67,10 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 	while(!oldNameFile.eof()){
 		if (m->getControl_pressed()) { break; }
 		
-		oldNameFile >> name; util.gobble(oldNameFile);
+		oldNameFile >> name; gobble(oldNameFile);
 		oldNameFile >> list;
 		oldNameMap[name] = list;
-		util.gobble(oldNameFile);
+		gobble(oldNameFile);
 	}
 	oldNameFile.close();
 	
@@ -101,7 +101,7 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 				//			data[sequence].groupnumber++;
 			}	
 		}
-		util.gobble(inFASTA);
+		gobble(inFASTA);
 	}
 	
 	

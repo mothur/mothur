@@ -155,7 +155,7 @@ int AlignCheckCommand::execute(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outfile); return 0; }
 			
-			Sequence seq(in);  util.gobble(in);
+			Sequence seq(in);  gobble(in);
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
@@ -246,7 +246,7 @@ void AlignCheckCommand::readMap(){
 			int position;
 			in >> position;
 			structMap.push_back(position);	
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 

@@ -604,12 +604,12 @@ int driverTrim(trimData* params) {
             string commentString = "";
             int currentSeqsDiffs = 0;
 
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
             QualityScores currQual; QualityScores savedQual;
             if(params->qFileName != ""){
-                currQual = QualityScores(qFile);  params->util.gobble(qFile);
+                currQual = QualityScores(qFile);  gobble(qFile);
                 savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
             }
               
@@ -1094,7 +1094,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             in.seekg(fastaFilePos[i]);
             
             //adjust start if null strings
-            if (i == 0) {  util.zapGremlins(in); util.gobble(in);  }
+            if (i == 0) {  util.zapGremlins(in); gobble(in);  }
             
             Sequence temp(in);
             firstSeqNames[temp.getName()] = i;

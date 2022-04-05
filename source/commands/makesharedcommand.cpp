@@ -333,7 +333,7 @@ void SharedCommand::convertSharedFormat() {
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                inScan >> label >> group >> otuName >> abundance; util.gobble(inScan);
+                inScan >> label >> group >> otuName >> abundance; gobble(inScan);
                 
                 labels.insert(label); groups.insert(group); otuNames.insert(otuName);
             }
@@ -371,7 +371,7 @@ void SharedCommand::convertSharedFormat() {
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                in >> label >> group >> otuName >> abundance; util.gobble(in);
+                in >> label >> group >> otuName >> abundance; gobble(in);
                 
                 itDistance = sharedVectors.find(label);
                 
@@ -512,7 +512,7 @@ int SharedCommand::createSharedFromBiom() {
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
 
-            char c = in.get(); util.gobble(in);
+            char c = in.get(); gobble(in);
 
             if (c == '[')               { countOpenBrace++;     }
             else if (c == ']')          { countClosedBrace++;   }
@@ -1245,7 +1245,7 @@ int SharedCommand::readOrderFile() {
 		string thisGroup;
 
 		while(!in.eof()){
-			in >> thisGroup; util.gobble(in);
+			in >> thisGroup; gobble(in);
 
 			order.push_back(thisGroup);
 

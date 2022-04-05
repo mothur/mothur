@@ -600,7 +600,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
                 else{  newLabel += '\t' + theseLabels[j];	}
             }
 			
-			util.gobble(temp);
+			gobble(temp);
 			
             int stop = numLines;
             if (theseLabels.size() != numCols+1) {  stop = numLines*2; }
@@ -623,7 +623,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 				
 				thisFilesLines.push_back(thisLine);
 					
-				util.gobble(temp);
+				gobble(temp);
 			}
             
             string extension = util.getExtension(outputNames[i]);

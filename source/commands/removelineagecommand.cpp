@@ -465,8 +465,8 @@ string RemoveLineageCommand::readTax(){
 
 			if (m->getControl_pressed()) { break; }
 
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
 			
             Taxonomy thisSeq(name, tax);
             vector<Taxon> otuTax = thisSeq.getTaxons();

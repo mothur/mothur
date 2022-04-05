@@ -258,7 +258,7 @@ int ChimeraCcodeCommand::driver(string outputFName, string filename, string accn
 		
             if (m->getControl_pressed()) {	count = 1; break;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  util.gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				

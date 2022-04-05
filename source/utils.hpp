@@ -143,8 +143,8 @@ public:
     void getline(ifstream&, vector<string>&);
     void getNumSeqs(ifstream&, int&);
     int getNumSeqs(ifstream&);
-    void gobble(istream&);
-    void gobble(istringstream&);
+    //void gobble(istream&);
+    //void gobble(istringstream&);
     vector<string> parseTreeFile(string filename); //returns treenames
     unordered_set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);

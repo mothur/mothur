@@ -376,8 +376,8 @@ int ClassifySeqsCommand::execute(){
         while (!inTax.eof()) {
             if (m->getControl_pressed()) { outputTypes.clear(); if (ct != nullptr) { delete ct; }  if (groupMap != nullptr) { delete groupMap; } delete taxaSum; for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);	} delete classify; return 0; }
             
-            inTax >> name; util.gobble(inTax);
-            taxon = util.getline(inTax); util.gobble(inTax);
+            inTax >> name; gobble(inTax);
+            taxon = util.getline(inTax); gobble(inTax);
             
             string newTax = util.addUnclassifieds(taxon, maxLevel, probs);
             
@@ -470,19 +470,15 @@ struct classifyData {
 //**********************************************************************************************************************
 void driverClassifier(classifyData* params){
     try {
-        ifstream inFASTA;
-        params->util.openInputFile(params->filename, inFASTA);
+        ifstream inFASTA; params->util.openInputFile(params->filename, inFASTA); inFASTA.seekg(params->start);
         
         string taxonomy;
-        
-        inFASTA.seekg(params->start);
-        
         bool done = false;
         string taxBuffer = ""; string taxTBuffer = ""; string accnosBuffer = "";
         while (!done) {
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence* candidateSeq = new Sequence(inFASTA); params->util.gobble(inFASTA);
+            Sequence* candidateSeq = new Sequence(inFASTA); gobble(inFASTA);
             
             if (candidateSeq->getName() != "") {
                 

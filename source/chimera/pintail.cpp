@@ -345,7 +345,7 @@ vector<float> Pintail::readFreq() {
 		ifstream in; util.openInputFile(consfile, in);
 		
 		//read version
-		string line = util.getline(in); util.gobble(in);
+		string line = util.getline(in); gobble(in);
 				
 		while(!in.eof()){
 			
@@ -362,7 +362,7 @@ vector<float> Pintail::readFreq() {
 				prob.push_back(Pi);  
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		return prob;
@@ -405,7 +405,7 @@ vector< vector<float> > Pintail::readQuantiles() {
 		ifstream in; util.openInputFile(quanfile, in);
 		
 		//read version
-		string line = util.getline(in); util.gobble(in);
+		string line = util.getline(in); gobble(in);
 			
 		while(!in.eof()){
 			
@@ -422,7 +422,7 @@ vector< vector<float> > Pintail::readQuantiles() {
 			
 			quan.push_back(temp);  
 	
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 

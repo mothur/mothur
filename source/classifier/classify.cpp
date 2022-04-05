@@ -64,7 +64,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile); util.gobble(fastaFile);
+                    Sequence temp(fastaFile); gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                     
@@ -82,7 +82,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile); util.gobble(fastaFile);
+                    Sequence temp(fastaFile); gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                 }

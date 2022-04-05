@@ -370,7 +370,7 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
            
-            in >> filename; util.gobble(in);
+            in >> filename; gobble(in);
 
             if (m->getDebug()) { m->mothurOut("[DEBUG]: Found file " + filename + ".\n"); }
             //ignore hidden files

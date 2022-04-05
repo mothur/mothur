@@ -287,7 +287,7 @@ int ChimeraPintailCommand::checkChimeras(){
 				
 			if (m->getControl_pressed()) {	break;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  util.gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				

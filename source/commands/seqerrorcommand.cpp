@@ -273,7 +273,7 @@ int SeqErrorCommand::execute(){
             while (!in.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
                 if (pieces.size() != 0) {
@@ -291,7 +291,7 @@ int SeqErrorCommand::execute(){
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                string line = util.getline(in2); util.gobble(in2);
+                string line = util.getline(in2); gobble(in2);
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
                 if (pieces.size() != 0) {
@@ -687,7 +687,7 @@ vector<Sequence> SeqErrorCommand::getReferences(string refFileName){
         while(!referenceFile.eof()){
             if (m->getControl_pressed()) { break; }
             
-            Sequence currentSeq(referenceFile); util.gobble(referenceFile);
+            Sequence currentSeq(referenceFile); gobble(referenceFile);
             
             int numAmbigs = currentSeq.getAmbigBases();
             if(numAmbigs > 0){	numAmbigSeqs++;	}

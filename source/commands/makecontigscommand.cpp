@@ -1439,8 +1439,8 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
         Utils util;
         if (delim == '@') { //fastq files
             bool tignore = false;
-            FastqRead fread(inFF, tignore, format);  util.gobble(inFF);
-            FastqRead rread(inRF, ignore, format); util.gobble(inRF);
+            FastqRead fread(inFF, tignore, format);  gobble(inFF);
+            FastqRead rread(inRF, ignore, format); gobble(inRF);
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
                 FastqRead f2read(inFF, tignore, format);
                 if (!checkName(f2read, rread, nameType, offByOneTrimLength)) {
@@ -1472,7 +1472,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 if (tignore) { ignore=true; }
                 rindexBarcode.setAligned(riread.getSeq());
                 if (!checkName(fread, riread, nameType, offByOneTrimLength)) {
-                    FastqRead r2iread(inRQ, tignore, format); util.gobble(inRQ);
+                    FastqRead r2iread(inRQ, tignore, format); gobble(inRQ);
                     if (tignore) { ignore=true; }
                     if (!checkName(fread, r2iread, nameType, offByOneTrimLength)) {
                         m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
@@ -1494,8 +1494,8 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
             rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
             if (thisfqualindexfile != "") {
-                fQual = new QualityScores(inFQ); util.gobble(inFQ);
-                rQual = new QualityScores(inRQ); util.gobble(inRQ);
+                fQual = new QualityScores(inFQ); gobble(inFQ);
+                rQual = new QualityScores(inRQ); gobble(inRQ);
                 if (!checkName(*fQual, *rQual, nameType, offByOneTrimLength)) {
                     m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
                 }
@@ -1521,12 +1521,12 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
         Utils util;
         if (delim == '@') { //fastq files
             bool tignore;
-            FastqRead fread(inFFasta, tignore, format); util.gobble(inFFasta);
-            FastqRead rread(inRFasta, ignore, format); util.gobble(inRFasta);
+            FastqRead fread(inFFasta, tignore, format); gobble(inFFasta);
+            FastqRead rread(inRFasta, ignore, format); gobble(inRFasta);
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
-                FastqRead f2read(inFFasta, tignore, format); util.gobble(inFFasta);
+                FastqRead f2read(inFFasta, tignore, format); gobble(inFFasta);
                 if (!checkName(f2read, rread, nameType, offByOneTrimLength)) {
-                    FastqRead r2read(inRFasta, ignore, format); util.gobble(inRFasta);
+                    FastqRead r2read(inRFasta, ignore, format); gobble(inRFasta);
                     if (!checkName(fread, r2read, nameType, offByOneTrimLength)) {
                         m->mothurOut("[WARNING]: name mismatch in forward and reverse fastq file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
                     }else { rread = r2read; }
@@ -1538,11 +1538,11 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             fQual = new QualityScores(fread.getName(), fread.getScores());
             rQual = new QualityScores(rread.getName(), rread.getScores());
             if (thisfqualindexfile != "") { //forward index file
-                FastqRead firead(inFQualIndex, tignore, format); util.gobble(inFQualIndex);
+                FastqRead firead(inFQualIndex, tignore, format); gobble(inFQualIndex);
                 if (tignore) { ignore=true; }
                 findexBarcode.setAligned(firead.getSeq());
                 if (!checkName(fread, firead, nameType, offByOneTrimLength)) {
-                    FastqRead f2iread(inFQualIndex, tignore, format); util.gobble(inFQualIndex);
+                    FastqRead f2iread(inFQualIndex, tignore, format); gobble(inFQualIndex);
                     if (tignore) { ignore=true; }
                     if (!checkName(fread, f2iread, nameType, offByOneTrimLength)) {
                         m->mothurOut("[WARNING]: name mismatch in forward index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
@@ -1550,11 +1550,11 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 }
             }
             if (thisrqualindexfile != "") { //reverse index file
-                FastqRead riread(inRQualIndex, tignore, format); util.gobble(inRQualIndex);
+                FastqRead riread(inRQualIndex, tignore, format); gobble(inRQualIndex);
                 if (tignore) { ignore=true; }
                 rindexBarcode.setAligned(riread.getSeq());
                 if (!checkName(fread, riread, nameType, offByOneTrimLength)) {
-                    FastqRead r2iread(inRQualIndex, tignore, format); util.gobble(inRQualIndex);
+                    FastqRead r2iread(inRQualIndex, tignore, format); gobble(inRQualIndex);
                     if (tignore) { ignore=true; }
                     if (!checkName(fread, r2iread, nameType, offByOneTrimLength)) {
                         m->mothurOut("[WARNING]: name mismatch in reverse index file. Ignoring, " + fread.getName() + ".\n"); ignore = true;
@@ -1562,12 +1562,12 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
                 }
             }
         }else { //reading fasta and maybe qual
-            Sequence tfSeq(inFFasta); util.gobble(inFFasta);
-            Sequence trSeq(inRFasta); util.gobble(inRFasta);
+            Sequence tfSeq(inFFasta); gobble(inFFasta);
+            Sequence trSeq(inRFasta); gobble(inRFasta);
             if (!checkName(tfSeq, trSeq, nameType, offByOneTrimLength)) {
-                Sequence t2fSeq(inFFasta); util.gobble(inFFasta);
+                Sequence t2fSeq(inFFasta); gobble(inFFasta);
                 if (!checkName(t2fSeq, trSeq, nameType, offByOneTrimLength)) {
-                    Sequence t2rSeq(inRFasta); util.gobble(inRFasta);
+                    Sequence t2rSeq(inRFasta); gobble(inRFasta);
                     if (!checkName(tfSeq, t2rSeq, nameType, offByOneTrimLength)) {
                         m->mothurOut("[WARNING]: name mismatch in forward and reverse fasta file. Ignoring, " + tfSeq.getName() + ".\n"); ignore = true;
                     }else { trSeq = t2fSeq; }
@@ -1576,8 +1576,8 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             fSeq.setName(tfSeq.getName()); fSeq.setAligned(tfSeq.getAligned());
             rSeq.setName(trSeq.getName()); rSeq.setAligned(trSeq.getAligned());
             if (thisfqualindexfile != "") {
-                fQual = new QualityScores(inFQualIndex); util.gobble(inFQualIndex);
-                rQual = new QualityScores(inRQualIndex); util.gobble(inRQualIndex);
+                fQual = new QualityScores(inFQualIndex); gobble(inFQualIndex);
+                rQual = new QualityScores(inRQualIndex); gobble(inRQualIndex);
                 if (!checkName(*fQual, *rQual, nameType, offByOneTrimLength)) {
                     m->mothurOut("[WARNING]: name mismatch in forward and reverse qual file. Ignoring, " + fQual->getName() + ".\n"); ignore = true;
                 }
@@ -2332,7 +2332,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 Sequence temp(in);
                 name = temp.getName();
             }else {
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 vector<string> pieces = util.splitWhiteSpace(line);
                 name = pieces[0];
                 name = name.substr(1);
@@ -2352,7 +2352,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
         string input;
         while(!in2.eof()){
-            input = util.getline(in2); util.gobble(in2);
+            input = util.getline(in2); gobble(in2);
 
             if (input.length() != 0) {
                 if(input[0] == delim){ //this is a name line
@@ -2425,7 +2425,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 
                 string input;
                 while(!inQual.eof()){
-                    input = util.getline(inQual); util.gobble(inQual);
+                    input = util.getline(inQual); gobble(inQual);
 
                     if (input.length() != 0) {
                         if(input[0] == delim){ //this is a sequence name line
@@ -2483,7 +2483,7 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
                 util.openInputFile(qual[1], inQual2);
 
                 while(!inQual2.eof()){
-                    input = util.getline(inQual2); util.gobble(inQual2);
+                    input = util.getline(inQual2); gobble(inQual2);
 
                     if (input.length() != 0) {
                         if(input[0] == delim){ //this is a sequence name line
@@ -2761,7 +2761,7 @@ void MakeContigsCommand::debugFunction() {
         if (m->getControl_pressed()) { break; }
         
         bool ignore = false;
-        FastqRead index(in, ignore, format); util.gobble(in);
+        FastqRead index(in, ignore, format); gobble(in);
         
         int success = 1;
         string trashCode = "";

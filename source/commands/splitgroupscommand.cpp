@@ -512,13 +512,13 @@ int driverSplitFlow(splitGroupsStruct* params){
         string name, flows;
         int count = 0;
         ifstream in; params->util.openInputFile(params->inputFileName, in);
-        in >> flows; params->util.gobble(in);
+        in >> flows; gobble(in);
         
         while (!in.eof()) {
             if (params->m->getControl_pressed()) { break; }
             
-            in >> name; params->util.gobble(in);
-            flows = params->util.getline(in); params->util.gobble(in);
+            in >> name; gobble(in);
+            flows = params->util.getline(in); gobble(in);
             
             vector<string> thisSeqsGroups;
             if (groupMap != nullptr) {
@@ -591,7 +591,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             if (params->m->getControl_pressed()) { break; }
             
             bool ignore = false;
-            FastqRead thisRead(in, ignore, params->format); params->util.gobble(in);
+            FastqRead thisRead(in, ignore, params->format); gobble(in);
             string name = thisRead.getName();
             
             vector<string> thisSeqsGroups;

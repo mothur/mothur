@@ -484,7 +484,7 @@ void GetOTURepCommand::readNamesFile(FastaMap& fasta) {
                 fasta.push_back(dupNames[i], sequence);
 			}
 		
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 
@@ -823,7 +823,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap&
 		ifstream in; util.openInputFile(filename, in);
 		
         string tempGroup = "";
-        in >> tempGroup; util.gobble(in);
+        in >> tempGroup; gobble(in);
         
         CountTable thisCt;
         if (countfile != "") {
@@ -834,7 +834,7 @@ int GetOTURepCommand::processFastaNames(string filename, string label, FastaMap&
         int thistotal = 0;
 		while (!in.eof()) {
 			string rep, binnames, binLabel;
-			in >> binLabel >> rep >> binnames; util.gobble(in);
+			in >> binLabel >> rep >> binnames; gobble(in);
             
             string repName = rep;
             if (rename) { repName = binLabel; }
@@ -976,7 +976,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		string rep, binnames;
         
         string tempGroup = "";
-        in >> tempGroup; util.gobble(in);
+        in >> tempGroup; gobble(in);
         
         CountTable thisCt;
         if (countfile != "") {
@@ -987,7 +987,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		while (!in.eof()) {
 			if (m->getControl_pressed()) { break; }
             string binLabel;
-			in >> binLabel >> rep >> binnames; util.gobble(in);
+			in >> binLabel >> rep >> binnames; gobble(in);
             
             string repName = rep;
             if (rename) { repName = binLabel; }

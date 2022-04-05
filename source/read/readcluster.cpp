@@ -71,7 +71,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 
 		string tempFile = distFile + ".column.temp";
 		
-        ifstream in; util.openInputFile(distFile, in);  util.gobble(in);
+        ifstream in; util.openInputFile(distFile, in);  gobble(in);
         ofstream out; util.openOutputFile(tempFile, out);
 		
 		float distance;
@@ -223,7 +223,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment*& nameMap){
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
-			util.gobble(in2);
+			gobble(in2);
 		}
 		in2.close();
 		out2.close();
@@ -250,7 +250,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 
 		string tempFile = distFile + ".column.temp";
 		
-        ifstream in; util.openInputFile(distFile, in);  util.gobble(in);
+        ifstream in; util.openInputFile(distFile, in);  gobble(in);
         ofstream out; util.openOutputFile(tempFile, out);
 		
 		float distance;
@@ -396,7 +396,7 @@ int ReadCluster::convertPhylip2Column(CountTable*& ct){
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
-			util.gobble(in2);
+			gobble(in2);
 		}
 		in2.close();
 		out2.close();

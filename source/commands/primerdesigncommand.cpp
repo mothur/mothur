@@ -735,14 +735,14 @@ void driverGetCounts(primerCountsData* params){
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
         
 		bool done = false;
     
 		while (!done) {
             if (params->m->getControl_pressed()) { break; }
             
-			Sequence seq(in); params->util.gobble(in);
+			Sequence seq(in); gobble(in);
             
 			if (seq.getName() != "") {
                 if (params->count == 0) { params->alignedLength = seq.getAligned().length(); initializeCounts(params->counts, params->alignedLength, params->numBins, params->m); }

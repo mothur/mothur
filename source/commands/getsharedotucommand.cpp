@@ -247,7 +247,7 @@ int GetSharedOTUCommand::execute(){
                 while(!inFasta.eof()) {
                     if (m->getControl_pressed()) { outputTypes.clear(); inFasta.close(); delete groupMap; return 0; }
                     
-                    Sequence seq(inFasta); util.gobble(inFasta);
+                    Sequence seq(inFasta); gobble(inFasta);
                     if (seq.getName() != "") {  seqs.push_back(seq);   }
                 }
                 inFasta.close();

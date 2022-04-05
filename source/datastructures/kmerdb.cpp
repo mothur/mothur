@@ -190,7 +190,7 @@ void KmerDB::readSeqs(ifstream& fastaFile){
             
             if (m->getControl_pressed()) { break;  }
             
-            Sequence seq(fastaFile); util.gobble(fastaFile);
+            Sequence seq(fastaFile); gobble(fastaFile);
             
             addSequence(seq);
         }
@@ -209,7 +209,7 @@ void KmerDB::readDB(ifstream& kmerDBFile){
 		kmerDBFile.seekg(0);									//	start at the beginning of the file
 		
 		//read version
-		string line = util.getline(kmerDBFile); util.gobble(kmerDBFile);
+		string line = util.getline(kmerDBFile); gobble(kmerDBFile);
 		
 		string seqName;
 		int seqNumber;

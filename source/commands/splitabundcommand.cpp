@@ -574,7 +574,7 @@ int SplitAbundCommand::splitNames() { //namefile
 			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
-            in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
+            in >> firstCol; gobble(in); in >> secondCol; gobble(in);
 			
 			int size = util.getNumNames(secondCol);
 				

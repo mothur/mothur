@@ -1472,7 +1472,7 @@ int ClusterSplitCommand::runSensSpec() {
         while(!in.eof()){
             if (m->getControl_pressed()) { break; }
             
-            m->mothurOut(util.getline(in)+"\n"); util.gobble(in);
+            m->mothurOut(util.getline(in)+"\n"); gobble(in);
         }
         in.close();
         
@@ -1520,12 +1520,12 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
         
         ifstream in; util.openInputFile(file, in);
         
-        in >> singleton; util.gobble(in);
+        in >> singleton; gobble(in);
         
         string path = util.hasPath(singleton);
         if (path == "") {  singleton = inputDir + singleton;  }
         
-        in >> type; util.gobble(in);
+        in >> type; gobble(in);
         
         if (type == "name") { }
         else if (type == "count") { }
@@ -1540,7 +1540,7 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
             while(!in.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                in >> thisListFileName; util.gobble(in);
+                in >> thisListFileName; gobble(in);
                 
                 string path = util.hasPath(thisListFileName);
                 if (path == "") {  thisListFileName = inputDir + thisListFileName;  }
@@ -1559,8 +1559,8 @@ string ClusterSplitCommand::readFile(vector< map<string, string> >& distName){
             while(!in.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                in >> thiscolumn; util.gobble(in);
-                in >> thisname; util.gobble(in);
+                in >> thiscolumn; gobble(in);
+                in >> thisname; gobble(in);
                 
                 map<string, string> temp;
                 temp[thiscolumn] = thisname;
@@ -1584,13 +1584,13 @@ int ClusterSplitCommand::getLabels(string file, set<string>& listLabels){
         ifstream in; util.openInputFile(file, in);
 
         //read headers
-        util.getline(in); util.gobble(in);
+        util.getline(in); gobble(in);
         
         string label;
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            in >> label; util.getline(in); util.gobble(in);
+            in >> label; util.getline(in); gobble(in);
             
             listLabels.insert(label);
         }

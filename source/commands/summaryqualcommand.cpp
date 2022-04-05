@@ -206,7 +206,7 @@ void driverCreateSummary(seqSumQualData* params) {
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
 		
 		bool done = false;
 		params->count = 0;
@@ -216,7 +216,7 @@ void driverCreateSummary(seqSumQualData* params) {
 			
 			if (params->m->getControl_pressed()) { in.close(); break; }
 			
-			QualityScores current(in); params->util.gobble(in);
+			QualityScores current(in); gobble(in);
 			
 			if (current.getName() != "") {
 				

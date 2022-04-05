@@ -334,7 +334,7 @@ void alignDriver(alignStruct* params) {
 			
 			if (params->m->getControl_pressed()) {  break; }
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);  params->util.gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA); gobble(inFASTA);
 			report.setCandidate(candidateSeq);
 
 			int origNumBases = candidateSeq->getNumBases();

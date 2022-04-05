@@ -403,9 +403,9 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 	try{
 		Utils util;
         //read version
-        string line = util.getline(in); util.gobble(in);
+        string line = util.getline(in); gobble(in);
         
-        in >> numKmers; util.gobble(in);
+        in >> numKmers; gobble(in);
         //initialze probabilities
         
         wordGenusProb.resize(numKmers);
@@ -418,14 +418,14 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
         for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
         
         //read version
-        string line2 = util.getline(inNum); util.gobble(inNum);
+        string line2 = util.getline(inNum); gobble(inNum);
         float probTemp;
         
         while (inNum) {
             inNum >> zeroCountProb[count] >> num[count] >> probTemp;
             WordPairDiffArr[count].prob = probTemp;
             count++;
-            util.gobble(inNum);
+            gobble(inNum);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(zeroCountProb[count]) + '\t' + toString(num[count]) + '\t' + toString(numKmers) + "\n"); }
 
@@ -448,7 +448,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(name) + '\t' + toString(prob) + '\t' + toString(kmer) + "\n"); }
             }
             
-            util.gobble(in);
+            gobble(in);
         }
         in.close();
   		

@@ -709,28 +709,28 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 	try {
 	
 		//read version
-		string line = util.getline(in); util.gobble(in);
+		string line = util.getline(in); gobble(in);
 		
 		int num;
 		
-		in >> num; util.gobble(in);
+		in >> num; gobble(in);
 		
 		tree.resize(num);
 		
-		in >> maxLevel; util.gobble(in);
+		in >> maxLevel; gobble(in);
 	
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
 	
-			in >> tree[i].level >> num; util.gobble(in); //num contains the number of children tree[i] has
-            tree[i].name = util.getline(in); util.gobble(in);
+			in >> tree[i].level >> num; gobble(in); //num contains the number of children tree[i] has
+            tree[i].name = util.getline(in); gobble(in);
             
 			//set children
 			string childName;
 			int childIndex;
 			for (int j = 0; j < num; j++) {
-				in >> childIndex; util.gobble(in);
-                childName = util.getline(in); util.gobble(in);
+				in >> childIndex; gobble(in);
+                childName = util.getline(in); gobble(in);
 				tree[i].children[childName] = childIndex;
 			}
 			
@@ -749,7 +749,7 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 			
 			tree[i].total = 0;
 			
-			util.gobble(in);
+			gobble(in);
 			
 			//if (tree[i].level > maxLevel) {  maxLevel = tree[i].level;  }
 		}

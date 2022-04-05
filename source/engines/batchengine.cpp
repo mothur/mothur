@@ -29,7 +29,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
 
             while (!inBatchTest.eof()) {
                 
-                nextcommand = util.getline(inBatchTest); util.gobble(inBatchTest);
+                nextcommand = util.getline(inBatchTest); gobble(inBatchTest);
                 
                 if (nextcommand[0] != '#') { //skip comments
                     
@@ -129,7 +129,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
             if (!inputBatchFile.eof()) {
                 
                 nextcommand = util.getline(inputBatchFile);
-                util.gobble(inputBatchFile);
+                gobble(inputBatchFile);
                 
             }else { nextcommand = "quit()"; break; } //end of file, quit
         }

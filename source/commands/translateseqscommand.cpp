@@ -199,8 +199,8 @@ void alignAminoDriver(alignAminoStruct* params) {
             
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence seq(inFASTA); params->util.gobble(inFASTA);
-            Protein prot(inAMINO); params->util.gobble(inAMINO);
+            Sequence seq(inFASTA); gobble(inFASTA);
+            Protein prot(inAMINO); gobble(inAMINO);
             
             if ((seq.getName() != "") && (prot.getName() != "") && (seq.getName() == prot.getName()))  {
                 
@@ -349,7 +349,7 @@ void translateToAminoAcidDriver(translateSeqsStruct* params) {
             
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence seq(inFASTA); params->util.gobble(inFASTA);
+            Sequence seq(inFASTA); gobble(inFASTA);
             
             if (seq.getName() != "") {
                 Protein prot = seq.getProtein(params->frame, params->stop);
@@ -441,7 +441,7 @@ bool TranslateSeqsCommand::setLines() {
             in.seekg(fastaFilePos[i]);
             
             //adjust start if null strings
-            if (i == 0) {  util.zapGremlins(in); util.gobble(in);  }
+            if (i == 0) {  util.zapGremlins(in); gobble(in);  }
             
             Sequence temp(in);
             firstSeqNames[temp.getName()] = i;

@@ -225,7 +225,7 @@ string UniqueSeqsCommand::processCount(string countfile) { //countfile can be bl
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             if (seq.getName() != "") { //not end of file
                 
@@ -355,7 +355,7 @@ string UniqueSeqsCommand::processName(string namefile) { //namefile can be blank
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             if (seq.getName() != "") { //not end of file
                 

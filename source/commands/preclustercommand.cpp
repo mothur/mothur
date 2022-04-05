@@ -721,7 +721,7 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
 
             if (params->m->getControl_pressed()) { inFasta.close(); break; }
 
-            Sequence seq(inFasta);  params->util.gobble(inFasta);
+            Sequence seq(inFasta);  gobble(inFasta);
 
             if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 
@@ -1071,7 +1071,7 @@ bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCo
             
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             if (seq.getName() != "") {
                 
@@ -1211,9 +1211,9 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
             
             if (m->getControl_pressed()) { break; }
             
-            inNames >> group; util.gobble(inNames);
-            inNames >> unique_sequence; util.gobble(inNames);
-            inNames >> numDups; util.gobble(inNames);
+            inNames >> group; gobble(inNames);
+            inNames >> unique_sequence; gobble(inNames);
+            inNames >> numDups; gobble(inNames);
             
             ct.setAbund(unique_sequence, group, numDups); count++;
             namesOfSeqs.push_back(unique_sequence);

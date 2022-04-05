@@ -774,14 +774,14 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue, boo
         
         ifstream in; util.openInputFile(samplefile, in);
         
-        util.getline(in); util.gobble(in); //grab header
+        util.getline(in); gobble(in); //grab header
         string groupName = "";
         
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (line != "") {
                 

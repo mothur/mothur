@@ -264,7 +264,7 @@ int ListOtusCommand::createList(string constaxFile){
             if (m->getControl_pressed()) { break; }
             
             in >> otuLabel;
-            string junk = util.getline(in); util.gobble(in);
+            string junk = util.getline(in); gobble(in);
             
             out << otuLabel << endl;
         }

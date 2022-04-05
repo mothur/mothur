@@ -736,7 +736,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 		
 		ifstream in; util.openInputFile(axesfile, in);
 		
-		string headerLine = util.getline(in); util.gobble(in);
+		string headerLine = util.getline(in); gobble(in);
 		
 		//count the number of axis you are reading
 		bool done = false;
@@ -756,7 +756,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 			if (m->getControl_pressed()) { in.close(); return axes; }
 			
 			string group = "";
-			in >> group; util.gobble(in);
+			in >> group; gobble(in);
 			
 			vector<float> thisGroupsAxes;
 			for (int i = 0; i < count; i++) {
@@ -777,7 +777,7 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				}else { m->mothurOut(group + " is already in your axes file, using first definition.\n");  }
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		
@@ -795,7 +795,7 @@ int CorrAxesCommand::getMetadata(){
 		
 		ifstream in; util.openInputFile(metadatafile, in);
 		
-		string headerLine = util.getline(in); util.gobble(in);
+		string headerLine = util.getline(in); gobble(in);
 		vector<string> pieces = util.splitWhiteSpace(headerLine);
 		
 		//save names of columns you are reading
@@ -808,7 +808,7 @@ int CorrAxesCommand::getMetadata(){
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-            string metadataLine = util.getline(in); util.gobble(in);
+            string metadataLine = util.getline(in); gobble(in);
             vector<string> metaPieces = util.splitWhiteSpace(metadataLine);
 			string group = metaPieces[0];
 			

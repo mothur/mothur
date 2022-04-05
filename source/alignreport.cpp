@@ -44,7 +44,7 @@ void AlignReport::read(ifstream& repFile){
         repFile >> gapsInTemplate;
         repFile >> longestInsert;
         repFile >> simBtwnQueryAndTemplate;
-        util.gobble(repFile);
+        gobble(repFile);
 
         searchScore = 0;
         if(dummySearchScore != "nan"){ util.mothurConvert(dummySearchScore, searchScore); }

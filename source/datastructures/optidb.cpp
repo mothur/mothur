@@ -149,18 +149,18 @@ void OptiDB::readDB(ifstream& optiDBFile){
         optiDBFile.seekg(0);
         
         //read version
-        string line = util.getline(optiDBFile); util.gobble(optiDBFile);
+        string line = util.getline(optiDBFile); gobble(optiDBFile);
         
         //read alignedLength
-        optiDBFile >> alignedLength; util.gobble(optiDBFile);
+        optiDBFile >> alignedLength; gobble(optiDBFile);
         
         longest = alignedLength-1;
         
         //read numSeqs in reference
         int numSeqs = 0;
-        optiDBFile >> numSeqs; util.gobble(optiDBFile);
+        optiDBFile >> numSeqs; gobble(optiDBFile);
         
-        line = util.getline(optiDBFile); util.gobble(optiDBFile);
+        line = util.getline(optiDBFile); gobble(optiDBFile);
         vector<string> iCols; util.splitAtComma(line, iCols);
         for (int i = 0; i < iCols.size(); i++) {
             int temp; util.mothurConvert(iCols[i], temp);
@@ -172,7 +172,7 @@ void OptiDB::readDB(ifstream& optiDBFile){
         int location, size; string bases;
         for (int i = 0; i < alignedLength; i++) { //for each alignment location
             
-            optiDBFile >> location >> size >> bases; util.gobble(optiDBFile);
+            optiDBFile >> location >> size >> bases; gobble(optiDBFile);
             
             for (int j = 0; j < size; j++) { //for each reference, if all bases are the same in this location, size = 1; saves space
                 

@@ -46,8 +46,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 
 		
-			fileHandle >> firstName; util.gobble(fileHandle);
-            fileHandle >> secondName; util.gobble(fileHandle);
+			fileHandle >> firstName; gobble(fileHandle);
+            fileHandle >> secondName; gobble(fileHandle);
             fileHandle >> distance;	// get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
@@ -96,7 +96,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 					}
 				}
 			}
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 		}
 
 		if(lt == 0){  // oops, it was square
@@ -107,8 +107,8 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			util.openInputFile(distFile, fileHandle);  //let's start over
 
 			while(fileHandle){
-				fileHandle >> firstName; util.gobble(fileHandle);
-                fileHandle >> secondName; util.gobble(fileHandle);
+				fileHandle >> firstName; gobble(fileHandle);
+                fileHandle >> secondName; gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
 				if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
@@ -127,7 +127,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 					DMatrix->addCell(itB->second, value);
 				}
 		
-				util.gobble(fileHandle);
+				gobble(fileHandle);
 			}
 		}
 		
@@ -167,8 +167,8 @@ int ReadColumnMatrix::read(CountTable* countTable){
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
             
             
-			fileHandle >> firstName; util.gobble(fileHandle);
-            fileHandle >> secondName; util.gobble(fileHandle);
+			fileHandle >> firstName; gobble(fileHandle);
+            fileHandle >> secondName; gobble(fileHandle);
             fileHandle >> distance;	// get the row and column names and distance
             
 			if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
@@ -214,7 +214,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
 					}
 				}
 			}
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 		}
         
 		if(lt == 0){  // oops, it was square
@@ -225,8 +225,8 @@ int ReadColumnMatrix::read(CountTable* countTable){
 			util.openInputFile(distFile, fileHandle);  //let's start over
             
 			while(fileHandle){
-				fileHandle >> firstName; util.gobble(fileHandle);
-                fileHandle >> secondName; util.gobble(fileHandle);
+				fileHandle >> firstName; gobble(fileHandle);
+                fileHandle >> secondName; gobble(fileHandle);
                 fileHandle >> distance;	// get the row and column names and distance
 				
 				if (m->getControl_pressed()) {  fileHandle.close();   return 0; }
@@ -245,7 +245,7 @@ int ReadColumnMatrix::read(CountTable* countTable){
 					DMatrix->addCell(itB, value);
 				}
                 
-				util.gobble(fileHandle);
+				gobble(fileHandle);
 			}
 		}
 		

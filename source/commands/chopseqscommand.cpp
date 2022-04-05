@@ -356,7 +356,7 @@ bool ChopSeqsCommand::runChopFastq(string& outputFileNameAccnos){
             if (m->getControl_pressed()) {  break;  }
             
             bool ignore;
-            FastqRead seq(in, ignore, format); util.gobble(in);
+            FastqRead seq(in, ignore, format); gobble(in);
 
             if (seq.getName() != "") {
                 bool isGood = getFastqChopped(seq);
@@ -640,7 +640,7 @@ void driverChop(chopData* params) {
 		in.seekg(params->start);
         
         //adjust
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in); }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in); }
         
         ofstream outfTemp;
         if (params->qualFileOutput != "") { params->util.openOutputFile(params->qualFileOutput, outfTemp); }
@@ -650,7 +650,7 @@ void driverChop(chopData* params) {
             
             if (params->m->getControl_pressed()) {  break;  }
             
-			Sequence seq(in); params->util.gobble(in);
+			Sequence seq(in); gobble(in);
 
 			if (seq.getName() != "") {
                 params->qualValues = "";
@@ -790,11 +790,11 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            QualityScores qual(inQual); util.gobble(inQual);
+            QualityScores qual(inQual); gobble(inQual);
             
             string name = "";
             int start = 0; int end = 0;
-            in >> name >> start >> end; util.gobble(in);
+            in >> name >> start >> end; gobble(in);
             
             if (qual.getName() != "") {
                 if (qual.getName() != name) { start = 0; end = 0; }

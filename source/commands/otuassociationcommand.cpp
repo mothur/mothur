@@ -382,7 +382,7 @@ void OTUAssociationCommand::readMetadata(){
 	try {
 		ifstream in; util.openInputFile(metadatafile, in);
 		
-		string headerLine = util.getline(in); util.gobble(in);
+		string headerLine = util.getline(in); gobble(in);
         metadataLabels = util.splitWhiteSpace(headerLine);
         metadataLabels.erase(metadataLabels.begin());
         
@@ -396,7 +396,7 @@ void OTUAssociationCommand::readMetadata(){
 			if (m->getControl_pressed()) { in.close(); return; }
 			
 			string group = "";
-			in >> group; util.gobble(in);
+			in >> group; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
             SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
@@ -413,7 +413,7 @@ void OTUAssociationCommand::readMetadata(){
             if (Groups.size() == 0) { metadataLookup->push_back(tempLookup);  }
             else if (util.inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
         

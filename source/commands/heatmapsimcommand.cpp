@@ -366,7 +366,7 @@ int HeatMapSimCommand::runCommandDist() {
 					if (m->getControl_pressed()) { return 0; }
 					
 					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
-					util.gobble(in);
+					gobble(in);
 				}
 			}else { 
 				double dist;
@@ -380,7 +380,7 @@ int HeatMapSimCommand::runCommandDist() {
 						in >> dist;
 						matrix[i][j] = dist;  matrix[j][i] = dist;
 					}
-					util.gobble(in);
+					gobble(in);
 				}
 			}
 			in.close();
@@ -414,7 +414,7 @@ int HeatMapSimCommand::runCommandDist() {
 			util.openInputFile(columnfile, in);
 			
 			while (!in.eof()) {
-				in >> first >> second >> dist; util.gobble(in);
+				in >> first >> second >> dist; gobble(in);
 				
 				if (m->getControl_pressed()) { return 0; }
 				

@@ -340,7 +340,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
             in >> sff;
             
             //ignore file pairing
-            if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} util.gobble(in); }
+            if(sff[0] == '#'){ while (!in.eof())	{	char c = in.get();  if (c == 10 || c == 13){	break;	}	} gobble(in); }
             else { //check for oligos file
                 bool ableToOpenSff = util.checkLocations(sff, current->getLocations());
                 
@@ -365,7 +365,7 @@ int SffMultipleCommand::readFile(vector<string>& sffFiles, vector<string>& oligo
                     oligosFiles.push_back(oligos); //will push a blank if there is not an oligos for this sff file
                 }else { m->mothurOut("Can not find " + sff + ". Ignoring.\n"); }
             }
-            util.gobble(in);
+            gobble(in);
         }
         in.close();
         

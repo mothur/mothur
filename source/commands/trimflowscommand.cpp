@@ -363,7 +363,7 @@ void driverCreateTrim(trimFlowData* params){
 		
 		flowFile.seekg(params->lineStart);
 		
-        if(params->lineStart == 0){ int temp; flowFile >> temp; params->util.gobble(flowFile); }
+        if(params->lineStart == 0){ int temp; flowFile >> temp; gobble(flowFile); }
 		
 		FlowData flowData(params->numFlows, params->signal, params->noise, params->maxHomoP, params->flowOrder);
 		params->count = 0;
@@ -686,7 +686,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 
 		ifstream in; util.openInputFile(flowFileName, in);
 		in >> numFlows;
-		util.gobble(in);
+		gobble(in);
 		in.close();
 		
 		processors = (filePos.size() - 1);

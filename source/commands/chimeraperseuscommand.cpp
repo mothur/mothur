@@ -417,7 +417,7 @@ int ChimeraPerseusCommand::execute(){
                         
                         string name, group;
                         while (!in2.eof()) {
-                            in2 >> name; util.gobble(in2); in2 >> group; util.gobble(in2);
+                            in2 >> name; gobble(in2); in2 >> group; gobble(in2);
                             newCount.setAbund(name, group, 0);
                         }
                         in2.close();
@@ -618,7 +618,7 @@ vector<seqData> loadSequences(map<string, int>& nameMap, string thisGroupsFastaF
         while (!in.eof()) {
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             itNameMap = nameMap.find(seq.getName());
             
@@ -692,7 +692,7 @@ void driverGroups(perseusGroupsData* params){
                     string name;
                     if (params->hasCount) {
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             outCountList << name << '\t' << thisGroup << endl;
                         }
                         in.close();
@@ -733,7 +733,7 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 			
 			if (m->getControl_pressed()) { in.close(); return sequences; }
 			
-			Sequence temp(in); util.gobble(in);
+			Sequence temp(in); gobble(in);
 			
 			it = nameMap.find(temp.getName());
 			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct.\n");  }
@@ -882,7 +882,7 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 		 */
 		
 		//get and print headers
-		BestMatchName = util.getline(in); util.gobble(in);
+		BestMatchName = util.getline(in); gobble(in);
 		out << BestMatchName << endl;
 		
 		while (!in.eof()) {
@@ -890,19 +890,19 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
-			in >> index;	util.gobble(in);
+			in >> index;	gobble(in);
 			
 			if (index != "SequenceIndex") { //if you are not a header line, there will be a header line for each group if group file is given
-				in >> name;		util.gobble(in);
-				in >> DiffsToBestMatch; util.gobble(in);
-				in >> BestMatchIndex; util.gobble(in);
-				in >> BestMatchName; util.gobble(in);
-				in >> DiffstToChimera; util.gobble(in);
-				in >> IndexofLeftParent; util.gobble(in);
-				in >> IndexOfRightParent; util.gobble(in);
-				in >> parent1;	util.gobble(in);
-				in >> parent2;	util.gobble(in);
-				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; util.gobble(in);
+				in >> name;		gobble(in);
+				in >> DiffsToBestMatch; gobble(in);
+				in >> BestMatchIndex; gobble(in);
+				in >> BestMatchName; gobble(in);
+				in >> DiffstToChimera; gobble(in);
+				in >> IndexofLeftParent; gobble(in);
+				in >> IndexOfRightParent; gobble(in);
+				in >> parent1;	gobble(in);
+				in >> parent2;	gobble(in);
+				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; gobble(in);
 				
 				
                 //is this name already in the file
@@ -924,7 +924,7 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 					out << BestMatchName << '\t' << DiffstToChimera << '\t' << IndexofLeftParent << '\t' << IndexOfRightParent << '\t' << parent1 << '\t' << parent2 << '\t';
 					out << temp1 << '\t' << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << flag << endl;	
 				}
-			}else { index = util.getline(in); util.gobble(in); }
+			}else { index = util.getline(in); gobble(in); }
 		}
 		in.close();
 		out.close();

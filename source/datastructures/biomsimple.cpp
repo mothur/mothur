@@ -71,7 +71,7 @@ void BiomSimple::read(string fname){
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
             
-            char c = in.get(); util.gobble(in);
+            char c = in.get(); gobble(in);
             
             if (c == '[')               { countOpenBrace++;     }
             else if (c == ']')          { countClosedBrace++;   }

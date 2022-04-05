@@ -63,7 +63,7 @@ int correctDist::getSequences(string sequenceFileName){
 		while(!sequenceFile.eof()){
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence temp(sequenceFile); util.gobble(sequenceFile);
+			Sequence temp(sequenceFile); gobble(sequenceFile);
 			
 			if (temp.getName() != "") {
 				names.push_back(temp.getName());

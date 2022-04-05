@@ -223,7 +223,7 @@ int Oligos::readOligos(){
 		
 		while(!inOligos.eof()){
             
-            string line = util.getline(inOligos); util.gobble(inOligos);
+            string line = util.getline(inOligos); gobble(inOligos);
         
 			if(line[0] == '#'){} //ignore
 			else{

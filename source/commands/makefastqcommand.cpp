@@ -139,8 +139,8 @@ int MakeFastQCommand::execute(){
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence currSeq(fFile); util.gobble(fFile);
-			QualityScores currQual(qFile);  util.gobble(qFile);
+			Sequence currSeq(fFile); gobble(fFile);
+			QualityScores currQual(qFile);  gobble(qFile);
             
             FastqRead fread(currSeq, currQual, format);
             fread.printFastq(out);

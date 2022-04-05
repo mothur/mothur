@@ -38,7 +38,7 @@ SequenceDB::SequenceDB(ifstream& filehandle, int kmerSize, vector< vector< int >
         
         while (!filehandle.eof()) {
             //input sequence info into sequencedb
-            Sequence newSequence(filehandle); util.gobble(filehandle);
+            Sequence newSequence(filehandle); gobble(filehandle);
             
             if (newSequence.getName() != "") {
                 if (length == 0) { length = newSequence.getAligned().length(); }
@@ -85,7 +85,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) : StorageDatabase() {
 			}
 			
 			//takes care of white space
-			util.gobble(filehandle);
+			gobble(filehandle);
 		}
 
 		filehandle.close();

@@ -41,30 +41,30 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 		numSeqs = 0;
 		
         //read version
-        string line = util.getline(in); util.gobble(in);
+        string line = util.getline(in); gobble(in);
         
-        in >> numNodes; util.gobble(in);
+        in >> numNodes; gobble(in);
         
         tree.resize(numNodes);
         
-        in >> maxLevel; util.gobble(in);
+        in >> maxLevel; gobble(in);
         
         for (int i = 0; i < tree.size(); i++) {
-            tree[i].name = util.getline(in); util.gobble(in);
-            in >> tree[i].level >> tree[i].parent; util.gobble(in);
+            tree[i].name = util.getline(in); gobble(in);
+            in >> tree[i].level >> tree[i].parent; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) + '\t' + tree[i].name + '\t' + toString(tree[i].level) + "\n"); }
         }
         
         //read genus nodes
         int numGenus = 0;
-        in >> numGenus; util.gobble(in);
+        in >> numGenus; gobble(in);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(numNodes) + '\t' + toString(numGenus) + '\t' + toString(maxLevel) + "\n"); }
 
         int gnode, gsize;
         totals.clear();
         for (int i = 0; i < numGenus; i++) {
-            in >> gnode >> gsize; util.gobble(in);
+            in >> gnode >> gsize; gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(gnode) + '\t' + toString(gsize) + '\t' + toString(i) + "\n"); }
 

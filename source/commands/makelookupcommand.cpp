@@ -157,7 +157,7 @@ int MakeLookupCommand::execute(){
         while(!refFASTA.eof()){
             if (m->getControl_pressed()) { refFASTA.close(); return 0; }
             
-            Sequence seq(refFASTA);  util.gobble(refFASTA);
+            Sequence seq(refFASTA);  gobble(refFASTA);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: seq = " + seq.getName() + ".\n"); }
             
@@ -214,7 +214,7 @@ int MakeLookupCommand::execute(){
                 map<string, vector<double> >::iterator it = refFlowgrams.find(referenceName);       //  * compare sequence to its closest reference
                 if (it == refFlowgrams.end()) {
                     m->mothurOut("[WARNING]: missing reference flow " + referenceName + ", ignoring flow " + flowQuery + ".\n");
-                    util.getline(flowFile); util.gobble(flowFile);
+                    util.getline(flowFile); gobble(flowFile);
                 }else {
                     vector<double> refFlow = it->second;
                     vector<double> flowgram; flowgram.resize(numFlows);
@@ -225,7 +225,7 @@ int MakeLookupCommand::execute(){
                         flowFile >> intensity;
                         flowgram[i] = intensity;// (int)round(100 * intensity);
                     }
-                    util.gobble(flowFile);
+                    gobble(flowFile);
                     
                     if (m->getDebug()) { m->mothurOut("[DEBUG]: before align.\n"); }
                     
@@ -246,8 +246,8 @@ int MakeLookupCommand::execute(){
                 }
                 
             }
-            util.gobble(errorFile);
-            util.gobble(flowFile);
+            gobble(errorFile);
+            gobble(flowFile);
         }
         errorFile.close(); flowFile.close();
         

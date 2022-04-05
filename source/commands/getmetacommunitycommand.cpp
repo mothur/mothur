@@ -479,7 +479,7 @@ vector<double> GetMetaCommunityCommand::generateDesignFile(int numPartitions, ma
             designFile << sampleName << '\t' << titles[maxPartition] << endl;
             
             numSamples++;
-            util.gobble(postFile);
+            gobble(postFile);
         }
         for(int i=0;i<numPartitions;i++){
             piValues[i] /= (double)numSamples;
@@ -565,8 +565,8 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
             tempData.difference = difference;
             summary.push_back(tempData);
             
-            util.gobble(referenceFile);
-            util.gobble(partitionFile);
+            gobble(referenceFile);
+            gobble(partitionFile);
         }
         referenceFile.close();
         partitionFile.close();

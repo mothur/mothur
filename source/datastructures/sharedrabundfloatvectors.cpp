@@ -26,20 +26,20 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             //is this a shared file that has headers
             if (label == "label") {
                 //gets "group"
-                f >> label; util.gobble(f);
+                f >> label; gobble(f);
                 
                 //gets "numOtus"
-                f >> label; util.gobble(f);
+                f >> label; gobble(f);
                 
                 //eat rest of line
-                label = util.getline(f); util.gobble(f);
+                label = util.getline(f); gobble(f);
                 
                 //parse labels to save
                 istringstream iStringStream(label);
                 while(!iStringStream.eof()){
                     if (m->getControl_pressed()) { break; }
                     string temp;
-                    iStringStream >> temp;  util.gobble(iStringStream);
+                    iStringStream >> temp;  gobble(iStringStream);
                     
                     currentLabels.push_back(temp);
                 }
@@ -95,7 +95,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
             push_back(temp);
         } else { util.getline(f); }
-        util.gobble(f);
+        gobble(f);
         
         if (!(f.eof())) { f >> nextLabel; }
         
@@ -115,7 +115,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
                 SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
                 push_back(temp);
             }else { util.getline(f); }
-            util.gobble(f);
+            gobble(f);
             
             if (f.eof() != true) { f >> nextLabel; }
         }

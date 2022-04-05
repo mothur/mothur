@@ -228,7 +228,7 @@ string MergeFileCommand::mergeFileData(){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence currSeq(in); util.gobble(in);
+            Sequence currSeq(in); gobble(in);
             
             string comment = " ";
             

@@ -323,7 +323,7 @@ int ClusterFragmentsCommand::readFASTA(){
 			
 			if (m->getControl_pressed()) { inFasta.close(); return 0; }
 			
-			Sequence seq(inFasta);  util.gobble(inFasta);
+			Sequence seq(inFasta);  gobble(inFasta);
 			
 			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 				if (namefile != "") {

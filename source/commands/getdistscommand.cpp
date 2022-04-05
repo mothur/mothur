@@ -307,7 +307,7 @@ int GetDistsCommand::readPhylip(){
             
             ifstream in3;
             util.openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; util.gobble(in3);
+            in3 >> nseqs; gobble(in3);
             char buffer[4096];        
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -351,7 +351,7 @@ int GetDistsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
-            in >> firstName >> secondName >> distance; util.gobble(in);
+            in >> firstName >> secondName >> distance; gobble(in);
             
             //are both names in the accnos file
             if ((names.count(firstName) != 0) && (names.count(secondName) != 0)) {
