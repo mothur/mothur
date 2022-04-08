@@ -234,8 +234,8 @@ int LefseCommand::execute(){
             designMap.setDefaultClass(mclass);
             Groups = designMap.getNamesGroups(Sets);
         }else {
-            vector<string> thisSets = designMap.getCategory();
-            numSets = (int)thisSets.size();
+            Sets = designMap.getCategory();
+            numSets = (int)Sets.size();
         }
         
         if (numSets != 2) { //for 2 sets just run pairwise
@@ -278,15 +278,12 @@ int LefseCommand::execute(){
 //**********************************************************************************************************************
 void LefseCommand::runPairwiseAnalysis(DesignMap& designMap) {
     try {
-        designMap.setDefaultClass(mclass);
-        Sets = designMap.getCategory();
-        int numGroups = (int)Sets.size();
-        
+        int numSets = (int)Sets.size();
         runAll = false;
         
-        if (numGroups < 2)    { m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete pairwise analysis.\n");  m->setControl_pressed(true); return; }
+        if (numSets < 2)    { m->mothurOut("[ERROR]: Not enough sets, I need at least 2 valid sets. Unable to complete pairwise analysis.\n");  m->setControl_pressed(true); return; }
         
-        for (int a=0; a<numGroups; a++) {
+        for (int a=0; a<numSets; a++) {
             for (int l = 0; l < a; l++) {
                
                 string combo = Sets[a] + "-" + Sets[l];
