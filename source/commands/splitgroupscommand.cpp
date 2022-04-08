@@ -10,6 +10,7 @@
 #include "splitgroupscommand.h"
 #include "sequenceparser.h"
 #include "counttable.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
@@ -382,13 +383,29 @@ int driverRunCount(splitGroups2Struct* params){
         
         params->Groups = ct.getNamesOfGroups();
         
-        string processTag = toString(params->start) + "_" + toString(params->end);
-        string uniqueFasta = params->fastafile+processTag;
-        string uniqueList = params->listfile+processTag;
-        
-        if (params->fastafile != "") { params->util.copyFile(params->fastafile, uniqueFasta); }else{ uniqueFasta = ""; }
-        if (params->listfile != "")  { params->util.copyFile(params->listfile, uniqueList); }else{ uniqueList = ""; }
+        vector<string> listFileOutputNames;
+        if (params->listfile != "") { //create output file names
+            InputData input(params->listfile, "list", nullVector);
+            ListVector* list = input.getListVector();
+            
+            vector<string> files;
+            map<string, vector<string> >::iterator it = params->group2Files.find(params->Groups[0]);
+            
+            if (it != params->group2Files.end()) { files = it->second; }
+            else { params->m->mothurOut("[ERROR]: Can find group " + params->Groups[0] + ", quitting.\n"); params->m->setControl_pressed(true);  }
 
+            string listFileRoot = params->outputDir + params->util.getRootName(params->util.getSimpleName(files[1]));
+            string listExt = params->util.getExtension(files[1]);
+
+            while(list != nullptr) {
+                                
+                listFileOutputNames.push_back(listFileRoot + list->getLabel() + listExt);
+
+                delete list;
+                list = input.getListVector();
+            }
+        }
+        
         //GroupName -> files(fasta, list, count)
         for (int i = 0; i < params->Groups.size(); i++) { //Groups only contains the samples assigned to this process
            
@@ -398,6 +415,7 @@ int driverRunCount(splitGroups2Struct* params){
             if (it != params->group2Files.end()) { files = it->second; }
             else { params->m->mothurOut("[ERROR]: Can find group " + params->Groups[i] + ", quitting.\n"); params->m->setControl_pressed(true); break; }
             
+            //print new count file
             string newCountFile = files[2];
             vector<string> tempGroups; tempGroups.push_back(params->Groups[i]);
             ct.printCompressedTable(newCountFile, tempGroups);
@@ -405,32 +423,26 @@ int driverRunCount(splitGroups2Struct* params){
             vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
             unordered_set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
             
+            //If more than one distance, use vector of list file outputs
+            pair<string, string> fastaFilePair(params->fastafile, files[0]);
+            pair<string, vector<string> > listFilePair(params->listfile, listFileOutputNames);
+            
             params->m->mothurOut("/******************************************/\n");
             params->m->mothurOut("Selecting sequences for group " + params->Groups[i] + "\n\n");
-            
-            Command* getCommand = new GetSeqsCommand(thisGroupsNames, uniqueFasta, uniqueList, "", "", params->outputDir);
-            
-            map<string, vector<string> > filenames = getCommand->getOutputFiles();
-            
+        
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, fastaFilePair, listFilePair, nullStringPair, "");
+        
             delete getCommand;
-            
-            if (params->fastafile != "") {
-                params->util.renameFile(filenames["fasta"][0], files[0]);
-                params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]);
-            }
-            if (params->listfile != "") {
-                params->util.renameFile(filenames["list"][0], files[1]);
-                params->outputNames.push_back(files[1]); params->outputTypes["list"].push_back(files[1]);
-            }
+        
+            if (params->listfile != "") { params->outputNames.insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); params->outputTypes["list"].insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); }
         
             params->m->mothurOut("/******************************************/\n\n");
+
+            if (params->fastafile != "") { params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]); }
             
             if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} break; }
         }
-        
-        if (params->fastafile != "") { params->util.mothurRemove(uniqueFasta); }
-        if (params->listfile != "") { params->util.mothurRemove(uniqueList);   }
-        
+           
         return 0;
     }
     catch(exception& e) {

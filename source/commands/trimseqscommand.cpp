@@ -1000,27 +1000,20 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, unordered_set<stri
             
             if (badNames.size() != 0) {
                 //select bad names for scrap file
-                Command* getScrapCommand = new GetSeqsCommand(badNames, "", "", dupsFile, dupsFormat, outputdir);
-                
-                map<string, vector<string> > filenames = getScrapCommand->getOutputFiles();
-                
-                string tempScrapCountfile = getScrapCommand->getOutputFiles()["count"][0];
-                util.renameFile(tempScrapCountfile, scrapCountFileName);
-                util.mothurRemove(tempScrapCountfile);
+                pair<string, string> scrapDups(dupsFile, scrapCountFileName);
+                Command* getScrapCommand = new GetSeqsCommand(badNames, nullStringPair, nullStringPair, scrapDups, dupsFormat);
                 
                 delete getScrapCommand;
                 
                 //remove bad names for trim file
-                Command* removeScrapCommand = new RemoveSeqsCommand(badNames, dupsFile, dupsFormat, outputdir);
+                pair<string, string> trimDups(dupsFile, trimCountFileName);
+                Command* removeScrapCommand = new RemoveSeqsCommand(badNames, trimDups, dupsFormat);
                 
-                filenames = removeScrapCommand->getOutputFiles();
+                delete removeScrapCommand;
                 
-                string tempTrimCountfile = removeScrapCommand->getOutputFiles()["count"][0];
-                util.renameFile(tempTrimCountfile, trimCountFileName);
                 outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
                 outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
 
-                util.mothurRemove(tempTrimCountfile);
                 util.mothurRemove(fullCountFile);
             }else {
                 //rename full file to be trim file
@@ -1029,7 +1022,6 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, unordered_set<stri
                 newScrapCt.printTable(scrapCountFileName);
                 outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
                 outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
-
             }
             
         }else { //create a count file without groups

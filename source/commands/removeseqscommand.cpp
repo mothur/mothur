@@ -104,19 +104,19 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dupsFileType, string output) {
+RemoveSeqsCommand::RemoveSeqsCommand(string accnos, pair<string,string> dupsFile, string dupsFileType) {
     try {
         names = util.readAccnos(accnos);
     
-        outputdir = output; dups = true; abort = false; calledHelp = false;
+        dups = true; abort = false; calledHelp = false;
         
         vector<string> tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         
-        if (dupsFile != "") {
-            if (dupsFileType == "count")    { readCount(dupsFile); }
-            else                            {  readName(dupsFile); }
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second); }
+            else                            {  readName(dupsFile.first, dupsFile.second); }
         }
     }
     catch(exception& e) {
@@ -126,19 +126,19 @@ RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dups
 }
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(unordered_set<string> n, string dupsFile, string dupsFileType, string output) {
+RemoveSeqsCommand::RemoveSeqsCommand(unordered_set<string> n, pair<string,string> dupsFile, string dupsFileType) {
     try {
         names = n;
     
-        outputdir = output; dups = true; abort = false; calledHelp = false;
+        dups = true; abort = false; calledHelp = false;
         
         vector<string> tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         
-        if (dupsFile != "") {
-            if (dupsFileType == "count")    { readCount(dupsFile); }
-            else                            {  readName(dupsFile); }
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second); }
+            else                            {  readName(dupsFile.first, dupsFile.second); }
         }
     }
     catch(exception& e) {
@@ -564,15 +564,29 @@ void RemoveSeqsCommand::readQual(string qualfile){
 }
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readCount(string countfile){
+    try {
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
+        string outputFileName = getOutputFileName("count", variables);
+        
+        readCount(countfile, outputFileName);
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readCount");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+void RemoveSeqsCommand::readCount(string countfile, string outputFileName){
 	try {
         
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-        variables["[extension]"] = util.getExtension(countfile);
-		string outputFileName = getOutputFileName("count", variables);
-		
         CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
         for (auto it = names.begin(); it != names.end(); it++) {
@@ -689,14 +703,26 @@ void RemoveSeqsCommand::readList(string listfile){
 }
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readName(string namefile){
-	try {
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
-		string outputFileName = getOutputFileName("name", variables);
-		
+        string outputFileName = getOutputFileName("name", variables);
+        
+        readName(namefile, outputFileName);
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void RemoveSeqsCommand::readName(string namefile, string outputFileName){
+	try {
         ofstream out; util.openOutputFile(outputFileName, out);
 		ifstream in; util.openInputFile(namefile, in);
         
