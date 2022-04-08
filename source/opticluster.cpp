@@ -8,6 +8,9 @@
 
 #include "opticluster.h"
 
+OptiCluster::OptiCluster(OptiData* mt, ClusterMetric* met, long long ns) : Cluster() {
+    matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
+}
 /***********************************************************************/
 //randomly assign sequences to OTUs
 int OptiCluster::initialize(double& value, bool randomize, string initialize) {

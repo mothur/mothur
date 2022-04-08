@@ -75,8 +75,6 @@ protected:
     MothurOut* m;
     Utils util;
     string name;
-    
-    
 };
 
 

@@ -29,21 +29,23 @@
 
 /***********************************************************************/
 
+/*
+ #ifdef UNIT_TEST
+     friend class TestOptiCluster;
+     OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0;  } //for testing class
+     void setVariables(OptiData* mt, ClusterMetric* met) { matrix = mt; metric = met; }
+ #endif
+     
+ */
+
 class OptiCluster : public Cluster {
 
 public:
     
-#ifdef UNIT_TEST
-    friend class TestOptiCluster;
-    OptiCluster() : Cluster() { m = MothurOut::getInstance(); truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0;  } //for testing class
-    void setVariables(OptiData* mt, ClusterMetric* met) { matrix = mt; metric = met; }
-#endif
-    
-    OptiCluster(OptiData* mt, ClusterMetric* met, long long ns) : Cluster() {
-        m = MothurOut::getInstance(); matrix = mt; metric = met; truePositives = 0; trueNegatives = 0; falseNegatives = 0; falsePositives = 0; numSingletons = ns;
-    }
+    OptiCluster(OptiData* mt, ClusterMetric* met, long long ns);
     ~OptiCluster() = default;
-    bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } //inheritance compliant
+    
+    bool updateDistance(PDistCell& colCell, PDistCell& rowCell) { return false; } 
     string getTag() { string tag = "opti_" + metric->getName(); return tag; }
     long long getNumBins();
     int initialize(double&, bool, string);  //randomize and place in "best" OTUs
@@ -53,22 +55,19 @@ public:
     ListVector* getList();
     
 protected:
-    MothurOut* m;
-    Utils util;
-    map<long long, long long> seqBin; //sequence# -> bin#
     OptiData* matrix;
+    ClusterMetric* metric;
     vector<int> randomizeSeqs;
     vector< vector<long long> > bins; //bin[0] -> seqs in bin[0]
     map<long long, string> binLabels; //for fitting - maps binNumber to existing reference label
+    map<long long, long long> seqBin; //sequence# -> bin#
     
-    ClusterMetric* metric;
     long long numSeqs, insertLocation, numSingletons;
     double truePositives, trueNegatives, falsePositives, falseNegatives;
     
     long long findInsert();
     vector<double> getCloseFarCounts(long long seq, long long newBin);
-    vector<double> getFitStats( long long&,  long long&,  long long&,  long long&);
-    
+    vector<double> getFitStats( long long&, long long&, long long&, long long&);
 };
 
 #endif /* defined(__Mothur__opticluster__) */

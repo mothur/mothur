@@ -18,11 +18,6 @@
 class OptiRefMatrix : public OptiData {
     
 public:
-    
-#ifdef UNIT_TEST
-    OptiRefMatrix() : OptiData(0.03) { };
-#endif
-    
     OptiRefMatrix(string, string, string, string, double, float, string); //distfile, distFormat, dupsFile, dupsFormat, cutoff, percentage to be fitseqs, refWeightMethod (options: abundance, none, connectivity)
     OptiRefMatrix(string, string, string, string, double, unordered_set<string>); //distfile, distFormat, dupsFile, dupsFormat, cutoff, accnosfile refNames
     OptiRefMatrix(string, string, string, string, double, string, string, string, string, string, string); //refdistfile, refname or refcount, refformat, refdistformat, cutoff, fitdistfile, fitname or fitcount, fitformat, fitdistformat, betweendistfile, betweendistformat - files for reference
@@ -45,7 +40,6 @@ public:
     
     vector<long long> getRefSeqs(); //every ref seq in matrix. Includes some that would have been singletons if not for the betweendistfile
     vector<long long> getFitSeqs(); //every fit seq in matrix. Includes some that would have been singletons if not for the betweendistfile
-    
     long long getNumFitSeqs() { return numFitSeqs; } //only Fit seqs that are in fitdistfile and not singletons
     long long getNumFitClose(long long);
     long long getNumRefClose(long long);
@@ -54,7 +48,6 @@ public:
     bool isCloseFit(long long, long long, bool&);
 
 protected:
-    
     SubSample subsample; 
     map<long long, long long> weights; //seqeunce index in matrix to weight in chosing as reference
     string method, refWeightMethod;
@@ -67,17 +60,11 @@ protected:
     int readColumn(string distFile, bool hasName, map<string, string>& names, map<string, long long>& nameAssignment, map<long long, long long>& singletonIndexSwap);
     int readFiles(string, string, string, string, string, string, string, string, string, string, string, string);
     int readFiles(string, string, string, string, unordered_set<string>&);
-    
     map<long long, long long> readColumnSingletons(vector<bool>& singleton, string distFile, map<string, long long>&);
     map<long long, long long> readPhylipSingletons(vector<bool>& singleton, string distFile, long long&,  map<string, long long>& nameAssignment);
-    
     vector<bool> isRef; //same size as closeness, this tells us whether a seq with distances in the matrix is a reference
     vector<bool> isSingleRef; ////same size as singletons, this tells us whether a seq WITHOUT distances in the matrix (singleton) is a reference
-    
     void calcCounts();
-    
-
-    
 };
 
 

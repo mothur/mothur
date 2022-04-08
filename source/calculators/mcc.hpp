@@ -11,6 +11,8 @@
 
 #include "calculator.h"
 
+
+
 /***********************************************************************/
 
 class MCC : public ClusterMetric  {
