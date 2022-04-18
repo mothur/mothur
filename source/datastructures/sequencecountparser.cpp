@@ -26,6 +26,7 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
         inputString += ", count=" + countfile;
         
         m->mothurOut("\n/******************************************/\n");
+        time_t start = time(nullptr);
         m->mothurOut("Running command: split.groups(" + inputString + ")\n");
         
         SplitGroupCommand* splitCommand = new SplitGroupCommand(inputString);
@@ -35,6 +36,8 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
         map<string, vector<string> > filenames = splitCommand->getOutputFiles();
         
         delete splitCommand;
+        
+        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to split sequences by sample.\n");
         m->mothurOut("/******************************************/\n");
         
         vector<string> parsedFastaFiles = filenames["fasta"]; //sorted in groups order
