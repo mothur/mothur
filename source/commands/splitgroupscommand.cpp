@@ -91,7 +91,39 @@ string SplitGroupCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
+//**********************************************************************************************************************
 
+SplitGroupCommand::SplitGroupCommand(vector<string> g, string ffile, string count, string outd) : Command() {
+    try {
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        
+        Groups = g; groupfile = ""; namefile = "";
+        fastafile = ffile; countfile = count; outputdir = outd;
+        string temp = current->getProcessors(); processors = current->setProcessors(temp);
+        
+        if (processors > Groups.size()) { processors = Groups.size(); m->mothurOut("Reducing processors to " + toString(Groups.size()) + ".\n"); }
+        
+        //divide the groups between the processors
+        int remainingPairs = Groups.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+          int numPairs = remainingPairs; //case for last processor
+          if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+          lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+          startIndex = startIndex + numPairs;
+          remainingPairs = remainingPairs - numPairs;
+        }
+        
+        splitFastaCount();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand - mothurRun");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(string option) : Command()  {
 	try {
@@ -451,6 +483,91 @@ int driverRunCount(splitGroups2Struct* params){
     }
 }
 //**********************************************************************************************************************
+
+//assumes nameToGroup[seq1] -> 1,3 means seq1 should be written to outputFiles[1] and outputFiles[3]
+       
+int driverFastaCount(splitGroups3Struct* params){
+    try {
+        CountTable ct; ct.readTable(params->countfile, true, false, params->Groups);
+        if (!ct.hasGroupInfo()) { params->m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); params->m->setControl_pressed(true); }
+        
+        if (params->m->getControl_pressed()) { return 0; }
+        
+        params->Groups = ct.getNamesOfGroups();
+        int numGroups = params->Groups.size();
+        
+        for (int i = 0; i < numGroups; i++) { //Groups only contains the samples assigned to this process
+           
+            vector<string> outputFastaFiles; string g = ""; int count = 0;
+            map<string, vector<int> > nameToGroup; map<string, vector<int> >::iterator it;
+            string groupNameOutput = ""; vector<string> groups;
+            
+            while ((count < params->splitNum) && (i < numGroups) ){
+            
+                //print new count file
+                string newCountFile = params->fileRootExts[2] + params->Groups[i] + params->fileRootExts[3];
+                vector<string> tempGroups; tempGroups.push_back(params->Groups[i]);
+                ct.printCompressedTable(newCountFile, tempGroups);
+                params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
+                
+                vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
+            
+                string newFasta = params->fileRootExts[0] + params->Groups[i] + params->fileRootExts[1];
+                outputFastaFiles.push_back(newFasta);
+                
+                for (string name : namesOfSeqsInGroup) {
+                    it = nameToGroup.find(name);
+                    
+                    if (it != nameToGroup.end()) {
+                        (it->second).push_back(count);
+                    }else {
+                        vector<int> thisSeqsGroups; thisSeqsGroups.push_back(count);
+                        nameToGroup[name] = thisSeqsGroups;
+                    }
+                }
+            
+                groups.push_back(params->Groups[i]);
+                
+                groupNameOutput += params->Groups[i] + "-";
+                
+                count++; i++;
+            }
+            
+            i--;
+            
+            if (groupNameOutput.length() != 0) {
+                groupNameOutput = groupNameOutput.substr(0, groupNameOutput.length()-1);
+            }
+                
+            params->m->mothurOut("/******************************************/\n");
+            params->m->mothurOut("Selecting sequences for groups " + groupNameOutput + "\n\n");
+        
+            Command* getCommand = new GetSeqsCommand(nameToGroup, params->fastafile, outputFastaFiles, groups);
+        
+            map<string, vector<string> > fileOutputs = getCommand->getOutputFiles();
+            
+            delete getCommand;
+            
+            map<string, vector<string> >::iterator itOut = fileOutputs.find("fasta");
+            if (itOut != fileOutputs.end()) {
+                vector<string> o = itOut->second;
+                for (string name : o) {
+                    params->outputNames.push_back(name); params->outputTypes["fasta"].push_back(name);
+                }
+            }
+            params->m->mothurOut("/******************************************/\n\n");
+
+            if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {    params->util.mothurRemove(params->outputNames[i]);    } break; }
+        }
+           
+        return 0;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "SplitGroupCommand", "driverRunCount");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void SplitGroupCommand::splitCountOrGroup(bool isCount){
     try {
         //create array of worker threads
@@ -498,6 +615,50 @@ void SplitGroupCommand::splitCountOrGroup(bool isCount){
     }
     catch(exception& e) {
         m->errorOut(e, "SplitGroupCommand", "splitCountOrGroup");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//splitGroups3Struct(string count, string fasta, string outd, vector<string> g, int st, int en) : countfile(count), start(st), end(en)
+void SplitGroupCommand::splitFastaCount(){
+    try {
+        //create array of worker threads
+        vector<std::thread*> workerThreads;
+        vector<splitGroups3Struct*> data;
+
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            splitGroups3Struct* dataBundle = new splitGroups3Struct(countfile, fastafile, outputdir, Groups, lines[i+1].start, lines[i+1].end);
+            data.push_back(dataBundle);
+    
+            workerThreads.push_back(new std::thread(driverFastaCount, dataBundle));
+        }
+
+        splitGroups3Struct* dataBundle = new splitGroups3Struct(countfile, fastafile, outputdir, Groups, lines[0].start, lines[0].end);
+        
+        driverFastaCount(dataBundle);
+        
+        outputNames.insert(outputNames.end(), dataBundle->outputNames.begin(), dataBundle->outputNames.end());
+        for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+            outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+        }
+        
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+
+            outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
+            for (itTypes = data[i]->outputTypes.begin(); itTypes != data[i]->outputTypes.end(); itTypes++) {
+                outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+            }
+
+            delete data[i];
+            delete workerThreads[i];
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "splitFastaCount");
         exit(1);
     }
 }

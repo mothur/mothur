@@ -156,12 +156,43 @@ struct splitGroups2Struct {
         }
     }
 };
+//**********************************************************************************************************************
+struct splitGroups3Struct {
+    string countfile, fastafile, outputDir;
+    int start, end, splitNum;
+    vector<string> Groups;
+    vector< string > fileRootExts; // fastafileRoot, fastaFileExtentsions, countfileRoot, countFileExtension,
+    map<string, vector<string> > outputTypes;
+    vector<string> outputNames;
+    MothurOut* m;
+    Utils util;
+    
+    splitGroups3Struct(string count, string fasta, string outd, vector<string> g, int st, int en) : fastafile(fasta), countfile(count), outputDir(outd), start(st), end(en) {
+        m = MothurOut::getInstance();
+        for (int i = st; i < en; i++) { Groups.push_back(g[i]); }
+        
+        splitNum = 10;
+        
+        string thisOutputDir = outputDir;
+        if (outputDir == "") {  thisOutputDir = util.hasPath(fastafile);  }
+        string fastaFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        string fastaExt = util.getExtension(fastafile);
+       
+        if (outputDir == "") {  thisOutputDir = util.hasPath(countfile);  }
+        string countFileRoot = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        string countExt = util.getExtension(countfile);
+        
+        fileRootExts.push_back(fastaFileRoot); fileRootExts.push_back(fastaExt);
+        fileRootExts.push_back(countFileRoot); fileRootExts.push_back(countExt);
+    }
+};
 /***************************************************************************************/
 
 class SplitGroupCommand : public Command {
 	
 public:
-	SplitGroupCommand(string);	
+	SplitGroupCommand(string);
+    SplitGroupCommand(vector<string>, string fasta, string count, string o); //used by splitbySample algos
 	~SplitGroupCommand() = default;
 	
 	vector<string> setParameters();
@@ -186,6 +217,7 @@ private:
     int processors;
     
     void splitCountOrGroup(bool);
+    void splitFastaCount();
     void splitFastqOrFlow(string, string);
 };
 

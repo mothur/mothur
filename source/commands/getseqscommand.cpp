@@ -155,6 +155,21 @@ GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, pair<string,string> ffil
 }
 //**********************************************************************************************************************
 
+GetSeqsCommand::GetSeqsCommand(map<string, vector<int> > names, string ffile, vector<string> ofile, vector<string> g) : Command() {
+    try {
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        
+        readFasta(names, ffile, ofile, g);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
 GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, pair<string,string> ffile, pair<string,vector<string > > lfile, pair<string,string> dupsFile, string dupsFileType) : Command() {
     try {
         names = n; dups = true;
@@ -536,6 +551,70 @@ void GetSeqsCommand::readFasta(string fastafile, string outputFileName){
         outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
         
         m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastafile + ".\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//assumes nameToGroup[seq1] -> 1,3 means seq1 should be written to outputFiles[1] and outputFiles[3]
+void GetSeqsCommand::readFasta(map<string, vector<int> > nameToGroups, string fastafile, vector<string> outputFiles, vector<string> groups){
+    try {
+        map<string, vector<int> >::iterator it;
+        
+        vector<ofstream*> outputs;
+        vector<int> selectedCounts; selectedCounts.resize(outputFiles.size(), 0);
+        
+        for (string filename : outputFiles) {
+            ofstream* out = new ofstream();
+            util.openOutputFile(filename, *out);
+            outputs.push_back(out);
+        }
+        ifstream in; util.openInputFile(fastafile, in);
+        string name; bool wroteSomething = false;
+                
+        set<string> uniqueNames; int redundNum = 0;
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { break; }
+            
+            Sequence currSeq(in);
+            name = currSeq.getName();
+            
+            if (name != "") {
+            
+                it = nameToGroups.find(name);
+                
+                if (it != nameToGroups.end()) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        
+                        vector<int> outputIndex = it->second;
+                        for (int i : outputIndex) {
+                            currSeq.printSequence(*outputs[i]);
+                            selectedCounts[i]++;
+                        }
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fasta file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                        redundNum++;
+                    }
+                }
+            }
+            gobble(in);
+        }
+        in.close();
+        for (ofstream* out : outputs) { out->close(); delete out; }
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastafile + " does not contain any sequence from the .accnos file.\n");  }
+            
+        for (int i = 0; i < outputFiles.size(); i++) {
+            outputNames.push_back(outputFiles[i]);  outputTypes["fasta"].push_back(outputFiles[i]);
+            m->mothurOut("Selected " + toString(selectedCounts[i]) + " sequences from " + groups[i] + ".\n");
+        }
         
         return;
     }

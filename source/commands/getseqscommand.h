@@ -23,6 +23,7 @@ class GetSeqsCommand : public Command {
 		GetSeqsCommand(string);
         GetSeqsCommand(unordered_set<string>, pair<string,string> fasta, pair<string,vector<string> > list, pair<string,string> dupsFile, string dupsFileType);
         GetSeqsCommand(unordered_set<string>, pair<string,string> fasta, pair<string,string> list, pair<string,string> dupsFile, string dupsFileType);
+        GetSeqsCommand(map<string, vector<int> >, string fastafile, vector<string> outputFiles, vector<string> groups);
 		~GetSeqsCommand(){}
 	
 		vector<string> setParameters();
@@ -47,6 +48,7 @@ class GetSeqsCommand : public Command {
         map<string, string> uniqueMap;
         map<string, set<string> > sanity; //for debug //maps file type to names chosen for file. something like "fasta" -> vector<string>. If running in debug mode this is filled and we check to make sure all the files have the same names. If they don't we output the differences for the user.
 		
+        void readFasta(map<string, vector<int> > nameToGroups, string fastafile, vector<string> outputFiles, vector<string>);
         void readFasta(string); //inputFastaFile, mothur generates output name
         void readFasta(string, string); //inputFastaFile, outputName (internal use)
         void readName(string); //inputNameFile, mothur generates output name

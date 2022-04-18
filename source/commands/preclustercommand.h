@@ -52,8 +52,8 @@ private:
     vector<string> outputNames;
     
     void createProcessesGroups(map<string, vector<string> >&, vector<string>, string, string);
-    string mergeGroupCounts(string, string);
-    void printFasta(string newFastaFileName, string accnosFile);
+    unordered_set<string> mergeGroupCounts(string, string);
+    void printFasta(string newFastaFileName, unordered_set<string> accnosFile);
 };
 
 
