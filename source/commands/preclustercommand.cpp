@@ -442,7 +442,7 @@ void mergeSeqs(seqPNode* representative, seqPNode* duplicate, string& chunk, int
         }
         representative->numIdentical += duplicate->numIdentical;
         
-        chunk += representative->name + "\t" + duplicate->name + "\t" + toString(originalCount) + "\t" + toString(mismatch) + "\t" + duplicate->sequence + "\n";
+        chunk += (representative->name + "\t" + duplicate->name + "\t" + toString(originalCount) + "\t" + toString(mismatch) + "\t" + duplicate->sequence + "\n");
         duplicate->numIdentical = 0;
         duplicate->diffs = mismatch;
     }
@@ -967,13 +967,10 @@ void PreClusterCommand::printFasta(string newFastaFileName, unordered_set<string
         
         m->mothurOut("\n/******************************************/\n");
         m->mothurOut("Running get.seqs: \n");
-        current->setMothurCalling(true);
         
         Command* getCommand = new GetSeqsCommand(accnos, ffiles, nullStringPair, nullStringPair, "");
-        getCommand->execute();
-                
         delete getCommand;
-        current->setMothurCalling(false);
+                
         m->mothurOut("/******************************************/\n");
     }
     catch(exception& e) {

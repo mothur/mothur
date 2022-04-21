@@ -155,7 +155,7 @@ GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, pair<string,string> ffil
 }
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(map<string, vector<int> > names, string ffile, vector<string> ofile, vector<string> g) : Command() {
+GetSeqsCommand::GetSeqsCommand(unordered_map<string, vector<int> > names, string ffile, vector<string> ofile, vector<string> g) : Command() {
     try {
         abort = false; calledHelp = false;
         vector<string> tempOutNames;
@@ -561,9 +561,9 @@ void GetSeqsCommand::readFasta(string fastafile, string outputFileName){
 }
 //**********************************************************************************************************************
 //assumes nameToGroup[seq1] -> 1,3 means seq1 should be written to outputFiles[1] and outputFiles[3]
-void GetSeqsCommand::readFasta(map<string, vector<int> > nameToGroups, string fastafile, vector<string> outputFiles, vector<string> groups){
+void GetSeqsCommand::readFasta(unordered_map<string, vector<int> > nameToGroups, string fastafile, vector<string> outputFiles, vector<string> groups){
     try {
-        map<string, vector<int> >::iterator it;
+        unordered_map<string, vector<int> >::iterator it;
         
         vector<ofstream*> outputs;
         vector<int> selectedCounts; selectedCounts.resize(outputFiles.size(), 0);

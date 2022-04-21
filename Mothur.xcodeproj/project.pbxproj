@@ -1799,6 +1799,8 @@
 		A7FF19F1140FFDA500AD216D /* trimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trimoligos.cpp; path = source/trimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		A7FFB556142CA02C004884F2 /* summarytaxcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = summarytaxcommand.h; path = source/commands/summarytaxcommand.h; sourceTree = SOURCE_ROOT; };
 		A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summarytaxcommand.cpp; path = source/commands/summarytaxcommand.cpp; sourceTree = SOURCE_ROOT; };
+		F40859AF280F2DDB00F19B1A /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		F40859B0280F3CB200F19B1A /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F4103A4B25A3A40F001ED741 /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = mothur_resources/libs/libboost_filesystem.a; sourceTree = SOURCE_ROOT; };
 		F4103A4F25A3A411001ED741 /* libboost_iostreams.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_iostreams.a; path = mothur_resources/libs/libboost_iostreams.a; sourceTree = SOURCE_ROOT; };
 		F4103A5D25A3A7C7001ED741 /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = mothur_resources/libs/libhdf5_hl.a; sourceTree = SOURCE_ROOT; };
@@ -2734,6 +2736,7 @@
 		A7E9BA3F12D395F700DA6239 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
+				F40859B0280F3CB200F19B1A /* README.txt */,
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
 				481E40E0244F62980059C925 /* calculator.cpp */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
@@ -2947,6 +2950,7 @@
 		A7E9BA4F12D398D700DA6239 /* clearcut */ = {
 			isa = PBXGroup;
 			children = (
+				F40859AF280F2DDB00F19B1A /* README.txt */,
 				A7E9B69412D37EC400DA6239 /* clearcut.cpp */,
 				A7E9B69512D37EC400DA6239 /* clearcut.h */,
 				A7E9B6A412D37EC400DA6239 /* cmdargs.cpp */,

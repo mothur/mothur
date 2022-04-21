@@ -463,7 +463,7 @@ int driverRunCount(splitGroups2Struct* params){
             params->m->mothurOut("Selecting sequences for group " + params->Groups[i] + "\n\n");
         
             Command* getCommand = new GetSeqsCommand(thisGroupsNames, fastaFilePair, listFilePair, nullStringPair, "");
-        
+            
             delete getCommand;
         
             if (params->listfile != "") { params->outputNames.insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); params->outputTypes["list"].insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); }
@@ -499,7 +499,7 @@ int driverFastaCount(splitGroups3Struct* params){
         for (int i = 0; i < numGroups; i++) { //Groups only contains the samples assigned to this process
            
             vector<string> outputFastaFiles; string g = ""; int count = 0;
-            map<string, vector<int> > nameToGroup; map<string, vector<int> >::iterator it;
+            unordered_map<string, vector<int> > nameToGroup; unordered_map<string, vector<int> >::iterator it;
             string groupNameOutput = ""; vector<string> groups;
             
             while ((count < params->splitNum) && (i < numGroups) ){
@@ -535,12 +535,9 @@ int driverFastaCount(splitGroups3Struct* params){
             
             i--;
             
-            if (groupNameOutput.length() != 0) {
-                groupNameOutput = groupNameOutput.substr(0, groupNameOutput.length()-1);
-            }
+            if (groupNameOutput.length() != 0) { groupNameOutput = groupNameOutput.substr(0, groupNameOutput.length()-1); }
                 
-            params->m->mothurOut("/******************************************/\n");
-            params->m->mothurOut("Selecting sequences for groups " + groupNameOutput + "\n\n");
+            params->m->mothurOut("\nSelecting sequences for groups " + groupNameOutput + "\n\n");
         
             Command* getCommand = new GetSeqsCommand(nameToGroup, params->fastafile, outputFastaFiles, groups);
         
@@ -551,11 +548,8 @@ int driverFastaCount(splitGroups3Struct* params){
             map<string, vector<string> >::iterator itOut = fileOutputs.find("fasta");
             if (itOut != fileOutputs.end()) {
                 vector<string> o = itOut->second;
-                for (string name : o) {
-                    params->outputNames.push_back(name); params->outputTypes["fasta"].push_back(name);
-                }
+                for (string name : o) { params->outputNames.push_back(name); params->outputTypes["fasta"].push_back(name);  }
             }
-            params->m->mothurOut("/******************************************/\n\n");
 
             if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {    params->util.mothurRemove(params->outputNames[i]);    } break; }
         }

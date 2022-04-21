@@ -13,9 +13,6 @@
 #include "sabundvector.hpp"
 #include "utils.hpp"
 
-
-
-
 /***********************************************************************/
 struct acceptRatioPos  {
     double acceptRatio;
