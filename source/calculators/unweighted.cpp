@@ -29,14 +29,11 @@ Unweighted::Unweighted(bool r, vector<string> G) : includeRoot(r), Groups(G) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::getValues(Tree* t, int p, string o) {
+EstOutput Unweighted::getValues(Tree* t, int p) {
 	try {
-		processors = p; outputDir = o;
-        
-        CountTable* ct = t->getCountTable();
-        
-		
-		return (createProcesses(t,  ct));
+		processors = p;
+    
+		return (createProcesses(t));
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Unweighted", "getValues");
@@ -86,64 +83,83 @@ struct unweightedData {
     }
 };
 /**************************************************************************************************/
-int getRoot(Tree* t, bool includeRoot, int v, vector<string> grouping, map< vector<string>, set<int> >& rootForGrouping) {
-    MothurOut* m; m = MothurOut::getInstance();
+int findNodeBelonging(MothurOut* m, vector<string>& namesOfGroupCombos, map< string, vector<int> >& groupNodeInfo) {
+    try {
+     
+     int nodeBelonging = -1;
+     for (int g = 0; g < namesOfGroupCombos.size(); g++) {
+         if (groupNodeInfo[namesOfGroupCombos[g]].size() != 0) { nodeBelonging = groupNodeInfo[namesOfGroupCombos[g]][0]; break; }
+     }
+     
+     //sanity check
+     if (nodeBelonging == -1) {
+         m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping ");
+         for (int g = 0; g < namesOfGroupCombos.size()-1; g++) { m->mothurOut(namesOfGroupCombos[g] + "-"); }
+         m->mothurOut(namesOfGroupCombos[namesOfGroupCombos.size()-1]);
+         m->mothurOut(", skipping.\n");
+     }
+     
+     return nodeBelonging;
+ }
+ catch(exception& e) {
+     m->errorOut(e, "Weighted", "findNodeBelongingToThisComparison");
+     exit(1);
+ }
+}
+/**************************************************************************************************/
+void getRoot2(MothurOut* m, Tree* t, int v, vector<string> grouping, set<int>& rootForGrouping) {
     try {
         //you are a leaf so get your parent
         int index = t->tree[v].getParent();
         
-        if (includeRoot) {
-            rootForGrouping[grouping].clear();
-        }else {
+        //my parent is a potential root
+        rootForGrouping.insert(index);
+        
+        //while you aren't at root
+        while(t->tree[index].getParent() != -1){
             
-            //my parent is a potential root
-            rootForGrouping[grouping].insert(index);
+            if (m->getControl_pressed()) {  return; }
             
-            //while you aren't at root
-            while(t->tree[index].getParent() != -1){
-                
-                if (m->getControl_pressed()) {  return 0; }
-                
-                //am I the root for this grouping? if so I want to stop "early"
-                //does my sibling have descendants from the users groups?
-                //if so I am not the root
-                int parent = t->tree[index].getParent();
-                int lc = t->tree[parent].getLChild();
-                int rc = t->tree[parent].getRChild();
-                
-                int sib = lc;
-                if (lc == index) { sib = rc; }
-                
-                map<string, int>::iterator itGroup;
-                int pcountSize = 0;
-                for (int j = 0; j < grouping.size(); j++) {
-                    map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
-                    if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } }
-                }
-                
-                //if yes, I am not the root
-                if (pcountSize != 0) {
-                    rootForGrouping[grouping].clear();
-                    rootForGrouping[grouping].insert(parent);
-                }
-                
-                index = parent;
+            //am I the root for this grouping? if so I want to stop "early"
+            //does my sibling have descendants from the users groups?
+            //if so I am not the root
+            int parent = t->tree[index].getParent();
+            int lc = t->tree[parent].getLChild();
+            int rc = t->tree[parent].getRChild();
+            
+            int sib = lc;
+            if (lc == index) { sib = rc; }
+            
+            map<string, int>::iterator itGroup;
+            int pcountSize = 0;
+            for (int j = 0; j < grouping.size(); j++) {
+                map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
+                if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } }
             }
             
-            //get all nodes above the root to add so we don't add their u values above
-            index = *(rootForGrouping[grouping].begin());
-            while(t->tree[index].getParent() != -1){
-                int parent = t->tree[index].getParent();
-                rootForGrouping[grouping].insert(parent);
-                
-                index = parent;
+            //if yes, I am not the root
+            if (pcountSize != 0) {
+                rootForGrouping.clear();
+                rootForGrouping.insert(parent);
             }
+            
+            index = parent;
         }
         
-        return 0;
+        //get all nodes above the root to add so we don't add their u values above
+        index = *(rootForGrouping.begin());
+        while(t->tree[index].getParent() != -1){
+            int parent = t->tree[index].getParent();
+            rootForGrouping.insert(parent);
+            
+            index = parent;
+        }
+        
+        
+        return;
     }
     catch(exception& e) {
-        m->errorOut(e, "Unweighted", "getRoot");
+        m->errorOut(e, "Weighted", "getRoot2");
         exit(1);
     }
 }
@@ -151,7 +167,7 @@ int getRoot(Tree* t, bool includeRoot, int v, vector<string> grouping, map< vect
 void driverUnweighted(unweightedData* params) {
     try {
         params->count = 0;
-        map< vector<string>, set<int> > rootForGrouping;
+
         for (int h = params->start; h < (params->start+params->num); h++) {
             
             if (params->m->getControl_pressed()) { break; }
@@ -159,24 +175,15 @@ void driverUnweighted(unweightedData* params) {
             double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
             double totalBL = 0.00;	//all branch lengths
             double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
+            set<int> rootBranches; //if not including root this will hold branches that are "above" the root for this comparison
+
+            int nodeBelonging = findNodeBelonging(params->m, params->namesOfGroupCombos[h], params->t->groupNodeInfo);
             
-            //find a node that belongs to one of the groups in this combo
-            int nodeBelonging = -1;
-            for (int g = 0; g < params->namesOfGroupCombos[h].size(); g++) {
-                if (params->t->groupNodeInfo[params->namesOfGroupCombos[h][g]].size() != 0) { nodeBelonging = params->t->groupNodeInfo[params->namesOfGroupCombos[h][g]][0]; break; }
-            }
-            
-            //sanity check
-            if (nodeBelonging == -1) {
-                params->m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping ");
-                for (int g = 0; g < params->namesOfGroupCombos[h].size()-1; g++) { params->m->mothurOut(params->namesOfGroupCombos[h][g] + "-"); }
-                params->m->mothurOut(params->namesOfGroupCombos[h][params->namesOfGroupCombos[h].size()-1]);
-                params->m->mothurOut(", skipping.\n"); params->results[params->count] = UW;
-            }else{
-                
-                //if including the root this clears rootForGrouping[namesOfGroupCombos[h]]
-                getRoot(params->t, params->includeRoot, nodeBelonging, params->namesOfGroupCombos[h], rootForGrouping);
-                
+            if (nodeBelonging != -1) {
+
+                //fills rootBranches to exclude, if including the root then rootBranches should be empty.
+                if (!params->includeRoot) { getRoot2(params->m, params->t, nodeBelonging, params->namesOfGroupCombos[h], rootBranches); }
+
                 for(int i=0;i<params->t->getNumNodes();i++){
                     
                     if (params->m->getControl_pressed()) {  break; }
@@ -194,13 +201,13 @@ void driverUnweighted(unweightedData* params) {
                     
                     //unique calc
                     if (pcountSize == 0) { }
-                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
+                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootBranches.count(i) == 0)) { //you have a unique branch length and you are not the root
                         UniqueBL += abs(params->t->tree[i].getBranchLength());
                     }
                     
                     //total calc
                     if (pcountSize == 0) { }
-                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
+                    else if (!params->util.isEqual(params->t->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootBranches.count(i) == 0)) { //you have a branch length and you are not the root
                         totalBL += abs(params->t->tree[i].getBranchLength());
                     }
                 }
@@ -221,7 +228,7 @@ void driverUnweighted(unweightedData* params) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
+EstOutput Unweighted::createProcesses(Tree* t) {
 	try {
         vector<linePair> lines;
         int remainingPairs = namesOfGroupCombos.size();
@@ -239,6 +246,7 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
         vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
+        CountTable* ct = t->getCountTable();
         
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
@@ -285,14 +293,11 @@ EstOutput Unweighted::createProcesses(Tree* t, CountTable* ct) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::getValues(Tree* t, vector<vector<int> >& randomTreeNodes, int p, string o) {
+EstOutput Unweighted::getValues(Tree* t, vector<vector<int> >& randomTreeNodes, int p) {
  try {
 		processors = p;
-		outputDir = o;
-		
-        CountTable* ct = t->getCountTable();
-     
-        return (createProcesses(t, randomTreeNodes, ct));
+    
+        return (createProcesses(t, randomTreeNodes));
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Unweighted", "getValues");
@@ -303,7 +308,7 @@ EstOutput Unweighted::getValues(Tree* t, vector<vector<int> >& randomTreeNodes, 
 void driverRandomCalcs(unweightedData* params) {
     try {
         params->count = 0;
-        map< vector<string>, set<int> > rootForGrouping;
+       
         vector<string> Treenames = params->t->getTreeNames();
         Tree* copyTree = new Tree(params->ct, Treenames);
         
@@ -321,22 +326,15 @@ void driverRandomCalcs(unweightedData* params) {
             double totalBL = 0.00;	//all branch lengths
             double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
             //find a node that belongs to one of the groups in this combo
-            int nodeBelonging = -1;
-            for (int g = 0; g < params->namesOfGroupCombos[h].size(); g++) {
-                if (copyTree->groupNodeInfo[params->namesOfGroupCombos[h][g]].size() != 0) { nodeBelonging = copyTree->groupNodeInfo[params->namesOfGroupCombos[h][g]][0]; break; }
-            }
+            set<int> rootBranches; //if not including root this will hold branches that are "above" the root for this comparison
+
+            int nodeBelonging = findNodeBelonging(params->m, params->namesOfGroupCombos[h], params->t->groupNodeInfo);
             
-            //sanity check
-            if (nodeBelonging == -1) {
-                params->m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping ");
-                for (int g = 0; g < params->namesOfGroupCombos[h].size()-1; g++) { params->m->mothurOut(params->namesOfGroupCombos[h][g] + "-"); }
-                params->m->mothurOut(params->namesOfGroupCombos[h][params->namesOfGroupCombos[h].size()-1]);
-                params->m->mothurOut(", skipping.\n"); params->results[params->count] = UW;
-            }else{
-                
-                //if including the root this clears rootForGrouping[namesOfGroupCombos[h]]
-                getRoot(copyTree, params->includeRoot, nodeBelonging, params->namesOfGroupCombos[h], rootForGrouping);
-                
+            if (nodeBelonging != -1) {
+
+                //fills rootBranches to exclude, if including the root then rootBranches should be empty.
+                if (!params->includeRoot) { getRoot2(params->m, params->t, nodeBelonging, params->namesOfGroupCombos[h], rootBranches); }
+
                 for(int i=0;i<copyTree->getNumNodes();i++){
                     
                     if (params->m->getControl_pressed()) {  break; }
@@ -353,13 +351,13 @@ void driverRandomCalcs(unweightedData* params) {
                     
                     //unique calc
                     if (pcountSize == 0) { }
-                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root
+                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize == 1) && (rootBranches.count(i) == 0)) { //you have a unique branch length and you are not the root
                         UniqueBL += abs(copyTree->tree[i].getBranchLength());
                     }
                     
                     //total calc
                     if (pcountSize == 0) { }
-                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root
+                    else if (!params->util.isEqual(copyTree->tree[i].getBranchLength(), -1) && (pcountSize != 0) && (rootBranches.count(i) == 0)) { //you have a branch length and you are not the root
                         totalBL += abs(copyTree->tree[i].getBranchLength()); 
                     }
                     
@@ -382,7 +380,7 @@ void driverRandomCalcs(unweightedData* params) {
 }
 /**************************************************************************************************/
 
-EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeNodes, CountTable* ct) {
+EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeNodes) {
 	try {
         vector<linePair> lines;
         int remainingPairs = namesOfGroupCombos.size();
@@ -400,6 +398,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector<vector<int> >& randomTreeN
         vector<std::thread*> workerThreads;
         vector<unweightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
+        CountTable* ct = t->getCountTable();
+        
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             CountTable* copyCount = new CountTable();

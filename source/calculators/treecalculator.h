@@ -39,7 +39,7 @@ protected:
 	EstOutput data;
 	string name;
 	MothurOut* m;
-
+    
 };
 
 /***********************************************************************/

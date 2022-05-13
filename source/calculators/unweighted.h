@@ -20,19 +20,19 @@ class Unweighted : public TreeCalculator  {
 	
 	public:
         Unweighted(bool r, vector<string> g);
-		~Unweighted() = default;;
-		EstOutput getValues(Tree*, int, string);
-		EstOutput getValues(Tree*, vector<vector<int> >&, int, string);
+		~Unweighted() = default;
+    
+		EstOutput getValues(Tree*, int);
+		EstOutput getValues(Tree*, vector<vector<int> >&, int);
 		
 	private:
 		vector< vector<string> > namesOfGroupCombos;
         vector<string> Groups;
 		int processors;
-		string outputDir;
 		bool includeRoot;
 		
-		EstOutput createProcesses(Tree*, CountTable*);
-		EstOutput createProcesses(Tree*, vector<vector<int> >&, CountTable*);
+		EstOutput createProcesses(Tree*);
+		EstOutput createProcesses(Tree*, vector<vector<int> >&);
 };
 
 /**************************************************************************************************/

@@ -16,7 +16,8 @@
 /* This class represents the treefile. */
 
 class Tree {
-public: 
+public:
+    
 	Tree(int, CountTable*, vector<string>&);
 	Tree(CountTable*, vector<string>&);		
     Tree(CountTable*, vector< vector<double> >&, vector<string>&); //create tree from sim matrix
@@ -50,6 +51,10 @@ public:
     vector<int> getNodes(vector<string>); //return tree indexes of nodes for groups passed in
 			
 private:
+    MothurOut* m;
+    vector<string> Treenames;
+    Utils util;
+    
 	CountTable* ct;
 	int numNodes, numLeaves;
 	ofstream out;
@@ -71,10 +76,6 @@ private:
 	int populateNewTree(vector<Node>&, int, int&);
 	void printBranch(int, ostream&, string, vector<Node>&);
     void pruneNewTree(Tree* copy, vector<string> namesToInclude);
-    
-	MothurOut* m;
-    vector<string> Treenames;
-    Utils util;
 };
 
 #endif

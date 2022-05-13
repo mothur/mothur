@@ -274,7 +274,7 @@ int UnifracUnweightedCommand::execute() {
             
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
 
-			userData = unweighted.getValues(T[i], processors, outputdir);  //userData[0] = unweightedscore
+			userData = unweighted.getValues(T[i], processors);  //userData[0] = unweightedscore
 		
 			if (m->getControl_pressed()) { break; }
 			
@@ -317,7 +317,7 @@ int UnifracUnweightedCommand::execute() {
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Unweighted thisUnweighted(includeRoot, Groups);
-                iterData = thisUnweighted.getValues(subSampleTree, processors, outputdir); //userData[0] = weightedscore
+                iterData = thisUnweighted.getValues(subSampleTree, processors); //userData[0] = weightedscore
         
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
@@ -620,7 +620,7 @@ int UnifracUnweightedCommand::runRandomCalcs(Tree* thisTree, vector<double> user
             for (int f = 0; f < numComp; f++) { util.mothurRandomShuffle(randomTreeNodes[f]);  } //randomize labels
             
             //we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
-            randomData = unweighted.getValues(thisTree, randomTreeNodes, processors, outputdir);
+            randomData = unweighted.getValues(thisTree, randomTreeNodes, processors);
             
             if (m->getControl_pressed()) { return 0; }
 			
