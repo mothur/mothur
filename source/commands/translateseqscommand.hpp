@@ -54,7 +54,7 @@ public:
     string getCommonQuestions();
     string getOutputPattern(string);
     string getCitation() { return "http://www.mothur.org/wiki/translate.seqs"; }
-    string getDescription()        { return "tranlate dna to amino acids or amino acids to dna"; }
+    string getDescription()        { return "tranlate dna to amino acids or align dna to amino acids"; }
     
     int execute();
     void help() { m->mothurOut(getHelpString()); }

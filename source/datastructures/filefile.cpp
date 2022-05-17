@@ -156,6 +156,7 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
             util.checkGroupName(group);
             forward = pieces[1];
             reverse = pieces[2];
+            if ((reverse == "none") || (reverse == "NONE")){ reverse = "NONE"; }
             findex = "";
             rindex = "";
             fileOption = 2;
@@ -181,7 +182,7 @@ bool FileFile::validateFiles(vector<string> pieces, string& forward, string& rev
         }else { m->mothurOut("[WARNING]: can't find " + forward + ", ignoring pair.\n"); }
         
         bool openReverse = true;
-        if (reverse != ""){
+        if ((reverse != "") && (reverse != "NONE")){
             openReverse = util.checkLocations(reverse, current->getLocations());
             if (openReverse) {
                 if (util.isBlank(reverse)) { m->mothurOut("[WARNING]: " + reverse + " is blank, skipping.\n"); skip=true; }
