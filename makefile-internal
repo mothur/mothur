@@ -1,3 +1,5 @@
+#compress for release command
+#zip -r {filename.zip} {foldername}
 
 USEREADLINE ?= yes
 USEBOOST ?= yes
