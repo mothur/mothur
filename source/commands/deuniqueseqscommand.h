@@ -17,7 +17,7 @@ class DeUniqueSeqsCommand : public Command {
 
 public:
 	DeUniqueSeqsCommand(string);
-	~DeUniqueSeqsCommand() {}
+	~DeUniqueSeqsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "deunique.seqs";		}

@@ -293,7 +293,7 @@ int CollectCommand::execute(){
             
             OrderVector* order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
                    
-            while (order != NULL) {
+            while (order != nullptr) {
                        
                 if (m->getControl_pressed()) { delete order; break; }
                        
@@ -442,7 +442,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
             files[group] = (sharedFileRoot + group + ".rabund");
 		}
 		
-		while(shared != NULL) {
+		while(shared != nullptr) {
             
             vector<SharedRAbundVector*> lookup = shared->getSharedRAbundVectors();
 			for (int i = 0; i < lookup.size(); i++) {
@@ -453,7 +453,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 				temp.close();
 			}
 		
-            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } lookup[i] = NULL; }
+            for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != nullptr) { delete lookup[i]; } lookup[i] = nullptr; }
 			shared = input.getSharedRAbundVectors();
 		}
 

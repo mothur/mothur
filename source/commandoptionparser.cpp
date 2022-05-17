@@ -32,7 +32,7 @@ CommandOptionParser::CommandOptionParser(string input){
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
             if (!(commandString == "set.logfile")) {
                 if (m->getLogFileName() == "") {
-                    time_t ltime = time(NULL); /* calendar time */
+                    time_t ltime = time(nullptr); /* calendar time */
                     string outputPath = current->getOutputDir();
                     string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
                     m->setLogFileName(logFileName, false);

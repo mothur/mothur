@@ -110,8 +110,8 @@ void SharedChao1::initialTree(int n) {
 	
 		//initialize leaf values
 		for (int i = 0; i < numLeaves; i++) {
-			f1leaves[i] = new IntNode(0, 0, NULL, NULL);
-			f2leaves[i] = new IntNode(0, 0, NULL, NULL);
+			f1leaves[i] = new IntNode(0, 0, nullptr, nullptr);
+			f2leaves[i] = new IntNode(0, 0, nullptr, nullptr);
 		}
 		
 		//set pointers to children
@@ -204,7 +204,7 @@ void SharedChao1::updateBranchf2(IntNode* node, vector<int> bin, int index) {
 /***********************************************************************/
 void SharedChao1::setCoef(IntNode* node, int coef) {
 	try {
-		if (node->left != NULL) {
+		if (node->left != nullptr) {
 			setCoef(node->left, coef+1);
 			setCoef(node->right, coef);
 		}else {
@@ -235,7 +235,7 @@ void SharedChao1::printBranch(IntNode* node) {
 	try {
 		
 		// you are not a leaf
-		if (node->left != NULL) {
+		if (node->left != nullptr) {
 			printBranch(node->left);
 			printBranch(node->right);
 		}else { //you are a leaf

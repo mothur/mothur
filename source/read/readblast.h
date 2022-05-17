@@ -23,7 +23,7 @@ class ReadBlast {
 	
 public:
 	ReadBlast(string, float, float, int, bool); //blastfile, cutoff, penalty, length of overlap, min or max bsr
-	~ReadBlast() {}
+	~ReadBlast() = default;
 	
 	int read(NameAssignment*);
 	SparseDistanceMatrix* getDistMatrix()		{	return matrix;		}

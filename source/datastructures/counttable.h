@@ -62,7 +62,7 @@ class CountTable {
     public:
 
         CountTable() { m = MothurOut::getInstance(); hasGroups = false; total = 0; uniques = 0; isCompressed = true; }
-        ~CountTable() {}
+        ~CountTable() = default;
 
         //reads and creates smart enough to eliminate groups with zero counts
         int createTable(map<string, string>&); //seqName->group
@@ -72,7 +72,7 @@ class CountTable {
         int readTable(ifstream&, bool, bool); //filehandler, readGroups, mothurRunning
         int readTable(string, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
         int readTable(ifstream&, bool, bool, vector<string>); //filename, readGroups, mothurRunning, groups to save (if none provided, read all groups)
-        int readTable(string, bool, bool, set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
+        int readTable(string, bool, bool, unordered_set<string>); //filename, readGroups, mothurRunning, namesofSeqs to save (if none provided, read all seqs)
         int readTable(string, string); //filename, format - if format=fasta, read fasta file and create unique table. if format=name, use namefile to create count table
     
         int zeroOutTable(); //turn all counts to zeros
@@ -141,18 +141,18 @@ class CountTable {
         bool hasGroups, isCompressed;
         int total, uniques;
         vector<string> groups;
-        vector< vector<countTableItem> > counts; //countTableItem ((int)abund, (int)group). each line in counts represents a sequence line from the count table file(sparse). The vector<ountTableItem> are sorted by group, so that you can stop search early if group is not found. For example:  seq1 10 5 0 0 1 0 0 0 3 0 0 1 0 0 - 13 groups, but seq1 is only present in 4 samples. Let's save space by not storing 0 abunds. seq1's vector<ountTableItem> (5,0),(1,3),(3,7),(1,10). Group0 = 5, Group3 = 1, Group7 = 3, Group10 = 1.  
+        vector< vector<intPair> > counts; //intPair ((int)abund, (int)group). each line in counts represents a sequence line from the count table file(sparse). The vector<intPair> are sorted by group, so that you can stop search early if group is not found. For example:  seq1 10 5 0 0 1 0 0 0 3 0 0 1 0 0 - 13 groups, but seq1 is only present in 4 samples. Let's save space by not storing 0 abunds. seq1's vector<ountTableItem> (5,0),(1,3),(3,7),(1,10). Group0 = 5, Group3 = 1, Group7 = 3, Group10 = 1.
         vector<int> totals;
         vector<int> totalGroups;
         map<string, int> indexNameMap; //maps seqName -> vector index in counts. seq1 -> 1 would mean seq1's counts are stored in counts[1].
         map<string, int> indexGroupMap;
     
-        int find(int seq, int group, bool returnNext); //returns index of countTableItem for group passed in. If group is not present in seq, returns -1
-        int getAbund(int seq, int group); //returns abundance of countTableItem for seq and group passed in. If group is not present in seq, returns 0
-        vector<countTableItem> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
+        int find(int seq, int group, bool returnNext); //returns index of intPair for group passed in. If group is not present in seq, returns -1
+        int getAbund(int seq, int group); //returns abundance of intPair for seq and group passed in. If group is not present in seq, returns 0
+        vector<intPair> getItems(string); //returns group counts for a seq passed in, if no group info is in file vector is blank. sorted by group
         vector<int> expandAbunds(int index);
-        vector<int> expandAbunds(vector<countTableItem>& items);
-        vector<countTableItem> compressAbunds(vector<int> abunds);
+        vector<int> expandAbunds(vector<intPair>& items);
+        vector<intPair> compressAbunds(vector<int> abunds);
         void printGroupAbunds(ofstream& out, int index);
         int sortCountTable();
         int sortRow(int);

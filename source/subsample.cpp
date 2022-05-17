@@ -68,7 +68,7 @@ Tree* SubSample::getSample(Tree* T, CountTable* ct, CountTable* newCt, int size,
 //**********************************************************************************************************************
 Tree* SubSample::getSampleWithReplacement(Tree* T, CountTable* ct, CountTable* newCt, int size, vector<string>& mGroups) {
     try {
-        Tree* newTree = NULL;
+        Tree* newTree = nullptr;
         
         //remove seqs not in sample from counttable
         vector<string> Groups = ct->getNamesOfGroups();
@@ -460,7 +460,7 @@ int SubSample::getSample(RAbundVector*& rabund, int size) {
         int numBins = rabund->getNumBins();
         int thisSize = rabund->getNumSeqs();
         
-        OrderVector order = rabund->getOrderVector(NULL);
+        OrderVector order = rabund->getOrderVector(nullptr);
         
         if (thisSize > size) {
             util.mothurRandomShuffle(order);
@@ -496,7 +496,7 @@ int SubSample::getSampleWithReplacement(RAbundVector*& rabund, int size) {
         int numBins = rabund->getNumBins();
         int thisSize = rabund->getNumSeqs();
         
-        OrderVector order = rabund->getOrderVector(NULL);
+        OrderVector order = rabund->getOrderVector(nullptr);
         
         if (thisSize > size) {
             RAbundVector sampledRabund(numBins);
@@ -752,14 +752,14 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
             for (int i = 0; i < Groups.size(); i++) { sampledCt.addGroup(Groups[i]);  }
                 
             vector<string> names = ct.getNamesOfSeqs(Groups); //names of sequences in groups
-            vector<item> allNames;
+            vector<intPair> allNames;
             for (int j = 0; j < names.size(); j++) {
                     
                 if (m->getControl_pressed()) { return sampledCt; }
                 
                 for (int i = 0; i < Groups.size(); i++) {
                     int num = ct.getGroupCount(names[j], Groups[i]); //num reads in this group from this seq
-                    item thisSeq(j,i);
+                    intPair thisSeq(j,i);
                     for (int k = 0; k < num; k++) { allNames.push_back(thisSeq); }
                 }
             }
@@ -772,14 +772,14 @@ CountTable SubSample::getSample(CountTable& ct, int size, vector<string> Groups)
                         
                     if (m->getControl_pressed()) { return sampledCt; }
                         
-                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[j].name]);
+                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[j].abund]);
                         
                     if (it == tempCount.end()) { //we have not seen this sequence at all yet
                         vector<int> tempGroups; tempGroups.resize(Groups.size(), 0);
                         tempGroups[allNames[j].group]++;
-                        tempCount[names[allNames[j].name]] = tempGroups;
+                        tempCount[names[allNames[j].abund]] = tempGroups;
                     }else{
-                        tempCount[names[allNames[j].name]][allNames[j].group]++;
+                        tempCount[names[allNames[j].abund]][allNames[j].group]++;
                     }
                 }
             }
@@ -842,14 +842,14 @@ CountTable SubSample::getSampleWithReplacement(CountTable& ct, int size, vector<
             for (int i = 0; i < Groups.size(); i++) { sampledCt.addGroup(Groups[i]);  }
             
             vector<string> names = ct.getNamesOfSeqs(Groups); //names of sequences in groups
-            vector<item> allNames;
+            vector<intPair> allNames;
             for (int j = 0; j < names.size(); j++) {
                 
                 if (m->getControl_pressed()) { return sampledCt; }
                 
                 for (int i = 0; i < Groups.size(); i++) {
                     int num = ct.getGroupCount(names[j], Groups[i]); //num reads in this group from this seq
-                    item thisSeq(j,i);
+                    intPair thisSeq(j,i);
                     for (int k = 0; k < num; k++) { allNames.push_back(thisSeq); }
                 }
             }
@@ -864,14 +864,14 @@ CountTable SubSample::getSampleWithReplacement(CountTable& ct, int size, vector<
                     
                     long long randomRead = util.getRandomIndex(allNamesSize);
                     
-                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[randomRead].name]);
+                    map<string, vector<int> >::iterator it = tempCount.find(names[allNames[randomRead].abund]);
                     
                     if (it == tempCount.end()) { //we have not seen this sequence at all yet
                         vector<int> tempGroups; tempGroups.resize(Groups.size(), 0);
                         tempGroups[allNames[randomRead].group]++;
-                        tempCount[names[allNames[randomRead].name]] = tempGroups;
+                        tempCount[names[allNames[randomRead].abund]] = tempGroups;
                     }else{
-                        tempCount[names[allNames[randomRead].name]][allNames[randomRead].group]++;
+                        tempCount[names[allNames[randomRead].abund]][allNames[randomRead].group]++;
                     }
                 }
             }

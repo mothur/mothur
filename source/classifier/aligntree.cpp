@@ -28,7 +28,7 @@ AlignTree::AlignTree(string referenceFileName, string taxonomyFileName, int cuto
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(referenceFile);  util.gobble(referenceFile);
+            Sequence seq(referenceFile);  gobble(referenceFile);
             
             if (seq.getName() != "") {
                 map<string, string>::iterator it = taxonomy.find(seq.getName());

@@ -262,7 +262,7 @@ int CreateDatabaseCommand::execute(){
             
             if (m->getControl_pressed()) { delete list; return 0; }
             
-            GroupMap* groupmap = NULL;
+            GroupMap* groupmap = nullptr;
             if (groupfile != "") {
                 groupmap = new GroupMap(groupfile);
                 groupmap->readMap();
@@ -487,8 +487,7 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
 		
         vector<int> sizes; 
         
-        ifstream in;
-        util.openInputFile(contaxonomyfile, in);
+        ifstream in;  util.openInputFile(contaxonomyfile, in);
         
         //read headers
         util.getline(in);
@@ -500,8 +499,8 @@ vector<int> CreateDatabaseCommand::readTax(vector<string>& taxonomies, vector<st
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             sizes.push_back(size);
             taxonomies.push_back(tax);
@@ -522,8 +521,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
 		
         vector<int> sizes; 
         
-        ifstream in;
-        util.openInputFile(repfastafile, in);
+        ifstream in; util.openInputFile(repfastafile, in);
         
         set<int> sanity;
         while (!in.eof()) {
@@ -531,7 +529,7 @@ vector<int> CreateDatabaseCommand::readFasta(vector<Sequence>& seqs){
             if (m->getControl_pressed()) { break; }
             
             string binInfo;
-            Sequence seq(in, binInfo, true);  util.gobble(in);
+            Sequence seq(in, binInfo, true);  gobble(in);
             
             //the binInfo should look like - binNumber|size ie. 1|200 if it is binNumber|size|group then the user gave us the wrong repfasta file
             vector<string> info;
@@ -577,7 +575,7 @@ ListVector* CreateDatabaseCommand::getList(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  delete input; return list;  }
 			
 			if(labels.count(list->getLabel()) == 1){
@@ -649,7 +647,7 @@ SharedRAbundVectors* CreateDatabaseCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && (userLabels.size() != 0)) {
+		while((lookup != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return lookup;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
@@ -717,7 +715,7 @@ SharedRAbundFloatVectors* CreateDatabaseCommand::getRelabund(){
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookupFloat != NULL) && (userLabels.size() != 0)) {
+        while((lookupFloat != nullptr) && (userLabels.size() != 0)) {
             
             if (m->getControl_pressed()) {  return 0;  }
             

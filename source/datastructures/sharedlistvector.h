@@ -32,8 +32,8 @@ class SharedListVector : public DataVector {
 	
 public:
 	SharedListVector(ifstream&, vector<string>&, string&, string&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), groups(lv.groups), fillGroups(lv.fillGroups), groupMode(lv.groupMode), otuTag(lv.otuTag) { groupmap = NULL; countTable = NULL; };
-	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } if (countTable != NULL) { delete countTable; } };
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs), binLabels(lv.binLabels), groups(lv.groups), fillGroups(lv.fillGroups), groupMode(lv.groupMode), otuTag(lv.otuTag) { groupmap = nullptr; countTable = nullptr; };
+	~SharedListVector(){ if (groupmap != nullptr) { delete groupmap; } if (countTable != nullptr) { delete countTable; } };
 	
 	int getNumBins()							{	return numBins;		}
 	int getNumSeqs()							{	return numSeqs;		}

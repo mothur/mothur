@@ -157,7 +157,7 @@ NJ_is_distance(char *token) {
   int expsign_state;
   int dpoint_state;
 
-  /* if token is NULL return failure */
+  /* if token is nullptr return failure */
   if(!token) {
     return(0);
   }
@@ -369,7 +369,7 @@ NJ_get_token(FILE *fp,
  *
  * OUTPUT:
  * -------
- *   <DMAT *> -- NULL  (failure)
+ *   <DMAT *> -- nullptr  (failure)
  *            -- A pointer to a populated distance matrix
  *
  * DESCRIPTION:
@@ -414,9 +414,9 @@ NJ_get_token(FILE *fp,
 DMAT *
 NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
   
-  DMAT *dmat           = NULL;
-  FILE *fp            = NULL;
-  NJ_DIST_TOKEN *token = NULL;
+  DMAT *dmat           = nullptr;
+  FILE *fp            = nullptr;
+  NJ_DIST_TOKEN *token = nullptr;
 
   int state, dmat_type;
   int row;
@@ -445,7 +445,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
     fp = stdin;
   } else {
     fp = fopen(nj_args->infilename, "r");
-    if(fp==NULL) {
+    if(fp==nullptr) {
       fprintf(stderr, "Clearcut: Could not open distance matrix: %s\n", nj_args->infilename);
       perror("Clearcut");
       goto XIT_BAD;
@@ -724,7 +724,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
     free(token);
   }
   
-  return(NULL);
+  return(nullptr);
 }
 
 
@@ -763,7 +763,7 @@ void
 NJ_output_matrix(NJ_ARGS *nj_args,
 		 DMAT *dmat) {
   
-  FILE *fp = NULL;
+  FILE *fp = nullptr;
   long int i, j;
 
 

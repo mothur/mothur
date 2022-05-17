@@ -192,7 +192,7 @@ void OTUAssociationCommand::processShared(){
             if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the shared file.\n");  m->setControl_pressed(true); error=true; }
         }
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -293,7 +293,7 @@ void OTUAssociationCommand::processRelabund(){
             if (metadata[0].size() != lookup->size()) { m->mothurOut("[ERROR]: You have selected to use " + toString(metadata[0].size()) + " data rows from the metadata file, but " + toString(lookup->size()) + " from the relabund file.\n");  m->setControl_pressed(true); error=true;}
         }
 		
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -380,10 +380,9 @@ void OTUAssociationCommand::process(SharedRAbundFloatVectors*& lookup){
 /*****************************************************************/
 void OTUAssociationCommand::readMetadata(){
 	try {
-		ifstream in;
-		util.openInputFile(metadatafile, in);
+		ifstream in; util.openInputFile(metadatafile, in);
 		
-		string headerLine = util.getline(in); util.gobble(in);
+		string headerLine = util.getline(in); gobble(in);
         metadataLabels = util.splitWhiteSpace(headerLine);
         metadataLabels.erase(metadataLabels.begin());
         
@@ -397,7 +396,7 @@ void OTUAssociationCommand::readMetadata(){
 			if (m->getControl_pressed()) { in.close(); return; }
 			
 			string group = "";
-			in >> group; util.gobble(in);
+			in >> group; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: metadata group = " + group + "\n"); }
             
             SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
@@ -414,7 +413,7 @@ void OTUAssociationCommand::readMetadata(){
             if (Groups.size() == 0) { metadataLookup->push_back(tempLookup);  }
             else if (util.inUsersGroups(group, Groups)) {  metadataLookup->push_back(tempLookup);  }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
         

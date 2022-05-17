@@ -31,7 +31,7 @@ int DesignMap::read(string file) {
         ifstream in; util.openInputFile(file, in);
         
         string temp = "";
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         vector<string> tempColumnHeaders = util.splitWhiteSpace(headers);
         if (tempColumnHeaders.size() != 0) { temp = tempColumnHeaders[0]; }
         else { m->setControl_pressed(true); return 0; }
@@ -65,7 +65,7 @@ int DesignMap::read(string file) {
             
             if (m->getControl_pressed()) { break; }
             
-            in >> group; util.gobble(in);
+            in >> group; gobble(in);
             util.checkGroupName(group);  if (m->getDebug()) { m->mothurOut("[DEBUG]: group = " + group + "\n"); }
             
             //if group info, then read it
@@ -73,7 +73,7 @@ int DesignMap::read(string file) {
             for (int i = 0; i < numCategories; i++) {
                 int thisIndex = indexCategoryMap[originalGroupIndexes[i]]; //find index of this category because we sort the values.
                 string temp = "not found";
-                in >> temp; categoryValues[thisIndex] = temp; util.gobble(in);
+                in >> temp; categoryValues[thisIndex] = temp; gobble(in);
                 util.checkGroupName(temp);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: value = " + temp + "\n"); }

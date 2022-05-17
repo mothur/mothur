@@ -68,7 +68,7 @@ class DistanceCommand : public Command {
 public:
     DistanceCommand(string);
     DistanceCommand(StorageDatabase*&, string, double, string, int); //used by mothur's splitMatrix class to avoid rereading files
-	~DistanceCommand() {}
+	~DistanceCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "dist.seqs";			}

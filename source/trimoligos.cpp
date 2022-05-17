@@ -1280,7 +1280,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& forwardSeq, Sequence& reverseSeq,
                 }
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
         }
         //exit(1);
         return success;
@@ -2380,7 +2380,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (barcodes.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFBarcodeLength+bdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -2440,7 +2440,7 @@ vector<int> TrimOligos::stripBarcode(Sequence& seq, int& group){
                 success[0] = minDiff; success[1] = 0;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -2485,7 +2485,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (primers.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFPrimerLength+pdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -2545,7 +2545,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, int& group){
                 success[0] = minDiff; success[1] = 0;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -2596,7 +2596,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (primers.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxFPrimerLength+pdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -2659,7 +2659,7 @@ vector<int> TrimOligos::stripForward(Sequence& seq, QualityScores& qual, int& gr
                 success[0] = minDiff; success[1] = 0;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -2707,7 +2707,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
         
             //can you find the revPrimer
             int minDiff = MOTHURMAX;
@@ -2764,7 +2764,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq, QualityScores& qual){
                 success[0] = minDiff; success[1] = 0;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
     
@@ -2813,7 +2813,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (revPrimer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxRevPrimerLength+pdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the revPrimer
             int minDiff = MOTHURMAX;
@@ -2865,7 +2865,7 @@ vector<int> TrimOligos::stripReverse(Sequence& seq){
                 success[0] = minDiff; success[1] = 0;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -2906,7 +2906,7 @@ int TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (linker.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLinkerLength+ldiffs+1)); }	
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -2964,7 +2964,7 @@ int TrimOligos::stripLinker(Sequence& seq, QualityScores& qual){
                 success = minDiff;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -3005,7 +3005,7 @@ int TrimOligos::stripLinker(Sequence& seq){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (linker.size() > 0) {alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLinkerLength+ldiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -3056,7 +3056,7 @@ int TrimOligos::stripLinker(Sequence& seq){
                 success = minDiff;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -3099,7 +3099,7 @@ int TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (spacer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxSpacerLength+sdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -3157,7 +3157,7 @@ int TrimOligos::stripSpacer(Sequence& seq, QualityScores& qual){
                 success = minDiff;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         
@@ -3198,7 +3198,7 @@ int TrimOligos::stripSpacer(Sequence& seq){
         else { //try aligning and see if you can find it
             Alignment* alignment;
             if (spacer.size() > 0) { alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxSpacerLength+sdiffs+1)); }
-            else{ alignment = NULL; }
+            else{ alignment = nullptr; }
             
             //can you find the barcode
             int minDiff = MOTHURMAX;
@@ -3252,7 +3252,7 @@ int TrimOligos::stripSpacer(Sequence& seq){
                 success = minDiff;
             }
             
-            if (alignment != NULL) { delete alignment; }
+            if (alignment != nullptr) { delete alignment; }
             
         }
         

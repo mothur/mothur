@@ -226,7 +226,7 @@ int GetMetaCommunityCommand::execute(){
             m->mothurOut("\n\n");
         }
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; return 0; }
             
@@ -355,15 +355,14 @@ int GetMetaCommunityCommand::processDriver(SharedRAbundVectors*& thislookup, vec
             for (int j = 0; j < doneFlags.size(); j++) {
                 if (!util.isBlank(doneFlags[j])) { //another process has finished
                     //are they done at a lower partition?
-                    ifstream in;
-                    util.openInputFile(doneFlags[j], in);
+                    ifstream in; util.openInputFile(doneFlags[j], in);
                     int tempNum;
                     in >> tempNum; in.close();
                     if (tempNum < numPartitions) { break; } //quit, because someone else has finished
                 }
             }
             
-            CommunityTypeFinder* finder = NULL;
+            CommunityTypeFinder* finder = nullptr;
             if (method == "dmm")            {   finder = new qFinderDMM(sharedMatrix, numPartitions);   }
             else if (method == "kmeans")    {   finder = new KMeans(sharedMatrix, numPartitions);       }
             else if (method == "pam")       {   finder = new Pam(sharedMatrix, dists, numPartitions);                 }
@@ -480,7 +479,7 @@ vector<double> GetMetaCommunityCommand::generateDesignFile(int numPartitions, ma
             designFile << sampleName << '\t' << titles[maxPartition] << endl;
             
             numSamples++;
-            util.gobble(postFile);
+            gobble(postFile);
         }
         for(int i=0;i<numPartitions;i++){
             piValues[i] /= (double)numSamples;
@@ -566,8 +565,8 @@ int GetMetaCommunityCommand::generateSummaryFile(int numPartitions, map<string,s
             tempData.difference = difference;
             summary.push_back(tempData);
             
-            util.gobble(referenceFile);
-            util.gobble(partitionFile);
+            gobble(referenceFile);
+            gobble(partitionFile);
         }
         referenceFile.close();
         partitionFile.close();

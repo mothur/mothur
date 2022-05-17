@@ -19,7 +19,7 @@ struct vsearchVariables {
     bool dups, useAbskew, chimealns, useMinH, useMindiv, useXn, useDn, useXa, hasCount, useMindiffs;
     string abskew, minh, mindiv, xn, dn, mindiffs;
     
-    vsearchVariables() {}
+    vsearchVariables() = default;
     void setBooleans(bool dps, bool Abskew, bool calns, bool MinH, bool Mindiv, bool Xn, bool Dn, bool mindif, bool hc) {
         useAbskew = Abskew;
         chimealns = calns;
@@ -44,7 +44,6 @@ struct vsearchVariables {
 };
 /**************************************************************************************************/
 struct vsearchData {
-    string fastafile;
     string dupsfile;
     string outputFName;
     string accnos, alns, formattedFastaFilename, templatefile, vsearchLocation;
@@ -59,8 +58,7 @@ struct vsearchData {
     Utils util;
     
     vsearchData(){}
-    vsearchData(int proc, map<string, vector<string> > g2f, string o, string uloc, string t, string file, string f, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
-        fastafile = f;
+    vsearchData(int proc, map<string, vector<string> > g2f, string o, string uloc, string t, string file, string n, string ac,  string al, string nc, vector<string> gr, vsearchVariables* vs) {
         dupsfile = n;
         formattedFastaFilename = file;
         outputFName = o;
@@ -92,7 +90,7 @@ struct vsearchData {
 class ChimeraVsearchCommand : public Command {
 public:
     ChimeraVsearchCommand(string);
-    ~ChimeraVsearchCommand() {}
+    ~ChimeraVsearchCommand() = default;
     
     vector<string> setParameters();
     string getCommandName()			{ return "chimera.vsearch";		}

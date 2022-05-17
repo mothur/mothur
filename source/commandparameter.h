@@ -25,7 +25,7 @@ class CommandParameter {
 				chooseOnlyOneGroup(only), chooseAtLeastOneGroup(atLeast), linkedGroup(linked), outputTypes(opt),multipleSelectionAllowed(m), required(r), important(i) {}
         CommandParameter(string n, string t, string o, string d, string only, string atLeast, string linked, string opt, bool m, bool r) : name(n), type(t), options(o), optionsDefault(d), 
     chooseOnlyOneGroup(only), chooseAtLeastOneGroup(atLeast), linkedGroup(linked), outputTypes(opt), multipleSelectionAllowed(m), required(r)  { important = false; }
-		~CommandParameter() {}
+		~CommandParameter() = default;
 	
 		string name;		//something like fasta, processors, method
 		string type;  //must be set to "Boolean", "Multiple", "Number", "String", "InputTypes" - InputTypes is for file inputs

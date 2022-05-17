@@ -216,7 +216,7 @@ int PcrSeqsCommand::execute(){
         
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL); fileAligned = true; pairedOligos = false;
+        long start = time(nullptr); fileAligned = true; pairedOligos = false;
         
         string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
@@ -317,7 +317,7 @@ int PcrSeqsCommand::execute(){
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
             
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.\n");
         
 		m->mothurOut("\nOutput File Names: \n");
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
@@ -723,7 +723,7 @@ int driverPcr(pcrData* params){
             
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             
             if (params->fileAligned) { //assume aligned until proven otherwise
                 lengths.insert(currSeq.getAligned().length());
@@ -975,7 +975,7 @@ int PcrSeqsCommand::adjustDots(string goodFasta, map<string, vector<int> > locat
         while(!inFasta.eof()) {
             if(m->getControl_pressed()) { break; }
             
-            Sequence seq(inFasta); util.gobble(inFasta);
+            Sequence seq(inFasta); gobble(inFasta);
             
             string name = seq.getName();
             int thisStart = -1; int thisEnd = -1;

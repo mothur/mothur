@@ -13,8 +13,8 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseDistanceMatrix*, float, string, float);
-    Cluster(){}
-    virtual ~Cluster() {}
+    Cluster() { m = MothurOut::getInstance(); }
+    virtual ~Cluster() = default;
     virtual bool update(double&);
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  
@@ -31,16 +31,12 @@ protected:
 	ListVector* list;
 	SparseDistanceMatrix* dMatrix;	
 	
-	ull smallRow;
-	ull smallCol;
-	float smallDist, adjust;
+	ull smallRow, smallCol, nRowCells, nColCells;
+	float smallDist, adjust, cutoff;
 	bool mapWanted;
-	float cutoff;
 	map<string, int> seq2Bin;
 	string method;
 	
-	ull nRowCells;
-	ull nColCells;
 	MothurOut* m;
     Utils util;
 };

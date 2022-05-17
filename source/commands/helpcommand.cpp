@@ -83,7 +83,7 @@
 #include "clusterfragmentscommand.h"
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
@@ -306,7 +306,7 @@ int HelpCommand::execute(){
                 else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
                 else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
                 else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
-                else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
+                else if((commandName == "make.group") || (commandName == "make.count"))			{	command = new MakeGroupCommand(optionString);				}
                 else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
                 else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
                 else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}

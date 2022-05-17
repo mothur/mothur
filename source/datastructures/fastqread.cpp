@@ -132,7 +132,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         }
         
         //read sequence name
-        string line = util.getline(in); util.gobble(in);
+        string line = util.getline(in); gobble(in);
         vector<string> pieces = util.splitWhiteSpace(line);
         name = "";  if (pieces.size() != 0) { name = pieces[0]; }
         if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read.\n");  ignore=true;  }
@@ -141,11 +141,11 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = util.getStringFromVector(pieces, " "); }
         
         //read sequence
-        sequence = util.getline(in); util.gobble(in);
+        sequence = util.getline(in); gobble(in);
         if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
 
         //read sequence name
-        line = util.getline(in); util.gobble(in);
+        line = util.getline(in); gobble(in);
         pieces = util.splitWhiteSpace(line);
         string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
         if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
@@ -153,7 +153,7 @@ FastqRead::FastqRead(ifstream& in, bool& ignore, string f) {
         else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
         
         //read quality scores
-        string quality = util.getline(in); util.gobble(in);
+        string quality = util.getline(in); gobble(in);
         if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
         
         //sanity check sequence length and number of quality scores match
@@ -190,7 +190,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
             }
             
             //read sequence name
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             vector<string> pieces = util.splitWhiteSpace(line);
             name = "";  if (pieces.size() != 0) { name = pieces[0];  }
             if (name == "") {  m->mothurOut("[WARNING]: Blank fasta name, ignoring read.\n");  ignore=true;  }
@@ -199,11 +199,11 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
             if (pieces.size() > 1) { pieces.erase(pieces.begin()); comment = util.getStringFromVector(pieces, " "); }
             
             //read sequence
-            sequence = util.getline(in); util.gobble(in);
+            sequence = util.getline(in); gobble(in);
             if (sequence == "") {  m->mothurOut("[WARNING]: missing sequence for " + name + ", ignoring."); ignore=true; }
             
             //read sequence name
-            line = util.getline(in); util.gobble(in);
+            line = util.getline(in); gobble(in);
             pieces = util.splitWhiteSpace(line);
             string name2 = "";  if (pieces.size() != 0) { name2 = pieces[0]; }
             if (name2 == "") {  m->mothurOut("[WARNING]: expected a name with + as a leading character, ignoring."); ignore=true; }
@@ -211,7 +211,7 @@ FastqRead::FastqRead(boost::iostreams::filtering_istream& in, bool& ignore, stri
             else { name2 = name2.substr(1); if (name2 == "") { name2 = name; } }
             
             //read quality scores
-            string quality = util.getline(in); util.gobble(in);
+            string quality = util.getline(in); gobble(in);
             if (quality == "") {  m->mothurOut("[WARNING]: missing quality for " + name2 + ", ignoring."); ignore=true; }
             
             //sanity check sequence length and number of quality scores match

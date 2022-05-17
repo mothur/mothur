@@ -20,7 +20,7 @@ class RareFactSharedCommand : public Command {
 	
 public:
 	RareFactSharedCommand(string);
-	~RareFactSharedCommand() {}
+	~RareFactSharedCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "rarefaction.shared";		}

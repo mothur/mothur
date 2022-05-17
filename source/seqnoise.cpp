@@ -31,7 +31,7 @@ int seqNoise::getSequenceData(string sequenceFileName, vector<string>& sequences
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence temp(sequenceFile); util.gobble(sequenceFile);
+			Sequence temp(sequenceFile); gobble(sequenceFile);
 			
 			if (temp.getName() != "") {
 				sequences.push_back(temp.getAligned());
@@ -69,8 +69,8 @@ int seqNoise::getRedundantNames(string namesFileName, vector<string>& uniqueName
 			
 			if (m->getControl_pressed()) { break; }
 			
-			namesFile >> uniqueNames[i]; util.gobble(namesFile);
-			namesFile >> redundantNames[i]; util.gobble(namesFile);
+			namesFile >> uniqueNames[i]; gobble(namesFile);
+			namesFile >> redundantNames[i]; gobble(namesFile);
 			
 			seqFreq[i] = util.getNumNames(redundantNames[i]);
 		}
@@ -147,7 +147,7 @@ int seqNoise::getListData(string listFileName, double cutOff, vector<int>& otuDa
         
 		while(!listFile.eof()){
             
-            ListVector list(listFile, readLabels, lastLabel); util.gobble(listFile); //10/18/13 - change to reading with listvector to accomodate changes to the listfiel format. ie. adding header labels.
+            ListVector list(listFile, readLabels, lastLabel); gobble(listFile); //10/18/13 - change to reading with listvector to accomodate changes to the listfiel format. ie. adding header labels.
             
             string thisLabel = list.getLabel();
             lastLabel = thisLabel;

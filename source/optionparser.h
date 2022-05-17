@@ -24,7 +24,7 @@ class OptionParser {
 public:
 	OptionParser(string, vector<string>);
     OptionParser(string, map<string, string>&);
-	~OptionParser() {}
+	~OptionParser() = default;
 	map<string, string> getParameters(); //adds inputdir to parameters if indicated
 	
 private:

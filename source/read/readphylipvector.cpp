@@ -26,13 +26,11 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 	try {
 		vector<string> names;
 		
-		ifstream in;
-        Utils util; util.openInputFile(distFile, in);
+		ifstream in; Utils util; util.openInputFile(distFile, in);
 		
 		//check whether matrix is square
 		char d;
-		int square = 1;
-		int numSeqs;
+		int square = 1; int numSeqs;
 		string name;
 		
 		string numTest;
@@ -113,8 +111,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 	try {
 		vector<string> names;
 		
-		ifstream in;
-        Utils util; util.openInputFile(distFile, in);
+		ifstream in; Utils util; util.openInputFile(distFile, in);
 		
 		//check whether matrix is square
 		char d;

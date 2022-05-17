@@ -434,7 +434,7 @@ int EstimatorSingleCommand::processSharedFile() {
             *out[0] << "label\tgroup\tnum\t" << calc << "\n";
         }
         
-        while (shared != NULL) {
+        while (shared != nullptr) {
             
             if (m->getControl_pressed()) { delete shared; break; }
             
@@ -516,7 +516,7 @@ int EstimatorSingleCommand::processSingleSample() {
             *out[0] << "label\tnum\t" << calc << "\n";
         }
          
-        while (sabund != NULL) {
+        while (sabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete sabund; break; }
                    
@@ -772,17 +772,16 @@ int EstimatorSingleCommand::fillSampling(int burnValue, int burnSampleValue, boo
         int numPiecesExpected = 5;
         if (filldNu) { numPiecesExpected = 6; }
         
-        ifstream in;
-        util.openInputFile(samplefile, in);
+        ifstream in; util.openInputFile(samplefile, in);
         
-        util.getline(in); util.gobble(in); //grab header
+        util.getline(in); gobble(in); //grab header
         string groupName = "";
         
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (line != "") {
                 

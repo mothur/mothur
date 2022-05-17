@@ -22,7 +22,7 @@ public:
 #endif
 
     Summary(int p) { processors = p; m = MothurOut::getInstance(); total = 0; numUniques = 0; hasNameOrCount = false; nameCountNumUniques = 0; type = "count"; }
-    ~Summary() {}
+    ~Summary() = default;
 
     long long summarizeFasta(string f, string n, string o); //provide fasta file to summarize (paralellized) and optional nameorCountfile and optional outputfile for individual seqs info. To skip nameCount or output file, n="" and / or o=""
     long long summarizeFasta(string f, string o); //provide fasta file to summarize (paralellized) and optional outputfile for individual seqs info. To skip output file, o=""

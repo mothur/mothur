@@ -25,7 +25,7 @@ class ParseFastaQCommand : public Command {
 
 public:
 	ParseFastaQCommand(string);
-	~ParseFastaQCommand() {}
+	~ParseFastaQCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "fastq.info";		}

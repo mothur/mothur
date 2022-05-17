@@ -23,7 +23,7 @@ class SplitMatrix  {
 
 		SplitMatrix(string, string, string, string, float, float, int, bool, string, bool); //fastafile, namefile, countfile, taxFile, taxcutoff, cutoff, processors, classic, outputDir, usingVsearchToCLuster
 		
-        ~SplitMatrix() {}
+        ~SplitMatrix() = default;
     
 		vector< map<string, string> > getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		string getSingletonNames() { return singleton; } //returns namesfile or countfile containing singletons

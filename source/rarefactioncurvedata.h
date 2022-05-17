@@ -29,7 +29,7 @@ private:
 class SharedRarefactionCurveData : public Observable {
 	
 public:
-	SharedRarefactionCurveData() {}; //: shared1(0), shared2(0) 
+	SharedRarefactionCurveData() = default;; //: shared1(0), shared2(0) 
 	
 	void registerDisplay(Display* o)            {	displays.insert(o);				}
     void registerDisplays(vector<Display*> o)	{	for(int i=0;i<o.size();i++){ registerDisplay(o[i]); 	} }

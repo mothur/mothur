@@ -247,7 +247,7 @@ int RareFactCommand::execute(){
 	
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
         map<string, set<int> > labelToEnds;
 		if ((format != "sharedfile")) { inputFileNames.push_back(inputfile);  }
@@ -278,7 +278,7 @@ int RareFactCommand::execute(){
             
             OrderVector* order = util.getNextOrder(input, allLines, userLabels, processedLabels, lastLabel);
                    
-            while (order != NULL) {
+            while (order != nullptr) {
                 
                 if (m->getControl_pressed()) { delete order; break; }
                 
@@ -305,7 +305,7 @@ int RareFactCommand::execute(){
 
 		if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to run rarefaction.single.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to run rarefaction.single.\n");
 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -401,10 +401,9 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
             string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
-			ifstream in;
-			util.openInputFile(outputNames[i], in);
+			ifstream in; util.openInputFile(outputNames[i], in);
 			
-            string labels = util.getline(in); util.gobble(in);
+            string labels = util.getline(in); gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);
             
             vector< vector<string> > allLabels;
@@ -462,14 +461,14 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
 				util.openInputFile(thisfilename, temp);
 				
 				//read through first line - labels
-				string dummy = util.getline(temp);	util.gobble(temp);
+				string dummy = util.getline(temp);	gobble(temp);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dummy + "\t" + toString(fileLabels[combineFileName].size()) + "\n");  } //
 				
 				map<int, vector< vector<string> > > thisFilesLines; //numSampled ->
 				while (!temp.eof()){
                     float numSampled = 0;
-                    string thisLineInfo = util.getline(temp); util.gobble(temp);
+                    string thisLineInfo = util.getline(temp); gobble(temp);
                     vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
                     util.mothurConvert(parsedLine[0], numSampled);
                 
@@ -488,7 +487,7 @@ vector<string> RareFactCommand::createGroupFile(vector<string>& outputNames, map
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(reads, " ") + "\n");  }
                     }
                     thisFilesLines[numSampled] = theseReads;
-                    util.gobble(temp);
+                    gobble(temp);
                    
                     numSampledSet.insert(numSampled);
 				}
@@ -575,7 +574,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename, map<string, set
             files[group] = (sharedFileRoot + group + ".rabund");
         }
         
-        while(lookup != NULL) {
+        while(lookup != nullptr) {
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
                 ofstream temp;

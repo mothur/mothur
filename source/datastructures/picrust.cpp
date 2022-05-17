@@ -13,7 +13,7 @@
 Picrust::Picrust(string ref, string otumapfile){
     try {
         m = MothurOut::getInstance();
-        phyloTree = NULL;
+        phyloTree = nullptr;
         
         read(ref, otumapfile);
         
@@ -28,7 +28,7 @@ Picrust::Picrust(string ref, string otumapfile){
 Picrust::Picrust(){
     try {
         m = MothurOut::getInstance();
-        phyloTree = NULL;
+        phyloTree = nullptr;
         
     }
     catch(exception& e) {
@@ -40,7 +40,7 @@ Picrust::Picrust(){
 
 Picrust::~Picrust(){
     try {
-        if (phyloTree != NULL) { delete phyloTree; }
+        if (phyloTree != nullptr) { delete phyloTree; }
         
     }
     catch(exception& e) {
@@ -149,7 +149,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVec
             vector<float> abunds; abunds.resize(lookup->size(), 0.0);
             string mergeString = "";
             vector<float> boots; boots.resize(scores.size(), 0.0);
-            bool scoresNULL = false;
+            bool scoresnullptr = false;
             for (int j = 0; j < itMap->second.size(); j++) { //<OTU01, OTU10, OTU22>
                 
                 if (scores[0] != "null") {
@@ -157,13 +157,13 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVec
                     vector<string> scores;
                     vector<string> taxonomies = util.parseTax(it->second, scores);
                     for (int i = 0; i < boots.size(); i++) {
-                        if (scores[i] == "null") { scoresNULL = true; break; }
+                        if (scores[i] == "null") { scoresnullptr = true; break; }
                         else {
                             float tempScore; util.mothurConvert(scores[i], tempScore);
                             boots[i] += tempScore;
                         }
                     }
-                }else { scoresNULL = true; }
+                }else { scoresnullptr = true; }
                 
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
@@ -175,7 +175,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundFloatVec
             //average scores
             //add merged otu to new lookup
             string newTaxString = "";
-            if (!scoresNULL) {
+            if (!scoresnullptr) {
                 for (int j = 0; j < boots.size(); j++) { boots[j] /= (float) itMap->second.size(); }
                 
                 //assemble new taxomoy
@@ -299,7 +299,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*
             vector<float> abunds; abunds.resize(lookup->size(), 0.0);
             string mergeString = "";
             vector<float> boots; boots.resize(scores.size(), 0.0);
-            bool scoresNULL = false;
+            bool scoresnullptr = false;
             for (int j = 0; j < itMap->second.size(); j++) { //<OTU01, OTU10, OTU22>
                 
                 if (scores[0] != "null") {
@@ -307,13 +307,13 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*
                     vector<string> scores;
                     vector<string> taxonomies = util.parseTax(it->second, scores);
                     for (int i = 0; i < boots.size(); i++) {
-                        if (scores[i] == "null") { scoresNULL = true; break; }
+                        if (scores[i] == "null") { scoresnullptr = true; break; }
                         else {
                             float tempScore; util.mothurConvert(scores[i], tempScore);
                             boots[i] += tempScore;
                         }
                     }
-                }else { scoresNULL = true; }
+                }else { scoresnullptr = true; }
                 
                 //merge abunds
                 mergeString += (itMap->second)[j] + " ";
@@ -325,7 +325,7 @@ void Picrust::setGGOTUIDs(map<string, string>& labelTaxMap, SharedRAbundVectors*
             //average scores
             //add merged otu to new lookup
             string newTaxString = "";
-            if (!scoresNULL) {
+            if (!scoresnullptr) {
                 for (int j = 0; j < boots.size(); j++) { boots[j] /= (float) itMap->second.size(); }
                 
                 //assemble new taxomoy
@@ -377,7 +377,7 @@ void Picrust::readGGOtuMap(string otumapfile){
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             vector<string> pieces = util.splitWhiteSpace(line);
             
             if (pieces.size() != 0) {

@@ -126,7 +126,7 @@ int GetListCountCommand::execute(){
         
         ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                
-        while (list != NULL) {
+        while (list != nullptr) {
                    
             if (m->getControl_pressed()) { delete list; break; }
                    

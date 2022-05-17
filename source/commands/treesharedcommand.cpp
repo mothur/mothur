@@ -277,7 +277,7 @@ int TreeSharedCommand::execute(){
             
 			if (m->getControl_pressed()) { return 0; }
             
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -310,7 +310,7 @@ int TreeSharedCommand::execute(){
                 readMatrix->read(ct);
                 list = readMatrix->getListVector();
                 delete ct;
-            }else { NameAssignment* nameMap = NULL; readMatrix->read(nameMap); list = readMatrix->getListVector(); }
+            }else { NameAssignment* nameMap = nullptr; readMatrix->read(nameMap); list = readMatrix->getListVector(); }
 
 			SparseDistanceMatrix* dMatrix = readMatrix->getDMatrix();
 			Treenames.clear();
@@ -344,10 +344,10 @@ int TreeSharedCommand::execute(){
 			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				//printSims(cout, matrix, Treenames);
             Tree* newTree = new Tree(&ct, matrix, Treenames);
-            if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+            if (m->getControl_pressed()) { delete newTree; newTree = nullptr; }
             else { newTree->assembleTree(); }
  
-            if (newTree != NULL) {  newTree->createNewickFile(outputFile);  delete newTree; }
+            if (newTree != nullptr) {  newTree->createNewickFile(outputFile);  delete newTree; }
 			
 			if (m->getControl_pressed()) { return 0; } m->mothurOut("Tree complete.\n");
 		}
@@ -735,9 +735,9 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 
                 //creates tree from similarity matrix and write out file
                 Tree* newTree = new Tree(&ct, matrix, Treenames);
-                if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                if (m->getControl_pressed()) { delete newTree; newTree = nullptr; }
                 else { newTree->assembleTree(); }
-                if (newTree != NULL) { newTree->createNewickFile(outputFile);  delete newTree; }
+                if (newTree != nullptr) { newTree->createNewickFile(outputFile);  delete newTree; }
             }
             
             if (m->getDebug()) {  m->mothurOut("[DEBUG]: done averages trees.\n"); }
@@ -779,9 +779,9 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                     
                     //creates tree from similarity matrix and write out file
                     Tree* newTree = new Tree(&ct, matrix, Treenames);
-                    if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                    if (m->getControl_pressed()) { delete newTree; newTree = nullptr; }
                     else { newTree->assembleTree(); }
-                    if (newTree != NULL) {
+                    if (newTree != nullptr) {
                         newTree->print(outAll);
                         trees.push_back(newTree);
                     }
@@ -804,7 +804,7 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 ofstream outTree;
                 util.openOutputFile(conFile, outTree);
                 
-                if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; }
+                if (conTree != nullptr) { conTree->print(outTree, "boot"); delete conTree; }
             }
         }else {
             for (int i = 0; i < matrices.size(); i++) {
@@ -824,9 +824,9 @@ int TreeSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup, CountTa
                 
                 //creates tree from similarity matrix and write out file
                 Tree* newTree = new Tree(&ct, matrix, Treenames);
-                if (m->getControl_pressed()) { delete newTree; newTree = NULL; }
+                if (m->getControl_pressed()) { delete newTree; newTree = nullptr; }
                 else { newTree->assembleTree(); }
-                if (newTree != NULL) { newTree->createNewickFile(outputFile);  delete newTree; }
+                if (newTree != nullptr) { newTree->createNewickFile(outputFile);  delete newTree; }
             }
         }
         

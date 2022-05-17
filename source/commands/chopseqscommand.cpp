@@ -356,7 +356,7 @@ bool ChopSeqsCommand::runChopFastq(string& outputFileNameAccnos){
             if (m->getControl_pressed()) {  break;  }
             
             bool ignore;
-            FastqRead seq(in, ignore, format); util.gobble(in);
+            FastqRead seq(in, ignore, format); gobble(in);
 
             if (seq.getName() != "") {
                 bool isGood = getFastqChopped(seq);
@@ -377,9 +377,7 @@ bool ChopSeqsCommand::runChopFastq(string& outputFileNameAccnos){
         //report progress
         if((count) % 10000 != 0){    m->mothurOut(toString(count)+"\n");         }
         
-        in.close();
-        out.close();
-        outAccnos.close();
+        in.close(); out.close(); outAccnos.close();
         
         return wroteAccnos;
         
@@ -637,13 +635,12 @@ string getChopped(chopData* params) {
 /**************************************************************************************/
 void driverChop(chopData* params) {
 	try {
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
         
 		in.seekg(params->start);
         
         //adjust
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in); }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in); }
         
         ofstream outfTemp;
         if (params->qualFileOutput != "") { params->util.openOutputFile(params->qualFileOutput, outfTemp); }
@@ -653,7 +650,7 @@ void driverChop(chopData* params) {
             
             if (params->m->getControl_pressed()) {  break;  }
             
-			Sequence seq(in); params->util.gobble(in);
+			Sequence seq(in); gobble(in);
 
 			if (seq.getName() != "") {
                 params->qualValues = "";
@@ -782,14 +779,9 @@ bool ChopSeqsCommand::createProcesses(string filename, string outFasta, string o
 //**********************************************************************************************************************
 int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
     try {
-        ofstream out;
-        util.openOutputFile(outputFile, out);
-        
-        ifstream in;
-        util.openInputFile(inputFile, in);
-        
-        ifstream inQual;
-        util.openInputFile(qualfile, inQual);
+        ofstream out; util.openOutputFile(outputFile, out);
+        ifstream in;  util.openInputFile(inputFile, in);
+        ifstream inQual; util.openInputFile(qualfile, inQual);
 
         m->mothurOut("Processing the quality file.\n");
         
@@ -798,11 +790,11 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
             
             if (m->getControl_pressed()) { in.close(); out.close(); return 0; }
             
-            QualityScores qual(inQual);
+            QualityScores qual(inQual); gobble(inQual);
             
             string name = "";
             int start = 0; int end = 0;
-            in >> name >> start >> end; util.gobble(in);
+            in >> name >> start >> end; gobble(in);
             
             if (qual.getName() != "") {
                 if (qual.getName() != name) { start = 0; end = 0; }
@@ -823,8 +815,7 @@ int ChopSeqsCommand::processQual(string outputFile, string inputFile) {
         //report progress
         if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
         
-        in.close();
-        out.close();
+        in.close(); inQual.close(); out.close();
         
         return 0;
     }

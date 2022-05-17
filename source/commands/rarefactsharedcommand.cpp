@@ -306,7 +306,7 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
 			delete lookup; delete subset; return 0;
 		}
         
-        while (subset != NULL) {
+        while (subset != nullptr) {
             
             if (m->getControl_pressed()) { delete subset; delete lookup; break; }
             
@@ -319,14 +319,14 @@ int RareFactSharedCommand::process(DesignMap& designMap, string thisSet){
            delete lookup; delete subset;
            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel, thisSet);
            
-           if (lookup != NULL) {
+           if (lookup != nullptr) {
                subset = new SharedRAbundVectors();
                data = lookup->getSharedRAbundVectors();
                if (thisSet != "") {//remove unwanted groups
                    for (int i = 0; i < data.size(); i++) { if (util.inUsersGroups(data[i]->getGroup(), newGroups)) { subset->push_back(data[i]); } }
                    subset->eliminateZeroOTUS();
                }else { for (int i = 0; i < data.size(); i++) {  subset->push_back(data[i]); } }
-           }else {  subset = NULL; }
+           }else {  subset = nullptr; }
         }
         
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
@@ -387,10 +387,9 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
             vector<string> thisTypesFiles = it->second;
             vector<string> columnHeaders;
             for (int i = 0; i < thisTypesFiles.size(); i++) {
-                ifstream in;
-                util.openInputFile(thisTypesFiles[i], in);
+                ifstream in; util.openInputFile(thisTypesFiles[i], in);
                 
-                string headers = util.getline(in); util.gobble(in);
+                string headers = util.getline(in); gobble(in);
                 columnHeaders = util.splitWhiteSpace(headers);
                 int numCols = columnHeaders.size();
                 
@@ -399,7 +398,7 @@ int RareFactSharedCommand::subsampleLookup(SharedRAbundVectors*& thisLookup, str
                     if (m->getControl_pressed()) { break; }
                     vector<double> data; data.resize(numCols, 0);
                     //read numSampled line
-                    for (int j = 0; j < numCols; j++) { in >> data[j]; util.gobble(in); }
+                    for (int j = 0; j < numCols; j++) { in >> data[j]; gobble(in); }
                     thisFilesLines.push_back(data);
                 }
                 in.close();
@@ -491,10 +490,9 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
             string combineFileName = outputdir + util.getRootName(util.getSimpleName(sharedfile)) + "groups" + extension;
 			util.mothurRemove(combineFileName); //remove old file
             
-			ifstream in;
-			util.openInputFile(outputNames[i], in);
+			ifstream in; util.openInputFile(outputNames[i], in);
 			
-            string labels = util.getline(in); util.gobble(in);
+            string labels = util.getline(in); gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);
             
             vector< vector<string> > allLabels;
@@ -545,14 +543,14 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                 util.openInputFile(thisfilename, temp);
                 
                 //read through first line - labels
-                string dummy = util.getline(temp);	util.gobble(temp);
+                string dummy = util.getline(temp);	gobble(temp);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + dummy + "\t" + toString(fileLabels[combineFileName].size()) + "\n");  }
 				
 				map<int, vector< vector<string> > > thisFilesLines;
 				while (!temp.eof()){
                     float numSampled = 0;
-                    string thisLineInfo = util.getline(temp); util.gobble(temp);
+                    string thisLineInfo = util.getline(temp); gobble(temp);
                     vector<string> parsedLine = util.splitWhiteSpace(thisLineInfo);
                     util.mothurConvert(parsedLine[0], numSampled);
                     
@@ -571,7 +569,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
                         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + util.getStringFromVector(reads, " ") + "\n");  }
                     }
                     thisFilesLines[numSampled] = theseReads;
-                    util.gobble(temp);
+                    gobble(temp);
                     
                     numSampledSet.insert(numSampled);
 				}

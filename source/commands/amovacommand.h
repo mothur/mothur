@@ -17,7 +17,7 @@ class AmovaCommand : public Command {
 	
 public:
 	AmovaCommand(string);
-	~AmovaCommand() {}
+	~AmovaCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "amova";					}

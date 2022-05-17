@@ -30,21 +30,18 @@ Weighted::Weighted(bool r, vector<string> G) : includeRoot(r), Groups(G) {
 }
 /**************************************************************************************************/
 
-EstOutput Weighted::getValues(Tree* t, int p, string o) {
+EstOutput Weighted::getValues(Tree* t, int p) {
     try {
-		processors = p; outputDir = o;
-        
-        CountTable* ct = t->getCountTable();
-		
-		if (m->getControl_pressed()) { return data; }
-		
-        return (createProcesses(t, ct));
+		processors = p;
+				
+        return (createProcesses(t));
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Weighted", "getValues");
 		exit(1);
 	}
 }
+
 /***********************************************************************/
 struct weightedData {
     int start;
@@ -70,92 +67,202 @@ struct weightedData {
     }
 };
 /**************************************************************************************************/
-double getLengthToRoot(Tree* t, bool includeRoot, int v, string groupA, string groupB, map< vector<string>, set<int> >& rootForGrouping) {
-    MothurOut* m; m = MothurOut::getInstance();
+void getRoot(MothurOut* m, Tree* t, int v, vector<string> grouping, set<int>& rootForGrouping) {
+    try {
+        //you are a leaf so get your parent
+        int index = t->tree[v].getParent();
+        
+        //my parent is a potential root
+        rootForGrouping.insert(index);
+        
+        //while you aren't at root
+        while(t->tree[index].getParent() != -1){
+            
+            if (m->getControl_pressed()) {  return; }
+            
+            //am I the root for this grouping? if so I want to stop "early"
+            //does my sibling have descendants from the users groups?
+            //if so I am not the root
+            int parent = t->tree[index].getParent();
+            int lc = t->tree[parent].getLChild();
+            int rc = t->tree[parent].getRChild();
+            
+            int sib = lc;
+            if (lc == index) { sib = rc; }
+            
+            map<string, int>::iterator itGroup;
+            int pcountSize = 0;
+            for (int j = 0; j < grouping.size(); j++) {
+                map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
+                if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } }
+            }
+            
+            //if yes, I am not the root
+            if (pcountSize != 0) {
+                rootForGrouping.clear();
+                rootForGrouping.insert(parent);
+            }
+            
+            index = parent;
+        }
+        
+        //get all nodes above the root to add so we don't add their u values above
+        index = *(rootForGrouping.begin());
+        while(t->tree[index].getParent() != -1){
+            int parent = t->tree[index].getParent();
+            rootForGrouping.insert(parent);
+            
+            index = parent;
+        }
+        
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Weighted", "getRoot");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+double getLengthToRoot(MothurOut* m, Tree* t, int v, set<int> roots, vector<double>& leafToTreeRoot) {
     try {
         double sum = 0.0;
         int index = v;
         Utils util;
         
-        //you are a leaf
-        if(!util.isEqual(t->tree[index].getBranchLength(), -1)){	sum += abs(t->tree[index].getBranchLength());	}
-        double tempTotal = 0.0;
-        index = t->tree[index].getParent();
-        
-        vector<string> grouping; grouping.push_back(groupA); grouping.push_back(groupB);
-        
-        rootForGrouping[grouping].insert(index);
-        
-        //while you aren't at root
-        while(t->tree[index].getParent() != -1){
+        //find length to complete tree root and save
+        if (util.isEqual(leafToTreeRoot[v], 0.0)) {
+            //you are a leaf
+            if(!util.isEqual(t->tree[index].getBranchLength(), -1)){    leafToTreeRoot[v] += abs(t->tree[index].getBranchLength());    }
             
-            if (m->getControl_pressed()) {  return sum; }
-            
-            int parent = t->tree[index].getParent();
-            
-            if (includeRoot) { //add everyone
-                if(!util.isEqual(t->tree[index].getBranchLength(), -1)){	sum += abs(t->tree[index].getBranchLength());	}
-            }else {
+            index = t->tree[index].getParent();
+                            
+            //while you aren't at root
+            while(t->tree[index].getParent() != -1){
                 
-                //am I the root for this grouping? if so I want to stop "early"
-                //does my sibling have descendants from the users groups?
-                int lc = t->tree[parent].getLChild();
-                int rc = t->tree[parent].getRChild();
+                if (m->getControl_pressed()) {  return sum; }
                 
-                int sib = lc;
-                if (lc == index) { sib = rc; }
+                int parent = t->tree[index].getParent();
+                                    
+                if (!util.isEqual(t->tree[index].getBranchLength(), -1)) { leafToTreeRoot[v] += abs(t->tree[index].getBranchLength()); }
                 
-                map<string, int>::iterator itGroup;
-                int pcountSize = 0;
-                itGroup = t->tree[sib].pcount.find(groupA);
-                if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  }
-                itGroup = t->tree[sib].pcount.find(groupB);
-                if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  }
-                
-                //if yes, I am not the root so add me
-                if (pcountSize != 0) {
-                    if (!util.isEqual(t->tree[index].getBranchLength(), -1)) {
-                        sum += abs(t->tree[index].getBranchLength()) + tempTotal;
-                        tempTotal = 0.0;
-                    }else {
-                        sum += tempTotal;
-                        tempTotal = 0.0;
-                    }
-                    rootForGrouping[grouping].clear();
-                    rootForGrouping[grouping].insert(parent);
-                }else { //if no, I may be the root so add my br to tempTotal until I am proven innocent
-                    if (!util.isEqual(t->tree[index].getBranchLength(), -1)) {
-                        tempTotal += abs(t->tree[index].getBranchLength());
-                    }
-                }
+                index = parent;
             }
-            
-            index = parent;	
         }
         
-        //get all nodes above the root to add so we don't add their u values above
-        index = *(rootForGrouping[grouping].begin());
+        index = v;
         
-        while(t->tree[index].getParent() != -1){
-            int parent = t->tree[index].getParent();
-            rootForGrouping[grouping].insert(parent);
-            index = parent;
+        sum = leafToTreeRoot[v];
+        
+        //subtract excess root for this grouping
+        for (set<int>::iterator it = roots.begin(); it != roots.end(); it++) {
+            if (!util.isEqual(t->tree[*it].getBranchLength(), -1)) {
+                sum -= abs(t->tree[*it].getBranchLength());
+            }
         }
+        
         return sum;
     }
     catch(exception& e) {
-        m->errorOut(e, "Weighted", "getBranchLengthSums");
+        m->errorOut(e, "Weighted", "getLengthToRoot");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+int findNodeBelongingToThisComparison(MothurOut* m, vector<string>& namesOfGroupCombos, map< string, vector<int> >& groupNodeInfo) {
+    try {
+     
+     int nodeBelonging = -1;
+     for (int g = 0; g < namesOfGroupCombos.size(); g++) {
+         if (groupNodeInfo[namesOfGroupCombos[g]].size() != 0) { nodeBelonging = groupNodeInfo[namesOfGroupCombos[g]][0]; break; }
+     }
+     
+     //sanity check
+     if (nodeBelonging == -1) {
+         m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping ");
+         for (int g = 0; g < namesOfGroupCombos.size()-1; g++) { m->mothurOut(namesOfGroupCombos[g] + "-"); }
+         m->mothurOut(namesOfGroupCombos[namesOfGroupCombos.size()-1]);
+         m->mothurOut(", skipping.\n");
+     }
+     
+     return nodeBelonging;
+ }
+ catch(exception& e) {
+     m->errorOut(e, "Weighted", "findNodeBelongingToThisComparison");
+     exit(1);
+ }
+}
+/**************************************************************************************************/
+double findNumerator(MothurOut* m, Tree* t, set<int>& rootBranches, string groupA, string groupB, int groupACount, int groupBCount) {
+    try {
+        Utils util;
+        double WScore = 0.0;
+        
+        for(int i=0;i<t->getNumNodes();i++){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            double u = 0.00;
+            
+            //does this node have descendants from groupA
+            map<string, int>::iterator it = t->tree[i].pcount.find(groupA);
+            //if it does u = # of its descendants with a certain group / total number in tree with a certain group
+            if (it != t->tree[i].pcount.end()) { u = (double) it->second / (double) groupACount; }
+            
+            //does this node have descendants from group l
+            it = t->tree[i].pcount.find(groupB);
+            
+            //if it does subtract their percentage from u
+            if (it != t->tree[i].pcount.end()) { u -= (double) it->second / (double) groupBCount; }
+            
+            if (!util.isEqual(t->tree[i].getBranchLength(), -1)) {
+                //if this is not the root then add it
+                if (rootBranches.count(i) == 0) {
+                    u = abs(u * t->tree[i].getBranchLength());
+                    WScore += u;
+                }
+            }
+        }
+        
+        return WScore;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Weighted", "findNumerator");
+        exit(1);
+    }
+}
+/**************************************************************************************************/
+double findWeightedSums(MothurOut* m, Tree* t, set<int>& rootBranches, vector<double>& nodeToRootLength, string groupA, int groupACount) {
+    try {
+        double D = 0.0;
+        
+        //adding the wieghted sums from groupA
+        for (int j = 0; j < t->groupNodeInfo[groupA].size(); j++) { //the leaf nodes that have seqs from groupA
+            
+            map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupA][j]].pcount.find(groupA);
+            int numSeqsInGroupI = it->second;
+
+            double sum = getLengthToRoot(m, t, t->groupNodeInfo[groupA][j], rootBranches, nodeToRootLength);
+            double weightedSum = ((numSeqsInGroupI * sum) / (double) groupACount);
+            
+            D += weightedSum;
+        }
+        
+        return D;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Weighted", "findNumerator");
         exit(1);
     }
 }
 /**************************************************************************************************/
 void driverWeighted(weightedData* params) {
  try {
-		vector<double> D;
+        Utils util;
 		params->count = 0;
-        map<string, double> WScore;
-        map< vector<string>, set<int> > rootForGrouping;
-     
+        vector<double> nodeToRootLength;  //length from leaf to tree root, grouping root maybe smaller. Used as reference and excess root is deducted if neccasary
+        nodeToRootLength.resize(params->t->getNumLeaves(), 0.0); //set all leaf nodes length to root to zero
+
 		for (int h = params->start; h < (params->start+params->num); h++) {
 		
             if (params->m->getControl_pressed()) { break; }
@@ -163,192 +270,88 @@ void driverWeighted(weightedData* params) {
 			//initialize weighted score
 			string groupA = params->namesOfGroupCombos[h][0];
 			string groupB = params->namesOfGroupCombos[h][1];
-			
-			set<int> validBranches;
-            WScore[groupA+groupB] = 0.0;
-			D.push_back(0.0000); //initialize a spot in D for each combination
-			
-			//adding the wieghted sums from group i
-			for (int j = 0; j < params->t->groupNodeInfo[groupA].size(); j++) { //the leaf nodes that have seqs from group i
-				map<string, int>::iterator it = params->t->tree[params->t->groupNodeInfo[groupA][j]].pcount.find(groupA);
-				int numSeqsInGroupI = it->second;
-				
-				double sum = getLengthToRoot(params->t, params->includeRoot, params->t->groupNodeInfo[groupA][j], groupA, groupB, rootForGrouping);
-				double weightedSum = ((numSeqsInGroupI * sum) / (double)params->ct->getGroupCount(groupA));
-			
-				D[params->count] += weightedSum;
-			}
-			
-			//adding the wieghted sums from group l
-			for (int j = 0; j < params->t->groupNodeInfo[groupB].size(); j++) { //the leaf nodes that have seqs from group l
-				map<string, int>::iterator it = params->t->tree[params->t->groupNodeInfo[groupB][j]].pcount.find(groupB);
-				int numSeqsInGroupL = it->second;
-				
-				double sum = getLengthToRoot(params->t, params->includeRoot, params->t->groupNodeInfo[groupB][j], groupA, groupB, rootForGrouping);
-				double weightedSum = ((numSeqsInGroupL * sum) / (double)params->ct->getGroupCount(groupB));
-			
-				D[params->count] += weightedSum;
-			}
-			params->count++;
-		}
-	 
-		//calculate u for the group comb 
-		for (int h = params->start; h < (params->start+params->num); h++) {
             
-			string groupA = params->namesOfGroupCombos[h][0];
-			string groupB = params->namesOfGroupCombos[h][1];
+            int groupACount = params->ct->getGroupCount(groupA);
+            int groupBCount = params->ct->getGroupCount(groupB);
+            
+            set<int> rootBranches; //if not including root this will hold branches that are "above" the root for this comparison
 			
-			//calculate u for the group comb 
-			for(int i=0;i<params->t->getNumNodes();i++){
-				
-                if (params->m->getControl_pressed()) { break; }
-				
-				double u;
-				//int pcountSize = 0;
-				//does this node have descendants from groupA
-				map<string, int>::iterator it = params->t->tree[i].pcount.find(groupA);
-				//if it does u = # of its descendants with a certain group / total number in tree with a certain group
-				if (it != params->t->tree[i].pcount.end()) {
-					u = (double) params->t->tree[i].pcount[groupA] / (double) params->ct->getGroupCount(groupA);
-				}else { u = 0.00; }
-				
-				
-				//does this node have descendants from group l
-				it = params->t->tree[i].pcount.find(groupB);
-				
-				//if it does subtract their percentage from u
-				if (it != params->t->tree[i].pcount.end()) {
-					u -= (double) params->t->tree[i].pcount[groupB] / (double) params->ct->getGroupCount(groupB);
-				}
-                Utils util;
-				if (params->includeRoot) {
-					if (!util.isEqual(params->t->tree[i].getBranchLength(), -1)) {
-						u = abs(u * params->t->tree[i].getBranchLength());
-						WScore[(groupA+groupB)] += u; 
-					}
-				}else {
-					//if this is not the root then add it
-					if (rootForGrouping[params->namesOfGroupCombos[h]].count(i) == 0) {
-						if (!util.isEqual(params->t->tree[i].getBranchLength(), -1)) {
-							u = abs(u * params->t->tree[i].getBranchLength());
-							WScore[(groupA+groupB)] += u; 
-						}
-					}
-				}
-			}
-			
-		}
-		
-		/********************************************************/
-		//calculate weighted score for the group combination
-		double UN;	
-		params->count = 0;
-		for (int h = params->start; h < (params->start+params->num); h++) {
-			UN = (WScore[params->namesOfGroupCombos[h][0]+params->namesOfGroupCombos[h][1]] / D[params->count]);
-			if (isnan(UN) || isinf(UN)) { UN = 0; } 
-			params->results.push_back(UN);
+            double WScore = 0.0;
+			double D = 0.0;
+            
+            //find a node that belongs to one of the groups in this combo
+            int nodeBelonging = findNodeBelongingToThisComparison(params->m, params->namesOfGroupCombos[h], params->t->groupNodeInfo);
+            
+            if (nodeBelonging != -1) {
+            
+                //fills rootBranches to exclude, if including the root then rootBranches should be empty.
+                if (!params->includeRoot) { getRoot(params->m, params->t, nodeBelonging, params->namesOfGroupCombos[h], rootBranches); }
+
+                WScore = findNumerator(params->m, params->t, rootBranches, groupA, groupB, groupACount, groupBCount);
+                
+                D += findWeightedSums(params->m, params->t, rootBranches, nodeToRootLength, groupA, groupACount);
+                D += findWeightedSums(params->m, params->t, rootBranches, nodeToRootLength, groupB, groupBCount);
+                
+                double result = (WScore / D);
+                if (isnan(result) || isinf(result)) { result = 0; }
+                params->results.push_back(result);
+                
+            }else { params->results.push_back(0.0); }
+            
 			params->count++;
 		}
 	}
 	catch(exception& e) {
-		params->m->errorOut(e, "Weighted", "driver");
+		params->m->errorOut(e, "Weighted", "driverWeighted");
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+ /**************************************************************************************************/
 EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) { 
- try {
-		
-		EstOutput data;
+    try {
+        EstOutput data;
         CountTable* ct = t->getCountTable();
-        map< vector<string>, set<int> > rootForGrouping;
-		
-		if (m->getControl_pressed()) { return data; }
-		
-		//initialize weighted score
-		map<string, double> WScore; WScore[(groupA+groupB)] = 0.0;
-		double D = 0.0;
-		set<int> validBranches;
-		
-		vector<string> groups; groups.push_back(groupA); groups.push_back(groupB);
-		
-		//adding the wieghted sums from group i
-		for (int j = 0; j < t->groupNodeInfo[groups[0]].size(); j++) { //the leaf nodes that have seqs from group i
-			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[0]][j]].pcount.find(groups[0]);
-			int numSeqsInGroupI = it->second;
-			
-			double sum = getLengthToRoot(t, includeRoot, t->groupNodeInfo[groups[0]][j], groups[0], groups[1], rootForGrouping);
-			double weightedSum = ((numSeqsInGroupI * sum) / (double)ct->getGroupCount(groups[0]));
-		
-			D += weightedSum;
-		}
-     
-		//adding the wieghted sums from group l
-		for (int j = 0; j < t->groupNodeInfo[groups[1]].size(); j++) { //the leaf nodes that have seqs from group l
-			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
-			int numSeqsInGroupL = it->second;
-			
-			double sum = getLengthToRoot(t, includeRoot, t->groupNodeInfo[groups[1]][j], groups[0], groups[1], rootForGrouping);
-			double weightedSum = ((numSeqsInGroupL * sum) / (double)ct->getGroupCount(groups[1]));
-		
-			D += weightedSum;
-		}
-	
-		//calculate u for the group comb 
-		for(int i=0;i<t->getNumNodes();i++){
-		 
-			if (m->getControl_pressed()) { return data; }
-			
-			double u;
-			//int pcountSize = 0;
-			//does this node have descendants from groupA
-			map<string, int>::iterator it =  t->tree[i].pcount.find(groupA);
-			//if it does u = # of its descendants with a certain group / total number in tree with a certain group
-			if (it != t->tree[i].pcount.end()) {
-				u = (double) t->tree[i].pcount[groupA] / (double) ct->getGroupCount(groupA);
-			}else { u = 0.00; }
-			
-			
-			//does this node have descendants from group l
-			it = t->tree[i].pcount.find(groupB);
-			//if it does subtract their percentage from u
-			if (it != t->tree[i].pcount.end()) {
-				u -= (double) t->tree[i].pcount[groupB] / (double) ct->getGroupCount(groupB);
-			}
-			
-			if (includeRoot) {
-				if (!util.isEqual(t->tree[i].getBranchLength(), -1)) {
-					u = abs(u * t->tree[i].getBranchLength());
-					WScore[(groupA+groupB)] += u;
-				}
-			}else{
-				//if this is not the root then add it
-				if (rootForGrouping[groups].count(i) == 0) {
-					if (!util.isEqual(t->tree[i].getBranchLength(), -1)) {
-						u = abs(u * t->tree[i].getBranchLength());
-						WScore[(groupA+groupB)] += u;
-					}
-				}
-			}
-		}		
-		/********************************************************/
-	 
-		//calculate weighted score for the group combination
-		double W = (WScore[(groupA+groupB)] / D);
-     
-		if (isnan(W) || isinf(W)) { W = 0; }
-		data.push_back(W);
-				
-		return data; 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Weighted", "getValues");
-		exit(1);
-	}
+        vector<double> nodeToRootLength;  //length from leaf to tree root, grouping root maybe smaller. Used as reference and excess root is deducted if neccesary
+        nodeToRootLength.resize(t->getNumLeaves(), 0.0); //set all leaf nodes length to root to zero
+        
+        vector<string> grouping; grouping.push_back(groupA); grouping.push_back(groupB);
+        
+        int groupACount = ct->getGroupCount(groupA);
+        int groupBCount = ct->getGroupCount(groupB);
+        
+        set<int> rootBranches; //if not including root this will hold branches that are "above" the root for this comparison
+        
+        double WScore = 0.0;
+        double D = 0.0;
+        
+        //find a node that belongs to one of the groups in this combo
+        int nodeBelonging = findNodeBelongingToThisComparison(m, grouping, t->groupNodeInfo);
+        
+        if (nodeBelonging != -1) {
+            
+            if (!includeRoot) { getRoot(m, t, nodeBelonging, grouping, rootBranches); }
+            
+            WScore = findNumerator(m, t, rootBranches, groupA, groupB, groupACount, groupBCount);
+            
+            D += findWeightedSums(m, t, rootBranches, nodeToRootLength, groupA, groupACount);
+            D += findWeightedSums(m, t, rootBranches, nodeToRootLength, groupB, groupBCount);
+            
+            double result = (WScore / D);
+            if (isnan(result) || isinf(result)) { result = 0; }
+            data.push_back(result);
+            
+        }else { data.push_back(0.0); }
+        
+        return data;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Weighted", "getValues");
+        exit(1);
+    }
 }
 /**************************************************************************************************/
 
-EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
+EstOutput Weighted::createProcesses(Tree* t) {
     try {
         vector<linePair> lines;
         int remainingPairs = namesOfGroupCombos.size();
@@ -366,6 +369,8 @@ EstOutput Weighted::createProcesses(Tree* t, CountTable* ct) {
         vector<std::thread*> workerThreads;
         vector<weightedData*> data;
         vector<string> Treenames; Treenames = t->getTreeNames();
+        CountTable* ct = t->getCountTable();
+        
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
             CountTable* copyCount = new CountTable();

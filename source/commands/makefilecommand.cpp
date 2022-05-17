@@ -46,7 +46,7 @@ string MakeFileCommand::getHelpString(){
         helpString += "The delim parameter allow you to enter the character you would like to use to create the sample name. Default='_'. For example, M6D7_S163_L001_R2_001.fastq.gz would produce the sample name M6D7. Set delim=* to indicate you want mothur to create unique names for each file pair. (no pooling)\n";
         helpString += "The make.file command should be in the following format: \n";
         helpString += "make.file(inputdir=yourInputDirectory). \n";
-        helpString += "Example make.group(inputdir=fastqFiles)\n";
+        helpString += "Example make.file(inputdir=fastqFiles)\n";
         return helpString;
     }
     catch(exception& e) {
@@ -296,8 +296,8 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                 if (groupName != "") { groupName = groupName.substr(0, groupName.length()-1); }
                
                 //is this name unique
-                if (groups.count(groupName) == 0) {  groups.insert(groupName);  }
-                else { groupName = "Group_"+ toString(i); groups.insert(groupName); }
+                if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
+                else { groupName = "Group_"+ toString(i); util.checkName(groupName); groups.insert(groupName); }
                 
                 results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
             }
@@ -312,7 +312,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                 
                 if (pos != string::npos) { groupName = filename.substr(0, pos); }
                 
-                if (groups.count(groupName) == 0) {  groups.insert(groupName);  }
+                if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
                 else {
                     //look for another delim
                     string tempFilename = filename.substr(pos+1); //grab rest of name
@@ -322,6 +322,7 @@ vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> 
                         if (groups.count(groupName) != 0) {  groupName += "_"+ toString(i);  } //already have this name
                     }
                     else { groupName += "_"+ toString(i); }
+                    util.checkName(groupName);
                     groups.insert(groupName);
                 }
                 
@@ -358,22 +359,18 @@ int MakeFileCommand::fillAccnosFile(string tempFile){
         //findCommand = "dir /B \""  + inputDir.substr(0, inputDir.length()-1) + "\\*.\"" + typeFile + " > " + tempFile + "\"";
         if (m->getDebug()) { m->mothurOut(findCommand + "\n"); }
         system(findCommand.c_str());
-
-        ifstream in;
-        ofstream out;
-        tempOut += ".temp";
         
+        tempOut += ".temp";
         tempFile = tempFile.substr(1, tempFile.length()-2); //remove ""
         
-        util.openOutputFile(tempOut, out);
-        
-        util.openInputFile(tempFile, in);
+        ofstream out; util.openOutputFile(tempOut, out);
+        ifstream in; util.openInputFile(tempFile, in);
         
         string junk, filename;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
            
-            in >> filename; util.gobble(in);
+            in >> filename; gobble(in);
 
             if (m->getDebug()) { m->mothurOut("[DEBUG]: Found file " + filename + ".\n"); }
             //ignore hidden files

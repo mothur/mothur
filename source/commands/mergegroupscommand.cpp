@@ -343,7 +343,7 @@ int MergeGroupsCommand::processSharedFile(DesignMap*& designMap){
         Groups = lookup->getNamesGroups();
         bool printHeaders = true;
 		
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

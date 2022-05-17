@@ -41,7 +41,7 @@ public:
     #ifdef USE_BOOST
     FastqRead(boost::iostreams::filtering_istream&, bool&, string f);
     #endif
-    ~FastqRead() {}
+    ~FastqRead() = default;
     
     void setFormat(string f) { format = f; }
     string getFormat() { return format; }

@@ -289,7 +289,7 @@ int HeatMapSimCommand::runCommandShared() {
 			
 		if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command, quitting\n"); return 0;}
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -366,7 +366,7 @@ int HeatMapSimCommand::runCommandDist() {
 					if (m->getControl_pressed()) { return 0; }
 					
 					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
-					util.gobble(in);
+					gobble(in);
 				}
 			}else { 
 				double dist;
@@ -380,7 +380,7 @@ int HeatMapSimCommand::runCommandDist() {
 						in >> dist;
 						matrix[i][j] = dist;  matrix[j][i] = dist;
 					}
-					util.gobble(in);
+					gobble(in);
 				}
 			}
 			in.close();
@@ -397,7 +397,7 @@ int HeatMapSimCommand::runCommandDist() {
                     names.push_back(nameMap->get(i));
                 }
              }else if (countfile != "") {
-                nameMap = NULL;
+                nameMap = nullptr;
                 ct.readTable(countfile, true, false);
                 names = ct.getNamesOfSeqs();
             }
@@ -414,7 +414,7 @@ int HeatMapSimCommand::runCommandDist() {
 			util.openInputFile(columnfile, in);
 			
 			while (!in.eof()) {
-				in >> first >> second >> dist; util.gobble(in);
+				in >> first >> second >> dist; gobble(in);
 				
 				if (m->getControl_pressed()) { return 0; }
 				

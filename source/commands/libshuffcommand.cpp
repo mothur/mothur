@@ -170,8 +170,7 @@ int LibShuffCommand::execute(){
 		int error = groupMap->readMap();
 		if (error == 1) { delete groupMap; return 0; }
 		
-		ifstream in;
-		util.openInputFile(phylipfile, in);
+		ifstream in; util.openInputFile(phylipfile, in);
 		matrix = new FullMatrix(in, groupMap, sim); //reads the matrix file
 		in.close();
 		

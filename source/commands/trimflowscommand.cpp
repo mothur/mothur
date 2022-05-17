@@ -9,7 +9,7 @@
 
 #include "trimflowscommand.h"
 #include "needlemanoverlap.hpp"
-
+#include "counttable.h"
 
 //**********************************************************************************************************************
 vector<string> TrimFlowsCommand::setParameters(){	
@@ -39,7 +39,7 @@ vector<string> TrimFlowsCommand::setParameters(){
         outputTypes["flow"] = tempOutNames;
         outputTypes["fasta"] = tempOutNames;
         outputTypes["file"] = tempOutNames;
-        outputTypes["group"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
         
         abort = false; calledHelp = false;    comboStarts = 0;
 		
@@ -81,7 +81,7 @@ string TrimFlowsCommand::getOutputPattern(string type) {
         string pattern = "";
         
         if (type == "flow") {  pattern = "[filename],[tag],flow"; }
-        else if (type == "group") {  pattern = "[filename],flow.groups"; }
+        else if (type == "count") {  pattern = "[filename],flow.count_table"; }
         else if (type == "fasta") {  pattern = "[filename],flow.fasta"; } 
         else if (type == "file") {  pattern = "[filename],flow.files"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -118,16 +118,11 @@ TrimFlowsCommand::TrimFlowsCommand(string option) : Command()  {
 			
 			if (outputdir == ""){	 outputdir += util.hasPath(flowFileName);  }
 			
-			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			
-			string temp;
-			temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
+			string temp = validParameter.valid(parameters, "minflows");	if (temp == "not found") { temp = "450"; }
 			util.mothurConvert(temp, minFlows);  
 
 			temp = validParameter.valid(parameters, "maxflows");	if (temp == "not found") { temp = "450"; }
 			util.mothurConvert(temp, maxFlows);  
-			
 			
 			temp = validParameter.validFile(parameters, "oligos");
 			if (temp == "not found")	{	oligoFileName = "";		}
@@ -231,13 +226,14 @@ int TrimFlowsCommand::execute(){
         outputNames.push_back(flowFilesFileName);
         
 		if((allFiles) && (groupMap.size() != 0)) {
-            //print group file
-            string groupFileName = getOutputFileName("group",variables);
-            ofstream out; util.openOutputFile(groupFileName, out);
-            for (map<string, string>::iterator it = groupMap.begin(); it != groupMap.end(); it++) {  out << it->first << '\t' << it->second << endl;  } out.close();
-            
+            //print count file
+            string countFileName = getOutputFileName("count",variables);
+            CountTable ct; ct.createTable(groupMap);
+            ct.printCompressedTable(countFileName);
+            outputNames.push_back(countFileName); outputTypes["count"].push_back(countFileName);
+
             //run split.groups command
-            string inputString = "flow=" + trimFlowFileName + ", group=" + groupFileName;
+            string inputString = "flow=" + trimFlowFileName + ", count=" + countFileName;
             m->mothurOut("\n/******************************************/\n");
             m->mothurOut("Generating flow files for each sample...\n\nRunning command: split.groups(" + inputString + ")\n");
             current->setMothurCalling(true);
@@ -274,10 +270,22 @@ int TrimFlowsCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 		
+        //set group file as new current groupfile
+        string currentName = "";
+        itTypes = outputTypes.find("count");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setCountFile(currentName); }
+        }
+        
+        itTypes = outputTypes.find("file");
+        if (itTypes != outputTypes.end()) {
+            if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setFileFile(currentName); }
+        }
+        
 		return 0;	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "execute");
+		m->errorOut(e, "TrimFlowsCommand", "execute");
 		exit(1);
 	}
 }
@@ -355,7 +363,7 @@ void driverCreateTrim(trimFlowData* params){
 		
 		flowFile.seekg(params->lineStart);
 		
-        if(params->lineStart == 0){ int temp; flowFile >> temp; params->util.gobble(flowFile); }
+        if(params->lineStart == 0){ int temp; flowFile >> temp; gobble(flowFile); }
 		
 		FlowData flowData(params->numFlows, params->signal, params->noise, params->maxHomoP, params->flowOrder);
 		params->count = 0;
@@ -365,11 +373,11 @@ void driverCreateTrim(trimFlowData* params){
         int numSpacers = params->spacer.size();
         int numFPrimers = 0;
         int numRPrimers = 0;
-        TrimOligos* trimOligos = NULL;
+        TrimOligos* trimOligos = nullptr;
         if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); numFPrimers = params->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer); numBarcodes = params->barcodes.size();  numFPrimers = params->primers.size();  numRPrimers = params->revPrimer.size(); }
         
-        TrimOligos* rtrimOligos = NULL;
+        TrimOligos* rtrimOligos = nullptr;
         if (params->reorient) {
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
@@ -634,7 +642,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		//get num bytes in file
         flowFileName = util.getFullPathName(flowFileName);
 		pFile = fopen (flowFileName.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
+		if (pFile==nullptr) perror ("Error opening file");
 		else{
 			fseek (pFile, 0, SEEK_END);
 			size=ftell (pFile);
@@ -652,8 +660,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 		for (int i = 0; i < processors; i++) {
 			double spot = (i+1) * chunkSize;
 			
-			ifstream in;
-			util.openInputFile(flowFileName, in);
+			ifstream in; util.openInputFile(flowFileName, in);
 			in.seekg(spot);
 			
 			string dummy = util.getline(in);
@@ -677,10 +684,9 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
 		}
 
-		ifstream in;
-		util.openInputFile(flowFileName, in);
+		ifstream in; util.openInputFile(flowFileName, in);
 		in >> numFlows;
-		util.gobble(in);
+		gobble(in);
 		in.close();
 		
 		processors = (filePos.size() - 1);
@@ -698,7 +704,7 @@ vector<double> TrimFlowsCommand::getFlowFileBreaks() {
 int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName){
 
 	try {
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         ifstream in; util.openInputFile(flowFileName, in); in >> numFlows; in.close();
         
         vector<linePair> lines;
@@ -739,7 +745,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         for (int i = 0; i < processors-1; i++) {
             OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
             OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
-            OutputWriter* threadFastaWriter = NULL;
+            OutputWriter* threadFastaWriter = nullptr;
             
             if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
             
@@ -753,7 +759,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         
         OutputWriter* threadTrimWriter = new OutputWriter(synchronizedOutputTrimFile);
         OutputWriter* threadScrapWriter = new OutputWriter(synchronizedOutputScrapFile);
-        OutputWriter* threadFastaWriter = NULL;
+        OutputWriter* threadFastaWriter = nullptr;
         
         if (fasta) { threadFastaWriter = new OutputWriter(synchronizedOutputFastaFile); }
         
@@ -787,7 +793,7 @@ int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trim
         if (fasta) { delete threadFastaWriter; }
         delete dataBundle;
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".\n");  } 
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to trim " + toString(num) + " sequences."); if (m->getDebug()) {   m->mothurOut("Scrapped " + toString(badNames.size()) + ".\n");  } 
         
 		return num;
 	}

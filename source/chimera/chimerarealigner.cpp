@@ -14,7 +14,7 @@
 //***************************************************************************************************************
 ChimeraReAligner::ChimeraReAligner()  {  m = MothurOut::getInstance(); }
 //***************************************************************************************************************
-ChimeraReAligner::~ChimeraReAligner() {}	
+ChimeraReAligner::~ChimeraReAligner() = default;	
 //***************************************************************************************************************
 void ChimeraReAligner::reAlign(Sequence* query, vector<string> parents) {
 	try {
@@ -261,7 +261,7 @@ string ChimeraReAligner::getNewAlignment(string query){
 //			}
 //		}
 //		
-//		if(spot == -1) { m->mothurOut("Error: Could not find sequence.\n");  return NULL; }
+//		if(spot == -1) { m->mothurOut("Error: Could not find sequence.\n");  return nullptr; }
 //		
 //		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
 //		

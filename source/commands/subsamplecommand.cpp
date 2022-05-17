@@ -125,7 +125,6 @@ SubSampleCommand::SubSampleCommand(string option) : Command() {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list");
 			if (listfile == "not open") { listfile = ""; abort = true; }
@@ -340,7 +339,7 @@ int SubSampleCommand::execute(){
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleTree() {
     try {
-        TreeReader* reader = NULL;
+        TreeReader* reader = nullptr;
         string cinputfile = countfile;
         if (countfile == "") {
             reader = new TreeReader(treefile, groupfile, namefile);
@@ -545,12 +544,8 @@ int SubSampleCommand::getSubSampleFasta() {
 		string outputFileName = getOutputFileName("fasta", variables);
         outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		//read through fasta file outputting only the names on the subsample list
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		string thisname;
 		int count = 0;
@@ -578,7 +573,7 @@ int SubSampleCommand::getSubSampleFasta() {
 					}
 				}else{ m->mothurOut("[ERROR]: " + thisname + " is not in your namefile, please correct.\n");  }
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -623,7 +618,7 @@ int SubSampleCommand::getSubSampleFasta() {
                 util.openInputFile(outputFileName, in2);
                 
                 while (!in2.eof()) {
-                    Sequence seq(in2); util.gobble(in2);
+                    Sequence seq(in2); gobble(in2);
                     if (seq.getName() != "") {
                         tempSubset.insert(seq.getName());
                     }
@@ -655,8 +650,7 @@ vector<string> SubSampleCommand::getNames() {
 	try {
 		vector<string> names;
         
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		string thisname;
 		while(!in.eof()){
@@ -671,7 +665,7 @@ vector<string> SubSampleCommand::getNames() {
 				nameMap[thisname] = temp;
 				names.push_back(thisname);
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		
@@ -731,7 +725,7 @@ int SubSampleCommand::getSubSampleShared() {
 		
 		m->mothurOut("Sampling " + toString(size) + " from each group.\n");
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -780,14 +774,12 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
             variables["[distance]"] = thislookup->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             
-            ifstream in;
-            util.openInputFile(constaxonomyfile, in);
+            ifstream in; util.openInputFile(constaxonomyfile, in);
             
             //read headers
-            string headers = util.getline(in); util.gobble(in);
+            string headers = util.getline(in); gobble(in);
             
-            ofstream outCons;
-            util.openOutputFile(consOutputFileName, outCons);
+            ofstream outCons; util.openOutputFile(consOutputFileName, outCons);
             outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
 
             outCons << headers << endl;
@@ -799,8 +791,8 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
                 string otu = ""; string tax = "unknown";
                 int size = 0;
                 
-                in >> otu; util.gobble(in); in >> size; util.gobble(in);
-                tax = util.getline(in); util.gobble(in);
+                in >> otu; gobble(in); in >> size; gobble(in);
+                tax = util.getline(in); gobble(in);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
                 
@@ -980,7 +972,7 @@ int SubSampleCommand::getSubSampleList() {
             sampledCt.printTable(countOutputFileName);
         }
 			
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             
@@ -989,7 +981,7 @@ int SubSampleCommand::getSubSampleList() {
             list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
 		
-		if (list != NULL) { delete list; }
+		if (list != nullptr) { delete list; }
         
         if (taxonomyfile != "") {
             if (namefile == "") {
@@ -1118,14 +1110,12 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
             variables["[distance]"] = list->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             
-            ifstream in;
-            util.openInputFile(constaxonomyfile, in);
+            ifstream in; util.openInputFile(constaxonomyfile, in);
             
             //read headers
-            string headers = util.getline(in); util.gobble(in);
+            string headers = util.getline(in); gobble(in);
             
-            ofstream outCons;
-            util.openOutputFile(consOutputFileName, outCons);
+            ofstream outCons; util.openOutputFile(consOutputFileName, outCons);
             outputTypes["constaxonomy"].push_back(consOutputFileName);  outputNames.push_back(consOutputFileName);
             
             outCons << headers << endl;
@@ -1137,8 +1127,8 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
                 string otu = ""; string tax = "unknown";
                 int size = 0;
                 
-                in >> otu; util.gobble(in); in >> size; util.gobble(in);
-                tax = util.getline(in); util.gobble(in);
+                in >> otu; gobble(in); in >> size; gobble(in);
+                tax = util.getline(in); gobble(in);
                 
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
                 
@@ -1185,7 +1175,7 @@ void SubSampleCommand::getSubSampleRabund() {
         ofstream out; util.openOutputFile(outputFileName, out);
         outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
                
-        while (rabund != NULL) {
+        while (rabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete rabund; break; }
                    
@@ -1248,7 +1238,7 @@ void SubSampleCommand::getSubSampleSabund() {
         ofstream out; util.openOutputFile(outputFileName, out);
         outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
                
-        while (sabund != NULL) {
+        while (sabund != nullptr) {
                    
             if (m->getControl_pressed()) { delete sabund; break; }
                    
@@ -1310,8 +1300,8 @@ int SubSampleCommand::getTax(set<string>& subset) {
             
             if (m->getControl_pressed()) { inTax.close(); outTax.close();  return 0; }
             
-            inTax >> tname; util.gobble(inTax);
-            tax = util.getline(inTax); util.gobble(inTax);
+            inTax >> tname; gobble(inTax);
+            tax = util.getline(inTax); gobble(inTax);
             
             //does the subset contain a sequence that this sequence represents
             itNameMap = nameMap.find(tname);

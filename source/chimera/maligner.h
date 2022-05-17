@@ -21,7 +21,7 @@ class Maligner {
 	public:
 		
 		Maligner(vector<Sequence>, int, int, float, int, int); //int, int, int, , string, Database*, Database*
-		~Maligner() {};
+		~Maligner() = default;;
 		
 		string getResults(Sequence, DeCalculator);
 		float getPercentID() {	return percentIdenticalQueryChimera;	}

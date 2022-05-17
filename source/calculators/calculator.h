@@ -24,7 +24,7 @@ public:
 	Calculator(){ m = MothurOut::getInstance(); needsAll = false; }
     Calculator(string n, int c, bool f) : name(n), cols(c), multiple(f) { m = MothurOut::getInstance(); needsAll = false; };
     Calculator(string n, int c, bool f, bool a) : name(n), cols(c), multiple(f), needsAll(a) { m = MothurOut::getInstance(); };
-	virtual ~Calculator(){};
+	virtual ~Calculator()=default;
 	
 	virtual EstOutput getValues(SAbundVector*) = 0;	
 	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
@@ -75,8 +75,6 @@ protected:
     MothurOut* m;
     Utils util;
     string name;
-    
-    
 };
 
 
@@ -87,7 +85,7 @@ class DistCalc {
 public:
     DistCalc(double c){ name = "unknown"; dist = 0; cutoff = c;  m = MothurOut::getInstance(); }
 
-    virtual ~DistCalc() {}
+    virtual ~DistCalc() = default;
     virtual double calcDist(Sequence, Sequence) { return -1.0; }
     virtual double calcDist(Protein, Protein)   { return -1.0; }
     virtual string getCitation() = 0;

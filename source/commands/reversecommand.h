@@ -15,7 +15,7 @@
 class ReverseSeqsCommand : public Command {
 public:
 	ReverseSeqsCommand(string);
-	~ReverseSeqsCommand() {}
+	~ReverseSeqsCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "reverse.seqs";			}

@@ -19,7 +19,7 @@ class MergeCountCommand : public Command {
     
 public:
     MergeCountCommand(string);
-    ~MergeCountCommand() {}
+    ~MergeCountCommand() = default;
     
     vector<string> setParameters();
     string getCommandName()			{ return "merge.count";	}

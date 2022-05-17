@@ -148,8 +148,8 @@ int RemoveOtusCommand::execute(){
         //get labels you want to keep
 		otulabels = util.readAccnos(accnosfile);
         //simplfy labels
-        set<string> newLabels;
-        for (set<string>::iterator it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
+        unordered_set<string> newLabels;
+        for (auto it = otulabels.begin(); it != otulabels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
         otulabels = newLabels;
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: numlabels = " + toString(otulabels.size()) + "\n"); }
@@ -202,17 +202,15 @@ int RemoveOtusCommand::readClassifyOtu(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
         variables["[extension]"] = util.getExtension(constaxonomyfile);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(constaxonomyfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(constaxonomyfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -222,8 +220,8 @@ int RemoveOtusCommand::readClassifyOtu(){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + otu + toString(size) + tax + "\n"); }
             
@@ -257,17 +255,15 @@ int RemoveOtusCommand::readOtuAssociation(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(otucorrfile));
         variables["[extension]"] = util.getExtension(otucorrfile);
 		string outputFileName = getOutputFileName("otucorr", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(otucorrfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(otucorrfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -277,7 +273,7 @@ int RemoveOtusCommand::readOtuAssociation(){
             string otu1 = ""; 
             string otu2 = ""; 
             in >> otu1 >> otu2;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if ((otulabels.count(util.getSimpleLabel(otu1)) == 0) && (otulabels.count(util.getSimpleLabel(otu2)) == 0)){
 				wroteSomething = true;
@@ -310,18 +306,15 @@ int RemoveOtusCommand::readCorrAxes(){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(corraxesfile));
         variables["[extension]"] = util.getExtension(corraxesfile);
 		string outputFileName = getOutputFileName("corraxes", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-        
-		ifstream in;
-		util.openInputFile(corraxesfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(corraxesfile, in);
 		
 		bool wroteSomething = false;
 		int removedCount = 0;
 		
         //read headers
-        string headers = util.getline(in); util.gobble(in);
+        string headers = util.getline(in); gobble(in);
         out << headers << endl;
         
         while (!in.eof()) {
@@ -330,7 +323,7 @@ int RemoveOtusCommand::readCorrAxes(){
             
             string otu = ""; 
             in >> otu;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (otulabels.count(util.getSimpleLabel(otu)) == 0) {
 				wroteSomething = true;
@@ -473,7 +466,7 @@ int RemoveOtusCommand::getListVector(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
@@ -543,8 +536,8 @@ SharedRAbundVectors* RemoveOtusCommand::getShared(){
         set<string> userLabels = labels;
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && (userLabels.size() != 0)) {
-            if (m->getControl_pressed()) {   delete lookup; return NULL;  }
+        while((lookup != nullptr) && (userLabels.size() != 0)) {
+            if (m->getControl_pressed()) {   delete lookup; return nullptr;  }
             
             if(labels.count(lookup->getLabel()) == 1){
                 processedLabels.insert(lookup->getLabel());

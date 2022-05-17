@@ -210,7 +210,7 @@ int UnifracWeightedCommand::execute() {
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
         TreeReader* reader;
         if (countfile == "") { reader = new TreeReader(treefile, groupfile, namefile); }
@@ -263,7 +263,7 @@ int UnifracWeightedCommand::execute() {
             vector<double> userData; userData.resize(numComp,0);  //weighted score info for user tree. data[0] = weightedscore AB, data[1] = weightedscore AC...
             vector<double> randomData; randomData.resize(numComp,0); //weighted score info for random trees. data[0] = weightedscore AB, data[1] = weightedscore AC...
             
-            userData = weighted.getValues(T[i], processors, outputdir); //userData[0] = weightedscore
+            userData = weighted.getValues(T[i], processors); //userData[0] = weightedscore
             if (m->getControl_pressed()) { break; }
             
             if (phylip) {	createPhylipFile((i+1), userData);          }
@@ -275,31 +275,32 @@ int UnifracWeightedCommand::execute() {
             //subsample loop
             vector< vector<double> > calcDistsTotals;  //each iter, each groupCombos dists. this will be used to make .dist files
             SubSample sample;
+            int sampleTime = time(nullptr);
             for (int thisIter = 0; thisIter < subsampleIters; thisIter++) { //subsampleIters=0, if subsample=f.
                 if (m->getControl_pressed()) { break; }
 
                 //uses method of setting groups to doNotIncludeMe
                 //copy to preserve old one - would do this in subsample but memory cleanup becomes messy.
                 CountTable* newCt = new CountTable();
-                int sampleTime = time(NULL);
                 
                 Tree* subSampleTree;
                 if (withReplacement)    { subSampleTree = sample.getSampleWithReplacement(T[i], ct, newCt, subsampleSize, Groups);  }
                 else                    { subSampleTree = sample.getSample(T[i], ct, newCt, subsampleSize, Groups);                 }
                 
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(NULL) - sampleTime) + " seconds to sample tree.\n"); }
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: iter " + toString(thisIter) + " took " + toString(time(nullptr) - sampleTime) + " seconds to sample tree.\n"); }
                 
                 //call new weighted function
                 vector<double> iterData; iterData.resize(numComp,0);
                 Weighted thisWeighted(includeRoot, Groups);
-                iterData = thisWeighted.getValues(subSampleTree, processors, outputdir); //userData[0] = weightedscore
+                iterData = thisWeighted.getValues(subSampleTree, processors); //userData[0] = weightedscore
                 
                 //save data to make ave dist, std dist
                 calcDistsTotals.push_back(iterData);
                 
                 delete newCt; delete subSampleTree;
-                
-                if((thisIter+1) % 100 == 0){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); 	}
+                                
+                //output at 100 iters or after 10 mins
+                if (((thisIter+1) % 100 == 0) || ((time(nullptr) - sampleTime) > 600)){	m->mothurOutJustToScreen(toString(thisIter+1)+"\n"); sampleTime = time(nullptr);	}
             }
             
             if (m->getControl_pressed()) { break; }
@@ -311,7 +312,7 @@ int UnifracWeightedCommand::execute() {
 		
 		if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.weighted.\n"); 
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run unifrac.weighted.\n"); 
 		
 		//set phylip file as new current phylipfile
 		string currentName = "";
@@ -454,7 +455,7 @@ int UnifracWeightedCommand::getConsensusTrees(vector< vector<double> >& dists, i
         ofstream outTree;
         util.openOutputFile(conFile, outTree);
         
-        if (conTree != NULL) { conTree->print(outTree, "boot"); delete conTree; } outTree.close();
+        if (conTree != nullptr) { conTree->print(outTree, "boot"); delete conTree; } outTree.close();
         
         return 0;
     }
@@ -506,7 +507,7 @@ vector<Tree*> UnifracWeightedCommand::buildTrees(vector< vector<double> >& dists
         }
         outAll.close();
         
-        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = NULL; } util.mothurRemove(outputFile); }
+        if (m->getControl_pressed()) {  for (int i = 0; i < trees.size(); i++) {  delete trees[i]; trees[i] = nullptr; } util.mothurRemove(outputFile); }
         
         return trees;
     }

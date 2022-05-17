@@ -316,9 +316,9 @@ int ClusterFitCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;    }
         
-        time_t estart = time(NULL);
+        time_t estart = time(nullptr);
         
-        ClusterMetric* metric = NULL;
+        ClusterMetric* metric = nullptr;
         if (metricName == "mcc")             { metric = new MCC();              }
         else if (metricName == "sens")       { metric = new Sensitivity();      }
         else if (metricName == "spec")       { metric = new Specificity();      }
@@ -372,7 +372,7 @@ int ClusterFitCommand::execute(){
                 
             }else { //reference with accnos file or reference list file assigning references
                 
-                set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
+                unordered_set<string> refNames; vector<string> refLabels; vector< vector<string> > otus;
                 
                 if (accnosfile != "") { //use accnos file to assign references
                     
@@ -460,7 +460,7 @@ int ClusterFitCommand::execute(){
         
         if (m->getControl_pressed()) {     for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to fit sequences to reference OTUs.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - estart) + " seconds to fit sequences to reference OTUs.\n");
         
         //set list file as new current listfile
         string currentName = "";
@@ -716,7 +716,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
     try {
         m->mothurOut("\nClustering " + toString(refsMatrix->getNumSeqs()+refsMatrix->getNumSingletons()) + " reference sequences.\n");
         
-        ListVector* list = NULL;
+        ListVector* list = nullptr;
         
         OptiCluster cluster(refsMatrix, metric, 0);
         
@@ -738,7 +738,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
         
         while ((delta > 0.0001) && (iters < maxIters)) {
             
-            long start = time(NULL);
+            long start = time(nullptr);
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -751,7 +751,7 @@ ListVector* ClusterFitCommand::clusterRefs(OptiData*& refsMatrix, ClusterMetric*
             results = cluster.getStats(tp, tn, fp, fn);
             numBins = cluster.getNumBins();
             
-            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            m->mothurOut(toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
             
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
             m->mothurOutEndLine();

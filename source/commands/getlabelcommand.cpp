@@ -115,7 +115,7 @@ int GetlabelCommand::execute(){
 		OrderVector* order = input->getOrderVector();
 		string label = order->getLabel();
 		
-		while (order != NULL) {
+		while (order != nullptr) {
 			
 			if (m->getControl_pressed()) { delete input;  delete order; return 0; }
 			

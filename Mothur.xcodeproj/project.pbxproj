@@ -234,7 +234,7 @@
 		481FB5E81AC1B77E0076CFF3 /* otuassociationcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A3C8C714D041AD00B1BFBE /* otuassociationcommand.cpp */; };
 		481FB5E91AC1B77E0076CFF3 /* otuhierarchycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77912D37EC400DA6239 /* otuhierarchycommand.cpp */; };
 		481FB5EA1AC1B77E0076CFF3 /* pairwiseseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */; };
-		481FB5EB1AC1B77E0076CFF3 /* parsefastaqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */; };
+		481FB5EB1AC1B77E0076CFF3 /* fastaqinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* fastaqinfocommand.cpp */; };
 		481FB5ED1AC1B77E0076CFF3 /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */; };
 		481FB5EE1AC1B77E0076CFF3 /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC486612D795D60055BC5C /* pcacommand.cpp */; };
 		481FB5EF1AC1B77E0076CFF3 /* pcoacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78712D37EC400DA6239 /* pcoacommand.cpp */; };
@@ -719,7 +719,7 @@
 		A7E9B90E12D37EC400DA6239 /* otuhierarchycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77912D37EC400DA6239 /* otuhierarchycommand.cpp */; };
 		A7E9B90F12D37EC400DA6239 /* overlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77B12D37EC400DA6239 /* overlap.cpp */; };
 		A7E9B91012D37EC400DA6239 /* pairwiseseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */; };
-		A7E9B91112D37EC400DA6239 /* parsefastaqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */; };
+		A7E9B91112D37EC400DA6239 /* fastaqinfocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B77F12D37EC400DA6239 /* fastaqinfocommand.cpp */; };
 		A7E9B91312D37EC400DA6239 /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78312D37EC400DA6239 /* parsimony.cpp */; };
 		A7E9B91412D37EC400DA6239 /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */; };
 		A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B78712D37EC400DA6239 /* pcoacommand.cpp */; };
@@ -851,6 +851,8 @@
 		F4A866D1266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A866D2266912830010479A /* proteindb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A866CF266912830010479A /* proteindb.cpp */; };
 		F4A86713268F5CCE0010479A /* kimura.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4A86711268F5CCE0010479A /* kimura.cpp */; };
+		F4B4B0DC27396EF7003B2133 /* translateseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */; };
+		F4B4B0DD27396EF7003B2133 /* translateseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -1552,8 +1554,8 @@
 		A7E9B77C12D37EC400DA6239 /* overlap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = overlap.hpp; path = source/overlap.hpp; sourceTree = SOURCE_ROOT; };
 		A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pairwiseseqscommand.cpp; path = source/commands/pairwiseseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B77E12D37EC400DA6239 /* pairwiseseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pairwiseseqscommand.h; path = source/commands/pairwiseseqscommand.h; sourceTree = SOURCE_ROOT; };
-		A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsefastaqcommand.cpp; path = source/commands/parsefastaqcommand.cpp; sourceTree = SOURCE_ROOT; };
-		A7E9B78012D37EC400DA6239 /* parsefastaqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsefastaqcommand.h; path = source/commands/parsefastaqcommand.h; sourceTree = SOURCE_ROOT; };
+		A7E9B77F12D37EC400DA6239 /* fastaqinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fastaqinfocommand.cpp; path = source/commands/fastaqinfocommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7E9B78012D37EC400DA6239 /* fastaqinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fastaqinfocommand.h; path = source/commands/fastaqinfocommand.h; sourceTree = SOURCE_ROOT; };
 		A7E9B78312D37EC400DA6239 /* parsimony.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsimony.cpp; path = source/calculators/parsimony.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B78412D37EC400DA6239 /* parsimony.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parsimony.h; path = source/calculators/parsimony.h; sourceTree = SOURCE_ROOT; };
 		A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parsimonycommand.cpp; path = source/commands/parsimonycommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -1797,6 +1799,9 @@
 		A7FF19F1140FFDA500AD216D /* trimoligos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = trimoligos.cpp; path = source/trimoligos.cpp; sourceTree = SOURCE_ROOT; };
 		A7FFB556142CA02C004884F2 /* summarytaxcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = summarytaxcommand.h; path = source/commands/summarytaxcommand.h; sourceTree = SOURCE_ROOT; };
 		A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = summarytaxcommand.cpp; path = source/commands/summarytaxcommand.cpp; sourceTree = SOURCE_ROOT; };
+		F40859AF280F2DDB00F19B1A /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		F40859B0280F3CB200F19B1A /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		F40859B12811AE6500F19B1A /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		F4103A4B25A3A40F001ED741 /* libboost_filesystem.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_filesystem.a; path = mothur_resources/libs/libboost_filesystem.a; sourceTree = SOURCE_ROOT; };
 		F4103A4F25A3A411001ED741 /* libboost_iostreams.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libboost_iostreams.a; path = mothur_resources/libs/libboost_iostreams.a; sourceTree = SOURCE_ROOT; };
 		F4103A5D25A3A7C7001ED741 /* libhdf5_hl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libhdf5_hl.a; path = mothur_resources/libs/libhdf5_hl.a; sourceTree = SOURCE_ROOT; };
@@ -1824,6 +1829,8 @@
 		F4A86707268E3AFA0010479A /* pam.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = pam.hpp; sourceTree = "<group>"; };
 		F4A86711268F5CCE0010479A /* kimura.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = kimura.cpp; sourceTree = "<group>"; };
 		F4A86712268F5CCE0010479A /* kimura.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = kimura.hpp; sourceTree = "<group>"; };
+		F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = translateseqscommand.cpp; sourceTree = "<group>"; };
+		F4B4B0DB27396EF7003B2133 /* translateseqscommand.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = translateseqscommand.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2508,6 +2515,8 @@
 				A7E9B74912D37EC400DA6239 /* distsharedcommand.cpp */,
 				F4103A6F25A4C4D2001ED741 /* diversityestimatorcommand.hpp */,
 				484976E52256799100F3A291 /* diversityestimatorcommand.cpp */,
+				A7E9B78012D37EC400DA6239 /* fastaqinfocommand.h */,
+				A7E9B77F12D37EC400DA6239 /* fastaqinfocommand.cpp */,
 				A7E9B6E412D37EC400DA6239 /* filterseqscommand.h */,
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A79EEF8816971D640006DEC1 /* filtersharedcommand.h */,
@@ -2616,8 +2625,6 @@
 				A7E9B77912D37EC400DA6239 /* otuhierarchycommand.cpp */,
 				A7E9B77E12D37EC400DA6239 /* pairwiseseqscommand.h */,
 				A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */,
-				A7E9B78012D37EC400DA6239 /* parsefastaqcommand.h */,
-				A7E9B77F12D37EC400DA6239 /* parsefastaqcommand.cpp */,
 				A7E9B78612D37EC400DA6239 /* parsimonycommand.h */,
 				A7E9B78512D37EC400DA6239 /* parsimonycommand.cpp */,
 				A7FC486512D795D60055BC5C /* pcacommand.h */,
@@ -2706,6 +2713,8 @@
 				A7FFB557142CA02C004884F2 /* summarytaxcommand.cpp */,
 				A7E9B85C12D37EC400DA6239 /* systemcommand.h */,
 				A7E9B85B12D37EC400DA6239 /* systemcommand.cpp */,
+				F4B4B0DA27396EF7003B2133 /* translateseqscommand.cpp */,
+				F4B4B0DB27396EF7003B2133 /* translateseqscommand.hpp */,
 				A7E9B86312D37EC400DA6239 /* treesharedcommand.h */,
 				A7E9B86212D37EC400DA6239 /* treesharedcommand.cpp */,
 				A7E9B86912D37EC400DA6239 /* trimflowscommand.h */,
@@ -2728,6 +2737,7 @@
 		A7E9BA3F12D395F700DA6239 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
+				F40859B0280F3CB200F19B1A /* README.txt */,
 				A7E9B66F12D37EC400DA6239 /* calculator.h */,
 				481E40E0244F62980059C925 /* calculator.cpp */,
 				A7E9B6E212D37EC400DA6239 /* filters.h */,
@@ -2881,12 +2891,11 @@
 		A7E9BA4512D3965600DA6239 /* chimera */ = {
 			isa = PBXGroup;
 			children = (
+				F40859B12811AE6500F19B1A /* README.txt */,
 				A7E9B65C12D37EC300DA6239 /* bellerophon.cpp */,
 				A7E9B65D12D37EC300DA6239 /* bellerophon.h */,
 				A7E9B67412D37EC400DA6239 /* ccode.cpp */,
 				A7E9B67512D37EC400DA6239 /* ccode.h */,
-				A7E9B67812D37EC400DA6239 /* mothurchimera.cpp */,
-				A7E9B67912D37EC400DA6239 /* mothurchimera.h */,
 				A7E9B68012D37EC400DA6239 /* chimeracheckrdp.cpp */,
 				A7E9B68112D37EC400DA6239 /* chimeracheckrdp.h */,
 				A7E9B68412D37EC400DA6239 /* chimerarealigner.cpp */,
@@ -2897,6 +2906,8 @@
 				A7E9B68912D37EC400DA6239 /* chimeraslayer.h */,
 				A7E9B74612D37EC400DA6239 /* maligner.h */,
 				A7E9B74512D37EC400DA6239 /* maligner.cpp */,
+				A7E9B67912D37EC400DA6239 /* mothurchimera.h */,
+				A7E9B67812D37EC400DA6239 /* mothurchimera.cpp */,
 				A7BF221314587886000AD524 /* myPerseus.h */,
 				A7BF221214587886000AD524 /* myPerseus.cpp */,
 				A7E9B79312D37EC400DA6239 /* pintail.cpp */,
@@ -2941,6 +2952,7 @@
 		A7E9BA4F12D398D700DA6239 /* clearcut */ = {
 			isa = PBXGroup;
 			children = (
+				F40859AF280F2DDB00F19B1A /* README.txt */,
 				A7E9B69412D37EC400DA6239 /* clearcut.cpp */,
 				A7E9B69512D37EC400DA6239 /* clearcut.h */,
 				A7E9B6A412D37EC400DA6239 /* cmdargs.cpp */,
@@ -3164,7 +3176,7 @@
 				489AF6952106194A0028155E /* optifitcluster.cpp in Sources */,
 				481FB5A71AC1B7300076CFF3 /* clustersplitcommand.cpp in Sources */,
 				481FB65C1AC1B82C0076CFF3 /* mothurmetastats.cpp in Sources */,
-				481FB5EB1AC1B77E0076CFF3 /* parsefastaqcommand.cpp in Sources */,
+				481FB5EB1AC1B77E0076CFF3 /* fastaqinfocommand.cpp in Sources */,
 				481FB6341AC1B7EA0076CFF3 /* kmeralign.cpp in Sources */,
 				481FB55B1AC1B6630076CFF3 /* sharedanderbergs.cpp in Sources */,
 				481FB5B81AC1B74F0076CFF3 /* getcoremicrobiomecommand.cpp in Sources */,
@@ -3302,6 +3314,7 @@
 				481FB59E1AC1B71B0076CFF3 /* classifyseqscommand.cpp in Sources */,
 				4810D5B7218208CC00C668E8 /* testcounttable.cpp in Sources */,
 				481FB5CF1AC1B75C0076CFF3 /* indicatorcommand.cpp in Sources */,
+				F4B4B0DD27396EF7003B2133 /* translateseqscommand.cpp in Sources */,
 				481FB64F1AC1B8100076CFF3 /* consensus.cpp in Sources */,
 				481FB5441AC1B6140076CFF3 /* goodscoverage.cpp in Sources */,
 				481FB5DD1AC1B77E0076CFF3 /* distsharedcommand.cpp in Sources */,
@@ -3686,9 +3699,10 @@
 				A7E9B90C12D37EC400DA6239 /* optionparser.cpp in Sources */,
 				A7E9B90D12D37EC400DA6239 /* ordervector.cpp in Sources */,
 				A7E9B90E12D37EC400DA6239 /* otuhierarchycommand.cpp in Sources */,
+				F4B4B0DC27396EF7003B2133 /* translateseqscommand.cpp in Sources */,
 				A7E9B90F12D37EC400DA6239 /* overlap.cpp in Sources */,
 				A7E9B91012D37EC400DA6239 /* pairwiseseqscommand.cpp in Sources */,
-				A7E9B91112D37EC400DA6239 /* parsefastaqcommand.cpp in Sources */,
+				A7E9B91112D37EC400DA6239 /* fastaqinfocommand.cpp in Sources */,
 				A7E9B91312D37EC400DA6239 /* parsimony.cpp in Sources */,
 				A7E9B91412D37EC400DA6239 /* parsimonycommand.cpp in Sources */,
 				A7E9B91512D37EC400DA6239 /* pcoacommand.cpp in Sources */,

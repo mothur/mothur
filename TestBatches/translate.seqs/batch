@@ -1,0 +1,11 @@
+#translate.seqs
+# NOTE: download TestReferences and TestFiles and put in same location as mothur executable
+# final.fasta from MISeq_SOP
+set.dir(input=./TestFiles, output=./TestResults/translate.seqs, tempdefault=./TestReferences)
+set.logfile(name=translateseqs.logfile)
+translate.seqs(fasta=final.fasta)
+translate.seqs(fasta=final.fasta, stop=f)
+translate.seqs(fasta=final.fasta, frames=1|-1|2|-2|3|-3)
+#translate.seqs(fasta=unalignedDNA, amino=alignedAminoAcid)
+quit()
+

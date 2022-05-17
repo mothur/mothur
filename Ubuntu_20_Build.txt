@@ -10,7 +10,7 @@ To use HDF5: 		sudo apt-get install libhdf5-dev
 Set locations in makefile
 
 OPTIMIZE ?= yes
-USEREADLINE ?= yes
+USEREADLINE ?= yesrename.
 USEBOOST ?= yes
 USEHDF5 ?= yes
 USEGSL ?= yes

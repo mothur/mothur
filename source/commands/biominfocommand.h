@@ -25,7 +25,7 @@ class BiomInfoCommand : public Command {
     
 public:
     BiomInfoCommand(string);
-    ~BiomInfoCommand() {}
+    ~BiomInfoCommand() = default;
     
     vector<string> setParameters();
     string getCommandName()			{ return "biom.info";				}

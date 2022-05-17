@@ -20,11 +20,9 @@ string getLabelTag(string label){
     
     string tag = "";
     
-    //remove OTU or phylo tag
-    string newLabel1 = "";
-    for (int i = 0; i < label.length(); i++) {
-        if(label[i]>47 && label[i]<58) { //is a digit
-        }else {  tag += label[i];  }
+    for (auto n : label) {
+        if(n >47 && n <58) { //is a digit
+        }else {  tag += n;  }
     }
     
     return tag;
@@ -97,7 +95,7 @@ vector<float> Utils::randomDirichlet(vector<float> alphas) {
         float sum = 0.0000;
         for(int i=0;i<nAlphas;i++){
             dirs[i] = randomGamma(alphas[i]);
-						while(isinf(dirs[i])) { dirs[i] = randomGamma(alphas[i]);	}
+            while(isinf(dirs[i])) { dirs[i] = randomGamma(alphas[i]);	}
             sum += dirs[i];
         }
 
@@ -188,7 +186,7 @@ void Utils::mothurRandomShuffle(vector<string>& randomize){
 
 }
 /***********************************************************************/
-void Utils::mothurRandomShuffle(vector<item>& randomize){
+void Utils::mothurRandomShuffle(vector<intPair>& randomize){
     try {
         shuffle (randomize.begin(), randomize.end(), mersenne_twister_engine);
     }
@@ -468,8 +466,8 @@ string Utils::getFullPathName(string fileName){
                 else { newFileName = fileName.substr(fileName.rfind(pattern)+2); } //save the complete part of the name
 
                 if (cwd == "") {
-                    char *cwdpath = NULL; cwdpath = getcwd(NULL, 0); // or _getcwd
-                    if (cwdpath != NULL)    { cwd = cwdpath;    }
+                    char *cwdpath = nullptr; cwdpath = getcwd(nullptr, 0); // or _getcwd
+                    if (cwdpath != nullptr)    { cwd = cwdpath;    }
                     else                    { cwd = "";         }
                     currentWorkingDirectory = cwd;
                 }
@@ -567,7 +565,7 @@ string Utils::findProgramPath(string programName){
 #else
         if (pPath == "") {
             char buffer[MAX_PATH];
-            GetModuleFileName(NULL, buffer, MAX_PATH) ;
+            GetModuleFileName(nullptr, buffer, MAX_PATH) ;
 
             pPath = buffer;
             pPath = getPathName(pPath);
@@ -595,8 +593,7 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations)
         vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
-        ifstream in;
-        ableToOpen = openInputFile(filename, in, "noerror");
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
 
         //if you can't open it, try input location
@@ -807,8 +804,7 @@ bool Utils::checkLocations(string& filename, vector< vector<string> > locations,
         vector<string> mothurFilesPaths = locations[4];
 
         bool ableToOpen;
-        ifstream in;
-        ableToOpen = openInputFile(filename, in, "noerror");
+        ifstream in; ableToOpen = openInputFile(filename, in, "noerror");
         in.close();
         
         //if you can't open it, try input location
@@ -1247,23 +1243,6 @@ int Utils::renameFile(string oldName, string newName){
         int renameOk = rename(oldName.c_str(), newName.c_str());
         
         if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
-        /*
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: mv " + oldName + " to " + newName + "\n"); }
-        
-        string command = "mv " + oldName + " " + newName;
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command mv " + oldName + " " + newName + "\n"); }
-        
-        int returnCode = system(command.c_str());
-        
-        if(m->getDebug()) { m->mothurOut("[DEBUG]: system command mv " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
-        
-        if (returnCode != 0) {
-            int renameOk = rename(oldName.c_str(), newName.c_str());
-        
-            if(m->getDebug()) { m->mothurOut("[DEBUG]: rename " + oldName + " " + newName + " returned " + toString(renameOk) + "\n"); }
-        }
-         */
 #else
         mothurRemove(newName);
         int renameOk = rename(oldName.c_str(), newName.c_str());
@@ -1296,15 +1275,6 @@ int Utils::copyFile(string oldName, string newName){
             mothurRemove(newName);
         }
         appendFiles(oldName, newName);
-        //if(m->getDebug()) { m->mothurOut("[DEBUG]: cp " + oldName + " to " + newName + "\n"); }
-        
-        //string command = "cp " + oldName + " " + newName;
-        
-        //if(m->getDebug()) { m->mothurOut("[DEBUG]: running system command cp " + oldName + " " + newName + "\n"); }
-        
-        //int returnCode = system(command.c_str());
-        
-       // if(m->getDebug()) { m->mothurOut("[DEBUG]: system command cp " + oldName + " " + newName + " returned " + toString(returnCode) + "\n"); }
 #else
         mothurRemove(newName);
         appendFiles(oldName, newName);
@@ -1626,7 +1596,7 @@ bool Utils::openOutputFileBinaryAppend(string fileName, ofstream& fileHandle){
     }
 }
 
-/***********************************************************************/
+/***********************************************************************
 void Utils::gobble(istream& f){
     try {
 
@@ -1639,7 +1609,7 @@ void Utils::gobble(istream& f){
         exit(1);
     }
 }
-/***********************************************************************/
+/***********************************************************************
 void Utils::gobble(istringstream& f){
     try {
         char d;
@@ -1681,15 +1651,8 @@ void Utils::zapGremlins(istringstream& f){
 string Utils::getline(istringstream& fileHandle) {
     try {
         string line = "";
-        while (!fileHandle.eof())	{
-            //get next character
-            char c = fileHandle.get();
-
-            //are you at the end of the line
-            if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}
-            else {		line += c;		}
-        }
-
+        std::getline(fileHandle, line); gobble(fileHandle);
+        rtrim(line); //remove extra line endings
         return line;
     }
     catch(exception& e) {
@@ -1712,15 +1675,8 @@ void Utils::getline(ifstream& fileHandle, vector<string>& headers) {
 string Utils::getline(ifstream& fileHandle) {
     try {
         string line = "";
-        while (fileHandle)	{
-            //get next character
-            char c = fileHandle.get();
-
-            //are you at the end of the line
-            if ((c == '\n') || (c == '\r') || (c == '\f') || (c == EOF)){  break;	}
-            else {		line += c;		}
-        }
-
+        std::getline(fileHandle, line); gobble(fileHandle);
+        rtrim(line); //remove extra line endings
         return line;
     }
     catch(exception& e) {
@@ -1846,9 +1802,9 @@ string Utils::getStringFromVector(vector<int>& list, string delim){
     }
 }
 //**********************************************************************************************************************
-set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
+unordered_set<string> Utils::getSetFromList(ListVector*& list, vector< vector<string> >& otus){
     try {
-        set<string> results; otus.clear();
+        unordered_set<string> results; otus.clear();
 
         if (list->getNumSeqs() == 0) { return results; }
 
@@ -2026,7 +1982,7 @@ string Utils::getFormattedHelp(vector<string> questions, vector<string> qanswers
 string Utils::removeNs(string seq){
     try {
         string newSeq = "";
-        for (int i = 0; i < seq.length(); i++) { if (seq[i] != 'N') {  newSeq += seq[i]; } }
+        for (auto n : seq) { if (n != 'N') {  newSeq += n; } }
         return newSeq;
     }
     catch(exception& e) {
@@ -2109,7 +2065,7 @@ bool Utils::dirCheckWritable(string& dirName){
 
         //test to make sure directory exists
         dirName = getFullPathName(dirName);
-        string outTemp = dirName + "temp"+ toString(time(NULL));
+        string outTemp = dirName + "temp"+ toString(time(nullptr));
         ofstream out;
         out.open(outTemp.c_str(), ios::trunc);
         if(!out) { m->mothurOut(dirName + " directory does not exist or is not writable.\n");  }
@@ -2196,7 +2152,7 @@ bool Utils::mkDir(string& dirName){
         
     #else
         
-        if (CreateDirectory(dirName.c_str(), NULL) ||
+        if (CreateDirectory(dirName.c_str(), nullptr) ||
             ERROR_ALREADY_EXISTS == GetLastError()) { }
         else { return false; }
         
@@ -2339,8 +2295,8 @@ void Utils::getCurrentDate(string& thisYear, string& thisMonth, string& thisDay)
 bool Utils::isASCII(string input){
     try {
         
-        for (int i = 0; i < input.length(); i++) {
-            if (isascii(input[i]) == 0) { return false; } //non ascii
+        for (auto it = input.cbegin(); it != input.cend(); it++) {
+            if (isascii(*it) == 0) { return false; } //non ascii
         }
         return true;
     }
@@ -2545,7 +2501,7 @@ bool Utils::isBlank(string fileName){
 /***********************************************************************/
 bool Utils::stringBlank(string input){
     try {
-        for (int i = 0; i < input.length(); i++) { if (!isspace(input[i])) { return false; } }
+        for (auto i : input) { if (!isspace(i)) { return false; } }
         return true;
     }
     catch(exception& e) {
@@ -2596,7 +2552,7 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num, char deli
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2635,7 +2591,7 @@ vector<double> Utils::setFilePosFasta(string filename, long long& num) {
 
         //get num bytes in file
         pFile = fopen (completeFileName.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2683,8 +2639,7 @@ vector<consTax> Utils::readConsTax(string inputfile){
 
         vector<consTax> taxes;
 
-        ifstream in;
-        openInputFile(inputfile, in);
+        ifstream in; openInputFile(inputfile, in);
 
         //read headers
         getline(in);
@@ -2746,8 +2701,7 @@ void Utils::readConsTax(string inputfile, vector<Taxonomy>& conTax){
 //**********************************************************************************************************************
 int Utils::readConsTax(string inputfile, map<int, consTax2>& taxes){
     try {
-        ifstream in;
-        openInputFile(inputfile, in);
+        ifstream in; openInputFile(inputfile, in);
 
         //read headers
         getline(in);
@@ -2784,9 +2738,7 @@ vector<double> Utils::setFilePosEachLine(string filename, long long& num) {
         filename = getFullPathName(filename);
 
         vector<double> positions;
-        ifstream in;
-        //openInputFile(filename, in);
-        openInputFileBinary(filename, in);
+        ifstream in; openInputFileBinary(filename, in);
 
         string input;
         unsigned long long count = 0;
@@ -2817,7 +2769,7 @@ vector<double> Utils::setFilePosEachLine(string filename, long long& num) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2839,9 +2791,7 @@ vector<double> Utils::setFilePosEachLine(string filename, unsigned long long& nu
         filename = getFullPathName(filename);
 
         vector<double> positions;
-        ifstream in;
-        //openInputFile(filename, in);
-        openInputFileBinary(filename, in);
+        ifstream in; openInputFileBinary(filename, in);
 
         string input;
         unsigned long long count = 0;
@@ -2871,7 +2821,7 @@ vector<double> Utils::setFilePosEachLine(string filename, unsigned long long& nu
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2902,7 +2852,7 @@ vector<double> Utils::divideFile(string filename, int& proc) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -2925,8 +2875,7 @@ vector<double> Utils::divideFile(string filename, int& proc) {
             for (int i = 0; i < proc; i++) {
                 double spot = (i+1) * chunkSize;
 
-                ifstream in;
-                openInputFile(filename, in);
+                ifstream in; openInputFile(filename, in);
                 in.seekg(spot);
 
                 //look for next '>'
@@ -2983,7 +2932,7 @@ vector<double> Utils::divideFile(string filename, int& proc, char delimChar) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -3008,8 +2957,7 @@ vector<double> Utils::divideFile(string filename, int& proc, char delimChar) {
         for (int i = 0; i < proc; i++) {
             double spot = (i+1) * chunkSize;
 
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(spot);
 
             getline(in); //get to end of line in case you jump into middle of line where the delim char happens to fall.
@@ -3086,7 +3034,7 @@ vector<double> Utils::divideFilePerLine(string filename, int& proc) {
 
         //get num bytes in file
         pFile = fopen (filename.c_str(),"rb");
-        if (pFile==NULL) perror ("Error opening file");
+        if (pFile==nullptr) perror ("Error opening file");
         else{
             fseek (pFile, 0, SEEK_END);
             size=ftell (pFile);
@@ -3105,8 +3053,7 @@ vector<double> Utils::divideFilePerLine(string filename, int& proc) {
         for (int i = 0; i < proc; i++) {
             double spot = (i+1) * chunkSize;
 
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(spot);
 
             //look for next line break
@@ -3157,8 +3104,7 @@ int Utils::divideFile(string filename, int& proc, vector<string>& files) {
         for (int i = 0; i < (filePos.size()-1); i++) {
 
             //read file chunk
-            ifstream in;
-            openInputFile(filename, in);
+            ifstream in; openInputFile(filename, in);
             in.seekg(filePos[i]);
             unsigned long long size = filePos[(i+1)] - filePos[i];
             char* chunk = new char[size];
@@ -3190,17 +3136,17 @@ int Utils::divideFile(string filename, int& proc, vector<string>& files) {
 bool Utils::isTrue(string f){
     try {
 
-        for (int i = 0; i < f.length(); i++) { f[i] = toupper(f[i]); }
+        toUpper(f);
 
         if ((f == "TRUE") || (f == "T")) {	return true;	}
-        else {	return false;  }
+        
+        return false;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "isTrue");
         exit(1);
     }
 }
-
 /***********************************************************************/
 
 float Utils::roundDist(float dist, int precision){
@@ -3248,51 +3194,12 @@ vector<string> Utils::splitWhiteSpace(string& rest, char buffer[], int size){
     }
 }
 /***********************************************************************/
-string Utils::trimWhiteSpace(string input){
-    try {
-       
-        int start, end; start = 0; end = input.length();
-        
-        //no spaces
-        if (input.find_first_of(' ') == string::npos) { return input; }
-        
-        for (int i = 0; i < input.length(); i++) {
-            if (input[i] != ' ') { start = i; break; }
-        }
-        
-        end = start;
-        for (int i = input.length()-1; i > start; i--) {
-            if (input[i] != ' ') { end = i; break; }
-        }
-        
-        string trimmed = input.substr(start, end-start+1);
-        
-        return trimmed;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "trimWhiteSpace");
-        exit(1);
-    }
-}
-/***********************************************************************/
 vector<string> Utils::splitWhiteSpace(string input){
     try {
         vector<string> pieces;
-        string rest = "";
-
-        for (int i = 0; i < input.length(); i++) {
-            if (!isspace(input[i]))  { rest += input[i];  }
-            else {
-                if (rest != "") { pieces.push_back(rest);  rest = ""; }
-                while (i < input.length()) {  //gobble white space
-                    if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; }
-                }
-            }
-        }
-
-        if (rest != "") { pieces.push_back(rest); }
-
+        
+        split(input, back_inserter(pieces));
+        
         return pieces;
     }
     catch(exception& e) {
@@ -3303,24 +3210,16 @@ vector<string> Utils::splitWhiteSpace(string input){
 /***********************************************************************/
 int Utils::splitWhiteSpace(string input, vector<float>& pieces, int index){
     try {
-        pieces.clear();
-        string rest = "";
-        int count = 0;
-
-        for (int i = 0; i < input.length(); i++) {
-            if (!isspace(input[i]))  { rest += input[i];  }
-            else {
-                if (rest != "") { float tdist; mothurConvert(rest, tdist); pieces.push_back(tdist); count++; rest = ""; }
-                while (i < input.length()) {  //gobble white space
-                    if (isspace(input[i])) { i++; }
-                    else { rest = input[i];  break; }
-                }
-                if (count > index) { return 0; }
-            }
-        }
-
-        if (rest != "") { float tdist; mothurConvert(rest, tdist); count++; pieces.push_back(tdist); }
-
+        
+        pieces.clear(); int count = 0;
+        
+        vector<string> temp;  split(input, back_inserter(temp));
+        
+        for(string item : temp){
+            float tdist; mothurConvert(item, tdist); pieces.push_back(tdist); count++;
+            if (count > index) { return 0; }
+        };
+        
         return 0;
     }
     catch(exception& e) {
@@ -3373,8 +3272,7 @@ vector<string> Utils::splitWhiteSpaceWithQuotes(string input){
 int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfidence) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(taxfile, in);
+        ifstream in; openInputFile(taxfile, in);
 
         bool error = false;
         string name, taxonomy;
@@ -3415,8 +3313,7 @@ int Utils::readTax(string taxfile, map<string, string>& taxMap, bool removeConfi
 int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3480,8 +3377,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, bool redund)
 int Utils::readNames(string namefile, map<string, string>& nameMap, int flip) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3538,8 +3434,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, map<string, 
     try {
         nameMap.clear(); nameCount.clear();
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3603,8 +3498,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, map<string, 
 int Utils::readNames(string namefile, map<string, string>& nameMap) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3656,8 +3550,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap) {
 int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>& namesToInclude) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
         
         string firstCol, secondCol;
         
@@ -3705,8 +3598,7 @@ int Utils::readNames(string namefile, map<string, string>& nameMap, set<string>&
 int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
     try {
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3764,13 +3656,9 @@ int Utils::readNames(string namefile, map<string, vector<string> >& nameMap) {
 /**********************************************************************************************************************/
 map<string, int> Utils::readNames(string namefile) {
     try {
+        ifstream in; openInputFile(namefile, in);
+        
         map<string, int> nameMap;
-
-        //open input file
-        ifstream in;
-        openInputFile(namefile, in);
-
-       
         string firstCol, secondCol;
 
         while (!in.eof()) {
@@ -3797,10 +3685,7 @@ map<string, int> Utils::readNames(string namefile) {
 /**********************************************************************************************************************/
 int Utils::scanNames(string namefile) {
     try {
-        
-        //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
         
         int total = 0;
         string firstCol, secondCol;
@@ -3885,8 +3770,7 @@ map<string, int> Utils::readNames(string namefile, unsigned long int& numSeqs) {
         numSeqs = 0;
 
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -3965,14 +3849,13 @@ int Utils::printVsearchFile(vector<seqPriorityNode>& nameMapCount, string filena
     }
 }
 /************************************************************/
-int Utils::checkName(string& name) {
+void Utils::checkName(string& name) {
     try {
         if (modifyNames) {
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') { name[i] = '_'; m->setChangedSeqNames(true); }
+            for (auto& n : name) {
+                if (n == ':') { n = '_'; m->setChangedSeqNames(true); }
             }
         }
-        return 0;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "checkName");
@@ -3980,30 +3863,39 @@ int Utils::checkName(string& name) {
     }
 }
 /************************************************************/
+bool Utils::checkGroupNames(vector<string>& names) {
+    try {
+        bool goodNames = true;
+        for (auto& name : names) { bool goodName = checkGroupName(name);  goodNames = goodName && goodNames; }
+        return goodNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "checkGroupNames");
+        exit(1);
+    }
+}
+/************************************************************/
 bool Utils::checkGroupName(string& name) {
     try {
-
+    
         bool goodName = true;
+        
         if (modifyNames) {
-            for (int i = 0; i < name.length(); i++) {
-                if (name[i] == ':') {  goodName = false; break;  }
-                else if (name[i] == '-') {  goodName = false; break;  }
-                else if (name[i] == '/') {  goodName = false; break;  }
-            }
+            
+            string oldName = name;
+            
+            for_each(name.begin(), name.end(), [&goodName](char& n){
+                if ((n == ':') || (n == '-') || (n == '/')) {
+                    n = '_'; goodName = false;
+                }
+            });
             
             if (!goodName) {
                 m->setChangedGroupNames(true);
-                m->mothurOut("\n[WARNING]: group " + name + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n");
-                
-                string newName = "";
-                for (int i = 0; i < name.length(); i++) {
-                    if ((name[i] == ':') || (name[i] == '-') || (name[i] == '/')) { newName += "_";  }
-                    else { newName += name[i]; }
-                }
-                m->mothurOut("\n[NOTE] Updating " + name + " to " + newName + " to avoid downstream issues.\n\n");
-                name = newName;
+                m->mothurOut("\n[WARNING]: group " + oldName + " contains illegal characters in the name. Group names should not include :, -, or / characters.  The ':' character is a special character used in trees. Using ':' will result in your tree being unreadable by tree reading software.  The '-' character is a special character used by mothur to parse group names.  Using the '-' character will prevent you from selecting groups. The '/' character will created unreadable filenames when mothur includes the group in an output filename.\n\n\n[NOTE] Updating " + oldName + " to " + name + " to avoid downstream issues.\n\n");
             }
         }
+        
         return goodName;
     }
     catch(exception& e) {
@@ -4017,8 +3909,7 @@ int Utils::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<s
         int error = 0;
 
         //open input file
-        ifstream in;
-        openInputFile(namefile, in);
+        ifstream in; openInputFile(namefile, in);
 
         string rest = "";
         char buffer[4096];
@@ -4089,9 +3980,9 @@ int Utils::readNames(string namefile, vector<seqPriorityNode>& nameVector, map<s
     }
 }
 //**********************************************************************************************************************
-set<string> Utils::readAccnos(string accnosfile){
+unordered_set<string> Utils::readAccnos(string accnosfile){
     try {
-        set<string> names;
+        unordered_set<string> names;
         ifstream in;
         bool ableToOpen = openInputFile(accnosfile, in, "");
         if (!ableToOpen) {  m->mothurOut("[ERROR]: Could not open " + accnosfile + "\n"); return names; }
@@ -4120,11 +4011,11 @@ void Utils::printAccnos(string accnosfile, vector<string>& names){
         ofstream out; openOutputFile(accnosfile, out);
         
         //output to .accnos file
-        for (int i = 0; i < names.size(); i++) {
+        for (auto name : names) {
             
             if (m->getControl_pressed()) { break; }
             
-            out << names[i] << endl;
+            out << name << endl;
         }
         out.close();
     }
@@ -4134,12 +4025,12 @@ void Utils::printAccnos(string accnosfile, vector<string>& names){
     }
 }
 //**********************************************************************************************************************
-void Utils::printAccnos(string accnosfile, set<string>& names){
+void Utils::printAccnos(string accnosfile, unordered_set<string>& names){
     try {
         ofstream out; openOutputFile(accnosfile, out);
         
         //output to .accnos file
-        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+        for (auto it = names.begin(); it != names.end(); it++) {
             
             if (m->getControl_pressed()) { break; }
             
@@ -4156,8 +4047,7 @@ void Utils::printAccnos(string accnosfile, set<string>& names){
 int Utils::readAccnos(string accnosfile, vector<string>& names){
     try {
         names.clear();
-        ifstream in;
-        openInputFile(accnosfile, in);
+        ifstream in; openInputFile(accnosfile, in);
         string name;
 
         string rest = "";
@@ -4189,14 +4079,15 @@ int Utils::readAccnos(string accnosfile, vector<string>& names){
 int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
     try {
         names.clear();
-        ifstream in;
-        openInputFile(accnosfile, in, noerror);
+        ifstream in; openInputFile(accnosfile, in, noerror);
         string name;
         
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
 
-            string line = trimWhiteSpace(getline(in));
+            string line = getline(in);
+            trimWhiteSpace(line);
+            
             checkName(line);
             if (line != "") { names.push_back(line); }
         }
@@ -4213,42 +4104,18 @@ int Utils::readAccnos(string accnosfile, vector<string>& names, string noerror){
 
 int Utils::getNumNames(string names){
     try {
-        int count = 0;
-
-        if(names != ""){
-            count = 1;
-            for(int i=0;i<names.size();i++){
-                if(names[i] == ','){
-                    count++;
-                }
-            }
-        }
-
+        
+        if(names == ""){ return 0; }
+        
+        int count = 1;
+        for_each(names.begin(), names.end(),[&count](char n){
+            if(n == ','){ count++; }
+        });
+        
         return count;
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "getNumNames");
-        exit(1);
-    }
-}
-/***********************************************************************/
-
-int Utils::getNumChar(string line, char c){
-    try {
-        int count = 0;
-
-        if(line != ""){
-            for(int i=0;i<line.size();i++){
-                if(line[i] == c){
-                    count++;
-                }
-            }
-        }
-
-        return count;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "getNumChar");
         exit(1);
     }
 }
@@ -4357,14 +4224,6 @@ char* Utils::mothurConvert(string item){
         
         *converted = '\0'; strncat(converted, item.c_str(), item.length());
         
-        //size_t size = item.length()+1;
-        
-        //strncat(converted, item.c_str(), size-strlen(converted)-1);
-        
-        //converted[size-1] = '\0';
-        
-        //if (m->getDebug()) { m->mothurOut("[DEBUG]: converting string " + item + " to char* " + converted + "\n"); }
-        
         return converted;
     }
     catch(exception& e) {
@@ -4417,7 +4276,6 @@ bool Utils::mothurConvert(char item, int& num){
 /***********************************************************************/
 bool Utils::mothurConvert(char item, string& output){
     try {
-
         stringstream ss;
         ss << item;
         ss >> output;
@@ -4477,12 +4335,23 @@ vector<long long> Utils::mothurConvert(set<long long>& input){
     }
 }
 /***********************************************************************/
-set<string> Utils::mothurConvert(vector<string>& input){
+unordered_set<string> Utils::mothurConvert(vector<string>& input){
     try {
-        set<string> output(input.begin(), input.end());
+        unordered_set<string> output(input.begin(), input.end());
         
         
         return output;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
+        exit(1);
+    }
+}
+/***********************************************************************/
+void Utils::mothurConvert(vector<string>& input, set<string>& output){
+    try {
+        //insert each item in vector into set
+        for_each(input.begin(), input.end(), [&output](string i){ output.insert(i); });
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "mothurConvert-vectorToSet");
@@ -4508,7 +4377,7 @@ string Utils::addUnclassifieds(string tax, int maxlevel, bool probs) {
         string newTax, taxon;
 
         string savedTax = tax;
-        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
+        vector<string> taxons; splitAtChar(tax, taxons, ';');
         vector<int> confidences;
 
         if (taxons.size() == maxlevel) { return savedTax; }
@@ -4570,36 +4439,6 @@ string Utils::trimTax(string tax, int trimLevel) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "trimTax");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-string Utils::toUpper(string item) {
-    try{
-        string newItem = "";
-        
-        for (int i = 0; i < item.length(); i++) {
-            newItem += toupper(item[i]);
-        }
-        return newItem;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "toUpper");
-        exit(1);
-    }
-}
-/**************************************************************************************************/
-string Utils::toLower(string item) {
-    try{
-        string newItem = "";
-        
-        for (int i = 0; i < item.length(); i++) {
-            newItem += tolower(item[i]);
-        }
-        return newItem;
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "toLower");
         exit(1);
     }
 }
@@ -5000,14 +4839,14 @@ int  Utils::average(vector<int> x) {
         exit(1);
     }
 }
+/***********************************************************************/
+
 int Utils::factorial(int num){
     try {
         int total = 1;
 
-        for (int i = 1; i <= num; i++) {
-            total *= i;
-        }
-
+        for (int i = 1; i <= num; i++) { total *= i; }
+        
         return total;
     }
     catch(exception& e) {
@@ -5063,26 +4902,42 @@ void Utils::getNumSeqs(ifstream& file, int& numSeqs){
     }
 }
 /***********************************************************************/
-
-//This function parses the estimator options and puts them in a vector
-void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
+//This function splits up the various option parameters
+void Utils::splitAtChar(string& prefix, string& suffix, char c){
     try {
 
-        if (symbol == '-') { splitAtDash(estim, container); return; }
-
         string individual = "";
-        int estimLength = estim.size();
+        int estimLength = prefix.size();
         for(int i=0;i<estimLength;i++){
-            if(estim[i] == symbol){
-                container.push_back(individual);
-                individual = "";
+            if(prefix[i] == c){
+                suffix = prefix.substr(i+1);
+                prefix = individual;
+                break;
             }
             else{
-                individual += estim[i];
+                individual += prefix[i];
             }
         }
-        container.push_back(individual);
 
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+//This function parses the estimator options and puts them in a vector
+void Utils::splitAtChar(string& s, vector<string>& container, char symbol) {
+    try {
+        
+        //special case to escape things
+        if (symbol == '-') { splitAtDash(s, container); return; }
+        
+        //parse string by delim and store in vector
+        split(s, symbol, back_inserter(container));
+        return;
+        
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");
@@ -5092,27 +4947,54 @@ void Utils::splitAtChar(string& estim, vector<string>& container, char symbol) {
 /***********************************************************************/
 
 //This function parses the estimator options and puts them in a vector
-void Utils::splitAtChar(string& estim, set<string>& container, char symbol) {
+void Utils::splitAtChar(string& s, set<string>& container, char symbol) {
     try {
         
-        if (symbol == '-') { splitAtDash(estim, container); return; }
+        if (symbol == '-') { splitAtDash(s, container); return; }
         
-        string individual = "";
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == symbol){
-                container.insert(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.insert(individual);
+        //parse string by delim and store in vector
+        vector<string> temp;
+        split(s, symbol, back_inserter(temp));
         
+        mothurConvert(temp, container);
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "splitAtChar");
+        exit(1);
+    }
+}
+
+/***********************************************************************/
+
+void Utils::splitAtComma(string& s, vector<string>& container) {
+    try {
+        
+        
+        //parse string by delim and store in vector
+        split(s, ',', back_inserter(container));
+        return;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtComma");
+        exit(1);
+    }
+}
+/***********************************************************************/
+
+void Utils::splitAtComma(string& s, vector<int>& container) {
+    try {
+        
+        vector<string> items; splitAtComma(s, items);
+        for (string i : items) {
+            int num; mothurConvert(i, num);
+            container.push_back(num);
+        }
+        return;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Utils", "splitAtComma");
         exit(1);
     }
 }
@@ -5237,83 +5119,6 @@ string Utils::makeList(vector<string>& names) {
     }
     catch(exception& e) {
         m->errorOut(e, "Utils", "makeList");
-        exit(1);
-    }
-}
-
-/***********************************************************************/
-//This function parses the a string and puts peices in a vector
-void Utils::splitAtComma(string& estim, vector<string>& container) {
-    try {
-        string individual = "";
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == ','){
-                container.push_back(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.push_back(individual);
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtComma");
-        exit(1);
-    }
-}
-/***********************************************************************/
-//This function parses the a string and puts peices in a vector
-void Utils::splitAtComma(string& estim, vector<int>& convertedContainer) {
-    try {
-        string individual = "";
-        vector<string> container;
-        int estimLength = estim.size();
-        for(int i=0;i<estimLength;i++){
-            if(estim[i] == ','){
-                container.push_back(individual);
-                individual = "";
-            }
-            else{
-                individual += estim[i];
-            }
-        }
-        container.push_back(individual);
-
-        for (int i = 0; i < container.size(); i++) {
-            int temp;
-            if (mothurConvert(container[i], temp)) { convertedContainer.push_back(temp); }
-        }
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtComma");
-        exit(1);
-    }
-}
-/***********************************************************************/
-//This function splits up the various option parameters
-void Utils::splitAtChar(string& prefix, string& suffix, char c){
-    try {
-
-        string individual = "";
-        int estimLength = prefix.size();
-        for(int i=0;i<estimLength;i++){
-            if(prefix[i] == c){
-                suffix = prefix.substr(i+1);
-                prefix = individual;
-                break;
-            }
-            else{
-                individual += prefix[i];
-            }
-        }
-
-    }
-    catch(exception& e) {
-        m->errorOut(e, "Utils", "splitAtChar");
         exit(1);
     }
 }
@@ -5474,9 +5279,9 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         SharedRAbundVectors* lookup = input.getSharedRAbundVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5508,13 +5313,13 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             lookup = input.getSharedRAbundVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5529,7 +5334,7 @@ SharedRAbundVectors* Utils::getNextShared(InputData& input, bool allLines, set<s
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5550,9 +5355,9 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
         SharedRAbundFloatVectors* lookup = input.getSharedRAbundFloatVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5584,13 +5389,13 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             lookup = input.getSharedRAbundFloatVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5605,7 +5410,7 @@ SharedRAbundFloatVectors* Utils::getNextRelabund(InputData& input, bool allLines
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedRAbundFloatVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5626,9 +5431,9 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
         SharedCLRVectors* lookup = input.getSharedCLRVectors();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((lookup != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((lookup != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete lookup;  return NULL; }
+            if (m->getControl_pressed()) {  delete lookup;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = lookup->getLabel();  }
             
@@ -5660,13 +5465,13 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
             //prevent memory leak
             delete lookup;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             lookup = input.getSharedCLRVectors();
         }
         
-        if (m->getControl_pressed()) { delete lookup;  return NULL; }
+        if (m->getControl_pressed()) { delete lookup;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5681,7 +5486,7 @@ SharedCLRVectors* Utils::getNextCLR(InputData& input, bool allLines, set<string>
         if (needToRun )  {
             delete lookup;
             lookup = input.getSharedCLRVectors(lastLabel);
-            if (lookup != NULL) {
+            if (lookup != nullptr) {
                 m->mothurOut(lookup->getLabel()+"\n");
                 processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());
             }
@@ -5702,9 +5507,9 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         ListVector* list = input.getListVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((list != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete list;  return NULL; }
+            if (m->getControl_pressed()) {  delete list;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = list->getLabel();  }
             
@@ -5736,13 +5541,13 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
             //prevent memory leak
             delete list;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             list = input.getListVector();
         }
         
-        if (m->getControl_pressed()) { delete list;  return NULL; }
+        if (m->getControl_pressed()) { delete list;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5757,7 +5562,7 @@ ListVector* Utils::getNextList(InputData& input, bool allLines, set<string>& use
         if (needToRun )  {
             delete list;
             list = input.getListVector(lastLabel);
-            if (list != NULL) {
+            if (list != nullptr) {
                 m->mothurOut(list->getLabel()+"\n");
                 processedLabels.insert(list->getLabel()); userLabels.erase(list->getLabel());
             }
@@ -5778,9 +5583,9 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
         RAbundVector* rabund = input.getRAbundVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((rabund != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete rabund;  return NULL; }
+            if (m->getControl_pressed()) {  delete rabund;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = rabund->getLabel();  }
             
@@ -5812,13 +5617,13 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete rabund;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             rabund = input.getRAbundVector();
         }
         
-        if (m->getControl_pressed()) { delete rabund;  return NULL; }
+        if (m->getControl_pressed()) { delete rabund;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5833,7 +5638,7 @@ RAbundVector* Utils::getNextRAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete rabund;
             rabund = input.getRAbundVector(lastLabel);
-            if (rabund != NULL) {
+            if (rabund != nullptr) {
                 m->mothurOut(rabund->getLabel()+"\n");
                 processedLabels.insert(rabund->getLabel()); userLabels.erase(rabund->getLabel());
             }
@@ -5854,9 +5659,9 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
         SAbundVector* sabund = input.getSAbundVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((sabund != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete sabund;  return NULL; }
+            if (m->getControl_pressed()) {  delete sabund;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = sabund->getLabel();  }
             
@@ -5888,13 +5693,13 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
             //prevent memory leak
             delete sabund;
             
-            if (m->getControl_pressed()) {  return NULL; }
+            if (m->getControl_pressed()) {  return nullptr; }
             
             //get next line to process
             sabund = input.getSAbundVector();
         }
         
-        if (m->getControl_pressed()) { delete sabund;  return NULL; }
+        if (m->getControl_pressed()) { delete sabund;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5909,7 +5714,7 @@ SAbundVector* Utils::getNextSAbund(InputData& input, bool allLines, set<string>&
         if (needToRun )  {
             delete sabund;
             sabund = input.getSAbundVector(lastLabel);
-            if (sabund != NULL) {
+            if (sabund != nullptr) {
                 m->mothurOut(sabund->getLabel()+"\n");
                 processedLabels.insert(sabund->getLabel()); userLabels.erase(sabund->getLabel());
             }
@@ -5930,9 +5735,9 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
         OrderVector* order = input.getOrderVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((order != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {  delete order;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = order->getLabel();  }
             
@@ -5964,13 +5769,13 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             order = input.getOrderVector();
         }
         
-        if (m->getControl_pressed()) { delete order;  return NULL; }
+        if (m->getControl_pressed()) { delete order;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -5985,7 +5790,7 @@ OrderVector* Utils::getNextOrder(InputData& input, bool allLines, set<string>& u
         if (needToRun )  {
             delete order;
             order = input.getOrderVector(lastLabel);
-            if (order != NULL) {
+            if (order != nullptr) {
                 m->mothurOut(order->getLabel()+"\n");
                 processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
             }
@@ -6006,9 +5811,9 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
         SharedOrderVector* order = input.getSharedOrderVector();
         
         //as long as you are not at the end of the file or done wih the lines you want
-        while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((order != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             
-            if (m->getControl_pressed()) {  delete order;  return NULL; }
+            if (m->getControl_pressed()) {  delete order;  return nullptr; }
             
             if (lastLabel == "") {  lastLabel = order->getLabel();  }
             
@@ -6040,13 +5845,13 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
             //prevent memory leak
             delete order;
             
-            if (m->getControl_pressed()) {   return NULL; }
+            if (m->getControl_pressed()) {   return nullptr; }
             
             //get next line to process
             order = input.getSharedOrderVector();
         }
         
-        if (m->getControl_pressed()) { delete order;  return NULL; }
+        if (m->getControl_pressed()) { delete order;  return nullptr; }
         
         //output error messages about any remaining user labels
         set<string>::iterator it;
@@ -6061,7 +5866,7 @@ SharedOrderVector* Utils::getNextSharedOrder(InputData& input, bool allLines, se
         if (needToRun )  {
             delete order;
             order = input.getSharedOrderVector(lastLabel);
-            if (order != NULL) {
+            if (order != nullptr) {
                 m->mothurOut(order->getLabel()+"\n");
                 processedLabels.insert(order->getLabel()); userLabels.erase(order->getLabel());
             }
@@ -6256,8 +6061,8 @@ int Utils::getTimeStamp(string filename) {
 #else
         HANDLE hFile;
 
-        hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
-                           OPEN_EXISTING, 0, NULL);
+        hFile = CreateFile(filename.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, 0, nullptr);
 
         if(hFile == INVALID_HANDLE_VALUE) {
             m->mothurOut("[ERROR]: Can't find timestamp for " + filename + "\n"); m->setControl_pressed(true);

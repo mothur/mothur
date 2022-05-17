@@ -172,7 +172,7 @@ int PrimerDesignCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        long start = time(NULL);
+        long start = time(nullptr);
         //////////////////////////////////////////////////////////////////////////////
         //              get file inputs                                             //
         //////////////////////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ int PrimerDesignCommand::execute(){
         
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process " + toString(list->getNumBins()) + " OTUs.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to process " + toString(list->getNumBins()) + " OTUs.\n");
         
         //output files created by command
 		m->mothurOut("\nOutput File Names: \n"); 
@@ -735,14 +735,14 @@ void driverGetCounts(primerCountsData* params){
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
         
 		bool done = false;
     
 		while (!done) {
             if (params->m->getControl_pressed()) { break; }
             
-			Sequence seq(in); params->util.gobble(in);
+			Sequence seq(in); gobble(in);
             
 			if (seq.getName() != "") {
                 if (params->count == 0) { params->alignedLength = seq.getAligned().length(); initializeCounts(params->counts, params->alignedLength, params->numBins, params->m); }
@@ -1002,7 +1002,7 @@ ListVector* PrimerDesignCommand::getListVector(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return list;  }
 			
 			if(labels.count(list->getLabel()) == 1){

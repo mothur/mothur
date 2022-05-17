@@ -122,7 +122,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) : Command() {
 			namefile = validParameter.validFile(parameters, "name");
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { namefile = ""; abort = true; }	
-			else {  readNameFile(); current->setNameFile(namefile); }
+            else {  util.readNames(namefile, names, sizes); current->setNameFile(namefile); }
             
             countfile = validParameter.validFile(parameters, "count");
 			if (countfile == "not open") { abort = true; countfile = ""; }	
@@ -151,7 +151,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
@@ -220,7 +220,7 @@ int ClusterFragmentsCommand::execute(){
 		
 		printData(newFastaFile, newNamesFile);
 		
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");  
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");  
 		
 		if (m->getControl_pressed()) { util.mothurRemove(newFastaFile); util.mothurRemove(newNamesFile); return 0; }
 		
@@ -323,7 +323,7 @@ int ClusterFragmentsCommand::readFASTA(){
 			
 			if (m->getControl_pressed()) { inFasta.close(); return 0; }
 			
-			Sequence seq(inFasta);  util.gobble(inFasta);
+			Sequence seq(inFasta);  gobble(inFasta);
 			
 			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 				if (namefile != "") {
@@ -375,31 +375,6 @@ void ClusterFragmentsCommand::printData(string newfasta, string newname){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterFragmentsCommand", "printData");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-void ClusterFragmentsCommand::readNameFile(){
-	try {
-		ifstream in;
-		util.openInputFile(namefile, in);
-		string firstCol, secondCol;
-				
-		while (!in.eof()) {
-			in >> firstCol >> secondCol; util.gobble(in);
-			names[firstCol] = secondCol;
-			int size = 1;
-
-			for(int i=0;i<secondCol.size();i++){
-				if(secondCol[i] == ','){	size++;	}
-			}
-			sizes[firstCol] = size;
-		}
-		in.close();
-	}
-	catch(exception& e) {
-		m->errorOut(e, "ClusterFragmentsCommand", "readNameFile");
 		exit(1);
 	}
 }

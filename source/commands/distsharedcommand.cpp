@@ -179,7 +179,7 @@ int DistSharedCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 	
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         
 		InputData input(sharedfile, "sharedfile", Groups);
 		set<string> processedLabels;
@@ -206,7 +206,7 @@ int DistSharedCommand::execute(){
         
         if (m->getControl_pressed()) { delete lookup;  return 0;  }
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             
@@ -224,7 +224,7 @@ int DistSharedCommand::execute(){
 			if ((itTypes->second).size() != 0) { currentName = (itTypes->second)[0]; current->setPhylipFile(currentName);  }
 		}
 		
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to run dist.shared.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to run dist.shared.\n");
         
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -420,24 +420,24 @@ int process(distSharedData* params){
             SharedRAbundVectors* thisItersLookup = new SharedRAbundVectors(*params->thisLookup);
             vector<string> namesOfGroups = thisItersLookup->getNamesGroups();
             
-            time_t start = time(NULL);
+            time_t start = time(nullptr);
             
             if (params->subsample) {
                 if (params->withReplacement)    {  sample.getSampleWithReplacement(thisItersLookup, params->subsampleSize);     }
                 else                            {  sample.getSample(thisItersLookup, params->subsampleSize);                    }
             }
-            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to subsample the shared file.\n");  }
+            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to subsample the shared file.\n");  }
             
-            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(NULL) - start) + " seconds to subsample the shared file.\n");
+            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(nullptr) - start) + " seconds to subsample the shared file.\n");
             
             vector<SharedRAbundVector*> thisItersRabunds = thisItersLookup->getSharedRAbundVectors();
             vector<string> thisItersGroupNames = params->thisLookup->getNamesGroups();
             
-            start = time(NULL);
+            start = time(nullptr);
             driver(thisItersRabunds, calcDists, matrixCalculators, params->m);
-            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to calc dist for shared file.\n");  }
+            if (params->m->getDebug()) { params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to calc dist for shared file.\n");  }
             
-            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(NULL) - start) + " seconds to calc dist for shared file.\n");
+            //params->m->mothurOut(toString(thisIter) + " It took " + toString(time(nullptr) - start) + " seconds to calc dist for shared file.\n");
             
             for (int i = 0; i < thisItersRabunds.size(); i++) { delete thisItersRabunds[i]; }
             if (params->subsample){

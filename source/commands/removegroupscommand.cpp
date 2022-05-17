@@ -300,7 +300,7 @@ int RemoveGroupsCommand::execute(){
             
             vector<string> newSeqs = ct.getNamesOfSeqs(); //names of seqs left after removing groups
             
-            set<string> goodNames = util.mothurConvert(newSeqs);
+            unordered_set<string> goodNames = util.mothurConvert(newSeqs);
             
             for (int i = 0; i < namesOfSeqs.size(); i++) {
                 if (goodNames.count(namesOfSeqs[i]) == 0) { //you aren't on good list
@@ -422,11 +422,8 @@ void RemoveGroupsCommand::readFasta(){
         variables["[extension]"] = util.getExtension(fastafile);
 		string outputFileName = getOutputFileName("fasta", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -453,7 +450,7 @@ void RemoveGroupsCommand::readFasta(){
 					}else { removedCount++; }
 				}
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -502,7 +499,7 @@ void RemoveGroupsCommand::readShared(){
 		bool wroteSomething = false;
         bool printHeaders = true;
 		
-		while(lookup != NULL) {
+		while(lookup != nullptr) {
 			
 			variables["[tag]"] = lookup->getLabel();
             string outputFileName = getOutputFileName("shared", variables);
@@ -550,7 +547,7 @@ void RemoveGroupsCommand::readList(){
         bool wroteSomething = false;
 		int removedCount = 0;
 		
-		while(list != NULL) {
+		while(list != nullptr) {
 			
 			removedCount = 0;
 			
@@ -638,11 +635,9 @@ void RemoveGroupsCommand::readName(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
 		string outputFileName = getOutputFileName("name", variables);	
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(namefile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -651,8 +646,8 @@ void RemoveGroupsCommand::readName(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> firstCol;		util.gobble(in);		
-			in >> secondCol;	util.gobble(in);
+			in >> firstCol;		gobble(in);		
+			in >> secondCol;	gobble(in);
 			
 			vector<string> parsedNames;
 			util.splitAtComma(secondCol, parsedNames);
@@ -716,11 +711,9 @@ void RemoveGroupsCommand::readGroup(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(groupfile));
         variables["[extension]"] = util.getExtension(groupfile);
 		string outputFileName = getOutputFileName("group", variables);	
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(groupfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
@@ -738,7 +731,7 @@ void RemoveGroupsCommand::readGroup(){
 				out << name << '\t' << group << endl;
 			}else {  removedCount++;  }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		out.close();
@@ -808,11 +801,9 @@ void RemoveGroupsCommand::readTax(){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(taxfile));
         variables["[extension]"] = util.getExtension(taxfile);
 		string outputFileName = getOutputFileName("taxonomy", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(taxfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -821,8 +812,8 @@ void RemoveGroupsCommand::readTax(){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
 			
 			//if this name is in the accnos file
 			if (names.count(name) == 0) {
@@ -989,7 +980,7 @@ void RemoveGroupsCommand::readPhylip(){
             
             ifstream in3;
             util.openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; util.gobble(in3);
+            in3 >> nseqs; gobble(in3);
             char buffer[4096];
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -1018,11 +1009,8 @@ void RemoveGroupsCommand::readColumn(){
         string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
-        
-        ifstream in;
-        util.openInputFile(columnfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(columnfile, in);
         
         set<string> removeNames;
         string firstName, secondName;
@@ -1032,7 +1020,7 @@ void RemoveGroupsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return; }
             
-            in >> firstName >> secondName >> distance; util.gobble(in);
+            in >> firstName >> secondName >> distance; gobble(in);
             
             //is either names in the accnos file
             if (names.count(firstName) != 0)       {

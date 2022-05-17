@@ -56,7 +56,7 @@ class Perseus {
 	
 public:
 	Perseus() { m = MothurOut::getInstance(); }
-	~Perseus() {}
+	~Perseus() = default;
 	
 	vector<vector<double> > binomial(int);
 	double modeledPairwiseAlignSeqs(string, string, string&, string&, vector<vector<double> >&);

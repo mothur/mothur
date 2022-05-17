@@ -215,11 +215,10 @@ void ChimeraCheckRDP::readName(string namefile) {
 	
 		string name;
 
-		ifstream in;
-        Utils util; util.openInputFile(namefile, in);
+		ifstream in; Utils util; util.openInputFile(namefile, in);
 				
 		while (!in.eof()) {
-			in >> name; util.gobble(in);
+			in >> name; gobble(in);
 			names[name] = name;
 		}
 		in.close();

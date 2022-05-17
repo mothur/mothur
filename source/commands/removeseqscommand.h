@@ -17,8 +17,8 @@ class RemoveSeqsCommand : public Command {
 	public:
 	
 		RemoveSeqsCommand(string);
-        RemoveSeqsCommand(string, string dupsFile, string dupsFileType, string output);
-        RemoveSeqsCommand(set<string>, string dupsFile, string dupsFileType, string output);
+        RemoveSeqsCommand(string, pair<string, string> dupsFile, string dupsFileType);
+        RemoveSeqsCommand(unordered_set<string>, pair<string, string> dupsFile, string dupsFileType);
 		~RemoveSeqsCommand(){}
 	
 		vector<string> setParameters();
@@ -34,7 +34,7 @@ class RemoveSeqsCommand : public Command {
 		void help() { m->mothurOut(getHelpString()); }	
 	
 	private:
-		set<string> names;
+        unordered_set<string> names;
         vector<string> fastafiles, namefiles, groupfiles, countfiles, alignfiles, listfiles, taxfiles, fastqfiles, contigsreportfiles, qualityfiles, outputNames;
 		string accnosfile, format;
 		bool abort, dups;
@@ -42,9 +42,12 @@ class RemoveSeqsCommand : public Command {
 		
 		void readFasta(string);
         void readFastq(string);
-		void readName(string);
+        void readGZFastq(string);
+        void readName(string); //inputNameFile, mothur generates output name
+        void readName(string, string); //inputNameFile, outputName (internal use)
 		void readGroup(string);
-        void readCount(string);
+        void readCount(string); //inputCountFile, mothur generates output name
+        void readCount(string, string); //inputCountFile, outputName (internal use)
 		void readAlign(string);
         void readContigs(string);
 		void readList(string);

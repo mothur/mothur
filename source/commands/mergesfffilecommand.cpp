@@ -172,14 +172,14 @@ int MergeSfffilesCommand::execute(){
 			
 			if (m->getControl_pressed()) {  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	} return 0; }
 			
-			long start = time(NULL);
+			long start = time(nullptr);
 			
             filenames[s] = util.getFullPathName(filenames[s]);
 			m->mothurOut("\nMerging info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
             
 			int numReads = mergeSffInfo(filenames[s], out);
             
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(numReads) + ".\n");
+			m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to merge " + toString(numReads) + ".\n");
 		}
         out.close();
         
@@ -211,8 +211,7 @@ int MergeSfffilesCommand::mergeSffInfo(string input, ofstream& out){
 	try {
 		currentFileName = input;
         
-		ifstream in;
-		util.openInputFileBinary(input, in);
+		ifstream in; util.openInputFileBinary(input, in);
 		
 		SffCommonHeader* header = new SffCommonHeader();
         bool goodHeader = header->read(in);
@@ -331,7 +330,7 @@ void MergeSfffilesCommand::readFile(){
             
             if (m->getControl_pressed()) { return; }
             
-            in >> filename; util.gobble(in);
+            in >> filename; gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: filename = " + filename + ".\n"); }
             

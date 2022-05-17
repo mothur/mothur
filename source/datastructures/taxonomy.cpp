@@ -54,9 +54,9 @@ Taxonomy::Taxonomy(ifstream& in) {
         string otu = ""; string consensusTax = "unknown";
         int size = 0;
 
-        in >> otu; util.gobble(in);
-        in >> size; util.gobble(in);
-        consensusTax = util.getline(in); util.gobble(in);
+        in >> otu; gobble(in);
+        in >> size; gobble(in);
+        consensusTax = util.getline(in); gobble(in);
         
         name = otu;
         numReps = size;

@@ -18,7 +18,7 @@ class LinearAlgebra {
 	
 public:
 	LinearAlgebra() { m = MothurOut::getInstance(); }
-	~LinearAlgebra() {}
+	~LinearAlgebra() = default;
 	
 	vector<vector<double> > matrix_mult(vector<vector<double> >, vector<vector<double> >);
     vector<vector<double> >transpose(vector<vector<double> >);

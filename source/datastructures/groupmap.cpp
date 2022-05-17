@@ -93,8 +93,8 @@ int GroupMap::readMap(vector<string> g) {
             while (!fileHandle.eof()) {
                 if (m->getControl_pressed()) { fileHandle.close();  return 1; }
                 
-                fileHandle >> seqName; util.gobble(fileHandle);
-                fileHandle >> seqGroup; util.gobble(fileHandle);
+                fileHandle >> seqName; gobble(fileHandle);
+                fileHandle >> seqGroup; gobble(fileHandle);
                 
                 if (util.inUsersGroups(seqGroup, g)) {
                     util.checkGroupName(seqGroup);

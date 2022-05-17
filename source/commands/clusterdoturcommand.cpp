@@ -153,8 +153,8 @@ int ClusterDoturCommand::execute(){
         
         ClusterClassic* cluster = new ClusterClassic(cutoff, method, sim);
         
-        NameAssignment* nameMap = NULL;
-        CountTable* ct = NULL;
+        NameAssignment* nameMap = nullptr;
+        CountTable* ct = nullptr;
         map<string, int> counts;
         if(namefile != "") {	
 			nameMap = new NameAssignment(namefile);
@@ -204,7 +204,7 @@ int ClusterDoturCommand::execute(){
 		oldList = *list;
         bool printHeaders = true;
 		
-        int estart = time(NULL); 
+        int estart = time(nullptr); 
 	
 		while ((cluster->getSmallDist() <= cutoff) && (cluster->getNSeqs() > 1)){
 			if (m->getControl_pressed()) { delete cluster; delete list; delete rabund; if(countfile == "") {rabundFile.close(); sabundFile.close();  util.mothurRemove((fileroot+ tag + ".rabund")); util.mothurRemove((fileroot+ tag + ".sabund")); }
@@ -216,7 +216,7 @@ int ClusterDoturCommand::execute(){
 			float rndDist = util.ceilDist(dist, precision);
             
 			if(previousDist <= 0.0000 && dist != previousDist)  { printData("unique", counts, printHeaders);                                }
-			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+			else if(rndDist != rndPreviousDist)                 { printData(toString(rndPreviousDist), counts, printHeaders);    }
 		
 			previousDist = dist;
 			rndPreviousDist = rndDist;
@@ -225,7 +225,7 @@ int ClusterDoturCommand::execute(){
 		}
 	
 		if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
-		else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
+		else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist), counts, printHeaders); }
 		
         if (countfile == "") {
             sabundFile.close();
@@ -251,7 +251,7 @@ int ClusterDoturCommand::execute(){
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
+		m->mothurOut("It took " + toString(time(nullptr) - estart) + " seconds to cluster\n"); 
 
 		return 0;
 	}

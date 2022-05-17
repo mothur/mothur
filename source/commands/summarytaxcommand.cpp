@@ -151,10 +151,10 @@ int SummaryTaxCommand::execute(){
         
         int maxLevel = findMaxLevel(taxfile);
         
-		long start = time(NULL);
+		long start = time(nullptr);
 		
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         if (groupfile != "") {
             groupMap = new GroupMap(groupfile);
             groupMap->readMap();
@@ -167,23 +167,22 @@ int SummaryTaxCommand::execute(){
         if (countfile != "") { taxaSum = new PhyloSummary(ct, relabund, printlevel);
         }else { taxaSum = new PhyloSummary(groupMap, relabund, printlevel);  }
         
-		if (m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
+		if (m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; } if (ct != nullptr) { delete ct; } delete taxaSum; return 0; }
 		
 		int numSeqs = 0;
         map<string, vector<string> > nameMap;
         map<string, vector<string> >::iterator itNames;
         if (namefile != "") { util.readNames(namefile, nameMap); }
 		
-        ifstream in;
-        util.openInputFile(taxfile, in);
+        ifstream in; util.openInputFile(taxfile, in);
         
         string name, taxon;
         while(!in.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            in >> name; util.gobble(in);
-            taxon = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            taxon = util.getline(in); gobble(in);
             
             string newTax = util.addUnclassifieds(taxon, maxLevel, true);
             
@@ -212,7 +211,7 @@ int SummaryTaxCommand::execute(){
         in.close();
         
 		
-		if (m->getControl_pressed()) {  if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { delete ct; } delete taxaSum; return 0; }
+		if (m->getControl_pressed()) {  if (groupMap != nullptr) { delete groupMap; } if (ct != nullptr) { delete ct; } delete taxaSum; return 0; }
 		
 		//print summary file
 		ofstream outTaxTree;
@@ -224,12 +223,12 @@ int SummaryTaxCommand::execute(){
 		outTaxTree.close();
 		
 		delete taxaSum;
-        if (groupMap != NULL) { delete groupMap; } if (ct != NULL) { numSeqs = ct->getNumSeqs();  delete ct; }
+        if (groupMap != nullptr) { delete groupMap; } if (ct != nullptr) { numSeqs = ct->getNumSeqs();  delete ct; }
 		
 		if (m->getControl_pressed()) {  util.mothurRemove(summaryFile); return 0; }
 		
 		m->mothurOutEndLine();
-		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n");  m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n");  m->mothurOutEndLine();
 		m->mothurOut("\nOutput File Names: \n"); 
 		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();
@@ -309,7 +308,7 @@ string SummaryTaxCommand::processTaxMap(string tax) {
 /**************************************************************************************************/
 int SummaryTaxCommand::findMaxLevel(string file) {
     try{
-        GroupMap* groupMap = NULL;
+        GroupMap* groupMap = nullptr;
         PhyloSummary taxaSum(groupMap, false, -1);
         
         taxaSum.summarize(file);

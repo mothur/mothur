@@ -235,7 +235,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
 
         //print header if you are process 0
         if (params->start == 0) {
-            params->util.zapGremlins(in); params->util.gobble(in);
+            params->util.zapGremlins(in); gobble(in);
             //print header if you are process 0
             if (params->summaryFile != "") { out << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl; }
         }
@@ -247,7 +247,7 @@ void driverSummarize(seqSumData* params) { //(string fastafile, string output, l
 
             if (params->m->getControl_pressed()) {  break; }
 
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
 
             if (seq.getName() != "") {
 
@@ -469,13 +469,12 @@ long long Summary::summarizeFastaSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverFastaSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 
         //print header if you are process 0
-        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); params->util.gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); params->util.getline(in); gobble(in); params->count++; }
 
         bool done = false;
         string name;
@@ -487,7 +486,7 @@ void driverFastaSummarySummarize(seqSumData* params) {
             if (params->m->getControl_pressed()) {  break; }
 
             //seqname	start	end	nbases	ambigs	polymer	numSeqs
-            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; params->util.gobble(in);
+            in >> name >> start >> end >> length >> ambigs >> polymer >> numReps; gobble(in);
 
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(start) + "\t" + toString(end) + "\t" + toString(length) + "\n"); }
 
@@ -658,21 +657,20 @@ long long Summary::summarizeContigsSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverContigsSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 
         //print header if you are process 0
         ContigsReport report;
-        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); params->util.gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); gobble(in); params->count++; }
 
         bool done = false;
         while (!done) {
 
             if (params->m->getControl_pressed()) { break; }
 
-            report.read(in); params->util.gobble(in);
+            report.read(in); gobble(in);
             
             string name = report.getName();
             
@@ -863,14 +861,13 @@ long long Summary::summarizeAlignSummary(string summaryfile, string n) {
 //**********************************************************************************************************************
 void driverAlignSummarySummarize(seqSumData* params) {
     try {
-        ifstream in;
-        params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 
         in.seekg(params->start);
 
         AlignReport report;
         //print header if you are process 0
-        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); params->util.gobble(in); params->count++; }
+        if (params->start == 0) { params->util.zapGremlins(in); report.readHeaders(in); gobble(in); params->count++; }
 
         bool done = false;
     
@@ -878,7 +875,7 @@ void driverAlignSummarySummarize(seqSumData* params) {
 
             if (params->m->getControl_pressed()) {  break; }
 
-            report.read(in); params->util.gobble(in);
+            report.read(in); gobble(in);
             
             string name = report.getQueryName();
             if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: " + name + "\t" + toString(report.getTemplateName()) + "\t" + toString(report.getSearchScore()) + "\t" + toString(report.getQueryLength()) + "\n"); }

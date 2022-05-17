@@ -21,7 +21,7 @@ class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand(string);
-		~UnifracWeightedCommand() {}
+		~UnifracWeightedCommand() = default;
 	
 		vector<string> setParameters();
 		string getCommandName()			{ return "unifrac.weighted";		}

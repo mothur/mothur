@@ -71,7 +71,7 @@ void BiomSimple::read(string fname){
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
             
-            char c = in.get(); util.gobble(in);
+            char c = in.get(); gobble(in);
             
             if (c == '[')               { countOpenBrace++;     }
             else if (c == ']')          { countClosedBrace++;   }
@@ -214,7 +214,7 @@ void BiomSimple::read(string fname){
         else {
             string thisLine = it->second;
             
-            if (shared != NULL) { delete shared; }
+            if (shared != nullptr) { delete shared; }
            
             shared = extractOTUData(thisLine, groupNames, numOTUs);
             shared->setOTUNames(otuNames);
@@ -499,7 +499,7 @@ SharedRAbundVectors* BiomSimple::extractOTUData(string line, vector<string>& gro
         
         if (matrixElementType == "float") {
             
-            if (sharedFloat != NULL) { delete sharedFloat; }
+            if (sharedFloat != nullptr) { delete sharedFloat; }
             sharedFloat = new SharedRAbundFloatVectors();
         
             //creates new sharedRAbunds
@@ -769,7 +769,7 @@ vector<string> BiomSimple::getMetaDataShared(Picrust* picrust){
         if (consTax.size() == 0) { for (int i = 0; i < shared->getNumBins(); i++) {  metadata.push_back("null");  } }
         else {
             
-            if (shared == NULL) { m->setControl_pressed(true); return metadata; }
+            if (shared == nullptr) { m->setControl_pressed(true); return metadata; }
             
             //should the labels be Otu001 or PhyloType001
             vector<string> otuNames = shared->getOTUNames();
@@ -812,7 +812,7 @@ vector<string> BiomSimple::getMetaDataShared(Picrust* picrust){
             }
             
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
-            if (picrust != NULL) {
+            if (picrust != nullptr) {
                 picrust->setGGOTUIDs(labelTaxMap, shared);
             }
             
@@ -871,7 +871,7 @@ vector<string> BiomSimple::getMetaDataFloat(Picrust* picrust){
         if (consTax.size() == 0) { for (int i = 0; i < sharedFloat->getNumBins(); i++) {  metadata.push_back("null");  } }
         else {
             
-            if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
+            if (sharedFloat == nullptr) { m->setControl_pressed(true); return metadata; }
             
             //should the labels be Otu001 or PhyloType001
             vector<string> otuNames = sharedFloat->getOTUNames();
@@ -914,7 +914,7 @@ vector<string> BiomSimple::getMetaDataFloat(Picrust* picrust){
             }
             
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
-            if (picrust != NULL) {
+            if (picrust != nullptr) {
                 picrust->setGGOTUIDs(labelTaxMap, sharedFloat);
             }
             

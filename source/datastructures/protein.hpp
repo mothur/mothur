@@ -14,6 +14,8 @@
 #include "writer.h"
 #include "aminoacid.hpp"
 
+class Sequence;
+
 /**************************************************************************************************/
 
 class Protein {
@@ -25,6 +27,7 @@ class Protein {
 public:
     
     Protein();
+    Protein(string, string);
     Protein(string, vector<AminoAcid>);
     Protein(ifstream&);
     Protein(ifstream&, string&, bool);
@@ -32,19 +35,24 @@ public:
 #ifdef USE_BOOST
     Protein(boost::iostreams::filtering_istream&);
 #endif
-    ~Protein() {}
+    ~Protein() = default;
     
     void setName(string);
     string getName();
     void setUnaligned(vector<AminoAcid>);
     vector<AminoAcid> getUnaligned();
+    string getUnalignedString() { return getProteinString(unaligned); }
     void setAligned(vector<AminoAcid>);
+    void setAligned(string);
     vector<AminoAcid> getAligned();
+    string getAlignedString() { return getProteinString(aligned); }
     void setComment(string);
     string getComment();
     string getInlineProtein();
     void setPairwise(vector<AminoAcid>);
     vector<AminoAcid> getPairwise();
+    string getCompressedDNA();
+    bool isAligned();
     
     int getNumBases();
     int getStartPos();

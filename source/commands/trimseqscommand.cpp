@@ -120,8 +120,6 @@ string TrimSeqsCommand::getOutputPattern(string type) {
         
         if (type == "qfile") {  pattern = "[filename],[tag],qual"; }
         else if (type == "fasta") {  pattern = "[filename],[tag],fasta"; }
-        //else if (type == "group") {  pattern = "[filename],groups"; }
-        //else if (type == "name") {  pattern = "[filename],[tag],names"; }
         else if (type == "count") {  pattern = "[filename],[tag],count_table-[filename],count_table"; }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
         
@@ -331,9 +329,9 @@ int TrimSeqsCommand::execute(){
 
         if (m->getControl_pressed()) { return 0; }
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
-        set<string> badNames;
+        unordered_set<string> badNames;
         long long numSeqs = createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, badNames);
         
         m->mothurOut("\nCreating count files...\n");
@@ -345,7 +343,7 @@ int TrimSeqsCommand::execute(){
             outputTypes["count"].push_back(trimCountFile); outputTypes["count"].push_back(scrapCountFile);
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - startTime) + " secs to trim " + toString(numSeqs) + " sequences.\n");
         
         if (m->getControl_pressed()) {    for (int i = 0; i < outputNames.size(); i++) {    util.mothurRemove(outputNames[i]); } return 0;    }
 
@@ -465,7 +463,7 @@ struct trimData {
     OutputWriter* scrapFileName;
     OutputWriter* trimQFileName;
     OutputWriter* scrapQFileName;
-    set<string> badNames;
+    unordered_set<string> badNames;
     unsigned long long lineStart, lineEnd, qlineStart, qlineEnd;
     bool flip, allFiles, qtrim, keepforward, createGroup, pairedOligos, reorient, logtransform;
     int maxAmbig, maxHomoP, minLength, maxLength, tdiffs, bdiffs, pdiffs, ldiffs, sdiffs;
@@ -561,16 +559,17 @@ int driverTrim(trimData* params) {
         
         bool moreSeqs = 1;
         int numBarcodes = params->barcodes.size();
-        TrimOligos* trimOligos = NULL;
+        TrimOligos* trimOligos = nullptr;
         if (params->pairedOligos)   {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, 0, 0, params->pairedPrimers, params->pairedBarcodes, false); numBarcodes = params->pairedBarcodes.size(); numFPrimers = params->pairedPrimers.size(); }
         else                {   trimOligos = new TrimOligos(params->pdiffs, params->bdiffs, params->ldiffs, params->sdiffs, params->primers, params->barcodes, params->revPrimer, params->linker, params->spacer);  }
         
-        TrimOligos* rtrimOligos = NULL;
+        TrimOligos* rtrimOligos = nullptr;
         if (params->reorient) {
             //create reoriented primer and barcode pairs
             map<int, oligosPair> rpairedPrimers, rpairedBarcodes;
             for (map<int, oligosPair>::iterator it = params->pairedPrimers.begin(); it != params->pairedPrimers.end(); it++) {
                   oligosPair tempPair(params->util.reverseOligo((it->second).reverse), (params->util.reverseOligo((it->second).forward))); //reversePrimer, rc ForwardPrimer
+
                 rpairedPrimers[it->first] = tempPair;
             }
             for (map<int, oligosPair>::iterator it = params->pairedBarcodes.begin(); it != params->pairedBarcodes.end(); it++) {
@@ -605,12 +604,12 @@ int driverTrim(trimData* params) {
             string commentString = "";
             int currentSeqsDiffs = 0;
 
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             Sequence savedSeq(currSeq.getName(), currSeq.getAligned());
             
             QualityScores currQual; QualityScores savedQual;
             if(params->qFileName != ""){
-                currQual = QualityScores(qFile);  params->util.gobble(qFile);
+                currQual = QualityScores(qFile);  gobble(qFile);
                 savedQual.setName(currQual.getName()); savedQual.setScores(currQual.getScores());
             }
               
@@ -845,7 +844,7 @@ int driverTrim(trimData* params) {
 }
 
 /**************************************************************************************************/
-long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, set<string>& badNames) {
+long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFASTAFileName, string scrapFASTAFileName, string trimQualFileName, string scrapQualFileName, unordered_set<string>& badNames) {
     try {
         string groupFile;
         Oligos oligos;
@@ -861,7 +860,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
             if (groupNames.size() == 0) { allFiles = 0;   }
             else { createGroup = true; }
         }
-        
+       
         //create array of worker threads
         vector<std::thread*> workerThreads;
         vector<trimData*> data;
@@ -878,8 +877,8 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         for (int i = 0; i < processors-1; i++) {
             OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
             OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
-            OutputWriter* threadQTrimWriter = NULL;
-            OutputWriter* threadQScrapWriter = NULL;
+            OutputWriter* threadQTrimWriter = nullptr;
+            OutputWriter* threadQScrapWriter = nullptr;
             if (qFileName != "") {
                 threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
                 threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
@@ -896,8 +895,8 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
         
         OutputWriter* threadFastaTrimWriter = new OutputWriter(synchronizedOutputFastaTrimFile);
         OutputWriter* threadFastaScrapWriter = new OutputWriter(synchronizedOutputFastaScrapFile);
-        OutputWriter* threadQTrimWriter = NULL;
-        OutputWriter* threadQScrapWriter = NULL;
+        OutputWriter* threadQTrimWriter = nullptr;
+        OutputWriter* threadQScrapWriter = nullptr;
         if (qFileName != "") {
             threadQTrimWriter = new OutputWriter(synchronizedOutputQTrimFile);
             threadQScrapWriter = new OutputWriter(synchronizedOutputQScrapFile);
@@ -958,7 +957,7 @@ long long TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFi
     }
 }
 /**************************************************************************************************/
-int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNames, string trimCountFileName, string scrapCountFileName) {
+int TrimSeqsCommand::processNamesCountFiles(string trimFasta, unordered_set<string> badNames, string trimCountFileName, string scrapCountFileName) {
     try {
        
         if (groupCounts.size() != 0) {
@@ -1001,30 +1000,28 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
             
             if (badNames.size() != 0) {
                 //select bad names for scrap file
-                Command* getScrapCommand = new GetSeqsCommand(badNames, "", "", dupsFile, dupsFormat, outputdir);
-                
-                map<string, vector<string> > filenames = getScrapCommand->getOutputFiles();
-                
-                string tempScrapCountfile = getScrapCommand->getOutputFiles()["count"][0];
-                util.renameFile(tempScrapCountfile, scrapCountFileName);
-                util.mothurRemove(tempScrapCountfile);
+                pair<string, string> scrapDups(dupsFile, scrapCountFileName);
+                Command* getScrapCommand = new GetSeqsCommand(badNames, nullStringPair, nullStringPair, scrapDups, dupsFormat);
                 
                 delete getScrapCommand;
                 
                 //remove bad names for trim file
-                Command* removeScrapCommand = new RemoveSeqsCommand(badNames, dupsFile, dupsFormat, outputdir);
+                pair<string, string> trimDups(dupsFile, trimCountFileName);
+                Command* removeScrapCommand = new RemoveSeqsCommand(badNames, trimDups, dupsFormat);
                 
-                filenames = removeScrapCommand->getOutputFiles();
+                delete removeScrapCommand;
                 
-                string tempTrimCountfile = removeScrapCommand->getOutputFiles()["count"][0];
-                util.renameFile(tempTrimCountfile, trimCountFileName);
-                util.mothurRemove(tempTrimCountfile);
+                outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+                outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
+
                 util.mothurRemove(fullCountFile);
             }else {
                 //rename full file to be trim file
                 util.renameFile(fullCountFile, trimCountFileName);
                 CountTable newScrapCt; //scrap file
                 newScrapCt.printTable(scrapCountFileName);
+                outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+                outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
             }
             
         }else { //create a count file without groups
@@ -1032,11 +1029,14 @@ int TrimSeqsCommand::processNamesCountFiles(string trimFasta, set<string> badNam
             CountTable newScrapCt; //scrap file
             
             for (map<string, int>::iterator itCount = nameCount.begin(); itCount != nameCount.end(); itCount++) {
-                if (badNames.count(itCount->first) != 0) { newCt.push_back(itCount->first, itCount->second); }
+                if (badNames.count(itCount->first) == 0) { newCt.push_back(itCount->first, itCount->second); }
                 else { newScrapCt.push_back(itCount->first, itCount->second); }
             }
             newCt.printTable(trimCountFileName);
             newScrapCt.printTable(scrapCountFileName);
+            outputNames.push_back(trimCountFileName); outputNames.push_back(scrapCountFileName);
+            outputTypes["count"].push_back(trimCountFileName); outputTypes["count"].push_back(scrapCountFileName);
+
         }
         
         
@@ -1082,12 +1082,11 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
         //get name of first sequence in each chunk
         map<string, int> firstSeqNames;
         for (int i = 0; i < (fastaFilePos.size()-1); i++) {
-            ifstream in;
-            util.openInputFile(filename, in);
+            ifstream in; util.openInputFile(filename, in);
             in.seekg(fastaFilePos[i]);
             
             //adjust start if null strings
-            if (i == 0) {  util.zapGremlins(in); util.gobble(in);  }
+            if (i == 0) {  util.zapGremlins(in); gobble(in);  }
             
             Sequence temp(in);
             firstSeqNames[temp.getName()] = i;
@@ -1143,7 +1142,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename) {
             //get num bytes in file
             qfilename = util.getFullPathName(qfilename);
             pFile = fopen (qfilename.c_str(),"rb");
-            if (pFile==NULL) perror ("Error opening file");
+            if (pFile==nullptr) perror ("Error opening file");
             else{
                 fseek (pFile, 0, SEEK_END);
                 size=ftell (pFile);

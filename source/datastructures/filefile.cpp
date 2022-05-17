@@ -95,7 +95,7 @@ vector< vector<string> > FileFile::read(string f, string mode){
             if (m->getControl_pressed()) { return files; }
             
             bool skip = false;
-            string line = util.getline(in);  util.gobble(in);
+            string line = util.getline(in);  gobble(in);
             
             if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
             

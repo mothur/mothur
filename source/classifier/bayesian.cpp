@@ -40,7 +40,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 		ifstream* probFileTest = new ifstream(probFileName.c_str());   files.push_back(probFileTest);
 		ifstream* probFileTest3 = new ifstream(phyloTreeSumName.c_str()); files.push_back(probFileTest3);
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		
 		//if they are there make sure they were created after this release date
 		bool FilesGood = false;
@@ -163,7 +163,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
         for (int i = 0; i < files.size(); i++) { delete files[i]; }
 			
 		m->mothurOut("DONE.\n");
-		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities.\n"); 
+		m->mothurOut("It took " + toString(time(nullptr) - start) + " seconds get probabilities.\n"); 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "Bayesian");
@@ -173,8 +173,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i) {
 /**************************************************************************************************/
 Bayesian::~Bayesian() {
 	try {
-        if (phyloTree != NULL) { delete phyloTree; }
-        if (database != NULL) {  delete database; }
+        if (phyloTree != nullptr) { delete phyloTree; }
+        if (database != nullptr) {  delete database; }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "~Bayesian");
@@ -403,9 +403,9 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 	try{
 		Utils util;
         //read version
-        string line = util.getline(in); util.gobble(in);
+        string line = util.getline(in); gobble(in);
         
-        in >> numKmers; util.gobble(in);
+        in >> numKmers; gobble(in);
         //initialze probabilities
         
         wordGenusProb.resize(numKmers);
@@ -418,14 +418,14 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
         for (int j = 0; j < numKmers; j++) {  diffPair tempDiffPair; WordPairDiffArr.push_back(tempDiffPair); }
         
         //read version
-        string line2 = util.getline(inNum); util.gobble(inNum);
+        string line2 = util.getline(inNum); gobble(inNum);
         float probTemp;
         
         while (inNum) {
             inNum >> zeroCountProb[count] >> num[count] >> probTemp;
             WordPairDiffArr[count].prob = probTemp;
             count++;
-            util.gobble(inNum);
+            gobble(inNum);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(zeroCountProb[count]) + '\t' + toString(num[count]) + '\t' + toString(numKmers) + "\n"); }
 
@@ -448,7 +448,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
                 if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(name) + '\t' + toString(prob) + '\t' + toString(kmer) + "\n"); }
             }
             
-            util.gobble(in);
+            gobble(in);
         }
         in.close();
   		

@@ -222,14 +222,13 @@ string MergeFileCommand::mergeFileData(){
         bool useTax = false;
         if (taxfile != "") {  util.readTax(taxfile, taxMap, false);  useTax = true;  }
         
-        ifstream in;
-        util.openInputFile(fastafile, in);
+        ifstream in; util.openInputFile(fastafile, in);
 
         while(!in.eof()){
             
             if (m->getControl_pressed()) { break; }
             
-            Sequence currSeq(in); util.gobble(in);
+            Sequence currSeq(in); gobble(in);
             
             string comment = " ";
             

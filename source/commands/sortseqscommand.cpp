@@ -242,7 +242,7 @@ int SortSeqsCommand::readFasta(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 in.close();
                 out.close();
@@ -289,7 +289,7 @@ int SortSeqsCommand::readFasta(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readFasta function.\n"); m->setControl_pressed(true); }
                         }
-                        util.gobble(in2);
+                        gobble(in2);
                     }
                     in2.close();	
 
@@ -332,7 +332,7 @@ int SortSeqsCommand::readFasta(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 in.close();	
                 
@@ -362,7 +362,7 @@ int SortSeqsCommand::readFasta(){
                     count++;
                     currSeq.printSequence(out);
                 }
-                util.gobble(in);
+                gobble(in);
             }
             in.close();	
             out.close();
@@ -389,15 +389,12 @@ int SortSeqsCommand::readFlow(){
 		string outputFileName = getOutputFileName("flow", variables);
 		outputTypes["flow"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(flowfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(flowfile, in);
         int numFlows;
 		string name;
         
-        in >> numFlows; util.gobble(in);
+        in >> numFlows; gobble(in);
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
             
@@ -423,10 +420,9 @@ int SortSeqsCommand::readFlow(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
-                in.close();
-                out.close();
+                in.close(); out.close();
                 
                 int numLeft = names.size();
                 if (numNamesInFile < numLeft) { numLeft = numNamesInFile; }
@@ -440,7 +436,7 @@ int SortSeqsCommand::readFlow(){
                 while (numLeft > 0) {
                     
                     ifstream in2;
-                    util.openInputFile(flowfile, in2); in2 >> numFlows; util.gobble(in2);
+                    util.openInputFile(flowfile, in2); in2 >> numFlows; gobble(in2);
                     
                     if (m->getControl_pressed()) { in2.close();  util.mothurRemove(outputFileName);  return 0; }
                     
@@ -469,7 +465,7 @@ int SortSeqsCommand::readFlow(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readFlow function.\n"); m->setControl_pressed(true); }
                         }
-                        util.gobble(in2);
+                        gobble(in2);
                     }
                     in2.close();	
                     
@@ -511,7 +507,7 @@ int SortSeqsCommand::readFlow(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 in.close();	
                 
@@ -542,7 +538,7 @@ int SortSeqsCommand::readFlow(){
                     count++;
                     out << name << '\t' << rest << endl;
                 }
-                util.gobble(in);
+                gobble(in);
             }
             in.close();	
             out.close();
@@ -599,7 +595,7 @@ int SortSeqsCommand::readQual(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 in.close();
                 out.close();
@@ -648,7 +644,7 @@ int SortSeqsCommand::readQual(){
                                 }
                             }else { m->mothurOut("[ERROR]: in logic of readQual function.\n"); m->setControl_pressed(true); }
                         }
-                        util.gobble(in2);
+                        gobble(in2);
                     }
                     in2.close();	
                     
@@ -693,7 +689,7 @@ int SortSeqsCommand::readQual(){
                             m->mothurOut(name + " was not in the contained the file which determined the order, adding it to the end.\n");
                         }
                     }
-                    util.gobble(in);
+                    gobble(in);
                 }
                 in.close();	
                 
@@ -715,7 +711,7 @@ int SortSeqsCommand::readQual(){
                 QualityScores currQual;
                 currQual = QualityScores(in);  
                                
-                util.gobble(in);
+                gobble(in);
                 
                 if (currQual.getName() != "") {
                     //if this name is in the accnos file
@@ -723,7 +719,7 @@ int SortSeqsCommand::readQual(){
                     count++;
                     currQual.printQScores(out);
                 }
-                util.gobble(in);
+                gobble(in);
             }
             in.close();	
             out.close();
@@ -750,11 +746,8 @@ int SortSeqsCommand::readName(){
 		string outputFileName = getOutputFileName("name", variables);
         outputTypes["name"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
         if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -764,8 +757,8 @@ int SortSeqsCommand::readName(){
                 while(!in.eof()){
                     if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                     
-                    in >> firstCol;		util.gobble(in);		
-                    in >> secondCol;    util.gobble(in);
+                    in >> firstCol;		gobble(in);		
+                    in >> secondCol;    gobble(in);
                     
                     if (firstCol != "") {
                         map<string, int>::iterator it = names.find(firstCol);
@@ -794,8 +787,8 @@ int SortSeqsCommand::readName(){
             while(!in.eof()){
                 if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> firstCol;		util.gobble(in);		
-                in >> secondCol;    util.gobble(in);
+                in >> firstCol;		gobble(in);		
+                in >> secondCol;    gobble(in);
                 
                 if (firstCol != "") {
                     //if this name is in the accnos file
@@ -803,7 +796,7 @@ int SortSeqsCommand::readName(){
                     count++;
                     out << firstCol << '\t' << secondCol << endl;
                 }
-                util.gobble(in);
+                gobble(in);
             }
             in.close();	
             out.close();
@@ -830,11 +823,8 @@ int SortSeqsCommand::readTax(){
 
         outputTypes["taxonomy"].push_back(outputFileName);  outputNames.push_back(outputFileName);
         
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-		ifstream in;
-		util.openInputFile(taxfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		if (names.size() != 0) {//this is not the first file we are reading so we need to use the order we already have
@@ -844,8 +834,8 @@ int SortSeqsCommand::readTax(){
             while(!in.eof()){
                 if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name; util.gobble(in);
-                tax = util.getline(in); util.gobble(in);
+                in >> name; gobble(in);
+                tax = util.getline(in); gobble(in);
                 
                 if (name != "") {
                     map<string, int>::iterator it = names.find(name);
@@ -874,8 +864,8 @@ int SortSeqsCommand::readTax(){
             while(!in.eof()){
                 if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return 0; }
                 
-                in >> name; util.gobble(in);
-                tax = util.getline(in); util.gobble(in);
+                in >> name; gobble(in);
+                tax = util.getline(in); gobble(in);
                 
                 if (name != "") {
                     //if this name is in the accnos file
@@ -883,7 +873,7 @@ int SortSeqsCommand::readTax(){
                     count++;
                     out << name << '\t' << tax << endl;
                 }
-                util.gobble(in);
+                gobble(in);
             }
             in.close();	
             out.close();

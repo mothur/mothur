@@ -435,7 +435,7 @@ int Bellerophon::readPrefs(string file) {
 		int start, num;
 		
 		//lets you know what part of the pref matrix you are writing
-		inTemp >> start >> num;  util.gobble(inTemp);
+		inTemp >> start >> num;  gobble(inTemp);
 		
 		for (int i = start; i < num; i++) {
 			
@@ -445,7 +445,7 @@ int Bellerophon::readPrefs(string file) {
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
-				util.gobble(inTemp);
+				gobble(inTemp);
 			}
 		}
 		

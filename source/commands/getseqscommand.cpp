@@ -128,9 +128,9 @@ string GetSeqsCommand::getCommonQuestions(){
 }
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string dupsFile, string dupsFileType, string output) : Command() {
+GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, pair<string,string> ffile, pair<string,string> lfile, pair<string,string> dupsFile, string dupsFileType) : Command() {
     try {
-        names = n; dups = true; outputdir = output;
+        names = n; dups = true; 
         
         abort = false; calledHelp = false;
         vector<string> tempOutNames;
@@ -139,13 +139,55 @@ GetSeqsCommand::GetSeqsCommand(set<string> n, string ffile, string lfile, string
         outputTypes["fasta"] = tempOutNames;
         outputTypes["list"] = tempOutNames;
         
-        if (dupsFile != "") {
-            if (dupsFileType == "count")    { readCount(dupsFile);  }
-            else                            { readName(dupsFile);   }
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second);  }
+            else                            { readName(dupsFile.first, dupsFile.second);   }
         }
         
-        if (ffile != "")    {    readFasta(ffile);      }
-        if (lfile != "")    {    readList(lfile);       }
+        if (ffile.first != "")    {    readFasta(ffile.first, ffile.second);      }
+        if (lfile.first != "")    {    readList(lfile.first, lfile.second);       }
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+GetSeqsCommand::GetSeqsCommand(unordered_map<string, vector<int> > names, string ffile, vector<string> ofile, vector<string> g) : Command() {
+    try {
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        
+        readFasta(names, ffile, ofile, g);
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand - mothurRun");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+GetSeqsCommand::GetSeqsCommand(unordered_set<string> n, pair<string,string> ffile, pair<string,vector<string > > lfile, pair<string,string> dupsFile, string dupsFileType) : Command() {
+    try {
+        names = n; dups = true;
+        
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["name"] = tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        outputTypes["list"] = tempOutNames;
+        
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second);  }
+            else                            { readName(dupsFile.first, dupsFile.second);   }
+        }
+        
+        if (ffile.first != "")    {    readFasta(ffile.first, ffile.second);      }
+        if (lfile.first != "")    {    readList(lfile.first, lfile.second);       }
         
     }
     catch(exception& e) {
@@ -340,6 +382,72 @@ int GetSeqsCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
+void GetSeqsCommand::readGZFastq(string fastqfile){
+    try {
+        
+#ifdef USE_BOOST
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        variables["[extension]"] = ".fastq" + util.getExtension(fastqfile);
+        string outputFileName = getOutputFileName("fastq", variables);
+        
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        util.openInputFileBinary(fastqfile, in, inBoost);
+        
+        ofstream file; ostream* out; boost::iostreams::filtering_streambuf<boost::iostreams::output> outBoost;
+        util.openOutputFileBinary(outputFileName, file, out, outBoost);
+        
+        bool wroteSomething = false; int selectedCount = 0; set<string> uniqueNames;
+        
+        while(!inBoost.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            //read sequence name
+            bool ignore;
+            FastqRead fread(inBoost, ignore, format);  gobble(inBoost);
+            
+            if (!ignore) {
+                string name = fread.getName();
+                
+                if (names.count(name) != 0) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        selectedCount++;
+                        fread.printFastq(*out);
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
+                }
+            }
+            gobble(inBoost);
+        }
+        in.close(); inBoost.pop();
+        boost::iostreams::close(outBoost);
+        file.close(); delete out;
+        
+        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return; }
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastqfile + " does not contain any sequence from the .accnos file.\n");   }
+        outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastqfile + ".\n");
+#else
+        m->mothurOut("[ERROR]: mothur requires the boost libraries to read and write compressed files. Please decompress your files and rerun.\n");
+#endif
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void GetSeqsCommand::readFastq(string fastqfile){
 	try {
 		string thisOutputDir = outputdir;
@@ -360,7 +468,7 @@ void GetSeqsCommand::readFastq(string fastqfile){
 			
 			//read sequence name
             bool ignore;
-            FastqRead fread(in, ignore, format); util.gobble(in);
+            FastqRead fread(in, ignore, format); gobble(in);
             
 			if (!ignore) {
                 string name = fread.getName();
@@ -377,7 +485,7 @@ void GetSeqsCommand::readFastq(string fastqfile){
                 }
             }
             
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
         
@@ -394,16 +502,9 @@ void GetSeqsCommand::readFastq(string fastqfile){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readFasta(string fastafile){
+void GetSeqsCommand::readFasta(string fastafile, string outputFileName){
     try {
-        string thisOutputDir = outputdir;
-        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
-        map<string, string> variables;
-        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
-        variables["[extension]"] = util.getExtension(fastafile);
-        string outputFileName = getOutputFileName("fasta", variables);
         ofstream out; util.openOutputFile(outputFileName, out);
-        
         ifstream in; util.openInputFile(fastafile, in);
         string name; bool wroteSomething = false; int selectedCount = 0;
         
@@ -442,7 +543,7 @@ void GetSeqsCommand::readFasta(string fastafile){
                     }
                 }
             }
-            util.gobble(in);
+            gobble(in);
         }
         in.close(); out.close();
         
@@ -450,6 +551,89 @@ void GetSeqsCommand::readFasta(string fastafile){
         outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
         
         m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + fastafile + ".\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//assumes nameToGroup[seq1] -> 1,3 means seq1 should be written to outputFiles[1] and outputFiles[3]
+void GetSeqsCommand::readFasta(unordered_map<string, vector<int> > nameToGroups, string fastafile, vector<string> outputFiles, vector<string> groups){
+    try {
+        unordered_map<string, vector<int> >::iterator it;
+        
+        vector<ofstream*> outputs;
+        vector<int> selectedCounts; selectedCounts.resize(outputFiles.size(), 0);
+        
+        for (string filename : outputFiles) {
+            ofstream* out = new ofstream();
+            util.openOutputFile(filename, *out);
+            outputs.push_back(out);
+        }
+        ifstream in; util.openInputFile(fastafile, in);
+        string name; bool wroteSomething = false;
+                
+        set<string> uniqueNames; int redundNum = 0;
+        while(!in.eof()){
+        
+            if (m->getControl_pressed()) { break; }
+            
+            Sequence currSeq(in);
+            name = currSeq.getName();
+            
+            if (name != "") {
+            
+                it = nameToGroups.find(name);
+                
+                if (it != nameToGroups.end()) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        
+                        vector<int> outputIndex = it->second;
+                        for (int i : outputIndex) {
+                            currSeq.printSequence(*outputs[i]);
+                            selectedCounts[i]++;
+                        }
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fasta file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                        redundNum++;
+                    }
+                }
+            }
+            gobble(in);
+        }
+        in.close();
+        for (ofstream* out : outputs) { out->close(); delete out; }
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastafile + " does not contain any sequence from the .accnos file.\n");  }
+            
+        for (int i = 0; i < outputFiles.size(); i++) {
+            outputNames.push_back(outputFiles[i]);  outputTypes["fasta"].push_back(outputFiles[i]);
+            m->mothurOut("Selected " + toString(selectedCounts[i]) + " sequences from " + groups[i] + ".\n");
+        }
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readFasta");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void GetSeqsCommand::readFasta(string fastafile){
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastafile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastafile));
+        variables["[extension]"] = util.getExtension(fastafile);
+        string outputFileName = getOutputFileName("fasta", variables);
+        
+        readFasta(fastafile, outputFileName);
         
         return;
     }
@@ -467,11 +651,9 @@ void GetSeqsCommand::readQual(string qualfile){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(qualfile));
         variables["[extension]"] = util.getExtension(qualfile);
 		string outputFileName = getOutputFileName("qfile", variables);
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
 		
-		ifstream in;
-		util.openInputFile(qualfile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(qualfile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -482,7 +664,7 @@ void GetSeqsCommand::readQual(string qualfile){
         set<string> uniqueNames;
 		while(!in.eof()){
             
-			QualityScores qual(in); util.gobble(in);
+			QualityScores qual(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(qual.getName());
@@ -504,7 +686,7 @@ void GetSeqsCommand::readQual(string qualfile){
                 }
             }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();
 		out.close();
@@ -522,6 +704,29 @@ void GetSeqsCommand::readQual(string qualfile){
 	}
 }
 //**********************************************************************************************************************
+void GetSeqsCommand::readCount(string countfile, string outputFileName){
+    try {
+        CountTable ct; ct.readTable(countfile, true, false, names);
+        
+        bool wroteSomething = false;
+        int selectedCount = ct.getNumSeqs();
+        if (selectedCount != 0) { wroteSomething = true; }
+        
+        ct.printTable(outputFileName);
+        
+        if (wroteSomething == false) {  m->mothurOut("[WARNING]: " + countfile + " does not contain any sequence from the .accnos file.\n");   }
+        outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + countfile + ".\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readCount");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void GetSeqsCommand::readCount(string countfile){
 	try {
 		string thisOutputDir = outputdir;
@@ -531,18 +736,7 @@ void GetSeqsCommand::readCount(string countfile){
         variables["[extension]"] = util.getExtension(countfile);
 		string outputFileName = getOutputFileName("count", variables);
 		
-        CountTable ct; ct.readTable(countfile, true, false, names);
-        
-        bool wroteSomething = false;
-        int selectedCount = ct.getNumSeqs();
-        if (selectedCount != 0) { wroteSomething = true; }
-        
-        ct.printTable(outputFileName);
-		
-		if (wroteSomething == false) {  m->mothurOut("[WARNING]: " + countfile + " does not contain any sequence from the .accnos file.\n");   }
-		outputTypes["count"].push_back(outputFileName); outputNames.push_back(outputFileName);
-		
-		m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + countfile + ".\n");
+        readCount(countfile, outputFileName);
         
 		return;
 	}
@@ -550,6 +744,127 @@ void GetSeqsCommand::readCount(string countfile){
 		m->errorOut(e, "GetSeqsCommand", "readCount");
 		exit(1);
 	}
+}
+//**********************************************************************************************************************
+void GetSeqsCommand::readList(string listfile, string outputFileName){
+    try {
+        InputData input(listfile, "list", nullVector);
+        ListVector* list = input.getListVector();
+        
+        bool wroteSomething = false;
+        
+        int selectedCount = processList(list, outputFileName, wroteSomething);
+        
+        delete list;
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + listfile + " does not contain any sequence from the .accnos file.\n");  }
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + listfile + ".\n");
+
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+int GetSeqsCommand::processList(ListVector*& list, string outputFileName, bool& wroteSomething){
+    try {
+        vector<string> binLabels = list->getLabels();
+        vector<string> newBinLabels;
+        set<string> uniqueNames;
+        int selectedCount = 0;
+        
+        ofstream out; util.openOutputFile(outputFileName, out);
+        outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+        
+        if (m->getControl_pressed()) { out.close();  return selectedCount; }
+        
+        //make a new list vector
+        ListVector newList;
+        newList.setLabel(list->getLabel());
+        
+        //for each bin
+        for (int i = 0; i < list->getNumBins(); i++) {
+            
+            //parse out names that are in accnos file
+            string binnames = list->get(i);
+            vector<string> bnames;
+            util.splitAtComma(binnames, bnames);
+            
+            string newNames = "";
+            for (int j = 0; j < bnames.size(); j++) {
+                string name = bnames[j];
+                
+                //if that name is in the .accnos file, add it
+                if (names.count(name) != 0) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        uniqueNames.insert(name);
+                        newNames += name + ",";
+                        selectedCount++;
+                        if (m->getDebug()) { sanity["list"].insert(name); }
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your list file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
+                }
+            }
+            
+            //if there are names in this bin add to new list
+            if (newNames != "") {
+                newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
+                newList.push_back(newNames);
+                newBinLabels.push_back(binLabels[i]);
+            }
+        }
+        
+        //print new listvector
+        if (newList.getNumBins() != 0) {
+            wroteSomething = true;
+            newList.setLabels(newBinLabels);
+            newList.print(out, false);
+        }
+        
+        out.close();
+        
+        return selectedCount;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "processList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void GetSeqsCommand::readList(string listfile, vector<string> outputFileNames){
+    try {
+        if (outputFileNames.size() == 1) { return (readList(listfile, outputFileNames[0])); }
+        
+        InputData input(listfile, "list", nullVector);
+        ListVector* list = input.getListVector();
+        
+        bool wroteSomething = false; int selectedCount = 0; int distCount = 0;
+        
+        if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
+        
+        while((list != nullptr) && (distCount < outputFileNames.size())){
+        
+            selectedCount = processList(list, outputFileNames[distCount], wroteSomething); distCount++;
+            
+            delete list;
+            list = input.getListVector();
+        }
+        
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + listfile + " does not contain any sequence from the .accnos file.\n");  }
+        
+        m->mothurOut("Selected " + toString(selectedCount) + " sequences from " + listfile + ".\n");
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readList");
+        exit(1);
+    }
 }
 //**********************************************************************************************************************
 void GetSeqsCommand::readList(string listfile){
@@ -562,73 +877,16 @@ void GetSeqsCommand::readList(string listfile){
         InputData input(listfile, "list", nullVector);
         ListVector* list = input.getListVector();
 		
-		bool wroteSomething = false; int selectedCount = 0;
+        bool wroteSomething = false; int selectedCount = 0;
         
         if (m->getDebug()) { set<string> temp; sanity["list"] = temp; }
 		
-		while(list != NULL) {
-			
-            set<string> uniqueNames;
-			selectedCount = 0;
-
-            //make a new list vector
-			ListVector newList;
-			newList.setLabel(list->getLabel());
-            
+		while(list != nullptr) {
+        
             variables["[distance]"] = list->getLabel();
             string outputFileName = getOutputFileName("list", variables);
 			
-			ofstream out;
-			util.openOutputFile(outputFileName, out);
-			outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
-            
-            vector<string> binLabels = list->getLabels();
-            vector<string> newBinLabels;
-            
-            if (m->getControl_pressed()) { out.close();  return; }
-			
-			//for each bin
-			for (int i = 0; i < list->getNumBins(); i++) {
-			
-				//parse out names that are in accnos file
-				string binnames = list->get(i);
-                vector<string> bnames;
-                util.splitAtComma(binnames, bnames);
-				
-				string newNames = "";
-                for (int j = 0; j < bnames.size(); j++) {
-                    string name = bnames[j];
-                    
-                    //if that name is in the .accnos file, add it
-                    if (names.count(name) != 0) {
-                        if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
-                            uniqueNames.insert(name);
-                            newNames += name + ",";
-                            selectedCount++;
-                            if (m->getDebug()) { sanity["list"].insert(name); }
-                        }else {
-                            m->mothurOut("[WARNING]: " + name + " is in your list file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
-                        }
-                    }
-                }
-			
-				//if there are names in this bin add to new list
-				if (newNames != "") { 
-					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
-					newList.push_back(newNames);
-                    newBinLabels.push_back(binLabels[i]);
-				}
-			}
-				
-			//print new listvector
-			if (newList.getNumBins() != 0) {
-				wroteSomething = true;
-				newList.setLabels(newBinLabels);
-				newList.print(out, false);
-			}
-			
-			
-            out.close();
+            selectedCount = processList(list, outputFileName, wroteSomething);
             
             delete list;
             list = input.getListVector();
@@ -655,8 +913,20 @@ void GetSeqsCommand::readName(string namefile){
         variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
         string outputFileName = getOutputFileName("name", variables);
-        ofstream out; util.openOutputFile(outputFileName, out);
         
+        readName(namefile, outputFileName);
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "GetSeqsCommand", "readName");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void GetSeqsCommand::readName(string namefile, string outputFileName){
+    try {
+        ofstream out; util.openOutputFile(outputFileName, out);
         ifstream in; util.openInputFile(namefile, in);
         string name, firstCol, secondCol;
         bool wroteSomething = false; int selectedCount = 0;
@@ -669,8 +939,8 @@ void GetSeqsCommand::readName(string namefile){
         
             if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-            in >> firstCol;            util.gobble(in);
-            in >> secondCol;        util.gobble(in);
+            in >> firstCol;            gobble(in);
+            in >> secondCol;        gobble(in);
             
             string hold = "";
             if (dups) { hold = secondCol; }
@@ -784,8 +1054,8 @@ void GetSeqsCommand::readGroup(string groupfile){
 
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			in >> name;		util.gobble(in);		//read from first column
-            in >> group;	util.gobble(in);		//read from second column
+			in >> name;		gobble(in);		//read from first column
+            in >> group;	gobble(in);		//read from second column
             
             if (names.count(name) != 0) {
                 if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
@@ -836,8 +1106,8 @@ void GetSeqsCommand::readTax(string taxfile){
 
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -889,7 +1159,7 @@ void GetSeqsCommand::readAlign(string alignfile){
         ofstream out; util.openOutputFile(outputFileName, out);
         ifstream in; util.openInputFile(alignfile, in);
 		
-        AlignReport report; report.readHeaders(in); util.gobble(in);
+        AlignReport report; report.readHeaders(in); gobble(in);
         report.printHeaders(out);
 		
         bool wroteSomething = false; int selectedCount = 0;
@@ -899,7 +1169,7 @@ void GetSeqsCommand::readAlign(string alignfile){
 		
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName);  return; }
 
-			report.read(in); util.gobble(in);
+			report.read(in); gobble(in);
             string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
@@ -951,14 +1221,14 @@ void GetSeqsCommand::readContigs(string contigsreportfile){
         set<string> uniqueNames;
         ifstream in; util.openInputFile(contigsreportfile, in);
         
-        ContigsReport report; report.readHeaders(in); util.gobble(in);
+        ContigsReport report; report.readHeaders(in); gobble(in);
         report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
             
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             string name = report.getName();
             
             if (!dups) {//adjust name if needed
@@ -1094,16 +1364,13 @@ int GetSeqsCommand::compareAccnos(string namefile){
 		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(accnosfile));
 		string outputFileName = getOutputFileName("accnosreport", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(accnosfile2, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(accnosfile2, in);
 		string name;
 		
 		set<string> namesAccnos2;
 		set<string> namesDups;
-		set<string> namesAccnos = names;
+        unordered_set<string> namesAccnos = names;
 		
 		map<string, int> nameCount;
 		
@@ -1116,13 +1383,13 @@ int GetSeqsCommand::compareAccnos(string namefile){
 				
 				string thisname, repnames;
 				
-				inName >> thisname;		util.gobble(inName);		//read from first column
+				inName >> thisname;		gobble(inName);		//read from first column
 				inName >> repnames;			//read from second column
 				
 				int num = util.getNumNames(repnames);
 				nameCount[thisname] = num;
 				
-				util.gobble(inName);
+				gobble(inName);
 			}
 			inName.close();	
 		}
@@ -1145,7 +1412,7 @@ int GetSeqsCommand::compareAccnos(string namefile){
 				namesDups.insert(name);
 			}
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	
 		
@@ -1161,7 +1428,7 @@ int GetSeqsCommand::compareAccnos(string namefile){
 		out << "Names unique to " + accnosfile + " : " + toString(namesAccnos.size()) << endl;
 		m->mothurOut("Names unique to " + accnosfile + " : " + toString(namesAccnos.size())); m->mothurOutEndLine();
 		
-		for (set<string>::iterator it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
+		for (auto it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
 			out << (*it);
 			if (namefile != "") { out << '\t' << nameCount[(*it)]; }
 			out << endl;

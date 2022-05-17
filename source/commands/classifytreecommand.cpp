@@ -158,7 +158,7 @@ int ClassifyTreeCommand::execute(){
 		
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
-		long start = time(NULL);
+		long start = time(nullptr);
         
 		/***************************************************/
 		//    reading tree info							   //
@@ -194,7 +194,7 @@ int ClassifyTreeCommand::execute(){
 			}
 		}
 		
-		m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the concensus taxonomies.\n"); 
+		m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to find the concensus taxonomies.\n"); 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
         

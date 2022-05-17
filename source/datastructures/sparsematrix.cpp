@@ -23,9 +23,9 @@ float SparseMatrix::getSmallDist(){
 
 MatData SparseMatrix::rmCell(MatData data){
 	try {
-		if(data->vectorMap != NULL ){
-			*(data->vectorMap) = NULL;
-			data->vectorMap = NULL;
+		if(data->vectorMap != nullptr ){
+			*(data->vectorMap) = nullptr;
+			data->vectorMap = nullptr;
 		}
 		data = matrix.erase(data);		
 		numNodes--;
@@ -129,7 +129,7 @@ PCell* SparseMatrix::getSmallestCell(){
 	//	if it doesn't then I remove the offending Cell -> should also be able to check for
 	//	invalid iterator / pointer -- right???
 	
-		while(!mins.empty() && mins.back() == NULL){
+		while(!mins.empty() && mins.back() == nullptr){
 			mins.pop_back();		
 		}
 	

@@ -102,15 +102,14 @@ vector<Sequence*> MothurChimera::readSeqs(string file) {
         m->mothurOut("Reading sequences from " + file + "..."); cout.flush();
         
         
-        ifstream in;
-        Utils util; util.openInputFile(file, in);
+        ifstream in; Utils util; util.openInputFile(file, in);
         
         //read in seqs and store in vector
         while(!in.eof()){
             
             if (m->getControl_pressed()) { return container; }
             
-            Sequence* current = new Sequence(in);  util.gobble(in);
+            Sequence* current = new Sequence(in);  gobble(in);
             
             if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
             else if (length != current->getAligned().length()) {   unaligned = true;	}
@@ -174,7 +173,7 @@ Sequence* MothurChimera::getSequence(string name) {
 			}
 		}
 		
-		if(spot == -1) { m->mothurOut("Error: Could not find sequence.\n");  return NULL; }
+		if(spot == -1) { m->mothurOut("Error: Could not find sequence.\n");  return nullptr; }
 		
 		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
 		

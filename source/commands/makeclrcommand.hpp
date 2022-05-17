@@ -16,7 +16,7 @@ class MakeCLRCommand : public Command {
 
 public:
     MakeCLRCommand(string);
-    ~MakeCLRCommand() {}
+    ~MakeCLRCommand() = default;
     
     vector<string> setParameters();
     string getCommandName()            { return "make.clr";                 }

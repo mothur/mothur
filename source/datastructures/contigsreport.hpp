@@ -11,6 +11,11 @@
 
 #include "report.hpp"
 
+/*
+ This class stores information for one line in the contigs report file
+ 
+ 
+ */
 /******************************************************************************************************************/
 
 class ContigsReport : public Report {
@@ -18,7 +23,7 @@ class ContigsReport : public Report {
 public:
     
     ContigsReport();
-    ~ContigsReport() {}
+    ~ContigsReport() = default;
     
     //io functions, note - printHeaders / readHeaders / getHeaders in Report parent class
     void read(ifstream&); //read line in report file

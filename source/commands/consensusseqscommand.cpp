@@ -146,7 +146,7 @@ int ConsensusSeqsCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        long start = time(NULL);
+        long start = time(nullptr);
         
 		readFasta(); if (m->getControl_pressed()) { return 0; }
 		
@@ -243,7 +243,7 @@ int ConsensusSeqsCommand::execute(){
             
             ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                    
-            while (list != NULL) {
+            while (list != nullptr) {
                        
                 if (m->getControl_pressed()) { delete list; break; }
                        
@@ -253,7 +253,7 @@ int ConsensusSeqsCommand::execute(){
             }
 		}
 		
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to find the consensus sequences.");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to find the consensus sequences.");
         
 		m->mothurOut("\nOutput File Names:\n");
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]+"\n"); 	}
@@ -558,15 +558,14 @@ char ConsensusSeqsCommand::getBase(vector<int> counts, int size){  //A,T,G,C,Gap
 int ConsensusSeqsCommand::readFasta(){
 	try{
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		seqLength = 0;
         
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { break; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			string name = seq.getName();
 			
 			if (name != "") {

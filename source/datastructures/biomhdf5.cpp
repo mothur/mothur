@@ -127,7 +127,7 @@ void BiomHDF5::read(string fname){
         //create shared file
         sort(sampleNames.begin(), sampleNames.end());
         
-        if (shared != NULL) { delete shared; }
+        if (shared != nullptr) { delete shared; }
         
         shared = new SharedRAbundVectors();
 
@@ -141,7 +141,7 @@ void BiomHDF5::read(string fname){
         
         if (matrixElementType == "float") {
             
-            if (sharedFloat != NULL) { delete sharedFloat; }
+            if (sharedFloat != nullptr) { delete sharedFloat; }
             sharedFloat = new SharedRAbundFloatVectors();
         
             //creates new sharedRAbunds
@@ -985,9 +985,9 @@ vector< vector<string> > BiomHDF5::getMetaData(Picrust* picrust, bool useRelabun
         else {
             
             if (!useRelabund) {
-                if (shared == NULL) { m->setControl_pressed(true); return metadata; }
+                if (shared == nullptr) { m->setControl_pressed(true); return metadata; }
             }else {
-                if (sharedFloat == NULL) { m->setControl_pressed(true); return metadata; }
+                if (sharedFloat == nullptr) { m->setControl_pressed(true); return metadata; }
             }
             
             //should the labels be Otu001 or PhyloType001
@@ -1040,7 +1040,7 @@ vector< vector<string> > BiomHDF5::getMetaData(Picrust* picrust, bool useRelabun
             }
             
             //merges OTUs classified to same gg otuid, sets otulabels to gg otuids, averages confidence scores of merged otus.  overwritting of otulabels is fine because constaxonomy only allows for one label to be processed.  If this assumption changes, could cause bug.
-            if (picrust != NULL) {
+            if (picrust != nullptr) {
                 if (!useRelabund)   { picrust->setGGOTUIDs(labelTaxMap, shared);        }
                 else                { picrust->setGGOTUIDs(labelTaxMap, sharedFloat);   }
             }

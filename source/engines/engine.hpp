@@ -49,7 +49,7 @@ public:
                     }
             #endif
             
-            start = time(NULL);
+            start = time(nullptr);
             numCommandsRun = 0;
             noBufferNeeded = false;
         }

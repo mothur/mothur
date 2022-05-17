@@ -196,7 +196,7 @@ int SeqErrorCommand::execute(){
 	try{
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		maxLength = 5000;
 		totalBases = 0;
 		totalMatches = 0;
@@ -262,7 +262,7 @@ int SeqErrorCommand::execute(){
 		}
         megAlignmentFile.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         
         bool extraOutput = false;
@@ -273,7 +273,7 @@ int SeqErrorCommand::execute(){
             while (!in.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
                 if (pieces.size() != 0) {
@@ -291,7 +291,7 @@ int SeqErrorCommand::execute(){
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { break; }
                 
-                string line = util.getline(in2); util.gobble(in2);
+                string line = util.getline(in2); gobble(in2);
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
                 if (pieces.size() != 0) {
@@ -687,7 +687,7 @@ vector<Sequence> SeqErrorCommand::getReferences(string refFileName){
         while(!referenceFile.eof()){
             if (m->getControl_pressed()) { break; }
             
-            Sequence currentSeq(referenceFile); util.gobble(referenceFile);
+            Sequence currentSeq(referenceFile); gobble(referenceFile);
             
             int numAmbigs = currentSeq.getAmbigBases();
             if(numAmbigs > 0){	numAmbigSeqs++;	}

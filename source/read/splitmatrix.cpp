@@ -104,34 +104,29 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             
             if (m->getControl_pressed()) { outNonSingleton.close(); util.mothurRemove(nonSingletonsFile); for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
-            set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
+            unordered_set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + ")\nNumber of unique sequences: " + toString(seqGroups[i].size()) + "\n\n");
             
-            string dupsFile = namefile; string dupsFormat = "name";
-            if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
-            
-            Command* getCommand = new GetSeqsCommand(thisGroupsNames, "", "", dupsFile, dupsFormat, outputDir);
-            
-            map<string, vector<string> > filenames = getCommand->getOutputFiles();
-            
-            //string thisGroupsFastaFile = filenames["fasta"][0];
             string outName = "";
-            
             if (namefile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
                 outName = thisOutputDir + util.getRootName(util.getSimpleName(namefile)) + toString(i) + ".name.temp";
-                util.renameFile(filenames["name"][0], outName);
             }
             
             if (countfile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
                 outName = thisOutputDir + util.getRootName(util.getSimpleName(countfile)) + toString(i) + ".count.temp";
-                util.renameFile(filenames["count"][0], outName);
             }
+            
+            pair<string,string> dupsFile(namefile, outName); string dupsFormat = "name";
+            if (countfile != "") { dupsFile.first = countfile; dupsFormat = "count"; }
+            
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, nullStringPair, nullStringPair, dupsFile, dupsFormat);
+            
             delete getCommand;
             
             StorageDatabase* thisDB;
@@ -155,7 +150,7 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
                 command = new PairwiseSeqsCommand(thisDB, kmerDB, lengths, outputFileRoot, distCutoff, outputformat, processors);
             }
             
-            filenames = command->getOutputFiles();
+            map<string, vector<string> > filenames = command->getOutputFiles();
             
             string thisDistanceFile = "";
             if (classic) { thisDistanceFile = filenames["phylip"][0]; }
@@ -178,7 +173,6 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
             }else {
                 util.mothurRemove(thisDistanceFile);
                 util.mothurRemove(outName);
-                
             }
             
             delete thisDB;
@@ -188,31 +182,26 @@ int SplitMatrix::createDistanceFilesFromTax(vector<vector<string> >& seqGroups, 
         
         if (!util.isBlank(nonSingletonsFile)) { //there are non singletons, so remove them to find the singletons
             //get singletons
-            string dupsFile = namefile; string dupsFormat = "name";
-            if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
-            
-            m->mothurOut("/******************************************/\n");
-            m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs()\n");
-            
-            Command* removeCommand = new RemoveSeqsCommand(nonSingletonsFile, dupsFile, dupsFormat, outputDir);
-            
-            map<string, vector<string> > filenames = removeCommand->getOutputFiles();
-            
-            string outName = "";
-            
             if (namefile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
                 singleton = thisOutputDir + util.getRootName(util.getSimpleName(namefile)) + "singletons.temp";
-                util.renameFile(filenames["name"][0], singleton);
             }
             
             if (countfile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
                 singleton = thisOutputDir + util.getRootName(util.getSimpleName(countfile)) + "singletons.temp";
-                util.renameFile(filenames["count"][0], singleton);
             }
+            
+            pair<string,string> dupsFile(namefile, singleton); string dupsFormat = "name";
+            if (countfile != "") { dupsFile.first = countfile; dupsFormat = "count"; }
+            
+            m->mothurOut("/******************************************/\n");
+            m->mothurOut("Finding singletons (ignore 'Removing group' messages):\n\nRunning command: remove.seqs()\n");
+            
+            Command* removeCommand = new RemoveSeqsCommand(nonSingletonsFile, dupsFile, dupsFormat);
+            
             delete removeCommand;
             
             m->mothurOut("/******************************************/\n");
@@ -261,34 +250,29 @@ int SplitMatrix::createFastaFilesFromTax(vector<vector<string> >& seqGroups, vec
             
             if (m->getControl_pressed()) {  for (int i = 0; i < dists.size(); i++) { util.mothurRemove((dists[i].begin()->first)); util.mothurRemove((dists[i].begin()->second)); } dists.clear(); return 0; }
             
-            set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
+            unordered_set<string> thisGroupsNames = util.mothurConvert(seqGroups[i]);
             
             m->mothurOut("/******************************************/\n");
             m->mothurOut("Selecting sequences for group " + groupNames[i] + " (" + toString(i+1) + " of " + toString(numGroups) + ")\nNumber of unique sequences: " + toString(seqGroups[i].size()) + "\n\n");
             
-            string dupsFile = namefile; string dupsFormat = "name";
-            if (countfile != "") { dupsFile = countfile; dupsFormat = "count"; }
-            
-            Command* getCommand = new GetSeqsCommand(thisGroupsNames, "", "", dupsFile, dupsFormat, outputDir);
-            
-            map<string, vector<string> > filenames = getCommand->getOutputFiles();
-            
-            //string thisGroupsFastaFile = filenames["fasta"][0];
             string outName = "";
-            
             if (namefile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(namefile);  }
                 outName = thisOutputDir + util.getRootName(util.getSimpleName(namefile)) + toString(i) + ".name.temp";
-                util.renameFile(filenames["name"][0], outName);
             }
             
             if (countfile != "") {
                 thisOutputDir = outputDir;
                 if (outputDir == "") {  thisOutputDir += util.hasPath(countfile);  }
                 outName = thisOutputDir + util.getRootName(util.getSimpleName(countfile)) + toString(i) + ".count.temp";
-                util.renameFile(filenames["count"][0], outName);
             }
+            
+            pair<string, string> dupsFile(namefile, outName); string dupsFormat = "name";
+            if (countfile != "") { dupsFile.first = countfile; dupsFormat = "count"; }
+            
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, nullStringPair, nullStringPair, dupsFile, dupsFormat);
+            
             delete getCommand;
             
             StorageDatabase* thisDB;
@@ -324,7 +308,7 @@ inline bool compareFileSizes(map<string, string> left, map<string, string> right
 	string filename = left.begin()->first;
 	pFile = fopen (filename.c_str(),"rb");
 	string error = "Error opening " + filename;
-	if (pFile==NULL) perror (error.c_str());
+	if (pFile==nullptr) perror (error.c_str());
 	else{
 		fseek (pFile, 0, SEEK_END);
 		leftsize=ftell (pFile);
@@ -338,7 +322,7 @@ inline bool compareFileSizes(map<string, string> left, map<string, string> right
 	filename = right.begin()->first;
 	pFile2 = fopen (filename.c_str(),"rb");
 	error = "Error opening " + filename;
-	if (pFile2==NULL) perror (error.c_str());
+	if (pFile2==nullptr) perror (error.c_str());
 	else{
 		fseek (pFile2, 0, SEEK_END);
 		rightsize=ftell (pFile2);

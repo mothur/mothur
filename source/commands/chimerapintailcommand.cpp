@@ -187,7 +187,7 @@ int ChimeraPintailCommand::execute(){
 		
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         //check for quantile to save the time
         lookForShortcutFiles(templatefile);
@@ -196,7 +196,7 @@ int ChimeraPintailCommand::execute(){
         
         if (m->getControl_pressed()) { outputTypes.clear();  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
         
-        m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("\n\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         if (removeChimeras) {
             string accnosFileName = "";
@@ -287,7 +287,7 @@ int ChimeraPintailCommand::checkChimeras(){
 				
 			if (m->getControl_pressed()) {	break;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  util.gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				

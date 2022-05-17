@@ -45,7 +45,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
         
         matrixNames.push_back(name);
         
-        if(nameMap == NULL){
+        if(nameMap == nullptr){
             list = new ListVector(nseqs);
             list->set(0, name);
         }
@@ -85,7 +85,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                 
                 
                 //there's A LOT of repeated code throughout this method...
-                if(nameMap == NULL){
+                if(nameMap == nullptr){
                     list->set(i, name);
                     
                     for(int j=0;j<i;j++){
@@ -136,7 +136,7 @@ int ReadPhylipMatrix::read(NameAssignment* nameMap){
                 
                 
                 
-                if(nameMap == NULL){
+                if(nameMap == nullptr){
                     list->set(i, name);
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;
@@ -207,7 +207,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
         
         matrixNames.push_back(name);
         
-        if(countTable == NULL){
+        if(countTable == nullptr){
             list = new ListVector(nseqs);
             list->set(0, name);
         }
@@ -247,7 +247,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                 
                 
                 //there's A LOT of repeated code throughout this method...
-                if(countTable == NULL){
+                if(countTable == nullptr){
                     list->set(i, name);
                     
                     for(int j=0;j<i;j++){
@@ -305,7 +305,7 @@ int ReadPhylipMatrix::read(CountTable* countTable){
                 fileHandle >> name;                
                 matrixNames.push_back(name);
                 
-                if(countTable == NULL){
+                if(countTable == nullptr){
                     list->set(i, name);
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;

@@ -44,6 +44,9 @@
 #include <string>
 #include <list>
 #include <string.h>
+#include <unordered_set>
+#include <unordered_map>
+
 
 //math
 #include <cmath>
@@ -152,6 +155,76 @@ const vector<string> nullVector; //used to pass blank vector
 const vector<int> nullIntVector; //used to pass blank ints
 const vector<char> nullCharVector; //used to pass blank char
 const map<int, int> nullIntMap;
+const pair<string, string> nullStringPair("", "");
+
+/**************************************************************************************************/
+
+// trim from start (in place)
+static inline void ltrim(string &s) {
+    s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+static inline void rtrim(string &s) {
+    s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trimWhiteSpace(string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
+//skip over white space
+template <typename In>
+static inline void gobble(In& f) {
+    char d;
+    while(isspace(d=f.get()))        { ;}
+    if(!f.eof()) { f.putback(d); }
+}
+
+/**************************************************************************************************/
+
+template <typename Out>
+void split(const string &s, char delim, Out result) {
+    istringstream iss(s);
+    string item;
+    while (getline(iss, item, delim)) {
+        if (!item.empty()) { //ignore white space
+            *result++ = item;
+        }
+    }
+}
+
+/**************************************************************************************************/
+
+template <typename Out>
+void split(const string &s, Out result) {
+    istringstream iss(s);
+    string item; char d;
+    while (iss) {
+        iss >> item;
+        while(isspace(d=iss.get()))        {;}
+        if(!iss.eof()) { iss.putback(d); }
+        if (!item.empty()) { //ignore white space
+            *result++ = item;
+        }
+    }
+}
+
+/**************************************************************************************************/
+
+static inline void toUpper(string &s) {
+    for_each(s.begin(), s.end(), [](char & c) { c = ::toupper(c); });
+}
+
+static inline void toLower(string &s) {
+    for_each(s.begin(), s.end(), [](char & c) { c = ::tolower(c); });
+}
 
 /**************************************************************************************************/
 struct classifierOTU {
@@ -189,7 +262,7 @@ struct classifierOTU {
     void readSeqs(vector<vector<char> > otu, int num) { otuData = otu; numSeqs = num; } //for shortcut files
     
     void readSeqs(vector<string> otu) {
-        int alignedLength = 0;
+        auto alignedLength = 0;
         bool error = false;
         if (otu.size() != 0) { alignedLength = otu[0].length(); }
         for (int j = 0; j < otu.size(); j++) { if (otu[j].length() != alignedLength) { error = true;} }
@@ -215,7 +288,7 @@ struct mcmcSample {
     double dNu;
     int ns;
     
-    mcmcSample() {}
+    mcmcSample()=default;
     mcmcSample(double a, double b, double d, int n) : alpha(a), beta(b), dNu(d), ns(n) {}
     
 };
@@ -314,7 +387,7 @@ struct IntNode {
 	IntNode* right;
 	
 	IntNode(int lv, int rv, IntNode* l, IntNode* r) : lvalue(lv), rvalue(rv), left(l), right(r) {};
-	IntNode() {};
+	IntNode() =default;
 };
 
 struct ThreadNode {
@@ -336,24 +409,14 @@ struct diffPair {
 	}
 };
 
-struct countTableItem {
+struct intPair {
     int abund;
     int group;
     
-    countTableItem() { abund = 0; group = -1; }
-    countTableItem(int a, int g) : abund(a), group(g) {}
-    ~countTableItem() {}
+    intPair() { abund = 0; group = -1; }
+    intPair(int a, int g) : abund(a), group(g) {}
+    ~intPair() = default;
 };
-
-struct item {
-    int name;
-    int group;
-    
-    item() { name = -1; group = -1; }
-    item(int n, int g) : name(n), group(g) {}
-    ~item() {}
-};
-
 
 struct kmerCount {
     int kmerNumber;
@@ -374,8 +437,8 @@ struct PCell{
     ull column;
     float dist;
     PCell** vectorMap;
-    PCell() : row(0), column(0), dist(0), vectorMap(NULL) {};
-    PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(NULL) {};
+    PCell() : row(0), column(0), dist(0), vectorMap(nullptr) {};
+    PCell(ull r, ull c, float d) : row(r), column(c), dist(d), vectorMap(nullptr) {};
 };
 
 /* For each distance in a sparse matrix we have a row, column and distance.
@@ -408,7 +471,7 @@ struct seqPNode {
     
     seqPNode() { diffs = 0; numIdentical = 0; name = ""; sequence = "";  }
     seqPNode(string na, string seq, int n, vector<int> nm) : numIdentical(n), name(na), sequence(seq), clusteredIndexes(nm) { diffs = 0; }
-    ~seqPNode() {}
+    ~seqPNode() = default;
 };
 
 /**********************************************************/
@@ -463,9 +526,9 @@ struct seqDist {
 	int seq1;
 	int seq2;
 	double dist;
-	seqDist() {}
+    seqDist() = default;
 	seqDist(int s1, int s2, double d) : seq1(s1), seq2(s2), dist(d) {}
-	~seqDist() {}
+	~seqDist() = default;
 };
 /************************************************************/
 struct oligosPair {
@@ -474,7 +537,7 @@ struct oligosPair {
 	
 	oligosPair() { forward = ""; reverse = "";  }
 	oligosPair(string f, string r) : forward(f), reverse(r) {}
-	~oligosPair() {}
+	~oligosPair() = default;
 };
 
 /************************************************************/
@@ -482,18 +545,18 @@ struct seqPriorityNode {
 	int numIdentical;
 	string seq;
 	string name;
-	seqPriorityNode() {}
+    seqPriorityNode() = default;
 	seqPriorityNode(int n, string s, string nm) : numIdentical(n), seq(s), name(nm) {}
-	~seqPriorityNode() {}
+	~seqPriorityNode() = default;
 };
 /************************************************************/
 struct compGroup {
 	string group1;
 	string group2;
-	compGroup() {}
+    compGroup() = default;
 	compGroup(string s, string nm) : group1(s), group2(nm) {}
     string getCombo() { return group1+"-"+group2; }
-	~compGroup() {}
+	~compGroup() = default;
 };
 /***************************************************************/
 struct spearmanRank {
@@ -503,7 +566,7 @@ struct spearmanRank {
 	spearmanRank(string n, float s) : name(n), score(s) {}
 };
 //***********************************************************************
-inline bool compareGroups(countTableItem left, countTableItem right){
+inline bool compareGroups(intPair left, intPair right){
 	return (left.group > right.group);
 }
 //***********************************************************************
@@ -547,14 +610,6 @@ inline bool compareSeqPriorityNodes(seqPriorityNode left, seqPriorityNode right)
 inline bool compareSequenceDistance(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
 }
-//********************************************************************************************************************
-//returns sign of double
-inline double sign(double temp){
-	//find sign
-    if (temp > 0)       { return 1.0;   }
-    else if (temp < 0)  { return -1.0;  }
-    return 0;
-}
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -574,8 +629,6 @@ void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 			throw BadConversion(s);
 	
 }
-//*******************************************************************************
-template <typename T> int sgn(T val){ return (val > T(0)) - (val < T(0)); }
 //*******************************************************************************
 template<typename T>
 bool convertTestFloat(const string& s, T& x, bool failIfLeftoverChars = true){
@@ -611,12 +664,16 @@ string toString(const T&x){
 		return output.str();
 	
 }
-//***********************************************************************
+//*********************************************************************
 template<typename T>
-void mothurSwap(T&x, T&y){
-    T temp = y;
-    y = x;
-    x = temp;
+string toString(const T&x, int i){
+    
+        stringstream output;
+        
+        output.precision(i);
+        output << fixed << x;
+        
+        return output.str();
 }
 //*************************************************************************
 template<typename T>
@@ -629,25 +686,6 @@ string toHex(const T&x){
 		return output.str();
 	
 }
-//*********************************************************************
-template<typename T>
-string toString(const T&x, int i){
-	
-		stringstream output;
-		
-		output.precision(i);
-		output << fixed << x;
-		
-		return output.str();
-}
-//***********************************************************************
-template<class T>
-T fromString(const string& s){
-	istringstream stream (s);
-	T t;
-	stream >> t;
-	return t;
-}
-//****************************************************************************
+//*************************************************************************
 
 #endif

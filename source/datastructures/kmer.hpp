@@ -18,7 +18,7 @@ class Kmer {
 	
 public:
 	Kmer(int);
-    ~Kmer() {}
+    ~Kmer() = default;
 	string getKmerString(string);
 	int getKmerNumber(string, int);
 	string getKmerBases(int);

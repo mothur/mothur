@@ -157,7 +157,7 @@ int CooccurrenceCommand::execute(){
         out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
         out << "metric\tlabel\tScore\tzScore\tstandardDeviation\tnp_Pvalue\n";
 
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

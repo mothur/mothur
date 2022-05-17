@@ -123,7 +123,7 @@ void* metropolis1 (void * pvInitMetro) {
         
         int nS = 0, nSDash = 0,nIter = 0;
         double dRand = 0.0, dNLL = 0.0;
-        void   *pvRet = NULL;
+        void   *pvRet = nullptr;
         double dM = 0.0, dV = 0.0;
         double dMDash = 0.0, dVDash = 0.0;
         double dXDash = 0.0, dX = 0.0;

@@ -89,7 +89,7 @@ int main(int argc, char *argv[], char *envp[]){
             if (m->getDebug()) { m->mothurOut("[DEBUG]: Setting environment variable " + key + " to " + value + "\n"); }
         }
         
-		Engine* mothur = NULL;
+		Engine* mothur = nullptr;
 		bool bail = false;
 		string input;
  
@@ -123,7 +123,7 @@ int main(int argc, char *argv[], char *envp[]){
 		        
         if (!createLogFile) { util.mothurRemove(newlogFileName); }
 				
-		if (mothur != NULL) { delete mothur; }
+		if (mothur != nullptr) { delete mothur; }
         
         int returnCode = 0;
         if (m->getNumErrors() != 0) { returnCode = 1; }

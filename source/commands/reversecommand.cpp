@@ -135,7 +135,7 @@ int ReverseSeqsCommand::execute(){
 			while(!inFASTA.eof()){
 				if (m->getControl_pressed()) {  inFASTA.close();  outFASTA.close(); util.mothurRemove(fastaReverseFileName); return 0; }
 				 
-				Sequence currSeq(inFASTA);  util.gobble(inFASTA);
+				Sequence currSeq(inFASTA);  gobble(inFASTA);
 				if (currSeq.getName() != "") {
 					currSeq.reverseComplement();
 					currSeq.printSequence(outFASTA);
@@ -165,7 +165,7 @@ int ReverseSeqsCommand::execute(){
 
 			while(!inQual.eof()){
 				if (m->getControl_pressed()) {  inQual.close();  outQual.close(); util.mothurRemove(qualReverseFileName); return 0; }
-				currQual = QualityScores(inQual);  util.gobble(inQual);
+				currQual = QualityScores(inQual);  gobble(inQual);
 				currQual.flipQScores();	
 				currQual.printQScores(outQual);
 			}

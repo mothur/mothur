@@ -148,7 +148,7 @@ long long OptiData::getNumDists(){
 /***********************************************************************/
 ListVector* OptiData::getListSingle() {
     try {
-        ListVector* singlelist = NULL;
+        ListVector* singlelist = nullptr;
         
         if (singletons.size() == 0) { }
         else {

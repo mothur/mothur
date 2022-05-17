@@ -19,7 +19,7 @@ Biom::Biom() {
         tableID = "No Table ID";
         mothurVersion = ""; sharedFileName = "";
        
-        shared = NULL;  sharedFloat = NULL;
+        shared = nullptr;  sharedFloat = nullptr;
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -37,7 +37,7 @@ Biom::Biom(string v) : version(v) {
         tableID = "No Table ID";
         mothurVersion = ""; sharedFileName = "";
         
-        shared = NULL; sharedFloat = NULL;
+        shared = nullptr; sharedFloat = nullptr;
     }
     catch(exception& e) {
         m->errorOut(e, "Biom", "Biom");
@@ -46,8 +46,8 @@ Biom::Biom(string v) : version(v) {
 }
 /**************************************************************************************************/
 Biom::~Biom() {
-    if (shared != NULL) { delete shared; }
-    if (sharedFloat != NULL) { delete sharedFloat; }
+    if (shared != nullptr) { delete shared; }
+    if (sharedFloat != nullptr) { delete sharedFloat; }
 }
 /**************************************************************************************************/
 void Biom::load(SharedRAbundVectors* s, vector<Taxonomy> c){

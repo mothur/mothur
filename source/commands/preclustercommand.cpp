@@ -284,7 +284,7 @@ struct preClusterData {
 				// double indel_prob = 0.01;indel_prob
 				// double max_indels = 3;max_indels
 
-  ~preClusterData() { if (alignment != NULL) { delete alignment; } }
+  ~preClusterData() { if (alignment != nullptr) { delete alignment; } }
 
   preClusterData(){}
 
@@ -331,7 +331,7 @@ struct preClusterData {
           m->mothurOutEndLine();
           alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 1000);
       }
-    } else { alignment = NULL; }
+    } else { alignment = nullptr; }
   }
 };
 
@@ -442,7 +442,7 @@ void mergeSeqs(seqPNode* representative, seqPNode* duplicate, string& chunk, int
         }
         representative->numIdentical += duplicate->numIdentical;
         
-        chunk += representative->name + "\t" + duplicate->name + "\t" + toString(originalCount) + "\t" + toString(mismatch) + "\t" + duplicate->sequence + "\n";
+        chunk += (representative->name + "\t" + duplicate->name + "\t" + toString(originalCount) + "\t" + toString(mismatch) + "\t" + duplicate->sequence + "\n");
         duplicate->numIdentical = 0;
         duplicate->diffs = mismatch;
     }
@@ -503,10 +503,10 @@ int process(string group, string newMapFile, preClusterData* params){
                     }
                     out << chunk;
                 }
-                if(i % 100 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); }
+                if(i % 1000 == 0)	{ params->m->mothurOutJustToScreen(group + toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)+"\n"); }
             }
             
-            if(numSeqs % 100 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
+            if(numSeqs % 1000 != 0)	{ params->m->mothurOut(group + toString(numSeqs) + "\t" + toString(numSeqs - count) + "\t" + toString(count) + "\n"); 	}
             
         } else if(params->pc_method == "unoise") {
             
@@ -721,7 +721,7 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
 
             if (params->m->getControl_pressed()) { inFasta.close(); break; }
 
-            Sequence seq(inFasta);  params->util.gobble(inFasta);
+            Sequence seq(inFasta);  gobble(inFasta);
 
             if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 
@@ -758,41 +758,26 @@ vector<seqPNode*> readFASTA(preClusterData* params, long long& num){
 
 void print(string newfasta, string newname, preClusterData* params){
     try {
-        ofstream outAccnos;
-        string outAccnosFileName = newfasta + ".temp";
-        params->util.openOutputFile(outAccnosFileName, outAccnos);
-        
-        CountTable ct;
+        CountTable ct; unordered_set<string> accnosNames;
         if (params->countfile != "") {
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
-                    outAccnos << params->alignSeqs[i]->name << endl;
                     ct.push_back(params->alignSeqs[i]->name, params->alignSeqs[i]->numIdentical);
                 }
             }
         }
-        outAccnos.close();
         
         if (params->countfile != "")  { ct.printTable(newname); }
 
-        //use unique.seqs to create new name and fastafile
-        string inputString = "fasta=" + params->fastafile + ", accnos=" + outAccnosFileName;
         params->m->mothurOut("/******************************************/\n");
-        params->m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
+        pair<string, string> ffiles(params->fastafile, newfasta);
         
-        Command* getCommand = new GetSeqsCommand(inputString);
+        Command* getCommand = new GetSeqsCommand(accnosNames, ffiles, nullStringPair, nullStringPair, "");
         getCommand->execute();
-        
-        map<string, vector<string> > filenames = getCommand->getOutputFiles();
-        
+                
         delete getCommand;
-        
-        params->util.renameFile(filenames["fasta"][0], newfasta);
-        
+                
         params->m->mothurOut("/******************************************/\nDone.\n");
-        
-        params->util.mothurRemove(outAccnosFileName);
-
     }
     catch(exception& e) {
         params->m->errorOut(e, "PreClusterCommand", "print");
@@ -808,6 +793,7 @@ int PreClusterCommand::execute(){
         
         if(pc_method == "tree"){
             diffs = 1;
+        }else if (pc_method == "simple") { ;
         } else {
             Summary summary_data(processors);
             if(countfile != ""){
@@ -861,7 +847,7 @@ int PreClusterCommand::execute(){
             }
         }
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         string numProcessors = current->getProcessors();
         
@@ -898,22 +884,22 @@ int PreClusterCommand::execute(){
             
             createProcessesGroups(group2Files, groups, convolutedNamesFile, newMapFile);
             
-            string accnosFile;
-            if (countfile != "") {  accnosFile = mergeGroupCounts(newCountFile, convolutedNamesFile); }
+            unordered_set<string> accnos;
+            if (countfile != "") {  accnos = mergeGroupCounts(newCountFile, convolutedNamesFile); }
             
-            printFasta(newFastaFile, accnosFile);
+            printFasta(newFastaFile, accnos);
             util.mothurRemove(convolutedNamesFile);
             
             if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); 	}	 return 0; }
             
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run pre.cluster.\n");
+            m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run pre.cluster.\n");
             
         }else {
             if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
             
             vector<string> groups;
             map<string, vector<string> > group2Files;
-            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, clump, NULL, newMapFile, nullVector);
+            preClusterData* params = new preClusterData(group2Files, fastafile, countfile, pc_method, align_method, clump, nullptr, newMapFile, nullVector);
             params->setVariables(diffs, pc_method, align_method, align, match, misMatch, gapOpen, gapExtend, alpha, delta, error_rate, indel_prob, max_indels, error_dist);
             
             //reads fasta file and return number of seqs
@@ -937,7 +923,7 @@ int PreClusterCommand::execute(){
             
             print(newFastaFile, newCountFile, params);
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
-            m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
+            m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(numSeqs) + " sequences.\n");
         }
         
         current->setProcessors(numProcessors);
@@ -975,24 +961,17 @@ int PreClusterCommand::execute(){
 }
 /**************************************************************************************************/
 
-void PreClusterCommand::printFasta(string newFastaFileName, string accnosFile){
+void PreClusterCommand::printFasta(string newFastaFileName, unordered_set<string> accnos){
     try {
-        string inputString = "fasta=" + fastafile + ", accnos=" + accnosFile;
+        pair<string, string> ffiles(fastafile, newFastaFileName);
         
         m->mothurOut("\n/******************************************/\n");
-        m->mothurOut("Running command: get.seqs(" + inputString + ")\n");
-        current->setMothurCalling(true);
+        m->mothurOut("Running get.seqs: \n");
         
-        Command* getCommand = new GetSeqsCommand(inputString);
-        getCommand->execute();
-        
-        map<string, vector<string> > filenames = getCommand->getOutputFiles();
-        
+        Command* getCommand = new GetSeqsCommand(accnos, ffiles, nullStringPair, nullStringPair, "");
         delete getCommand;
-        current->setMothurCalling(false);
+                
         m->mothurOut("/******************************************/\n");
-        
-        util.renameFile(filenames["fasta"][0], newFastaFileName);
     }
     catch(exception& e) {
         m->errorOut(e, "PreClusterCommand", "printFasta");
@@ -1065,14 +1044,13 @@ bool fillWeighted(preClusterData* params, string fastafileName, string groupOrCo
             params->util.mothurRemove(groupOrCountFile);
         }
         
-        ifstream in;
-        params->util.openInputFile(fastafileName, in);
+        ifstream in; params->util.openInputFile(fastafileName, in);
         
         while (!in.eof()) {
             
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             if (seq.getName() != "") {
                 
@@ -1115,7 +1093,7 @@ long long driverGroups(preClusterData* params){
             string thisGroup = it->first;
             params->m->mothurOut("\nProcessing group " + thisGroup + ":\n");
             
-            time_t start = time(NULL);
+            time_t start = time(nullptr);
             bool aligned = false;
             
             string thisGroupsFasta = it->second[0];
@@ -1163,7 +1141,7 @@ long long driverGroups(preClusterData* params){
             
             for (int i = 0; i < params->alignSeqs.size(); i++) {  delete params->alignSeqs[i]; } params->alignSeqs.clear();
             
-            params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(num) + " sequences.\n");
+            params->m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to cluster " + toString(num) + " sequences.\n");
         }
         
         return numSeqs;
@@ -1176,7 +1154,7 @@ long long driverGroups(preClusterData* params){
 
 /**************************************************************************************************/
 //only called with count table including groups
-string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
+unordered_set<string> PreClusterCommand::mergeGroupCounts(string newcount, string newname){
 	try {
         m->mothurOut("\nDeconvoluting count table results...\n");
         
@@ -1186,8 +1164,7 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         for (int i = 0; i < groups.size(); i++)  { ct.addGroup(groups[i]); } //add groups
         ct.zeroOutTable();
         
-        ifstream inNames;
-        util.openInputFile(newname, inNames);
+        ifstream inNames; util.openInputFile(newname, inNames);
         
         /*
          newname looks like:
@@ -1200,24 +1177,24 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
          
          */
         
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         long long count = 0;
         
         string group, unique_sequence;
         int numDups;
         
         //build table
-        vector<string> namesOfSeqs;
+        unordered_set<string> namesOfSeqs;
         while (!inNames.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            inNames >> group; util.gobble(inNames);
-            inNames >> unique_sequence; util.gobble(inNames);
-            inNames >> numDups; util.gobble(inNames);
+            inNames >> group; gobble(inNames);
+            inNames >> unique_sequence; gobble(inNames);
+            inNames >> numDups; gobble(inNames);
             
             ct.setAbund(unique_sequence, group, numDups); count++;
-            namesOfSeqs.push_back(unique_sequence);
+            namesOfSeqs.insert(unique_sequence);
             
             //report progress
             if((count) % 1000 == 0){	m->mothurOutJustToScreen(toString(count) + "\n"); 		}
@@ -1227,17 +1204,13 @@ string PreClusterCommand::mergeGroupCounts(string newcount, string newname){
         
         inNames.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to merge " + toString(count) + " sequences group data.");
-        start = time(NULL);
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to merge " + toString(count) + " sequences group data.");
+        start = time(nullptr);
         
         ct.printTable(newcount);
         util.mothurRemove(newname);
-        
-        ofstream outAccnos; util.openOutputFile(newname, outAccnos);
-        for (int i = 0; i < namesOfSeqs.size(); i++) { outAccnos << namesOfSeqs[i] << endl; }
-        outAccnos.close();
 
-		return newname;
+		return namesOfSeqs;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PreClusterCommand", "mergeGroupCounts");

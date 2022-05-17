@@ -23,7 +23,7 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups, stri
         
         CurrentFile* current = CurrentFile::getInstance();
         groupMode = current->getGroupMode();
-        groupmap = NULL; countTable = NULL;
+        groupmap = nullptr; countTable = nullptr;
 		//set up groupmap for later.
         if (groupMode == "group") {
             groupmap = new GroupMap(current->getGroupFile());
@@ -47,17 +47,17 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups, stri
 			if (label == "label") {
 				
 				//gets "numOtus"
-				f >> label; util.gobble(f);
+				f >> label; gobble(f);
 				
 				//eat rest of line
-				label = util.getline(f); util.gobble(f);
+				label = util.getline(f); gobble(f);
 				
 				//parse labels to save
 				istringstream iStringStream(label);
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
-					iStringStream >> temp;  util.gobble(iStringStream);
+					iStringStream >> temp;  gobble(iStringStream);
                     
 					binLabels.push_back(temp);
 				}
@@ -98,7 +98,7 @@ SharedListVector::SharedListVector(ifstream& f, vector<string>& userGroups, stri
 			f >> inputData;
 			set(i, inputData);
 		}
-		util.gobble(f);
+		gobble(f);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedListVector", "SharedListVector");
@@ -402,11 +402,11 @@ SharedRAbundFloatVectors* SharedListVector::getSharedRAbundFloatVector() {
 
 /***********************************************************************/
 
-OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
+OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = nullptr){
 	
 	try {
         Utils util;
-		if(orderMap == NULL){
+		if(orderMap == nullptr){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){

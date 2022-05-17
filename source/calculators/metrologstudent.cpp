@@ -123,7 +123,7 @@ void* metropolis2 (void * pvInitMetro)
     gsl_rng            *ptGSLRNG;
     int nS = 0, nSDash = 0, nIter = 0;
     double dRand = 0.0, dNLL = 0.0;
-    void   *pvRet = NULL;
+    void   *pvRet = nullptr;
     
     /*set up random number generator*/
     T        = gsl_rng_default;

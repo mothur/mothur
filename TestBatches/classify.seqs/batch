@@ -12,5 +12,4 @@ classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, referenc
 #
 #knn
 classify.seqs(fasta=testClassify.fasta, template=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, method=knn)
-#classify.seqs(fasta=testClassify.fasta, count=testClassify.count_table, template=trainset18_062020.pds.fasta, taxonomy=trainset18_062020.pds.tax, method=knn, search=blast)
 quit()

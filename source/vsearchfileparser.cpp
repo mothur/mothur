@@ -93,14 +93,13 @@ string VsearchFileParser::createVsearchFasta(string inputFile){
         vector<seqPriorityNode> seqs;
         map<string, int>::iterator it;
         
-        ifstream in;
-        util.openInputFile(inputFile, in);
+        ifstream in; util.openInputFile(inputFile, in);
         
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { in.close(); return vsearchFasta; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             it = counts.find(seq.getName());
             if (it == counts.end()) {
@@ -159,8 +158,7 @@ ListVector VsearchFileParser::createListFile(string inputFile, int numBins, stri
         map<string, string>::iterator itName;
         if (format == "name") { counts.clear(); util.readNames(namefile, nameMap); }
         
-        ifstream in;
-        util.openInputFile(inputFile, in);
+        ifstream in; util.openInputFile(inputFile, in);
         
         ListVector list(numBins); list.setLabel(label);
         
@@ -170,7 +168,7 @@ ListVector VsearchFileParser::createListFile(string inputFile, int numBins, stri
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; util.gobble(in);
+            in >> recordType >> clusterNumber >> length >> percentIdentity >> strand >> notUsed1 >> notUsed2 >> compressedAlignment >> seqName >> repSequence; gobble(in);
             
             if (recordType != "S") {
                 
@@ -223,14 +221,13 @@ int VsearchFileParser::getNumBins(string logfile){
         
         int numBins = 0;
         
-        ifstream in;
-        Utils util; util.openInputFile(logfile, in);
+        ifstream in; Utils util; util.openInputFile(logfile, in);
         
         string line;
         while(!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            line = util.getline(in); util.gobble(in);
+            line = util.getline(in); gobble(in);
             
             int pos = line.find("Clusters:");
             if (pos != string::npos) {

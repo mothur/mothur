@@ -142,7 +142,7 @@ int MakeCLRCommand::execute(){
         util.openOutputFile(outputFileName, out);
         outputNames.push_back(outputFileName); outputTypes["clr"].push_back(outputFileName);
         
-        while (lookup != NULL) {
+        while (lookup != nullptr) {
             
             if (m->getControl_pressed()) { delete lookup; break; }
             

@@ -305,7 +305,7 @@ void SharedCommand::convertSharedFormat() {
             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             
             bool printHeaders = true;
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -333,7 +333,7 @@ void SharedCommand::convertSharedFormat() {
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                inScan >> label >> group >> otuName >> abundance; util.gobble(inScan);
+                inScan >> label >> group >> otuName >> abundance; gobble(inScan);
                 
                 labels.insert(label); groups.insert(group); otuNames.insert(otuName);
             }
@@ -371,7 +371,7 @@ void SharedCommand::convertSharedFormat() {
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                in >> label >> group >> otuName >> abundance; util.gobble(in);
+                in >> label >> group >> otuName >> abundance; gobble(in);
                 
                 itDistance = sharedVectors.find(label);
                 
@@ -489,8 +489,7 @@ int SharedCommand::createSharedFromBiom() {
             "generated_by": "mothur1.24.0",
             "date": "Tue Apr 17 13:12:07 2012", */
 
-        ifstream in;
-        util.openInputFile(biomfile, in);
+        ifstream in; util.openInputFile(biomfile, in);
 
         string matrixFormat = "";
         int numRows = 0;
@@ -513,7 +512,7 @@ int SharedCommand::createSharedFromBiom() {
         while (!in.eof()) { //split file by tags, so each "line" will have something like "id":"/Users/SarahsWork/Desktop/release/final.tx.1.subsample.1.pick.shared-1"
             if (m->getControl_pressed()) { break; }
 
-            char c = in.get(); util.gobble(in);
+            char c = in.get(); gobble(in);
 
             if (c == '[')               { countOpenBrace++;     }
             else if (c == ']')          { countClosedBrace++;   }
@@ -881,8 +880,8 @@ string SharedCommand::getTag(string& line) {
 int SharedCommand::createSharedFromListGroup() {
 	try {
 
-        GroupMap* groupMap = NULL;
-        CountTable* countTable = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* countTable = nullptr;
         pickedGroups = false;
         if (groupfile != "") {
             groupMap = new GroupMap(groupfile);
@@ -927,7 +926,7 @@ int SharedCommand::createSharedFromListGroup() {
         SharedRAbundVectors* lookup;
 
         if (m->getControl_pressed()) {
-            delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+            delete SharedList; if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
             out.close(); if (!pickedGroups) { util.mothurRemove(filename); }
             return 0;
         }
@@ -945,7 +944,7 @@ int SharedCommand::createSharedFromListGroup() {
             out.close(); if (!pickedGroups) { util.mothurRemove(filename); } //remove blank shared file you made
 
             //delete memory
-            delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+            delete SharedList; if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
             return 0;
         }
 
@@ -985,9 +984,9 @@ int SharedCommand::createSharedFromListGroup() {
         set<string> userLabels = labels;
         bool printHeaders = true;
     
-        while((SharedList != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+        while((SharedList != nullptr) && ((allLines == 1) || (userLabels.size() != 0))) {
             if (m->getControl_pressed()) {
-                delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+                delete SharedList; if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
                 if (!pickedGroups) { out.close(); util.mothurRemove(filename); }
                 return 0;
             }
@@ -999,7 +998,7 @@ int SharedCommand::createSharedFromListGroup() {
                 m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
-                    delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+                    delete SharedList; if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
                     delete lookup;
                     if (!pickedGroups) { out.close(); util.mothurRemove(filename); }
                     return 0;
@@ -1040,7 +1039,7 @@ int SharedCommand::createSharedFromListGroup() {
                 m->mothurOut(lookup->getLabel()+"\n"); 
 
                 if (m->getControl_pressed()) {
-                    delete SharedList; if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+                    delete SharedList; if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
                     delete lookup;
                     if (!pickedGroups) { out.close(); util.mothurRemove(filename); }
                     return 0;
@@ -1092,14 +1091,14 @@ int SharedCommand::createSharedFromListGroup() {
         
         //run last label if you need to
         if (needToRun )  {
-            if (SharedList != NULL) {	delete SharedList;	}
+            if (SharedList != nullptr) {	delete SharedList;	}
             SharedList = input.getSharedListVector(lastLabel); //get new list vector to process
 
             lookup = SharedList->getSharedRAbundVector();
             m->mothurOut(lookup->getLabel()+"\n"); 
 
             if (m->getControl_pressed()) {
-                if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+                if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
                 if (!pickedGroups) { out.close(); util.mothurRemove(filename); }
                 return 0;
             }
@@ -1129,7 +1128,7 @@ int SharedCommand::createSharedFromListGroup() {
         
         if (!pickedGroups) { out.close(); }
 
-        if (groupMap != NULL) { delete groupMap; } if (countTable != NULL) { delete countTable; }
+        if (groupMap != nullptr) { delete groupMap; } if (countTable != nullptr) { delete countTable; }
 
         if (m->getControl_pressed()) {
             if (!pickedGroups) { util.mothurRemove(filename); }
@@ -1242,12 +1241,11 @@ int SharedCommand::readOrderFile() {
 		//remove old names
 		order.clear();
 
-		ifstream in;
-		util.openInputFile(ordergroupfile, in);
+		ifstream in; util.openInputFile(ordergroupfile, in);
 		string thisGroup;
 
 		while(!in.eof()){
-			in >> thisGroup; util.gobble(in);
+			in >> thisGroup; gobble(in);
 
 			order.push_back(thisGroup);
 

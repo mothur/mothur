@@ -16,7 +16,7 @@ SensSpecCalc::SensSpecCalc(OptiData& matrix, ListVector* list){
         m = MothurOut::getInstance();
         map<string, long long> nameIndex = matrix.getNameIndexMap();
         
-        if (list != NULL) {
+        if (list != nullptr) {
             //for each bin
             for (int i = 0; i < list->getNumBins(); i++) {
                 

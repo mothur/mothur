@@ -8,6 +8,7 @@
  */
 
 #include "sequence.hpp"
+#include "protein.hpp"
 
 /***********************************************************************/
 Sequence::Sequence(){
@@ -224,6 +225,52 @@ Sequence::Sequence(ifstream& fastaFile, string& extraInfo, bool getInfo){
 		exit(1);
 	}							
 }
+/***********************************************************************/
+Protein Sequence::getProtein() {
+    try {
+        Protein thisProtein = getProtein(1, false);
+        return thisProtein;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Sequence", "getProtein");
+        exit(1);
+    }
+}
+/***********************************************************************/
+//startFrame options: 1,2,3,-1,-2,-3. 1 -> start at 0, 2 start at 1, 3 start at 2.
+Protein Sequence::getProtein(int sf, bool trim) {
+    try {
+        vector<AminoAcid> aa;
+        
+        int startFrame = sf; int length = unaligned.length();
+        if (sf < 1) { //-1,-2,-3
+            startFrame = (length+(sf+1)) % 3;
+        }else { startFrame--; }
+        
+        for (int i = startFrame; i <= length-3;) {
+            if (m->getControl_pressed()) { break; }
+            
+            string codon = ""; codon += unaligned[i]; i++; codon += unaligned[i]; i++; codon += unaligned[i]; i++;
+           
+            AminoAcid thisAA(codon);
+            
+            if (thisAA.getNum() == stop) {
+                if (trim) {  break;  }
+                else {  thisAA.setAmino('*'); }
+            }
+            
+            aa.push_back(thisAA);
+        }
+        
+        Protein thisProtein(name, aa);
+        
+        return thisProtein;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "Protein", "getSequence");
+        exit(1);
+    }
+}
 //********************************************************************************************************************
 string Sequence::getSequenceName(ifstream& fastaFile) {
 	try {
@@ -295,27 +342,25 @@ string Sequence::getSequenceName(istringstream& fastaFile) {
 //********************************************************************************************************************
 string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
 	try {
-		char letter;
 		string sequence = "";	
 		numAmbig = 0;
-		
-		while(fastaFile){
-			letter= fastaFile.get();
-			if(letter == '>'){
-				fastaFile.putback(letter);
-				break;
-			}else if (letter == ' ') {;}
-			else if(isprint(letter)){
-				letter = toupper(letter);
-				if(letter == 'U'){letter = 'T';}
-				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
-					letter = 'N';
-					numAmbig++;
-				}
-				sequence += letter;
-			}
-		}
-		
+        
+        while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
+            if (m->getControl_pressed()) { break; }
+            
+            string line = util.getline(fastaFile);
+            
+            //iterate through string
+            for_each(line.begin(), line.end(), [&numAmbig](char & c) {
+                    c = ::toupper(c);
+                    if(c != '.' && c != '-' && c != 'A' && c != 'T' && c != 'G'  && c != 'C' && c != 'N'){
+                        c = 'N';
+                        numAmbig++;
+                    }
+                });
+            sequence += line;
+        }
+
 		return sequence;
 	}
 	catch(exception& e) {
@@ -366,7 +411,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){
-				util.gobble(fastaFile);  //in case its a \r\n situation
+				gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;
@@ -391,7 +436,7 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
         while(fastaFile){
             letter=fastaFile.get();
             if((letter == '\r') || (letter == '\n') || letter == -1){
-                util.gobble(fastaFile);  //in case its a \r\n situation
+                gobble(fastaFile);  //in case its a \r\n situation
                 break;
             }else {
                 temp += letter;
@@ -409,27 +454,24 @@ string Sequence::getCommentString(boost::iostreams::filtering_istream& fastaFile
 //********************************************************************************************************************
 string Sequence::getSequenceString(istringstream& fastaFile, int& numAmbig) {
 	try {
-		char letter;
 		string sequence = "";
 		numAmbig = 0;
 		
-		while(!fastaFile.eof()){
-			letter= fastaFile.get();
-	
-			if(letter == '>'){
-				fastaFile.putback(letter);
-				break;
-			}else if (letter == ' ') {;}
-			else if(isprint(letter)){
-				letter = toupper(letter);
-				if(letter == 'U'){letter = 'T';}
-				if(letter != '.' && letter != '-' && letter != 'A' && letter != 'T' && letter != 'G'  && letter != 'C' && letter != 'N'){
-					letter = 'N';
-					numAmbig++;
-				}
-				sequence += letter;
-			}
-		}
+        while(fastaFile.peek() != '>' && fastaFile.peek() != EOF){
+            if (m->getControl_pressed()) { break; }
+            
+            string line = util.getline(fastaFile);
+            
+            //iterate through string
+            for_each(line.begin(), line.end(), [&numAmbig](char & c) {
+                    c = ::toupper(c);
+                    if(c != '.' && c != '-' && c != 'A' && c != 'T' && c != 'G'  && c != 'C' && c != 'N'){
+                        c = 'N';
+                        numAmbig++;
+                    }
+                });
+            sequence += line;
+        }
 		
 		return sequence;
 	}
@@ -448,7 +490,7 @@ string Sequence::getCommentString(istringstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n') || letter == -1){  
-				util.gobble(fastaFile);  //in case its a \r\n situation
+				gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}else {
                 temp += letter;
@@ -514,6 +556,8 @@ void Sequence::setUnaligned(string sequence){
 
 void Sequence::setAligned(string sequence){
 	
+    toUpper(sequence);
+    
 	//if the alignment starts or ends with a gap, replace it with a period to indicate missing data
 	aligned = sequence;
 	alignmentLength = aligned.length();
@@ -544,23 +588,34 @@ void Sequence::setAligned(string sequence){
 void Sequence::setPairwise(string sequence){
 	pairwise = sequence;
 }
-
+//********************************************************************************************************************
+bool Sequence::isAligned(){
+    
+    for (int i = 0; i < aligned.length(); i++) {
+        if ((aligned[i] == '.') || (aligned[i] == '-')) { return true; }
+    }
+    return false;
+}
 //********************************************************************************************************************
 
 string Sequence::convert2ints() {
 	
 	if(unaligned == "")	{	/* need to throw an error */	}
 	
-	string processed;
+	string processed = unaligned;
+    
+    
+    //iterate through string - replace bases with ints
+    for_each(processed.begin(), processed.end(),
+    [](char & c) {
+        if(c == 'A')                {    c = '0';    }
+        else if(c == 'C')           {    c = '1';    }
+        else if(c == 'G')           {    c = '2';    }
+        else if(c == 'T')           {    c = '3';    }
+        else if(c == 'U')           {    c = '3';    }
+        else                        {    c = '4';    }
+    });
 	
-	for(int i=0;i<unaligned.length();i++) {
-		if(toupper(unaligned[i]) == 'A')		{	processed += '0';	}
-		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
-		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
-		else if(toupper(unaligned[i]) == 'T')	{	processed += '3';	}
-		else if(toupper(unaligned[i]) == 'U')	{	processed += '3';	}
-		else									{	processed += '4';	}
-	}
 	return processed;
 }
 
@@ -609,15 +664,13 @@ int Sequence::getNumBases(){
 int Sequence::getNumNs(){
     int numNs = 0;
 	for (int i = 0; i < unaligned.length(); i++) {
-        if(toupper(unaligned[i]) == 'N') { numNs++; }
+        if(unaligned[i] == 'N') { numNs++; }
     }
     return numNs;
 }
 //********************************************************************************************************************
 void Sequence::printSequence(OutputWriter* out){
-    string seqOutput = ">";
-    seqOutput += name + comment + '\n';
-    seqOutput += aligned + '\n';
+    const string seqOutput = '>' + name + comment + '\n' + aligned + '\n';
     out->write(seqOutput);
 }
 //********************************************************************************************************************

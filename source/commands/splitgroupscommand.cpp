@@ -10,6 +10,7 @@
 #include "splitgroupscommand.h"
 #include "sequenceparser.h"
 #include "counttable.h"
+#include "inputdata.h"
 
 //**********************************************************************************************************************
 vector<string> SplitGroupCommand::setParameters(){	
@@ -90,7 +91,39 @@ string SplitGroupCommand::getOutputPattern(string type) {
         exit(1);
     }
 }
+//**********************************************************************************************************************
 
+SplitGroupCommand::SplitGroupCommand(vector<string> g, string ffile, string count, string outd) : Command() {
+    try {
+        abort = false; calledHelp = false;
+        vector<string> tempOutNames;
+        outputTypes["count"] = tempOutNames;
+        outputTypes["fasta"] = tempOutNames;
+        
+        Groups = g; groupfile = ""; namefile = "";
+        fastafile = ffile; countfile = count; outputdir = outd;
+        string temp = current->getProcessors(); processors = current->setProcessors(temp);
+        
+        if (processors > Groups.size()) { processors = Groups.size(); m->mothurOut("Reducing processors to " + toString(Groups.size()) + ".\n"); }
+        
+        //divide the groups between the processors
+        int remainingPairs = Groups.size();
+        int startIndex = 0;
+        for (int remainingProcessors = processors; remainingProcessors > 0; remainingProcessors--) {
+          int numPairs = remainingPairs; //case for last processor
+          if (remainingProcessors != 1) { numPairs = ceil(remainingPairs / remainingProcessors); }
+          lines.push_back(linePair(startIndex, (startIndex+numPairs))); //startIndex, endIndex
+          startIndex = startIndex + numPairs;
+          remainingPairs = remainingPairs - numPairs;
+        }
+        
+        splitFastaCount();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand - mothurRun");
+        exit(1);
+    }
+}
 //**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(string option) : Command()  {
 	try {
@@ -382,13 +415,29 @@ int driverRunCount(splitGroups2Struct* params){
         
         params->Groups = ct.getNamesOfGroups();
         
-        string processTag = toString(params->start) + "_" + toString(params->end);
-        string uniqueFasta = params->fastafile+processTag;
-        string uniqueList = params->listfile+processTag;
-        
-        if (params->fastafile != "") { params->util.copyFile(params->fastafile, uniqueFasta); }else{ uniqueFasta = ""; }
-        if (params->listfile != "")  { params->util.copyFile(params->listfile, uniqueList); }else{ uniqueList = ""; }
+        vector<string> listFileOutputNames;
+        if (params->listfile != "") { //create output file names
+            InputData input(params->listfile, "list", nullVector);
+            ListVector* list = input.getListVector();
+            
+            vector<string> files;
+            map<string, vector<string> >::iterator it = params->group2Files.find(params->Groups[0]);
+            
+            if (it != params->group2Files.end()) { files = it->second; }
+            else { params->m->mothurOut("[ERROR]: Can find group " + params->Groups[0] + ", quitting.\n"); params->m->setControl_pressed(true);  }
 
+            string listFileRoot = params->outputDir + params->util.getRootName(params->util.getSimpleName(files[1]));
+            string listExt = params->util.getExtension(files[1]);
+
+            while(list != nullptr) {
+                                
+                listFileOutputNames.push_back(listFileRoot + list->getLabel() + listExt);
+
+                delete list;
+                list = input.getListVector();
+            }
+        }
+        
         //GroupName -> files(fasta, list, count)
         for (int i = 0; i < params->Groups.size(); i++) { //Groups only contains the samples assigned to this process
            
@@ -398,39 +447,113 @@ int driverRunCount(splitGroups2Struct* params){
             if (it != params->group2Files.end()) { files = it->second; }
             else { params->m->mothurOut("[ERROR]: Can find group " + params->Groups[i] + ", quitting.\n"); params->m->setControl_pressed(true); break; }
             
+            //print new count file
             string newCountFile = files[2];
             vector<string> tempGroups; tempGroups.push_back(params->Groups[i]);
             ct.printCompressedTable(newCountFile, tempGroups);
             params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
             vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
-            set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
+            unordered_set<string> thisGroupsNames = params->util.mothurConvert(namesOfSeqsInGroup);
+            
+            //If more than one distance, use vector of list file outputs
+            pair<string, string> fastaFilePair(params->fastafile, files[0]);
+            pair<string, vector<string> > listFilePair(params->listfile, listFileOutputNames);
             
             params->m->mothurOut("/******************************************/\n");
             params->m->mothurOut("Selecting sequences for group " + params->Groups[i] + "\n\n");
-            
-            Command* getCommand = new GetSeqsCommand(thisGroupsNames, uniqueFasta, uniqueList, "", "", params->outputDir);
-            
-            map<string, vector<string> > filenames = getCommand->getOutputFiles();
+        
+            Command* getCommand = new GetSeqsCommand(thisGroupsNames, fastaFilePair, listFilePair, nullStringPair, "");
             
             delete getCommand;
-            
-            if (params->fastafile != "") {
-                params->util.renameFile(filenames["fasta"][0], files[0]);
-                params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]);
-            }
-            if (params->listfile != "") {
-                params->util.renameFile(filenames["list"][0], files[1]);
-                params->outputNames.push_back(files[1]); params->outputTypes["list"].push_back(files[1]);
-            }
+        
+            if (params->listfile != "") { params->outputNames.insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); params->outputTypes["list"].insert(params->outputNames.end(), listFileOutputNames.begin(), listFileOutputNames.end()); }
         
             params->m->mothurOut("/******************************************/\n\n");
+
+            if (params->fastafile != "") { params->outputNames.push_back(files[0]); params->outputTypes["fasta"].push_back(files[0]); }
             
             if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {	params->util.mothurRemove(params->outputNames[i]);	} break; }
         }
+           
+        return 0;
+    }
+    catch(exception& e) {
+        params->m->errorOut(e, "SplitGroupCommand", "driverRunCount");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+//assumes nameToGroup[seq1] -> 1,3 means seq1 should be written to outputFiles[1] and outputFiles[3]
+       
+int driverFastaCount(splitGroups3Struct* params){
+    try {
+        CountTable ct; ct.readTable(params->countfile, true, false, params->Groups);
+        if (!ct.hasGroupInfo()) { params->m->mothurOut("[ERROR]: your count file does not contain group info, cannot split by group.\n"); params->m->setControl_pressed(true); }
         
-        if (params->fastafile != "") { params->util.mothurRemove(uniqueFasta); }
-        if (params->listfile != "") { params->util.mothurRemove(uniqueList);   }
+        if (params->m->getControl_pressed()) { return 0; }
         
+        params->Groups = ct.getNamesOfGroups();
+        int numGroups = params->Groups.size();
+        
+        for (int i = 0; i < numGroups; i++) { //Groups only contains the samples assigned to this process
+           
+            vector<string> outputFastaFiles; string g = ""; int count = 0;
+            unordered_map<string, vector<int> > nameToGroup; unordered_map<string, vector<int> >::iterator it;
+            string groupNameOutput = ""; vector<string> groups;
+            
+            while ((count < params->splitNum) && (i < numGroups) ){
+            
+                //print new count file
+                string newCountFile = params->fileRootExts[2] + params->Groups[i] + params->fileRootExts[3];
+                vector<string> tempGroups; tempGroups.push_back(params->Groups[i]);
+                ct.printCompressedTable(newCountFile, tempGroups);
+                params->outputNames.push_back(newCountFile); params->outputTypes["count"].push_back(newCountFile);
+                
+                vector<string> namesOfSeqsInGroup = ct.getNamesOfSeqs(params->Groups[i]);
+            
+                string newFasta = params->fileRootExts[0] + params->Groups[i] + params->fileRootExts[1];
+                outputFastaFiles.push_back(newFasta);
+                
+                for (string name : namesOfSeqsInGroup) {
+                    it = nameToGroup.find(name);
+                    
+                    if (it != nameToGroup.end()) {
+                        (it->second).push_back(count);
+                    }else {
+                        vector<int> thisSeqsGroups; thisSeqsGroups.push_back(count);
+                        nameToGroup[name] = thisSeqsGroups;
+                    }
+                }
+            
+                groups.push_back(params->Groups[i]);
+                
+                groupNameOutput += params->Groups[i] + "-";
+                
+                count++; i++;
+            }
+            
+            i--;
+            
+            if (groupNameOutput.length() != 0) { groupNameOutput = groupNameOutput.substr(0, groupNameOutput.length()-1); }
+                
+            params->m->mothurOut("\nSelecting sequences for groups " + groupNameOutput + "\n\n");
+        
+            Command* getCommand = new GetSeqsCommand(nameToGroup, params->fastafile, outputFastaFiles, groups);
+        
+            map<string, vector<string> > fileOutputs = getCommand->getOutputFiles();
+            
+            delete getCommand;
+            
+            map<string, vector<string> >::iterator itOut = fileOutputs.find("fasta");
+            if (itOut != fileOutputs.end()) {
+                vector<string> o = itOut->second;
+                for (string name : o) { params->outputNames.push_back(name); params->outputTypes["fasta"].push_back(name);  }
+            }
+
+            if (params->m->getControl_pressed()) {  for (int i = 0; i < params->outputNames.size(); i++) {    params->util.mothurRemove(params->outputNames[i]);    } break; }
+        }
+           
         return 0;
     }
     catch(exception& e) {
@@ -490,10 +613,54 @@ void SplitGroupCommand::splitCountOrGroup(bool isCount){
     }
 }
 //**********************************************************************************************************************
+//splitGroups3Struct(string count, string fasta, string outd, vector<string> g, int st, int en) : countfile(count), start(st), end(en)
+void SplitGroupCommand::splitFastaCount(){
+    try {
+        //create array of worker threads
+        vector<std::thread*> workerThreads;
+        vector<splitGroups3Struct*> data;
+
+        //Lauch worker threads
+        for (int i = 0; i < processors-1; i++) {
+            splitGroups3Struct* dataBundle = new splitGroups3Struct(countfile, fastafile, outputdir, Groups, lines[i+1].start, lines[i+1].end);
+            data.push_back(dataBundle);
+    
+            workerThreads.push_back(new std::thread(driverFastaCount, dataBundle));
+        }
+
+        splitGroups3Struct* dataBundle = new splitGroups3Struct(countfile, fastafile, outputdir, Groups, lines[0].start, lines[0].end);
+        
+        driverFastaCount(dataBundle);
+        
+        outputNames.insert(outputNames.end(), dataBundle->outputNames.begin(), dataBundle->outputNames.end());
+        for (itTypes = dataBundle->outputTypes.begin(); itTypes != dataBundle->outputTypes.end(); itTypes++) {
+            outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+        }
+        
+        delete dataBundle;
+        
+        for (int i = 0; i < processors-1; i++) {
+            workerThreads[i]->join();
+
+            outputNames.insert(outputNames.end(), data[i]->outputNames.begin(), data[i]->outputNames.end());
+            for (itTypes = data[i]->outputTypes.begin(); itTypes != data[i]->outputTypes.end(); itTypes++) {
+                outputTypes[itTypes->first].insert(outputTypes[itTypes->first].end(), itTypes->second.begin(), itTypes->second.end());
+            }
+
+            delete data[i];
+            delete workerThreads[i];
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "SplitGroupCommand", "splitFastaCount");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 int driverSplitFlow(splitGroupsStruct* params){
     try {
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         vector<string> namesGroups;
         if (params->groupfile != "") {
             groupMap = new GroupMap(params->groupfile);
@@ -507,24 +674,24 @@ int driverSplitFlow(splitGroupsStruct* params){
         
         if (params->Groups.size() == 0) { params->Groups = namesGroups; }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         string name, flows;
         int count = 0;
         ifstream in; params->util.openInputFile(params->inputFileName, in);
-        in >> flows; params->util.gobble(in);
+        in >> flows; gobble(in);
         
         while (!in.eof()) {
             if (params->m->getControl_pressed()) { break; }
             
-            in >> name; params->util.gobble(in);
-            flows = params->util.getline(in); params->util.gobble(in);
+            in >> name; gobble(in);
+            flows = params->util.getline(in); gobble(in);
             
             vector<string> thisSeqsGroups;
-            if (groupMap != NULL) {
+            if (groupMap != nullptr) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            }else if (ct != nullptr) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 
@@ -556,7 +723,7 @@ int driverSplitFlow(splitGroupsStruct* params){
             }
         }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         return count;
     }
@@ -569,8 +736,8 @@ int driverSplitFlow(splitGroupsStruct* params){
 //**********************************************************************************************************************
 int driverSplitFastq(splitGroupsStruct* params){
     try {
-        GroupMap* groupMap = NULL;
-        CountTable* ct = NULL;
+        GroupMap* groupMap = nullptr;
+        CountTable* ct = nullptr;
         vector<string> namesGroups;
         if (params->groupfile != "") {
             groupMap = new GroupMap(params->groupfile);
@@ -582,7 +749,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             namesGroups = ct->getNamesOfGroups();
         }else { params->m->mothurOut("[ERROR]: you must provide a count or group file to split by group. quitting... \n"); params->m->setControl_pressed(true);  return 0; }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         int count = 0;
         ifstream in; params->util.openInputFile(params->inputFileName, in);
@@ -591,14 +758,14 @@ int driverSplitFastq(splitGroupsStruct* params){
             if (params->m->getControl_pressed()) { break; }
             
             bool ignore = false;
-            FastqRead thisRead(in, ignore, params->format); params->util.gobble(in);
+            FastqRead thisRead(in, ignore, params->format); gobble(in);
             string name = thisRead.getName();
             
             vector<string> thisSeqsGroups;
-            if (groupMap != NULL) {
+            if (groupMap != nullptr) {
                 string thisGroup = groupMap->getGroup(name);
                 thisSeqsGroups.push_back(thisGroup);
-            }else if (ct != NULL) { thisSeqsGroups  = ct->getGroups(name); }
+            }else if (ct != nullptr) { if (ct->inTable(name)) { thisSeqsGroups  = ct->getGroups(name); } }
             
             for (int i = 0; i < thisSeqsGroups.size(); i++) {
                 
@@ -633,7 +800,7 @@ int driverSplitFastq(splitGroupsStruct* params){
             }
         }
         
-        if (params->m->getControl_pressed()) { if (groupMap != NULL) { delete groupMap; }else if (ct != NULL) { delete ct; } return 0; }
+        if (params->m->getControl_pressed()) { if (groupMap != nullptr) { delete groupMap; }else if (ct != nullptr) { delete ct; } return 0; }
         
         return count;
         

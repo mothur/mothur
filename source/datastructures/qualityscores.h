@@ -24,7 +24,7 @@
 class QualityScores {
 public:
 	QualityScores();
-    ~QualityScores() {}
+    ~QualityScores() = default;
     QualityScores(string n, vector<int> qs);
 	QualityScores(ifstream&);
     #ifdef USE_BOOST

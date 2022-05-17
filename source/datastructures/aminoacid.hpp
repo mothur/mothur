@@ -60,13 +60,14 @@ class AminoAcid {
 public:
     AminoAcid();
     AminoAcid(char);    //AminoAcid character
-    ~AminoAcid() {}
+    AminoAcid(string);    //dna codon length of 3
+    ~AminoAcid() = default;
     
     string getName();
-    char getAmino()          { return aminoBase; }
-    int getNum()             { return aminoNum; }
+    char getAmino()          { return aminoBase;    }
+    int getNum()             { return aminoNum;     }
     void setAmino(char c);
-    
+        
 protected:
     
     MothurOut* m;
@@ -74,10 +75,14 @@ protected:
     
     char aminoBase;
     int aminoNum;
-    set<char> validAminoAcids;
+    
+    map<char, int> indexes; //A -> 0, T -> 1, G -> 2, C -> 3, N -> 4, Gap -> 5
+    map<char, int>::iterator it;
 
-    void fillValidAminoAcid();
+    char findAmino(string);
     char getAminoBase(string); //from name
+    int getIndex(char x);
+    
     
 };
 

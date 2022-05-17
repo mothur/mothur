@@ -223,13 +223,13 @@ int Oligos::readOligos(){
 		
 		while(!inOligos.eof()){
             
-            string line = util.getline(inOligos); util.gobble(inOligos);
+            string line = util.getline(inOligos); gobble(inOligos);
         
 			if(line[0] == '#'){} //ignore
 			else{
                 vector<string> pieces = util.splitWhiteSpace(line);
                 
-                type = util.toUpper(pieces[0]); //make type case insensitive
+                toUpper(pieces[0]); type = pieces[0];//make type case insensitive
                 
                 oligo = pieces[1]; formatOligo(oligo);
                 

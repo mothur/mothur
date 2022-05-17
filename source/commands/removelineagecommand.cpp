@@ -447,8 +447,7 @@ string RemoveLineageCommand::readTax(){
         util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 
-		ifstream in;
-		util.openInputFile(taxfile, in);
+		ifstream in; util.openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -466,8 +465,8 @@ string RemoveLineageCommand::readTax(){
 
 			if (m->getControl_pressed()) { break; }
 
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
 			
             Taxonomy thisSeq(name, tax);
             vector<Taxon> otuTax = thisSeq.getTaxons();
@@ -505,8 +504,7 @@ string RemoveLineageCommand::readConsTax(){
 		util.openOutputFile(outputFileName, out);
         util.openOutputFile(accnosFileName, outAccnos);
 		
-		ifstream in;
-		util.openInputFile(constaxonomy, in);
+		ifstream in; util.openInputFile(constaxonomy, in);
 		string otuLabel, tax;
         
         //read headers

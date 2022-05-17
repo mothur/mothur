@@ -175,7 +175,7 @@ int IndicatorCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
-		long start = time(NULL);
+		long start = time(nullptr);
 
 		//read designfile if given and set up groups for read of sharedfiles
         vector<string> allGroups;
@@ -187,7 +187,7 @@ int IndicatorCommand::execute(){
 						
 			namesSeqs = designMap->getNamesGroups(Groups);
         }else {
-            InputData* input = NULL;
+            InputData* input = nullptr;
             if (sharedfile != "") { input = new InputData(sharedfile, "sharedfile", Groups);  }
             else { input = new InputData(sharedfile, "relabundfile", Groups); }
             
@@ -265,7 +265,7 @@ int IndicatorCommand::execute(){
 			}
 		}
 		
-		m->mothurOut("\n\nIt took " + toString(time(NULL) - start) + " secs to find the indicator species.\n");
+		m->mothurOut("\n\nIt took " + toString(time(nullptr) - start) + " secs to find the indicator species.\n");
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
 				
@@ -441,15 +441,15 @@ vector<float> getValues(vector< vector<SharedRAbundVector*> >& groupings, vector
 int IndicatorCommand::GetIndicatorSpecies(){
 	try {
         
-        SharedRAbundVectors* lookup = NULL; SharedRAbundFloatVectors* lookupFloat = NULL;
+        SharedRAbundVectors* lookup = nullptr; SharedRAbundFloatVectors* lookupFloat = nullptr;
         if (sharedfile != "") {
             lookup = getShared();
             if (m->getControl_pressed()) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
-            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
+            if (lookup == nullptr) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
         }else {
             lookupFloat = getSharedFloat();
             if (m->getControl_pressed()) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
-            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
+            if (lookupFloat == nullptr) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
         }
 
         
@@ -608,15 +608,15 @@ int IndicatorCommand::GetIndicatorSpecies(){
 //report all otu values to file
 int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	try {
-        SharedRAbundVectors* lookup = NULL; SharedRAbundFloatVectors* lookupFloat = NULL;
+        SharedRAbundVectors* lookup = nullptr; SharedRAbundFloatVectors* lookupFloat = nullptr;
         if (sharedfile != "") {
             lookup = getShared();
             if (m->getControl_pressed()) { if (designfile != "") { delete designMap; } delete lookup;   return 0; }
-            if (lookup == NULL) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
+            if (lookup == nullptr) { m->mothurOut("[ERROR] reading shared file.\n");  return 0; }
         }else {
             lookupFloat = getSharedFloat();
             if (m->getControl_pressed()) {  if (designfile != "") { delete designMap; } delete lookupFloat; return 0; }
-            if (lookupFloat == NULL) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
+            if (lookupFloat == nullptr) { m->mothurOut("[ERROR] reading relabund file.\n");  return 0; }
         }
         
 		string thisOutputDir = outputdir;

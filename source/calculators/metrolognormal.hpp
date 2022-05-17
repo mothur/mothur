@@ -20,7 +20,7 @@ class MetroLogNormal : public DiversityCalculator {
 public:
     
     MetroLogNormal(int fi, double sigx, double sigy, double sigS, int n, string st);
-    ~MetroLogNormal() {}
+    ~MetroLogNormal() = default;
     
     vector<string> getValues(SAbundVector* rank);
     

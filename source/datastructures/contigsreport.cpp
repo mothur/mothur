@@ -35,7 +35,7 @@ void ContigsReport::read(ifstream& repFile){
         repFile >> numsNs;
         repFile >> expectedErrors;
         
-        util.gobble(repFile);
+        gobble(repFile);
     }
     catch(exception& e) {
         m->errorOut(e, "ContigsReport", "read");

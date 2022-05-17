@@ -161,7 +161,7 @@ int ListOtusCommand::execute(){
             SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
             
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -175,7 +175,7 @@ int ListOtusCommand::execute(){
             SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
             Groups = lookup->getNamesGroups();
             
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -187,7 +187,7 @@ int ListOtusCommand::execute(){
         }else if (format == "list") {
             ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                    
-            while (list != NULL) {
+            while (list != nullptr) {
                        
                 if (m->getControl_pressed()) { delete list; break; }
                        
@@ -251,11 +251,9 @@ int ListOtusCommand::createList(string constaxFile){
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(inputFileName));
         string outputFileName = getOutputFileName("accnos",variables);
         outputNames.push_back(outputFileName);  outputTypes["accnos"].push_back(outputFileName);
-        ofstream out;
-        util.openOutputFile(outputFileName, out);
         
-        ifstream in;
-        util.openInputFile(constaxFile, in);
+        ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(constaxFile, in);
         string otuLabel;
         
         //read headers
@@ -266,7 +264,7 @@ int ListOtusCommand::createList(string constaxFile){
             if (m->getControl_pressed()) { break; }
             
             in >> otuLabel;
-            string junk = util.getline(in); util.gobble(in);
+            string junk = util.getline(in); gobble(in);
             
             out << otuLabel << endl;
         }

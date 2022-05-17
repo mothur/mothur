@@ -169,12 +169,12 @@ int CountSeqsCommand::execute(){
             variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(namefile));
             string outputFileName = getOutputFileName("count", variables);
             
-            long start = time(NULL);
+            long start = time(nullptr);
             unsigned long long total = process(outputFileName);
             
             if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return 0; }
             
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create a table for " + toString(total) + " sequences.\n\n");
+            m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to create a table for " + toString(total) + " sequences.\n\n");
             m->mothurOut("Total number of sequences: " + toString(total) + "\n");
         }else {
             if (outputdir == "") { outputdir = util.hasPath(sharedfile); }
@@ -189,7 +189,7 @@ int CountSeqsCommand::execute(){
             vector<string> currentLabels = lookup->getOTUNames();
             Groups = lookup->getNamesGroups();
             
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -280,12 +280,8 @@ map<int, string> CountSeqsCommand::processNameFile(string name) {
 	try {
         map<int, string> indexToNames;
         
-        ofstream out;
-        util.openOutputFile(name, out);
-        
-        //open input file
-		ifstream in;
-		util.openInputFile(namefile, in);
+        ofstream out; util.openOutputFile(name, out);
+		ifstream in; util.openInputFile(namefile, in);
         
         string rest = "";
         char buffer[4096];
@@ -357,12 +353,8 @@ map<int, string> CountSeqsCommand::getGroupNames(string filename, set<string>& n
         map<string, int> groupIndex;
         map<string, int>::iterator it;
         
-        ofstream out;
-        util.openOutputFile(filename, out);
-        
-        //open input file
-		ifstream in;
-		util.openInputFile(groupfile, in);
+        ofstream out; util.openOutputFile(filename, out);
+		ifstream in; util.openInputFile(groupfile, in);
         
         string rest = "";
         char buffer[4096];

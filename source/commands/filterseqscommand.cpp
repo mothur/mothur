@@ -306,13 +306,12 @@ int FilterSeqsCommand::filterSequences() {
 /**************************************************************************************/
 void driverRunFilter(filterRunData* params) {
 	try {
-        ifstream in;
-		params->util.openInputFile(params->filename, in);
+        ifstream in; params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
 
 		bool done = false;
 		params->count = 0;
@@ -323,7 +322,7 @@ void driverRunFilter(filterRunData* params) {
 				
 				if (params->m->getControl_pressed()) { break; }
 				
-				Sequence seq(in); params->util.gobble(in);
+				Sequence seq(in); gobble(in);
 				if (seq.getName() != "") {
 					string align = seq.getAligned();
 					string filterSeq = "";
@@ -460,13 +459,12 @@ void driverCreateFilter(filterData* params) {
         if(params->hard.compare("") != 0)	{	params->F.doHard(params->hard);                             }
         else                                {	params->F.setFilter(string(params->alignmentLength, '1'));	}
         
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
 				
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
 
 		bool done = false;
 		params->count = 0;
@@ -476,7 +474,7 @@ void driverCreateFilter(filterData* params) {
 				
             if (params->m->getControl_pressed()) { break; }
 					
-			Sequence seq(in); params->util.gobble(in);
+			Sequence seq(in); gobble(in);
 			if (seq.getName() != "") {
                     if (params->m->getDebug()) { params->m->mothurOutJustToScreen("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); }
                 if (seq.getAligned().length() != params->alignmentLength) { params->m->mothurOut("[ERROR]: Sequences are not all the same length, please correct.\n"); error = true; if (!params->m->getDebug()) { params->m->setControl_pressed(true); }else{ params->m->mothurOutJustToLog("[DEBUG]: " + seq.getName() + " length = " + toString(seq.getAligned().length()) + '\n'); } }

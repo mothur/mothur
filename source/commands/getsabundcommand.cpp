@@ -153,7 +153,7 @@ int GetSAbundCommand::execute(){
             
             SAbundVector* sabund = util.getNextSAbund(input, allLines, userLabels, processedLabels, lastLabel);
             
-            while (sabund != NULL) {
+            while (sabund != nullptr) {
                        
                 if (m->getControl_pressed()) { delete sabund; break; }
                        
@@ -200,7 +200,7 @@ int GetSAbundCommand::processList(ofstream& out){
         
         if (m->getControl_pressed()) {  delete list;  return 0; }
         
-        while (list != NULL) {
+        while (list != nullptr) {
                    
             if (m->getControl_pressed()) { delete list; break; }
                    

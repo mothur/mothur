@@ -25,7 +25,7 @@ ValidParameters::ValidParameters() {
 }
 /***********************************************************************/
 
-ValidParameters::~ValidParameters() {}
+ValidParameters::~ValidParameters() = default;
 
 /***********************************************************************/
 bool ValidParameters::isValidParameter(string parameter, vector<string> cParams, string value) {
@@ -294,7 +294,7 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
                 it->second = util.removeQuotes(it->second);
                 string filename = it->second;
                 if (util.checkLocations(filename, current->getLocations())) { container[parameter] = filename; ableToOpen = true; }
-                else { m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine(); return "not open";  }
+                else { m->mothurOut("Unable to open " + container[parameter] + "\n"); return "not open";  }
                 
                 //check phylip file to make sure its really phylip and not column
                 if ((it->first == "phylip") && (ableToOpen)) {

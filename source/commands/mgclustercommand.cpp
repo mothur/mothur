@@ -272,11 +272,11 @@ int MGClusterCommand::runOptiCluster(){
         
         string distfile = blastfile;
         
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         
         OptiData* matrix; matrix = new OptiBlastMatrix(distfile, thisNamefile, nameOrCount, false, cutoff, length, penalty, minWanted);
         
-        ClusterMetric* metricCalc = NULL;
+        ClusterMetric* metricCalc = nullptr;
         if (metric == "mcc")             { metricCalc = new MCC();              }
         else if (metric == "sens")       { metricCalc = new Sensitivity();      }
         else if (metric == "spec")       { metricCalc = new Specificity();      }
@@ -335,7 +335,7 @@ int MGClusterCommand::runOptiCluster(){
         
         while ((delta > stableMetric) && (iters < maxIters)) {
             
-            long start = time(NULL);
+            long start = time(nullptr);
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -348,8 +348,8 @@ int MGClusterCommand::runOptiCluster(){
             results = cluster.getStats(tp, tn, fp, fn);
             numBins = cluster.getNumBins();
             
-            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-            outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+            m->mothurOut(toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            outStep << (toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
             m->mothurOutEndLine();
             outStep << endl;
@@ -440,7 +440,7 @@ int MGClusterCommand::runOptiCluster(){
         sensFile << '\n';
         sensFile.close();
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " seconds to cluster.\n");
 
         delete metricCalc; delete matrix;
         
@@ -479,7 +479,7 @@ int MGClusterCommand::runMothurCluster(){
         float previousDist = 0.00000;
         float rndPreviousDist = 0.00000;
         
-        time_t start = time(NULL);
+        time_t start = time(nullptr);
         
         //read blastfile - creates sparsematrices for the distances and overlaps as well as a listvector
         //must remember to delete those objects here since readBlast does not
@@ -487,7 +487,7 @@ int MGClusterCommand::runMothurCluster(){
         read->read(nameMap);
         
         list = new ListVector(nameMap->getListVector());
-        RAbundVector* rabund = NULL;
+        RAbundVector* rabund = nullptr;
         
         if(countfile != "") {
             rabund = new RAbundVector();
@@ -572,11 +572,11 @@ int MGClusterCommand::runMothurCluster(){
                         return 0;
                     }
                     
-                    temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
+                    temp->setLabel(toString(rndPreviousDist));
                     printData(temp, counts, printHeaders);
                     delete temp;
                 }else{
-                    oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
+                    oldList.setLabel(toString(rndPreviousDist));
                     printData(&oldList, counts, printHeaders);
                 }
             }
@@ -603,11 +603,11 @@ int MGClusterCommand::runMothurCluster(){
                     return 0;
                 }
                 
-                temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
+                temp->setLabel(toString(rndPreviousDist));
                 printData(temp, counts, printHeaders);
                 delete temp;
             }else{
-                oldList.setLabel(toString(rndPreviousDist,  precisionLength-1));
+                oldList.setLabel(toString(rndPreviousDist));
                 printData(&oldList, counts, printHeaders);
             }
         }
@@ -636,7 +636,7 @@ int MGClusterCommand::runMothurCluster(){
             m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster.\n"); 
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " seconds to cluster.\n"); 
         
         return 0;
 

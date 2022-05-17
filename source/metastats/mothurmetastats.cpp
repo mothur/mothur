@@ -24,7 +24,7 @@ MothurMetastats::MothurMetastats(double t, int n) {
 	}	
 }
 /***********************************************************/
-MothurMetastats::~MothurMetastats() {}
+MothurMetastats::~MothurMetastats() = default;
 /***********************************************************/
  //main metastats function
 int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> >& data, int secGroupingStart, vector<string> currentLabels, bool fillProps) {
@@ -210,7 +210,7 @@ int MothurMetastats::runMetastats(string outputFileName, vector< vector<double> 
         
         // And now we write the files to a text file.
 		struct tm *local;
-		time_t t; t = time(NULL);
+		time_t t; t = time(nullptr);
 		local = localtime(&t);
 		
 		ofstream out;

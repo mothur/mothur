@@ -36,7 +36,7 @@ struct repStruct {
 		
 		repStruct(){}
 		repStruct(string n, string seq, string b, int sb, int s, string g) : name(n), bin(b), size(s), group(g), simpleBin(sb), sequence(seq) { }
-		~repStruct() {}
+		~repStruct() = default;
 };
 
 class GetOTURepCommand : public Command {

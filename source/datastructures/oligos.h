@@ -20,7 +20,7 @@ class Oligos {
 public:
 	Oligos(string);
 	Oligos();
-    ~Oligos() {}
+    ~Oligos() = default;
     
     int read(string);
     int read(string, bool); //read without reversing the paired barcodes, for make.contigs.

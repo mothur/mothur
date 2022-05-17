@@ -119,11 +119,11 @@ int DegapSeqsCommand::execute(){
         string degapFile = getOutputFileName("fasta", variables);
         outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
         
-        long start = time(NULL);
+        long start = time(nullptr);
         
         int numSeqs = createProcesses(fastafile, degapFile);
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to degap " + toString(numSeqs) + " sequences.\n\n");
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
 		
@@ -177,12 +177,12 @@ void driverDegap(degapData* params){
         
         inFASTA.seekg(params->start);
         
-        if (params->start == 0) {  params->util.zapGremlins(inFASTA); params->util.gobble(inFASTA); }
+        if (params->start == 0) {  params->util.zapGremlins(inFASTA); gobble(inFASTA); }
         
         while(!inFASTA.eof()){
             if (params->m->getControl_pressed()) {  break; }
             
-            Sequence currSeq(inFASTA); params->util.gobble(inFASTA);
+            Sequence currSeq(inFASTA); gobble(inFASTA);
             if (currSeq.getName() != "") {
                 params->threadWriter->write(">"+currSeq.getName()+"\n"+currSeq.getUnaligned()+"\n");
                 params->count++;

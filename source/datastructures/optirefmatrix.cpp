@@ -27,11 +27,11 @@ OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile
     
     square = false;
     
-    set<string> noRefNamesSet;
+    unordered_set<string> noRefNamesSet;
     readFiles(distFile, distFormat, dupsFile, dupsFormat, noRefNamesSet);
 }
 /***********************************************************************/
-OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, set<string> accnosRefFileNames) : OptiData(c) {
+OptiRefMatrix::OptiRefMatrix(string distFile, string distFormat, string dupsFile, string dupsFormat, double c, unordered_set<string> accnosRefFileNames) : OptiData(c) {
     
     numFitSingletons = 0;
     numRefSingletons = 0;
@@ -454,7 +454,7 @@ set<long long> OptiRefMatrix::getCloseRefSeqs(long long index){
 //only used in open reference clustering
 ListVector* OptiRefMatrix::getFitListSingle() {
     try {
-        ListVector* singlelist = NULL;
+        ListVector* singlelist = nullptr;
         
         if (singletons.size() == 0) { }
         else {
@@ -520,7 +520,7 @@ void OptiRefMatrix::randomizeRefs() {
 }
 /***********************************************************************/
 //for denovo method
-int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, set<string>& optionalRefNames) {
+int OptiRefMatrix::readFiles(string distFile, string distFormat, string dupsFile, string dupsFormat, unordered_set<string>& optionalRefNames) {
     try {
         string namefile, countfile;
         if (dupsFormat == "name") { namefile = dupsFile; countfile = ""; }
@@ -766,9 +766,9 @@ map<long long, long long> OptiRefMatrix::readColumnSingletons(vector<bool>& sing
         
         while(fileHandle){  //let's assume it's a triangular matrix...
             
-            fileHandle >> firstName; util.gobble(fileHandle);
-            fileHandle >> secondName; util.gobble(fileHandle);
-            fileHandle >> distance;	util.gobble(fileHandle); // get the row and column names and distance
+            fileHandle >> firstName; gobble(fileHandle);
+            fileHandle >> secondName; gobble(fileHandle);
+            fileHandle >> distance;	gobble(fileHandle); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             
@@ -910,14 +910,14 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 
                 if (m->getControl_pressed()) {  break; }
                 
-                in >> name; util.gobble(in);
+                in >> name; gobble(in);
                 
                 if (hasName) { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(long long j=0;j<i;j++){
                     
-                    in >> distance; util.gobble(in);
+                    in >> distance; gobble(in);
                     
                     if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
@@ -933,18 +933,18 @@ int OptiRefMatrix::readPhylip(string distFile, bool hasName, map<string, string>
                 }
             }
         }else{
-            for(long long i=0;i<nseqs;i++){ in >> distance;  } util.gobble(in);
+            for(long long i=0;i<nseqs;i++){ in >> distance;  } gobble(in);
             
             for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  break; }
                 
-                in >> name; util.gobble(in);
+                in >> name; gobble(in);
                 
                 if (hasName) { name = names[name]; } //redundant names
                 nameMap[singletonIndexSwap[i]] = name;
                 
                 for(long long j=0;j<nseqs;j++){
-                    in >> distance; util.gobble(in);
+                    in >> distance; gobble(in);
                     
                     if (util.isEqual(distance,-1)) { distance = 1000000; }
                     
@@ -980,9 +980,9 @@ int OptiRefMatrix::readColumn(string distFile, bool hasName, map<string, string>
         
         while(in){  //let's assume it's a triangular matrix...
             
-            in >> firstName; util.gobble(in);
-            in >> secondName; util.gobble(in);
-            in >> distance;	util.gobble(in); // get the row and column names and distance
+            in >> firstName; gobble(in);
+            in >> secondName; gobble(in);
+            in >> distance;	gobble(in); // get the row and column names and distance
             
             if (m->getDebug()) { cout << firstName << '\t' << secondName << '\t' << distance << endl; }
             

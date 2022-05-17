@@ -35,7 +35,7 @@ class OptiFitCluster : public Cluster {
 public:
     
     OptiFitCluster(OptiData* mt, ClusterMetric* met, long long ns);
-    ~OptiFitCluster() {}
+    ~OptiFitCluster() = default;
     
     int initialize(double& value, bool randomize, vector<vector< string > > existingBins, vector<string>, string, bool);
     bool update(double&); //returns whether list changed and MCC

@@ -541,14 +541,14 @@ vector<Sequence> DeCalculator::findClosest(Sequence querySeq, vector<Sequence*>&
 			double distRight = distcalculator->calcDist(queryRight, dbRight);
 
 			SeqDist subjectLeft;
-			subjectLeft.seq = NULL;
+			subjectLeft.seq = nullptr;
 			subjectLeft.dist = distLeft;
 			subjectLeft.index = j;
 			
 			distsLeft.push_back(subjectLeft);
 			
 			SeqDist subjectRight;
-			subjectRight.seq = NULL;
+			subjectRight.seq = nullptr;
 			subjectRight.dist = distRight;
 			subjectRight.index = j;
 			

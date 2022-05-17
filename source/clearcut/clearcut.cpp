@@ -77,7 +77,7 @@
 int clearcut_main(int argc, char *argv[]) {
 
   DMAT *dmat;         /* The working distance matrix */
-  DMAT *dmat_backup = NULL;/* A backup distance matrix    */
+  DMAT *dmat_backup = nullptr;/* A backup distance matrix    */
   NJ_TREE *tree;      /* The phylogenetic tree       */
   NJ_ARGS *nj_args;   /* Structure for holding command-line arguments */
   long int i;
@@ -164,7 +164,7 @@ int clearcut_main(int argc, char *argv[]) {
     }
 
     /* RECORD THE PRECISE TIME OF THE START OF THE NEIGHBOR-JOINING */
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     startUs = ((unsigned long long) tv.tv_sec * 1000000ULL)
       + ((unsigned long long) tv.tv_usec);
 
@@ -185,7 +185,7 @@ int clearcut_main(int argc, char *argv[]) {
     }
 
     /* RECORD THE PRECISE TIME OF THE END OF THE NEIGHBOR-JOINING */
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     endUs = ((unsigned long long) tv.tv_sec * 1000000ULL)
       + ((unsigned long long) tv.tv_usec);
 
@@ -517,7 +517,7 @@ NJ_permute(long int *perm,
 
   /* check to see if vector of long ints is valid */
   if(!perm) {
-    fprintf(stderr, "Clearcut: NULL permutation pointer in NJ_permute()\n");
+    fprintf(stderr, "Clearcut: nullptr permutation pointer in NJ_permute()\n");
     exit(-1);
   }
   
@@ -1098,8 +1098,8 @@ NJ_neighbor_joining(NJ_ARGS *nj_args,
 		    DMAT *dmat) {
 
   
-  NJ_TREE   *tree = NULL;
-  NJ_VERTEX *vertex = NULL;
+  NJ_TREE   *tree = nullptr;
+  NJ_VERTEX *vertex = nullptr;
 
   long int a, b;
   float min;
@@ -1112,7 +1112,7 @@ NJ_neighbor_joining(NJ_ARGS *nj_args,
   vertex = NJ_init_vertex(dmat);
   if(!vertex) {
     fprintf(stderr, "Clearcut:  Could not initialize vertex in NJ_neighbor_joining()\n");
-    return(NULL);
+    return(nullptr);
   }
   
   /* we iterate until the working distance matrix has only 2 entries */
@@ -1224,7 +1224,7 @@ NJ_relaxed_nj(NJ_ARGS *nj_args,
   int join_flag;
   int additivity_mode;
   long int hmincount, vmincount;
-  long int *permutation = NULL;
+  long int *permutation = nullptr;
 
 
 
@@ -1238,7 +1238,7 @@ NJ_relaxed_nj(NJ_ARGS *nj_args,
     permutation = (long int *)calloc(dmat->size, sizeof(long int));
     if(!permutation) {
       fprintf(stderr, "Clearcut:  Memory allocation error in NJ_relaxed_nj()\n");
-      return(NULL);
+      return(nullptr);
     }
   }
 
@@ -1654,8 +1654,8 @@ NJ_init_vertex(DMAT *dmat) {
     
     vertex->nodes[i] = (NJ_TREE *)calloc(1, sizeof(NJ_TREE));
 
-    vertex->nodes[i]->left  = NULL;
-    vertex->nodes[i]->right = NULL;
+    vertex->nodes[i]->left  = nullptr;
+    vertex->nodes[i]->right = nullptr;
     
     vertex->nodes[i]->taxa_index = i;
   }
@@ -1816,9 +1816,9 @@ void
 NJ_shuffle_distance_matrix(DMAT *dmat) {
 
   
-  long int *perm      = NULL;
-  char **tmp_taxaname = NULL;
-  float *tmp_val      = NULL;
+  long int *perm      = nullptr;
+  char **tmp_taxaname = nullptr;
+  float *tmp_val      = nullptr;
   long int i, j;
 
   
@@ -2005,7 +2005,7 @@ NJ_dup_dmat(DMAT *src) {
   /* free what we may have allocated */
   NJ_free_dmat(dest);
   
-  return(NULL);
+  return(nullptr);
 }
 
 

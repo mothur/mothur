@@ -400,7 +400,7 @@ void HeatMap::printLegend(int y, float maxbin) {
 			else						{	label = maxbin * log10(51*i) / log10(255);	}
 			label = int(label * 1000 + 0.5);
 			label /= 1000.0;
-			string text = toString(label, 3);
+			string text = toString(label);
 			
 			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + text + "</text>\n";
 			x += 60;

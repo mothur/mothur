@@ -111,10 +111,10 @@ void* metropolis0 (void * pvInitMetro)
     char *szSampleFile = (char *) malloc(1024*sizeof(char));
     const gsl_rng_type *T;
     gsl_rng            *ptGSLRNG;
-    //FILE    *sfp = NULL;
+    //FILE    *sfp = nullptr;
     int nS = 0, nSDash = 0, nIter = 0;
     double dRand = 0.0, dNLL = 0.0;
-    void   *pvRet = NULL;
+    void   *pvRet = nullptr;
     
     /*set up random number generator*/
     T        = gsl_rng_default;

@@ -324,7 +324,7 @@ void driver(vsearchData* params){
             while (!in.eof()) {
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seq(in); params->util.gobble(in);
+                Sequence seq(in); gobble(in);
                 
                 if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
             }
@@ -434,7 +434,7 @@ void driver(vsearchData* params){
             
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             out << seq.getName() << endl; params->numChimeras++;
         }
@@ -459,7 +459,7 @@ int ChimeraVsearchCommand::execute(){
 
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -510,7 +510,6 @@ int ChimeraVsearchCommand::execute(){
             if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting.\n");  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
             
             util.printVsearchFile(nameMapCount, newFasta, ";size=", ";");
-            fastafile = newFasta;
         }
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
@@ -559,12 +558,12 @@ int ChimeraVsearchCommand::execute(){
                 long long numRedund = 0;
                 int totalChimeras = deconvoluteResults(outputFileName, accnosFileName, alnsFileName, numRedund);
                 
-                m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(totalChimeras) + " chimeras were found.\n");
+                m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check your sequences. " + toString(totalChimeras) + " chimeras were found.\n");
                 m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples.\n");
             }else {
                 
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -573,10 +572,10 @@ int ChimeraVsearchCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2;
                     util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) {
                         if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                     }
                     out2.close();
@@ -588,24 +587,10 @@ int ChimeraVsearchCommand::execute(){
         }else{
             if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
             
-            
             map<string, vector<string> > dummay;
             vector<string> dummyGroups;
-           
-            //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
-            ifstream in; util.openInputFile(fastafile, in);
-            ofstream outT; util.openOutputFile(newFasta, outT);
             
-            while (!in.eof()) {
-                if (m->getControl_pressed()) { break;  }
-                
-                Sequence seq(in); util.gobble(in);
-                
-                if (seq.getName() != "") { seq.printUnAlignedSequence(outT); }
-            }
-            in.close(); outT.close();
-            
-            vsearchData* dataBundle = new vsearchData(processors, dummay, outputFileName, vsearchLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, dummay, outputFileName, vsearchLocation, templatefile, newFasta, countfile, accnosFileName, alnsFileName, "", dummyGroups, vars);
 
             dataBundle->setDriverNames(outputFileName, alnsFileName, accnosFileName);
             driver(dataBundle);
@@ -613,8 +598,7 @@ int ChimeraVsearchCommand::execute(){
             int numChimeras = dataBundle->numChimeras;
             
             //add headings
-            ofstream out;
-            util.openOutputFile(outputFileName+".temp", out);
+            ofstream out; util.openOutputFile(outputFileName+".temp", out);
             out << "Score\tQuery\tParentA\tParentB\tIdQM\tIdQA\tIdQB\tIdAB\tIdQT\tLY\tLN\tLA\tRY\tRN\tRA\tDiv\tYN\n";
             out.close();
             
@@ -624,9 +608,9 @@ int ChimeraVsearchCommand::execute(){
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
             
             //remove file made for vsearch
-            if (templatefile == "self") {  util.mothurRemove(fastafile); }
+            if (templatefile == "self") {  util.mothurRemove(newFasta); }
             
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
+            m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
         
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
@@ -730,7 +714,7 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
                 
-                in2 >> name; util.gobble(in2);
+                in2 >> name; gobble(in2);
             
                 itChimeras = chimerasInFile.find(name);
                 
@@ -768,13 +752,13 @@ int ChimeraVsearchCommand::deconvoluteResults(string outputFileName, string accn
             if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
             
             bool print = false;
-            in >> temp1;	util.gobble(in);
-            in >> name;		util.gobble(in);
-            in >> parent1;	util.gobble(in);
-            in >> parent2;	util.gobble(in);
-            in >> parent3;	util.gobble(in);
+            in >> temp1;	gobble(in);
+            in >> name;		gobble(in);
+            in >> parent1;	gobble(in);
+            in >> parent2;	gobble(in);
+            in >> parent3;	gobble(in);
             in >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> temp9 >> temp10 >> temp11 >> temp12 >> temp13 >> flag;
-            util.gobble(in);
+            gobble(in);
             
                             //is this name already in the file
             itNames = namesInFile.find((name));
@@ -896,15 +880,14 @@ int ChimeraVsearchCommand::readFasta(string filename, map<string, string>& seqs)
     try {
         //create input file for vsearch
         //read through fastafile and store info
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         int num = 0;
         while (!in.eof()) {
             
             if (m->getControl_pressed()) { in.close(); return 0; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             seqs[seq.getName()] = seq.getUnaligned();
             num++;
         }
@@ -957,15 +940,14 @@ string ChimeraVsearchCommand::getCountFile(string& inputFile){
 int getSeqsVsearch(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile, MothurOut* m){
     try {
         int error = 0;
-        ifstream in;
-        Utils util; util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; Utils util; util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             itNameMap = nameMap.find(seq.getName());
             
@@ -1003,7 +985,7 @@ void driverGroups(vsearchData* params){
         
         Utils util;
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
-            long start = time(NULL);
+            long start = time(nullptr);
             
             if (params->m->getControl_pressed()) {  return; }
             
@@ -1035,14 +1017,13 @@ void driverGroups(vsearchData* params){
             //This table will zero out group counts for seqs determined to be chimeric by that group.
             if (params->vars->dups) {
                 if (!util.isBlank(params->accnos+thisGroup)) {
-                    ifstream in;
-                    util.openInputFile(params->accnos+thisGroup, in);
+                    ifstream in; util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
                         //add group to seqs2
                         vector<string> namesOfChimeras;
                         while (!in.eof()) {
-                            in >> name; util.gobble(in);
+                            in >> name; gobble(in);
                             namesOfChimeras.push_back(name);
                         }
                         in.close();
@@ -1053,7 +1034,7 @@ void driverGroups(vsearchData* params){
                         ofstream out;
                         util.openOutputFile(params->accnos+thisGroup+".temp", out);
                         while (!in.eof()) {
-                            in >> name; util.gobble(in);
+                            in >> name; gobble(in);
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
                                 vector<string> tempNames; util.splitAtComma(itN->second, tempNames);
@@ -1074,7 +1055,7 @@ void driverGroups(vsearchData* params){
             util.appendFiles((params->accnos+thisGroup), params->accnos); util.mothurRemove((params->accnos+thisGroup));
             if (params->vars->chimealns) { util.appendFiles((params->alns+thisGroup), params->alns); util.mothurRemove((params->alns+thisGroup)); }
             
-            params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
+            params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(thisGroupsSeqs) + " sequences from group " + thisGroup + ".\n");
         }
         params->count = totalSeqs;
     }
@@ -1125,7 +1106,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
                 }
                 else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
             }
-            vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, fastafile, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
+            vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName+extension, vsearchLocation, templatefile, filename+extension, countfile,  accnos+extension, alns+extension, accnos+".byCount."+extension, thisGroups, vars);
             data.push_back(dataBundle);
             
             workerThreads.push_back(new std::thread(driverGroups, dataBundle));
@@ -1141,7 +1122,7 @@ int ChimeraVsearchCommand::createProcessesGroups(map<string, vector<string> >& g
             }
             else { m->mothurOut("[ERROR]: missing files for group " + groups[j] + ", skipping\n"); }
         }
-        vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, fastafile, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
+        vsearchData* dataBundle = new vsearchData(processors, thisGroupsParsedFiles, outputFName, vsearchLocation, templatefile, filename, countfile, accnos, alns, accnos+".byCount.temp", thisGroups, vars);
         driverGroups(dataBundle);
         num = dataBundle->count;
         int numChimeras = dataBundle->numChimeras;

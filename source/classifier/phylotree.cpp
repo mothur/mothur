@@ -41,30 +41,30 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 		numSeqs = 0;
 		
         //read version
-        string line = util.getline(in); util.gobble(in);
+        string line = util.getline(in); gobble(in);
         
-        in >> numNodes; util.gobble(in);
+        in >> numNodes; gobble(in);
         
         tree.resize(numNodes);
         
-        in >> maxLevel; util.gobble(in);
+        in >> maxLevel; gobble(in);
         
         for (int i = 0; i < tree.size(); i++) {
-            tree[i].name = util.getline(in); util.gobble(in);
-            in >> tree[i].level >> tree[i].parent; util.gobble(in);
+            tree[i].name = util.getline(in); gobble(in);
+            in >> tree[i].level >> tree[i].parent; gobble(in);
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(i) + '\t' + tree[i].name + '\t' + toString(tree[i].level) + "\n"); }
         }
         
         //read genus nodes
         int numGenus = 0;
-        in >> numGenus; util.gobble(in);
+        in >> numGenus; gobble(in);
         
         if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(numNodes) + '\t' + toString(numGenus) + '\t' + toString(maxLevel) + "\n"); }
 
         int gnode, gsize;
         totals.clear();
         for (int i = 0; i < numGenus; i++) {
-            in >> gnode >> gsize; util.gobble(in);
+            in >> gnode >> gsize; gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + toString(gnode) + '\t' + toString(gsize) + '\t' + toString(i) + "\n"); }
 
@@ -118,33 +118,6 @@ PhyloTree::PhyloTree(string tfile){
 		exit(1);
 	}
 }
-
-/**************************************************************************************************/
-
-string PhyloTree::getNextTaxon(string& heirarchy, string seqname){
-	try {
-		string currentLevel = "";
-		if(heirarchy != ""){
-			int pos = heirarchy.find_first_of(';');
-			
-			if (pos == -1) { //you can't find another ;
-				currentLevel = heirarchy;
-				heirarchy = "";
-				m->mothurOut(seqname + " is missing a ;, please check for other errors.\n"); 
-			}else{
-				currentLevel=heirarchy.substr(0,pos);
-				if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
-				else { heirarchy = ""; }
-			}
-			
-		}
-		return currentLevel;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PhyloTree", "getNextTaxon");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 
 vector<string> PhyloTree::getSeqs(string seqTaxonomy){
@@ -156,14 +129,12 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 		int currentNode = 0;
 
         util.removeConfidences(seqTaxonomy);
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
         
-        string taxon;
-        while(seqTaxonomy != ""){
+        for(string taxon : taxons) {
 			
 			if (m->getControl_pressed()) { return names; }
-			
-			taxon = getNextTaxon(seqTaxonomy, "");
-            
+			            
             if (m->getDebug()) { m->mothurOut(taxon +'\n'); }
 			
 			if (taxon == "") {  m->mothurOut(taxCopy + " has an error in the taxonomy.  This may be due to a ;;\n"); break;  }
@@ -176,9 +147,10 @@ vector<string> PhyloTree::getSeqs(string seqTaxonomy){
 			else{											//otherwise, error this taxonomy is not in tree
 				m->mothurOut("[ERROR]: " + taxCopy + " is not in taxonomy tree, please correct.\n"); m->setControl_pressed(true); return names;
 			}
-            
-			if (seqTaxonomy == "") {   names = tree[currentNode].accessions;	}
 		}
+        
+        //return names in this taxonomy
+        names = tree[currentNode].accessions;
         
         return names;
     }
@@ -249,23 +221,19 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		numSeqs++;
 		
 		map<string, int>::iterator childPointer;
-		
-		int currentNode = 0;
-		int level = 0;
-		
+
 		tree[0].accessions.push_back(seqName);
 		util.removeConfidences(seqTaxonomy);
-        string taxon;// = getNextTaxon(seqTaxonomy);
-	
-		while(seqTaxonomy != ""){
-			
-			level++;
-		
+        vector<string> taxons; util.splitAtChar(seqTaxonomy, taxons, ';');
+        
+        int level = 0;
+        int currentNode = 0;
+        
+        for(string taxon : taxons) {
+            
+            level++;
+					
 			if (m->getControl_pressed()) { return 0; }
-			
-			//somehow the parent is getting one too many accnos
-			//use print to reassign the taxa id
-			taxon = getNextTaxon(seqTaxonomy, seqName);
             
             if (m->getDebug()) { m->mothurOut(seqName +'\t' + taxon +'\n'); }
 			
@@ -290,11 +258,10 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				tree[currentNode].accessions.push_back(seqName);
 				name2Taxonomy[seqName] = currentNode;
 			}
-	
-			if (seqTaxonomy == "") {   uniqueTaxonomies.insert(currentNode);	}
-
 		}
         
+        uniqueTaxonomies.insert(currentNode);
+
         //save maxLevel for binning the unclassified seqs
         if (level > maxLevel) { maxLevel = level; }
         

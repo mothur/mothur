@@ -148,8 +148,8 @@ int GetOtusCommand::execute(){
         //get labels you want to keep
 		labels = util.readAccnos(accnosfile);
         //simplfy labels
-        set<string> newLabels;
-        for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
+        unordered_set<string> newLabels;
+        for (auto it = labels.begin(); it != labels.end(); it++) {  newLabels.insert(util.getSimpleLabel(*it)); }
         labels = newLabels;
         
 		if (m->getControl_pressed()) { return 0; }
@@ -201,11 +201,8 @@ int GetOtusCommand::readClassifyOtu(){
         variables["[extension]"] = util.getExtension(constaxonomyfile);
 		string outputFileName = getOutputFileName("constaxonomy", variables);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(constaxonomyfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(constaxonomyfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
@@ -221,8 +218,8 @@ int GetOtusCommand::readClassifyOtu(){
             string otu = ""; string tax = "unknown";
             int size = 0;
             
-            in >> otu >> size; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> otu >> size; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("Otu=" + otu + ", size=" + toString(size) + ", tax=" + tax + "\n"); }
             
@@ -259,11 +256,8 @@ int GetOtusCommand::readOtuAssociation(){
         variables["[extension]"] = util.getExtension(otucorrfile);
 		string outputFileName = getOutputFileName("otucorr", variables);
 
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-		ifstream in;
-		util.openInputFile(otucorrfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(otucorrfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
@@ -279,7 +273,7 @@ int GetOtusCommand::readOtuAssociation(){
             string otu1 = ""; 
             string otu2 = ""; 
             in >> otu1 >> otu2;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if ((labels.count(util.getSimpleLabel(otu1)) != 0) && (labels.count(util.getSimpleLabel(otu2)) != 0)){
 				wroteSomething = true;
@@ -314,12 +308,8 @@ int GetOtusCommand::readCorrAxes(){
         variables["[extension]"] = util.getExtension(corraxesfile);
 		string outputFileName = getOutputFileName("corraxes", variables);
 
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-		
-        
-		ifstream in;
-		util.openInputFile(corraxesfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+		ifstream in; util.openInputFile(corraxesfile, in);
 		
 		bool wroteSomething = false;
 		int selectedCount = 0;
@@ -334,7 +324,7 @@ int GetOtusCommand::readCorrAxes(){
             
             string otu = ""; 
             in >> otu;
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             if (labels.count(util.getSimpleLabel(otu)) != 0) {
 				wroteSomething = true;
@@ -480,7 +470,7 @@ int GetOtusCommand::getListVector(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && (userLabels.size() != 0)) {
+		while((list != nullptr) && (userLabels.size() != 0)) {
 			if (m->getControl_pressed()) {  return 0;  }
 			
 			if(labels.count(list->getLabel()) == 1){
@@ -550,8 +540,8 @@ SharedRAbundVectors* GetOtusCommand::getShared(){
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup != NULL) && (userLabels.size() != 0)) {
-			if (m->getControl_pressed()) {   delete lookup; return NULL;  }
+		while((lookup != nullptr) && (userLabels.size() != 0)) {
+			if (m->getControl_pressed()) {   delete lookup; return nullptr;  }
 			
 			if(labels.count(lookup->getLabel()) == 1){
 				processedLabels.insert(lookup->getLabel()); userLabels.erase(lookup->getLabel());

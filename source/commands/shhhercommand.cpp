@@ -130,7 +130,7 @@ ShhherCommand::ShhherCommand(string option) : Command() {
                 ifstream flowFilesFile;
                 util.openInputFile(flowFilesFileName, flowFilesFile);
                 while(flowFilesFile){
-                    string fName = util.getline(flowFilesFile); util.gobble(flowFilesFile);
+                    string fName = util.getline(flowFilesFile); gobble(flowFilesFile);
                     
                     //check to make sure both are able to be opened
                     bool ableToOpen = util.checkLocations(fName, current->getLocations());
@@ -226,7 +226,7 @@ int ShhherCommand::execute(){
 	try {
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
 		getSingleLookUp();	if (m->getControl_pressed()) { return 0; }
 		getJointLookUp();	if (m->getControl_pressed()) { return 0; }
@@ -251,7 +251,7 @@ int ShhherCommand::execute(){
 
 		}
 
-        m->mothurOut("It took " + toString(time(NULL) - startTime) + " secs to de-noise your sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - startTime) + " secs to de-noise your sequences.\n");
 
 		m->mothurOut("\nOutput File Names: \n"); 
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i] +"\n"); 	} m->mothurOutEndLine();
@@ -274,7 +274,7 @@ inline bool compareFileSizes(string left, string right){
     string filename = left;
     pFile = fopen (filename.c_str(),"rb");
     string error = "Error opening " + filename;
-    if (pFile==NULL) perror (error.c_str());
+    if (pFile==nullptr) perror (error.c_str());
     else{
         fseek (pFile, 0, SEEK_END);
         leftsize=ftell (pFile);
@@ -288,7 +288,7 @@ inline bool compareFileSizes(string left, string right){
     filename = right;
     pFile2 = fopen (filename.c_str(),"rb");
     error = "Error opening " + filename;
-    if (pFile2==NULL) perror (error.c_str());
+    if (pFile2==nullptr) perror (error.c_str());
     else{
         fseek (pFile2, 0, SEEK_END);
         rightsize=ftell (pFile2);
@@ -304,11 +304,10 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
         vector<string> files;
         int count = 0;
         
-        ifstream in;
-        util.openInputFile(filename, in);
+        ifstream in; util.openInputFile(filename, in);
         
         int thisNumFLows = 0;
-        in >> thisNumFLows; util.gobble(in);
+        in >> thisNumFLows; gobble(in);
         
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
@@ -322,7 +321,7 @@ vector<string> ShhherCommand::parseFlowFiles(string filename){
             int numLinesWrote = 0;
             for (int i = 0; i < largeSize; i++) {
                 if (in.eof()) { break; }
-                string line = util.getline(in); util.gobble(in);
+                string line = util.getline(in); gobble(in);
                 out << line << endl;
                 numLinesWrote++;
             }
@@ -395,13 +394,13 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 
                 m->mothurOut("Calculating distances between flowgrams...\n");
                 string distFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.dist";
-                begTime = time(NULL);
+                begTime = time(nullptr);
                
                 
                 flowDistParentFork(numFlowCells, distFileName, numUniques, mapUniqueToSeq, mapSeqToUnique, lengths, flowDataPrI, flowDataIntI);
                 
                 m->mothurOutEndLine();
-                m->mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
+                m->mothurOut("Total time: " + toString(time(nullptr) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
                 
                 
                 string namesFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".shhh.names";
@@ -463,7 +462,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                 int iter = 0;
                 
                 begClock = clock();
-                begTime = time(NULL);
+                begTime = time(nullptr);
                 
                 m->mothurOut("\nDenoising flowgrams...\n");
                 m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
@@ -473,7 +472,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                     if (m->getControl_pressed()) { break; }
                     
                     double cycClock = clock();
-                    unsigned long long cycTime = time(NULL);
+                    unsigned long long cycTime = time(nullptr);
                     fill(numOTUs, seqNumber, seqIndex, cumNumSeqs, nSeqsPerOTU, aaP, aaI);
                     
                     if (m->getControl_pressed()) { break; }
@@ -500,7 +499,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
                     
                     iter++;
                     
-                    m->mothurOut(toString(iter) + '\t' + toString(maxDelta) + '\t' + toString(nLL) + '\t' + toString(time(NULL) - cycTime) + '\t' + toString((clock() - cycClock)/(double)CLOCKS_PER_SEC) + '\n');
+                    m->mothurOut(toString(iter) + '\t' + toString(maxDelta) + '\t' + toString(nLL) + '\t' + toString(time(nullptr) - cycTime) + '\t' + toString((clock() - cycClock)/(double)CLOCKS_PER_SEC) + '\n');
                     
                 }	
                 
@@ -569,7 +568,7 @@ int ShhherCommand::driver(vector<string> filenames, string thisCompositeFASTAFil
 			}
             
             numCompleted++;
-			m->mothurOut("Total time to process " + fileNameForOutput + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
+			m->mothurOut("Total time to process " + fileNameForOutput + ":\t" + toString(time(nullptr) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
@@ -625,7 +624,7 @@ int ShhherCommand::getFlowData(string filename, vector<string>& thisSeqNameVecto
 				int intI = int(100 * intensity + 0.0001);
 				thisFlowDataIntI.push_back(intI);
 			}
-			util.gobble(flowFile);
+			gobble(flowFile);
 		}
 		flowFile.close();
 		
@@ -660,7 +659,7 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 		outStream.setf(ios::showpoint);
 		outStream.precision(6);
 		
-		int begTime = time(NULL);
+		int begTime = time(nullptr);
 		double begClock = clock();
         
 		for(int i=0;i<stopSeq;i++){
@@ -678,7 +677,7 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 				}
 			}
 			if(i % 100 == 0){
-				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - begTime));
+				m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - begTime));
 				m->mothurOutJustToScreen("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC)+"\n");
 			}
 		}
@@ -689,7 +688,7 @@ int ShhherCommand::flowDistParentFork(int numFlowCells, string distFileName, int
 		
 		if (m->getControl_pressed()) {}
 		else {
-			m->mothurOutJustToScreen(toString(stopSeq-1) + "\t" + toString(time(NULL) - begTime));
+			m->mothurOutJustToScreen(toString(stopSeq-1) + "\t" + toString(time(nullptr) - begTime));
 			m->mothurOutJustToScreen("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC)+"\n");
 		}
         

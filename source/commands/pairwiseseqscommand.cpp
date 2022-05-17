@@ -442,7 +442,7 @@ vector<kmerCount> getUniqueKmers(vector<int> seqsKmers, int i){
 //the higher the kmercutoff the higher the aligned dist. As kmercutoff approaches 0, aligned dist aproaches 1.
 int driverColumn(pairwiseData* params){
     try {
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
@@ -505,9 +505,9 @@ int driverColumn(pairwiseData* params){
                     if(dist <= params->cutoff){ params->count++; params->threadWriter->write(seqI.getName() + ' ' + seqJ.getName() + ' ' + toString(dist) + "\n"); }
                 }
             }
-            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
+            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n"); }
         }
-        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n");
         
         delete alignment; delete distCalculator;
         
@@ -521,7 +521,7 @@ int driverColumn(pairwiseData* params){
 /**************************************************************************************************/
 int driverFitCalc(pairwiseData* params){
     try {
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
@@ -584,9 +584,9 @@ int driverFitCalc(pairwiseData* params){
                 }
             }
             
-            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
+            if((i+1) % 100 == 0){ params->m->mothurOutJustToScreen(toString(i+1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n"); }
         }
-        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n");
         
         delete alignment; delete distCalculator;
         
@@ -601,7 +601,7 @@ int driverFitCalc(pairwiseData* params){
 int driverLt(pairwiseData* params){
     try {
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
@@ -667,10 +667,10 @@ int driverLt(pairwiseData* params){
             
             outFile << endl;
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n"); }
             
         }
-        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n");
         
         outFile.close();
         delete alignment;
@@ -687,7 +687,7 @@ int driverLt(pairwiseData* params){
 int driverSquare(pairwiseData* params){
     try {
         
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
         
         Alignment* alignment;
         if(params->align == "gotoh")			{	alignment = new GotohOverlap(params->gapOpen, params->gapExtend, params->match, params->misMatch, params->longestBase);			}
@@ -755,10 +755,10 @@ int driverSquare(pairwiseData* params){
             
             outFile << endl; 
             
-            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n");  }
+            if(i % 100 == 0){ params->m->mothurOutJustToScreen(toString(i) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n");  }
             
         }
-        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(NULL) - startTime)+ "\t" + toString(params->count) +"\n"); 
+        params->m->mothurOutJustToScreen(toString(params->end-1) + "\t" + toString(time(nullptr) - startTime)+ "\t" + toString(params->count) +"\n"); 
         
         outFile.close();
         delete alignment;
@@ -821,8 +821,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 
         //Lauch worker threads
         for (int i = 0; i < processors-1; i++) {
-            OutputWriter* threadWriter = NULL;
-            pairwiseData* dataBundle = NULL;
+            OutputWriter* threadWriter = nullptr;
+            pairwiseData* dataBundle = nullptr;
             string extension = toString(i+1) + ".temp";
             if (output == "column") {
                 threadWriter = new OutputWriter(synchronizedOutputFile);
@@ -832,7 +832,7 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             dataBundle->setVariables(align, calc, countends, output, alignDB, oldFastaDB, lines[i+1].start, lines[i+1].end, match, misMatch, gapOpen, gapExtend, longestBase, cutoff, kmerCutoff, kmerSize, kmerDB, lengths, oldkmerDB, oldlengths);
             data.push_back(dataBundle);
             
-            std::thread* thisThread = NULL;
+            std::thread* thisThread = nullptr;
             if (output == "column")     {
                 if (fitCalc)    { thisThread = new std::thread(driverFitCalc, dataBundle);   }
                 else            {  thisThread = new std::thread(driverColumn, dataBundle);   }
@@ -842,8 +842,8 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
             workerThreads.push_back(thisThread);
         }
 
-        OutputWriter* threadWriter = NULL;
-        pairwiseData* dataBundle = NULL;
+        OutputWriter* threadWriter = nullptr;
+        pairwiseData* dataBundle = nullptr;
         if (output == "column") {
             threadWriter = new OutputWriter(synchronizedOutputFile);
             dataBundle = new pairwiseData(threadWriter);
@@ -897,7 +897,7 @@ bool PairwiseSeqsCommand::sanityCheck() {
         while (!inFasta.eof()) {
             if (m->getControl_pressed()) {  inFasta.close(); return good;  }
             
-            Sequence temp(inFasta);  util.gobble(inFasta);
+            Sequence temp(inFasta);  gobble(inFasta);
             
             if (temp.getName() != "") {
                 namesOldFasta.insert(temp.getName());  //save name
@@ -918,7 +918,7 @@ bool PairwiseSeqsCommand::sanityCheck() {
         while (!inDist.eof()) {
             if (m->getControl_pressed()) {  inDist.close(); outDist.close(); util.mothurRemove(outputFile); return good;  }
             
-            inDist >> name1; util.gobble(inDist); inDist >> name2; util.gobble(inDist); inDist >> dist; util.gobble(inDist);
+            inDist >> name1; gobble(inDist); inDist >> name2; gobble(inDist); inDist >> dist; gobble(inDist);
             
             //both names are in fasta file and distance is below cutoff
             if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }

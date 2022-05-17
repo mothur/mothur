@@ -369,14 +369,13 @@ int ShhhSeqsCommand::readData(correctDist* correct, seqNoise& noise, vector<stri
 		util.readNames(namefile, nameMap);
 		bool error = false;
 		
-		ifstream in;
-		util.openInputFile(fastafile, in);
+		ifstream in; util.openInputFile(fastafile, in);
 		
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			
 			if (seq.getName() != "") {
 				correct->addSeq(seq.getName(), seq.getAligned());
@@ -481,7 +480,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
         string fileroot = params->outputDir + params->util.getRootName(params->util.getSimpleName(params->fastafile));
         
         for (map<string, vector<string> >::iterator it = group2Files.begin(); it != group2Files.end(); it++) {
-            long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
+            long start = time(nullptr);	 if (params->m->getControl_pressed()) {  break; }
             
             string thisGroup = it->first;
             
@@ -500,7 +499,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
                 while (!in.eof()) {
                     if (params->m->getControl_pressed()) { break; }
                     
-                    Sequence seq(in); params->util.gobble(in);
+                    Sequence seq(in); gobble(in);
                     
                     if (seq.getName() != "") { thisSeqs.push_back(seq); }
                 }
@@ -533,7 +532,7 @@ void driverShhSeqsGroups(shhhseqsData* params){
                 params->util.appendFiles(params->newNFile+thisGroup, params->newNFile+params->extension); params->util.mothurRemove(params->newNFile+thisGroup);
                 params->mapfileNames.push_back(params->newMFile+thisGroup+".map");
                 
-                params->m->mothurOut("It took " + toString(time(NULL) - start) + " secs to process group " + thisGroup + ".\n");
+                params->m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to process group " + thisGroup + ".\n");
             }
         }
     }

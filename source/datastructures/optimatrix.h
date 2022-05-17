@@ -10,17 +10,15 @@
 #define __Mothur__optimatrix__
 
 #include "optidata.hpp"
-
-
-class OptiMatrix : public OptiData {
-    
-    
-public:
-    
+/*
 #ifdef UNIT_TEST
     OptiMatrix() : OptiData(0.03) {};
 #endif
-    
+*/
+
+class OptiMatrix : public OptiData {
+
+public:
     OptiMatrix(vector< set<long long> >, vector<string>, vector<string>, double); //closeness, namemap, singleton, cutoff
     OptiMatrix(string, string, string, string, double, bool); //distfile, dupsFile, dupsFormat, distFormat, cutoff, sim
     ~OptiMatrix(){}

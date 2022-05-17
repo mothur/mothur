@@ -256,7 +256,7 @@ int SplitAbundCommand::splitList() {
         
         if (m->getControl_pressed()) { delete list; return 0; }
         
-        while (list != NULL) {
+        while (list != nullptr) {
             
             if (m->getControl_pressed()) { delete list; break; }
             
@@ -568,14 +568,13 @@ int SplitAbundCommand::splitNames() { //namefile
         }
 			
 		//open input file
-		ifstream in;
-		util.openInputFile(namefile, in);
+		ifstream in; util.openInputFile(namefile, in);
 		
 		while (!in.eof()) {
 			if (m->getControl_pressed()) { break; }
 			
 			string firstCol, secondCol;
-            in >> firstCol; util.gobble(in); in >> secondCol; util.gobble(in);
+            in >> firstCol; gobble(in); in >> secondCol; gobble(in);
 			
 			int size = util.getNumNames(secondCol);
 				

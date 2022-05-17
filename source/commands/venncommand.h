@@ -19,7 +19,7 @@ class VennCommand : public Command {
 
 public:
 	VennCommand(string);
-	~VennCommand() {}
+	~VennCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "venn";					}

@@ -104,19 +104,19 @@ string RemoveSeqsCommand::getOutputPattern(string type) {
 }
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dupsFileType, string output) {
+RemoveSeqsCommand::RemoveSeqsCommand(string accnos, pair<string,string> dupsFile, string dupsFileType) {
     try {
         names = util.readAccnos(accnos);
     
-        outputdir = output; dups = true; abort = false; calledHelp = false;
+        dups = true; abort = false; calledHelp = false;
         
         vector<string> tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         
-        if (dupsFile != "") {
-            if (dupsFileType == "count")    { readCount(dupsFile); }
-            else                            {  readName(dupsFile); }
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second); }
+            else                            {  readName(dupsFile.first, dupsFile.second); }
         }
     }
     catch(exception& e) {
@@ -126,19 +126,19 @@ RemoveSeqsCommand::RemoveSeqsCommand(string accnos, string dupsFile, string dups
 }
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(set<string> n, string dupsFile, string dupsFileType, string output) {
+RemoveSeqsCommand::RemoveSeqsCommand(unordered_set<string> n, pair<string,string> dupsFile, string dupsFileType) {
     try {
         names = n;
     
-        outputdir = output; dups = true; abort = false; calledHelp = false;
+        dups = true; abort = false; calledHelp = false;
         
         vector<string> tempOutNames;
         outputTypes["name"] = tempOutNames;
         outputTypes["count"] = tempOutNames;
         
-        if (dupsFile != "") {
-            if (dupsFileType == "count")    { readCount(dupsFile); }
-            else                            {  readName(dupsFile); }
+        if (dupsFile.first != "") {
+            if (dupsFileType == "count")    { readCount(dupsFile.first, dupsFile.second); }
+            else                            {  readName(dupsFile.first, dupsFile.second); }
         }
     }
     catch(exception& e) {
@@ -368,7 +368,7 @@ void RemoveSeqsCommand::readFasta(string fastafile){
                     }
 				}else {  removedCount++;  }
 			}
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close();	out.close();
 		
@@ -385,8 +385,79 @@ void RemoveSeqsCommand::readFasta(string fastafile){
 	}
 }
 //**********************************************************************************************************************
+void RemoveSeqsCommand::readGZFastq(string fastqfile){
+    try {
+        
+#ifdef USE_BOOST
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(fastqfile));
+        variables["[extension]"] = ".fastq" + util.getExtension(fastqfile);
+        string outputFileName = getOutputFileName("fastq", variables);
+        
+        ifstream in; boost::iostreams::filtering_istream inBoost;
+        util.openInputFileBinary(fastqfile, in, inBoost);
+        
+        ofstream file; ostream* out; boost::iostreams::filtering_streambuf<boost::iostreams::output> outBoost;
+        util.openOutputFileBinary(outputFileName, file, out, outBoost);
+        
+        bool wroteSomething = false; int removedCount = 0; set<string> uniqueNames;
+        
+        while(!inBoost.eof()){
+            
+            if (m->getControl_pressed()) { break; }
+            
+            //read sequence name
+            bool ignore;
+            FastqRead fread(inBoost, ignore, format);  gobble(inBoost);
+            
+            if (!ignore) {
+                string name = fread.getName();
+                
+                if (names.count(name) == 0) {
+                    if (uniqueNames.count(name) == 0) { //this name hasn't been seen yet
+                        wroteSomething = true;
+                        fread.printFastq(*out);
+                        uniqueNames.insert(name);
+                    }else {
+                        m->mothurOut("[WARNING]: " + name + " is in your fastq file more than once.  Mothur requires sequence names to be unique. I will only add it once.\n");
+                    }
+                }else { removedCount++; }
+            }
+            gobble(inBoost);
+        }
+        in.close(); inBoost.pop();
+        boost::iostreams::close(outBoost);
+        file.close(); delete out;
+        
+        if (m->getControl_pressed()) { util.mothurRemove(outputFileName); return; }
+        
+        if (wroteSomething == false) { m->mothurOut("[WARNING]: " + fastqfile + " contains only sequences from the .accnos file.\n");   }
+        outputNames.push_back(outputFileName);  outputTypes["fastq"].push_back(outputFileName);
+        
+        m->mothurOut("Removed " + toString(removedCount) + " sequences from " + fastqfile + ".\n");
+#else
+        m->mothurOut("[ERROR]: mothur requires the boost libraries to read and write compressed files. Please decompress your files and rerun.\n");
+
+#endif
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readFastq");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 void RemoveSeqsCommand::readFastq(string fastqfile){
 	try {
+        
+        bool gz = util.isGZ(fastqfile)[1];
+        
+        if (gz) { readGZFastq(fastqfile); return; }
+        
 		string thisOutputDir = outputdir;
 		if (outputdir == "") {  thisOutputDir += util.hasPath(fastqfile);  }
 		map<string, string> variables;
@@ -405,7 +476,7 @@ void RemoveSeqsCommand::readFastq(string fastqfile){
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove(outputFileName); return; }
 			
             //read sequence name
-            bool ignore; FastqRead fread(in, ignore, format); util.gobble(in);
+            bool ignore; FastqRead fread(in, ignore, format); gobble(in);
             
             if (!ignore) {
                 string name = fread.getName();
@@ -422,7 +493,7 @@ void RemoveSeqsCommand::readFastq(string fastqfile){
                 }else { removedCount++; }
             }
             
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -456,7 +527,7 @@ void RemoveSeqsCommand::readQual(string qualfile){
         
 		while(!in.eof()){	
 			
-            QualityScores qual(in); util.gobble(in);
+            QualityScores qual(in); gobble(in);
 			
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(qual.getName());
@@ -475,7 +546,7 @@ void RemoveSeqsCommand::readQual(string qualfile){
                 }
 			}else {  removedCount++;  }
 			
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -493,18 +564,32 @@ void RemoveSeqsCommand::readQual(string qualfile){
 }
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readCount(string countfile){
+    try {
+        
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
+        variables["[extension]"] = util.getExtension(countfile);
+        string outputFileName = getOutputFileName("count", variables);
+        
+        readCount(countfile, outputFileName);
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readCount");
+        exit(1);
+    }
+}
+
+//**********************************************************************************************************************
+void RemoveSeqsCommand::readCount(string countfile, string outputFileName){
 	try {
         
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(countfile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(countfile));
-        variables["[extension]"] = util.getExtension(countfile);
-		string outputFileName = getOutputFileName("count", variables);
-		
         CountTable ct; ct.readTable(countfile, true, false); int originalCount = ct.getNumSeqs();
         
-        for (set<string>::iterator it = names.begin(); it != names.end(); it++) {
+        for (auto it = names.begin(); it != names.end(); it++) {
             ct.zeroOutSeq(*it);
             if (m->getControl_pressed()) {  return; }
         }
@@ -539,7 +624,7 @@ void RemoveSeqsCommand::readList(string listfile){
 		
 		bool wroteSomething = false; int removedCount = 0;
         
-		while(list != NULL) {
+		while(list != nullptr) {
 			
 			removedCount = 0;
             set<string> uniqueNames;
@@ -618,14 +703,26 @@ void RemoveSeqsCommand::readList(string listfile){
 }
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readName(string namefile){
-	try {
-		string thisOutputDir = outputdir;
-		if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
-		map<string, string> variables; 
-		variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
+    try {
+        string thisOutputDir = outputdir;
+        if (outputdir == "") {  thisOutputDir += util.hasPath(namefile);  }
+        map<string, string> variables;
+        variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(namefile));
         variables["[extension]"] = util.getExtension(namefile);
-		string outputFileName = getOutputFileName("name", variables);
-		
+        string outputFileName = getOutputFileName("name", variables);
+        
+        readName(namefile, outputFileName);
+        
+        return;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "RemoveSeqsCommand", "readList");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+void RemoveSeqsCommand::readName(string namefile, string outputFileName){
+	try {
         ofstream out; util.openOutputFile(outputFileName, out);
 		ifstream in; util.openInputFile(namefile, in);
         
@@ -635,8 +732,8 @@ void RemoveSeqsCommand::readName(string namefile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> firstCol;		util.gobble(in);		
-			in >> secondCol;	util.gobble(in);
+			in >> firstCol;		gobble(in);		
+			in >> secondCol;	gobble(in);
 			
 			vector<string> parsedNames;
 			util.splitAtComma(secondCol, parsedNames);
@@ -729,7 +826,7 @@ void RemoveSeqsCommand::readGroup(string groupfile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			in >> name;			util.gobble(in);		//read from first column
+			in >> name;			gobble(in);		//read from first column
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
@@ -743,7 +840,7 @@ void RemoveSeqsCommand::readGroup(string groupfile){
                 }
 			}else {  removedCount++;  }
 					
-			util.gobble(in);
+			gobble(in);
 		}
 		in.close(); out.close();
 		
@@ -778,8 +875,8 @@ void RemoveSeqsCommand::readTax(string taxfile){
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-            in >> name; util.gobble(in);
-            tax = util.getline(in); util.gobble(in);
+            in >> name; gobble(in);
+            tax = util.getline(in); gobble(in);
             
             if (!dups) {//adjust name if needed
                 map<string, string>::iterator it = uniqueMap.find(name);
@@ -829,12 +926,12 @@ void RemoveSeqsCommand::readAlign(string alignfile){
 		bool wroteSomething = false; int removedCount = 0;
         set<string> uniqueNames;
 		
-        AlignReport report; report.readHeaders(in); util.gobble(in); report.printHeaders(out);
+        AlignReport report; report.readHeaders(in); gobble(in); report.printHeaders(out);
 		
 		while(!in.eof()){
 			if (m->getControl_pressed()) { in.close();  out.close();  util.mothurRemove(outputFileName);  return; }
 			
-			report.read(in); util.gobble(in);
+			report.read(in); gobble(in);
             string name = report.getQueryName();
             
             if (!dups) {//adjust name if needed
@@ -886,13 +983,13 @@ void RemoveSeqsCommand::readContigs(string contigsreportfile){
         bool wroteSomething = false; int removedCount = 0;
         set<string> uniqueNames;
 
-        ContigsReport report; report.readHeaders(in); util.gobble(in); report.printHeaders(out);
+        ContigsReport report; report.readHeaders(in); gobble(in); report.printHeaders(out);
         
         while(!in.eof()){
         
             if (m->getControl_pressed()) { break; }
 
-            report.read(in); util.gobble(in);
+            report.read(in); gobble(in);
             string name = report.getName();
             
             if (!dups) {//adjust name if needed

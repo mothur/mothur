@@ -218,9 +218,9 @@ int ClassifyOtuCommand::execute(){
 		//if user gave a namesfile then use it
 		if (namefile != "")     {	util.readNames(namefile, nameMap, true);	}
         if (groupfile != "")    {   groupMap = new GroupMap(groupfile);  groupMap->readMap();  groups = groupMap->getNamesOfGroups(); }
-        else { groupMap = NULL;  }
+        else { groupMap = nullptr;  }
         if (countfile != "") {  ct = new CountTable(); ct->readTable(countfile, true, false);  if (ct->hasGroupInfo()) { groups = ct->getNamesOfGroups(); } }
-        else {  ct = NULL;    }
+        else {  ct = nullptr;    }
         
 		//read taxonomy file and save in map for easy access in building bin trees
         bool removeConfidences = false;
@@ -238,7 +238,7 @@ int ClassifyOtuCommand::execute(){
         
         ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                
-        while (list != NULL) {
+        while (list != nullptr) {
                    
             if (m->getControl_pressed()) { delete list; break; }
                    
@@ -247,8 +247,8 @@ int ClassifyOtuCommand::execute(){
             list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
         }
         
-        if (groupMap != NULL) { delete groupMap; }
-        if (ct != NULL) { delete ct; }
+        if (groupMap != nullptr) { delete groupMap; }
+        if (ct != nullptr) { delete ct; }
 				
 		if (m->getControl_pressed()) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } return 0; }
 		

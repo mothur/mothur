@@ -8,7 +8,7 @@
 
 #include "sracommand.h"
 #include "sffinfocommand.h"
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 
 //**********************************************************************************************************************
 vector<string> SRACommand::setParameters(){
@@ -559,16 +559,15 @@ int SRACommand::readContactFile(){
         lastName = ""; firstName = ""; submissionName = ""; email = ""; centerName = ""; centerType = ""; description = ""; website = ""; projectName = "";
         projectTitle = "";  ownership = "owner";
         
-        ifstream in;
-        util.openInputFile(contactfile, in);
+        ifstream in; util.openInputFile(contactfile, in);
         
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
             string key, value;
-            in >> key; util.gobble(in);
-            value = util.getline(in); util.gobble(in);
+            in >> key; gobble(in);
+            value = util.getline(in); gobble(in);
             
             if (!util.isASCII(value)) { m->mothurOut("[ERROR]: " + value + " contains non ASCII characters. Submission entries cannot contains non ASCII characters, please correct.\n"); m->setControl_pressed(true); }
             
@@ -668,15 +667,14 @@ int SRACommand::readMIMarksFile(){
         requiredFieldsForPackage.push_back("seq_methods");
         requiredFieldsForPackage.push_back("organism");
         
-        ifstream in;
-        util.openInputFile(mimarksfile, in);
+        ifstream in; util.openInputFile(mimarksfile, in);
         
         //read comments
         string temp; packageType = "";
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
-            temp = util.getline(in); util.gobble(in);
+            temp = util.getline(in); gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
@@ -732,7 +730,7 @@ int SRACommand::readMIMarksFile(){
             
             if (m->getControl_pressed()) { break; }
             
-            temp = util.getline(in);  util.gobble(in);
+            temp = util.getline(in);  gobble(in);
             
             if (m->getDebug()) { m->mothurOut("[DEBUG]: " + temp + "\n"); }
             
@@ -1782,8 +1780,7 @@ bool SRACommand::checkDateFormat(string& date){
 
 int SRACommand::findFileOption(){
     try {
-        ifstream in;
-        util.openInputFile(file, in);
+        ifstream in; util.openInputFile(file, in);
         
         fileOption = 0;
         
@@ -1791,7 +1788,7 @@ int SRACommand::findFileOption(){
             
             if (m->getControl_pressed()) { return 0; }
             
-            string line = util.getline(in);  util.gobble(in);
+            string line = util.getline(in);  gobble(in);
             vector<string> pieces = util.splitWhiteSpace(line);
             
             if (pieces.size() == 2) { //good pair and sff or fastq and oligos

@@ -349,7 +349,7 @@ int ClusterCommand::execute(){
 			return 0;
 		}
 		
-        time_t estart = time(NULL);
+        time_t estart = time(nullptr);
         
         if (format == "fasta")          {   runVsearchCluster();    }
         else if (method == "opti")      {   runOptiCluster();       }
@@ -358,7 +358,7 @@ int ClusterCommand::execute(){
         
 		if (m->getControl_pressed()) { 	for (int j = 0; j < outputNames.size(); j++) { util.mothurRemove(outputNames[j]); }  return 0; }
         
-        m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster\n"); 
+        m->mothurOut("It took " + toString(time(nullptr) - estart) + " seconds to cluster\n"); 
         
 		//set list file as new current listfile
 		string currentName = "";
@@ -568,8 +568,8 @@ int ClusterCommand::runMothurCluster(){
         
         read->setCutoff(cutoff);
         
-        NameAssignment* nameMap = NULL;
-        CountTable* ct = NULL;
+        NameAssignment* nameMap = nullptr;
+        CountTable* ct = nullptr;
         map<string, int> counts;
         if(namefile != ""){
             nameMap = new NameAssignment(namefile);
@@ -631,7 +631,7 @@ int ClusterCommand::runMothurCluster(){
         oldList = *list;
         
         print_start = true;
-        start = time(NULL);
+        start = time(nullptr);
         loops = 0;
         double saveCutoff = cutoff;
         bool printHeaders = true;
@@ -658,7 +658,7 @@ int ClusterCommand::runMothurCluster(){
             float rndDist = util.ceilDist(dist, precision);
             
             if(previousDist <= 0.0000 && !util.isEqual(dist, previousDist))  {  printData("unique", counts, printHeaders);                               }
-            else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist,  length-1), counts, printHeaders);    }
+            else if(!util.isEqual(rndDist, rndPreviousDist))                 { printData(toString(rndPreviousDist), counts, printHeaders);    }
             
             previousDist = dist;
             rndPreviousDist = rndDist;
@@ -674,7 +674,7 @@ int ClusterCommand::runMothurCluster(){
         }
         
         if(previousDist <= 0.0000)          { printData("unique", counts, printHeaders);                            }
-        else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist, length-1), counts, printHeaders); }
+        else if(rndPreviousDist<cutoff)     { printData(toString(rndPreviousDist), counts, printHeaders); }
         
         delete matrix;
         delete list;
@@ -705,12 +705,12 @@ void ClusterCommand::printData(string label, map<string, int>& counts, bool& ph)
         oldList.setPrintedLabels(ph); ph = false;
         
 		if (util.isTrue(timing)) {
-			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
+			m->mothurOut("\tTime: " + toString(time(nullptr) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)+"\n");
 		}
 		print_start = true;
 		loops = 0;
-		start = time(NULL);
+		start = time(nullptr);
         
         oldRAbund.setLabel(label);
         if (countfile == "") {
@@ -767,7 +767,7 @@ int ClusterCommand::runOptiCluster(){
         
         m->mothurOut("\nClustering " + distfile+"\n");
         
-        ClusterMetric* metric = NULL;
+        ClusterMetric* metric = nullptr;
         if (metricName == "mcc")             { metric = new MCC();              }
         else if (metricName == "sens")       { metric = new Sensitivity();      }
         else if (metricName == "spec")       { metric = new Specificity();      }
@@ -847,7 +847,7 @@ int ClusterCommand::runOptiCluster(){
             
             while ((delta > stableMetric) && (iters < maxIters)) {
                 
-                long start = time(NULL);
+                long start = time(nullptr);
                 
                 if (m->getControl_pressed()) { break; }
                 double oldMetric = listVectorMetric;
@@ -860,14 +860,14 @@ int ClusterCommand::runOptiCluster(){
                 results = cluster.getStats(tp, tn, fp, fn);
                 numBins = cluster.getNumBins();
                 
-                m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
-                outStep << (toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
+                m->mothurOut(toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+                outStep << (toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + toString(cutoff) + "\t" + toString(numBins) + "\t" + toString(cutoff) + "\t") << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
                 for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t"); outStep << results[i] << "\t"; }
                 m->mothurOutEndLine(); outStep << endl;
             }
             m->mothurOutEndLine(); m->mothurOutEndLine();
             
-            if (m->getControl_pressed()) { delete matrix; delete metric; metric = NULL; return 0; }
+            if (m->getControl_pressed()) { delete matrix; delete metric; metric = nullptr; return 0; }
             
             ListVector* list = cluster.getList();
             list->setLabel(toString(cutoff));

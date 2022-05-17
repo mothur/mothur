@@ -383,16 +383,14 @@ int driver(uchimeData* params){
         //are you using a reference file
         if (params->templatefile != "self") {
             string outputFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2) + ".uchime_formatted";
-            ifstream in;
-            params->util.openInputFile(params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2), in);
             
-            ofstream out;
-            params->util.openOutputFile(outputFileName, out);
+            ifstream in; params->util.openInputFile(params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2), in);
+            ofstream out; params->util.openOutputFile(outputFileName, out);
             
             while (!in.eof()) {
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seq(in); params->util.gobble(in);
+                Sequence seq(in); gobble(in);
                 
                 if (seq.getName() != "") { seq.printSequence(out); }
             }
@@ -530,11 +528,8 @@ int driver(uchimeData* params){
         if (params->m->getControl_pressed()) { return 0; }
         
         //create accnos file from uchime results
-        ifstream in;
-        params->util.openInputFile(params->driverOutputFName, in);
-        
-        ofstream out;
-        params->util.openOutputFile(params->driverAccnos, out);
+        ifstream in; params->util.openInputFile(params->driverOutputFName, in);
+        ofstream out; params->util.openOutputFile(params->driverAccnos, out);
         
         int num = 0;
         params->numChimeras = 0;
@@ -544,7 +539,7 @@ int driver(uchimeData* params){
             
             string name = ""; string chimeraFlag = "";
             
-            string line = params->util.getline(in); params->util.gobble(in);
+            string line = params->util.getline(in); gobble(in);
             
             vector<string> pieces = params->util.splitWhiteSpace(line);
             if (pieces.size() > 2) {
@@ -586,7 +581,7 @@ int ChimeraUchimeCommand::execute(){
 
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" ); 
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -620,13 +615,15 @@ int ChimeraUchimeCommand::execute(){
             
             //read namefile
             vector<seqPriorityNode> nameMapCount;
-            int error;
+            int error = 0;
             if (hasCount) {
                 CountTable ct;
                 ct.readTable(countfile, true, false);
                 for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
                     int num = ct.getNumSeqs(it->first);
-                    if (num == 0) { error = 1; }
+                    if (num == 0) {
+                        error = 1;
+                    }
                     else {
                         seqPriorityNode temp(num, it->second, it->first);
                         nameMapCount.push_back(temp);
@@ -683,11 +680,11 @@ int ChimeraUchimeCommand::execute(){
             if (!dups) {
                 int totalChimeras = deconvoluteResults(outputFileName, accnosFileName, alnsFileName);
                 
-                m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.\n");
+                m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(totalSeqs) + " sequences. " + toString(totalChimeras) + " chimeras were found.\n");
                 m->mothurOut("The number of sequences checked may be larger than the number of unique sequences because some sequences are found in several samples.\n");
             }else {
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -695,9 +692,9 @@ int ChimeraUchimeCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
                     out2.close();
                 }
             }
@@ -730,7 +727,7 @@ int ChimeraUchimeCommand::execute(){
             //remove file made for uchime
             if (templatefile == "self") {  util.mothurRemove(fastafile); }
             
-            m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
+            m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
         
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
@@ -839,7 +836,7 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
             while (!in2.eof()) {
                 if (m->getControl_pressed()) { in2.close(); out2.close(); util.mothurRemove(outputFileName); util.mothurRemove((accnosFileName+".temp")); return 0; }
                 
-                in2 >> name; util.gobble(in2);
+                in2 >> name; gobble(in2);
                 
                 itChimeras = chimerasInFile.find(name);
                     
@@ -880,12 +877,12 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
-			in >> temp1;	util.gobble(in);
-			in >> name;		util.gobble(in);
-			in >> parent1;	util.gobble(in);
-			in >> parent2;	util.gobble(in);
+			in >> temp1;	gobble(in);
+			in >> name;		gobble(in);
+			in >> parent1;	gobble(in);
+			in >> parent2;	gobble(in);
 			in >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> temp9 >> temp10 >> temp11 >> temp12 >> temp13 >> flag;
-			util.gobble(in);
+			gobble(in);
 			
 			//parse name - name will look like U68590/ab=1/
 			string restOfName = "";
@@ -1061,14 +1058,13 @@ int ChimeraUchimeCommand::readFasta(string filename, map<string, string>& seqs){
 	try {
 		//create input file for uchime
 		//read through fastafile and store info
-		ifstream in;
-		util.openInputFile(filename, in);
+		ifstream in; util.openInputFile(filename, in);
 		
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return 0; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			seqs[seq.getName()] = seq.getAligned();
 		}
 		in.close();
@@ -1118,15 +1114,14 @@ string ChimeraUchimeCommand::getCountFile(string& inputFile){
 int getSeqs(map<string, int>& nameMap, string thisGroupsFormattedOutputFilename, string tag, string tag2, long long& numSeqs, string thisGroupsFastaFile, MothurOut* m){
     try {
         int error = 0;
-        ifstream in;
-        Utils util; util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; Utils util; util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
         while (!in.eof()) {
             if (m->getControl_pressed()) { break; }
             
-            Sequence seq(in); util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             itNameMap = nameMap.find(seq.getName());
             
@@ -1162,7 +1157,7 @@ void driverGroups(uchimeData* params){
 		int totalSeqs = 0;
         
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
-            long start = time(NULL);
+            long start = time(nullptr);
             if (params->m->getControl_pressed()) {  break; }
             
             int error;
@@ -1193,13 +1188,12 @@ void driverGroups(uchimeData* params){
             //This table will zero out group counts for seqs determined to be chimeric by that group.
             if (params->vars->dups) {
                 if (!params->util.isBlank(params->accnos+thisGroup)) {
-                    ifstream in;
-                    params->util.openInputFile(params->accnos+thisGroup, in);
+                    ifstream in; params->util.openInputFile(params->accnos+thisGroup, in);
                     string name;
                     if (params->vars->hasCount) {
                         vector<string> namesOfChimeras;
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             namesOfChimeras.push_back(name);
                         }
                         in.close();
@@ -1210,7 +1204,7 @@ void driverGroups(uchimeData* params){
                         ofstream out;
                         params->util.openOutputFile(params->accnos+thisGroup+".temp", out);
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             itN = thisnamemap.find(name);
                             if (itN != thisnamemap.end()) {
                                 vector<string> tempNames; params->util.splitAtComma(itN->second, tempNames);
@@ -1230,7 +1224,7 @@ void driverGroups(uchimeData* params){
 			params->util.appendFiles((params->accnos+thisGroup), params->accnos); params->util.mothurRemove((params->accnos+thisGroup));
 			if (params->vars->chimealns) { params->util.appendFiles((params->alns+thisGroup), params->alns); params->util.mothurRemove((params->alns+thisGroup)); }
 			
-			params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + thisGroup + ".\n");
+			params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + thisGroup + ".\n");
 		}
     
         params->count = totalSeqs;

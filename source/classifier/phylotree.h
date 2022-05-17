@@ -40,7 +40,7 @@ public:
 	PhyloTree();
 	PhyloTree(string);  //pass it a taxonomy file and it makes the tree
 	PhyloTree(ifstream&, string);  //pass it a taxonomy file and it makes the train.tree
-	~PhyloTree() {};
+	~PhyloTree() = default;;
 	int addSeqToTree(string, string);
     int addSeqToTree(string, vector<Taxon>);
 	void assignHeirarchyIDs(int);
@@ -64,7 +64,6 @@ public:
 	bool ErrorCheck(vector<string>);
 	
 private:
-	string getNextTaxon(string&, string);
 	void print(ofstream&, vector<TaxNode>&); //used to create static reference taxonomy file
 	void fillOutTree(int, vector<TaxNode>&); //used to create static reference taxonomy file
 	void binUnclassified(string);

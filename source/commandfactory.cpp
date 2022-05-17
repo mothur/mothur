@@ -82,7 +82,7 @@
 #include "clusterfragmentscommand.h"
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
-#include "parsefastaqcommand.h"
+#include "fastaqinfocommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
@@ -154,6 +154,7 @@
 #include "diversityestimatorcommand.hpp"
 #include "srainfocommand.hpp"
 #include "makeclrcommand.hpp"
+#include "translateseqscommand.hpp"
 
 /*******************************************************/
 
@@ -221,6 +222,7 @@ CommandFactory::CommandFactory(){
 	commands["set.logfile"]			= "set.logfile";
 	commands["phylo.diversity"]		= "phylo.diversity";
 	commands["make.group"]			= "make.group";
+    commands["make.count"]          = "make.count";
 	commands["chop.seqs"]			= "chop.seqs";
 	commands["clearcut"]			= "clearcut";
 	commands["split.abund"]			= "split.abund";
@@ -324,6 +326,7 @@ CommandFactory::CommandFactory(){
     commands["estimator.single"]    = "estimator.single";
     commands["sra.info"]            = "sra.info";
     commands["make.clr"]            = "make.clr";
+    commands["tranlate.seqs"]       = "tranlate.seqs";
 
 }
 
@@ -347,7 +350,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   outputOption += optionString[i]; }
             }
             if (outputOption[0] == '=') { outputOption = outputOption.substr(1); }
-            outputOption = util.trimWhiteSpace(outputOption);
+            trimWhiteSpace(outputOption);
             outputOption = util.removeQuotes(outputOption);
             if(util.mkDir(outputOption)){
                 current->setOutputDir(outputOption);
@@ -365,7 +368,7 @@ int CommandFactory::checkForRedirects(string optionString) {
                 if (foundEquals)       {   intputOption += optionString[i]; }
             }
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
-            intputOption = util.trimWhiteSpace(intputOption);
+            trimWhiteSpace(intputOption);
             intputOption = util.removeQuotes(intputOption);
     
             vector<string> inputPaths;
@@ -404,7 +407,7 @@ int CommandFactory::checkForRedirects(string optionString) {
             if (intputOption[0] == '=') { intputOption = intputOption.substr(1); }
             bool seed = false; int random;
             if (intputOption == "clear") {
-                random = (int)time(NULL);
+                random = (int)time(nullptr);
                 seed = true;
             }else {
                 if (util.isNumeric1(intputOption)) { util.mothurConvert(intputOption, random); seed=true; }
@@ -433,7 +436,7 @@ int CommandFactory::checkForRedirects(string optionString) {
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 
-        Command* command = NULL;
+        Command* command = nullptr;
         
         if ((commandName != "help") && (commandName != "system")) { checkForRedirects(optionString); }
         
@@ -497,7 +500,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
-		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
+		else if((commandName == "make.group") || (commandName == "make.count"))			{	command = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
 		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
@@ -581,6 +584,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
         else if(commandName == "estimator.single")      {	command = new EstimatorSingleCommand(optionString);         }
         else if(commandName == "sra.info")              {   command = new SRAInfoCommand(optionString);                 }
         else if(commandName == "make.clr")              {   command = new MakeCLRCommand(optionString);                 }
+        else if(commandName == "translate.seqs")        {   command = new TranslateSeqsCommand(optionString);           }
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -596,7 +600,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 //This function calls the appropriate command fucntions based on user input.
 Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
 	try {
-		Command* pipecommand = NULL;   //delete the old command
+		Command* pipecommand = nullptr;   //delete the old command
         
         if (commandName != "help") {
             checkForRedirects(optionString);
@@ -673,7 +677,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	pipecommand = new PhyloDiversityCommand(optionString);			}
-		else if(commandName == "make.group")			{	pipecommand = new MakeGroupCommand(optionString);				}
+		else if((commandName == "make.group") || (commandName == "make.count"))			{	pipecommand = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	pipecommand = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	pipecommand = new ClearcutCommand(optionString);				}
 		else if(commandName == "split.abund")			{	pipecommand = new SplitAbundCommand(optionString);				}
@@ -758,6 +762,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
         else if(commandName == "estimator.single")      {	pipecommand = new EstimatorSingleCommand(optionString);         }
         else if(commandName == "sra.info")              {   pipecommand = new SRAInfoCommand(optionString);                 }
         else if(commandName == "make.clr")              {   pipecommand = new MakeCLRCommand(optionString);                 }
+        else if(commandName == "translate.seqs")        {   pipecommand = new TranslateSeqsCommand(optionString);           }
 		else											{	pipecommand = new NoCommand(optionString);						}
         
         

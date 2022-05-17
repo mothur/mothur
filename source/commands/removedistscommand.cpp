@@ -179,8 +179,7 @@ int RemoveDistsCommand::readPhylip(){
         variables["[extension]"] = util.getExtension(phylipfile);
 		string outputFileName = getOutputFileName("phylip", variables);
 		
-        ifstream in;
-        util.openInputFile(phylipfile, in);
+        ifstream in; util.openInputFile(phylipfile, in);
         
         float distance;
         int square, nseqs; 
@@ -311,7 +310,7 @@ int RemoveDistsCommand::readPhylip(){
             
             ifstream in3;
             util.openInputFile(outputFileName+".temp", in3);
-            in3 >> nseqs; util.gobble(in3);
+            in3 >> nseqs; gobble(in3);
             char buffer[4096];        
             while (!in3.eof()) {
                 in3.read(buffer, 4096);
@@ -343,11 +342,8 @@ int RemoveDistsCommand::readColumn(){
 		string outputFileName = getOutputFileName("column", variables);
         outputTypes["column"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-		ofstream out;
-		util.openOutputFile(outputFileName, out);
-        
-        ifstream in;
-        util.openInputFile(columnfile, in);
+		ofstream out; util.openOutputFile(outputFileName, out);
+        ifstream in; util.openInputFile(columnfile, in);
         
         set<string> removeNames;
         string firstName, secondName;
@@ -357,7 +353,7 @@ int RemoveDistsCommand::readColumn(){
             
             if (m->getControl_pressed()) { out.close(); in.close(); return 0; }
             
-            in >> firstName >> secondName >> distance; util.gobble(in);
+            in >> firstName >> secondName >> distance; gobble(in);
             
             //is either names in the accnos file
             if (names.count(firstName) != 0)       { 

@@ -31,7 +31,7 @@ class Utils {
 public:
     
     Utils(); 
-    ~Utils() {}
+    ~Utils() = default;
     
     //random operations
     int getRandomIndex(int); //highest
@@ -47,7 +47,7 @@ public:
     void mothurRandomShuffle(vector<long long>&);
     void mothurRandomShuffle(vector< vector<double> >&);
     void mothurRandomShuffle(vector<string>&);
-    void mothurRandomShuffle(vector<item>&);
+    void mothurRandomShuffle(vector<intPair>&);
     void mothurRandomShuffle(vector<PCell*>&);
     void mothurRandomShuffle(vector<PDistCellMin>&);
     void mothurRandomShuffle(vector<colDist>&);
@@ -143,13 +143,13 @@ public:
     void getline(ifstream&, vector<string>&);
     void getNumSeqs(ifstream&, int&);
     int getNumSeqs(ifstream&);
-    void gobble(istream&);
-    void gobble(istringstream&);
+    //void gobble(istream&);
+    //void gobble(istringstream&);
     vector<string> parseTreeFile(string filename); //returns treenames
-    set<string> readAccnos(string);
+    unordered_set<string> readAccnos(string);
     int readAccnos(string, vector<string>&);
     int readAccnos(string, vector<string>&, string);
-    void printAccnos(string, set<string>&);
+    void printAccnos(string, unordered_set<string>&);
     void printAccnos(string, vector<string>&);
     vector<consTax> readConsTax(string);
     void readConsTax(string, vector<Taxonomy>&);
@@ -208,7 +208,8 @@ public:
     bool mothurConvert(string, float&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(string, double&); //use for converting user inputs. Sets commandInputsConvertError to true if error occurs. Engines check this.
     bool mothurConvert(char, string&);
-    set<string> mothurConvert(vector<string>&);
+    unordered_set<string> mothurConvert(vector<string>&);
+    void mothurConvert(vector<string>&, set<string>&);
     vector<string> mothurConvert(set<string>&);
     set<long long> mothurConvert(vector<long long>&);
     vector<long long > mothurConvert(set<long long>&);
@@ -219,20 +220,18 @@ public:
     string addUnclassifieds(string tax, int maxlevel, bool probs);
     string trimTax(string tax, int trimLevel);
     bool checkGroupName(string& name);
-    int checkName(string&);
+    bool checkGroupNames(vector<string>& name);
+    void checkName(string&);
     void getCombos(vector<string>& groupComb, vector<string> userGroups, int& numComp);
     int getNumNames(string);
-    int getNumChar(string, char);
     string getSimpleLabel(string);
-    string toUpper(string);
-    string toLower(string);
     
     string getStringFromVector(vector<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromVector(vector<double>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<int>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
     string getStringFromSet(set<string>&, string); //creates string like "v[0], v[1], ... v[n]" where ', ' is string.
-    set<string> getSetFromList(ListVector*&, vector< vector<string> >&); 
+    unordered_set<string> getSetFromList(ListVector*&, vector< vector<string> >&);
     string getFormattedHelp(vector<string> question, vector<string> aquestion, vector<string> issue, vector<string> aissue, vector<string> howto,vector<string> ahowto);
     string trimStringEnd(string, int); //string, number of chars to remove from end.
     
@@ -263,22 +262,20 @@ public:
     SAbundVector* getNextSAbund(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
     OrderVector* getNextOrder(InputData&, bool, set<string>&, set<string>&, string&);//input, allLines, userLabels, processedLabels, lastLabel
 
-    
-    void splitAtComma(string&, string&);
-    void splitAtComma(string&, vector<string>&);
-    void splitAtComma(string&, vector<int>&);
     void splitAtDash(string&, set<int>&);
     void splitAtDash(string&, set<string>&);
     void splitAtDash(string&, vector<string>&);
-    void splitAtChar(string&, set<string>&, char);
-    void splitAtChar(string&, vector<string>&, char);
+    void splitAtComma(string&, string&);
+    void splitAtComma(string& s, vector<string>& container);
+    void splitAtComma(string& s, vector<int>& container);
+    void splitAtChar(string& s, set<string>& container, char delim);
+    void splitAtChar(string& s, vector<string>& container, char delim);
     void splitAtChar(string&, string&, char);
     void splitAtEquals(string&, string&);
     vector<string> splitWhiteSpaceWithQuotes(string);
     vector<string> splitWhiteSpace(string& rest, char[], int);
     vector<string> splitWhiteSpace(string);
     int splitWhiteSpace(string, vector<float>&, int);
-    string trimWhiteSpace(string input);
     
     int getOTUNames(vector<string>&, int, string);
     string getTag(string); //filename

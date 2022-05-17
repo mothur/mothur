@@ -269,7 +269,7 @@ int ChimeraSlayerCommand::execute(){
 
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -326,7 +326,7 @@ int ChimeraSlayerCommand::execute(){
                     
                     string name, group;
                     while (!in2.eof()) {
-                        in2 >> name >> group; util.gobble(in2);
+                        in2 >> name >> group; gobble(in2);
                         c.setAbund(name, group, 0);
                     }
                     in2.close();
@@ -340,7 +340,7 @@ int ChimeraSlayerCommand::execute(){
                 m->mothurOut("\n" + toString(totalChimeras) + " chimera found.\n");
             }else {
                 if (hasCount) {
-                    set<string> doNotRemove;
+                    unordered_set<string> doNotRemove;
                     CountTable c; c.readTable(newCountFile, true, true);
                     //returns non zeroed names
                     vector<string> namesInTable = c.printTable(newCountFile);
@@ -349,9 +349,9 @@ int ChimeraSlayerCommand::execute(){
                     for (int i = 0; i < namesInTable.size(); i++) { doNotRemove.insert(namesInTable[i]); }
                     
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) {
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) {
                         if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; }
                     }
                     out2.close();
@@ -359,7 +359,7 @@ int ChimeraSlayerCommand::execute(){
             }
         }
         
-        m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences.\n");
         
         if (removeChimeras) {
             if (!util.isBlank(accnosFileName)) {
@@ -432,14 +432,13 @@ int ChimeraSlayerCommand::execute(){
 //**********************************************************************************************************************
 int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accnosFileName, string trimFileName){
 	try {
-        set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
-        set<string>::iterator itChimeras;
-
-		set<string>::iterator itUnique;
+        unordered_set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
+        unordered_set<string>::iterator itChimeras;
+        unordered_set<string>::iterator itUnique;
 		int total = 0;
         
         if (trimera) { //add in more potential uniqueNames
-            set<string> newUniqueNames = chimerasInFile;
+            unordered_set<string> newUniqueNames = chimerasInFile;
             for (itUnique = chimerasInFile.begin(); itUnique != chimerasInFile.end(); itUnique++) {
                 newUniqueNames.insert(*itUnique+"_LEFT");
                 newUniqueNames.insert(*itUnique+"_RIGHT");
@@ -469,7 +468,7 @@ int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accno
 		
 		//get header line
 		if (!in.eof()) {
-			line = util.getline(in); util.gobble(in);
+			line = util.getline(in); gobble(in);
 			out << line << endl;
 		}
 		
@@ -482,11 +481,11 @@ int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accno
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
             string name = "";
-			in >> name;		util.gobble(in);
-			in >> parent1;	util.gobble(in);
+			in >> name;		gobble(in);
+			in >> parent1;	gobble(in);
 			
 			if (name == "Name") { //name = "Name" because we append the header line each time we add results from the groups
-				line = util.getline(in); util.gobble(in);
+				line = util.getline(in); gobble(in);
 			}else {
 				if (parent1 == "no") {
 					
@@ -504,7 +503,7 @@ int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accno
 					double DivQLAQRB,PerIDQLAQRB,BootStrapA,DivQLBQRA,PerIDQLBQRA,BootStrapB;
 					string flag, range1, range2;
 					bool print = false;
-					in >> parent2 >> DivQLAQRB >> PerIDQLAQRB >> BootStrapA >> DivQLBQRA >> PerIDQLBQRA >> BootStrapB >> flag >> range1 >> range2;	util.gobble(in);
+					in >> parent2 >> DivQLAQRB >> PerIDQLAQRB >> BootStrapA >> DivQLBQRA >> PerIDQLBQRA >> BootStrapB >> flag >> range1 >> range2;	gobble(in);
 					
                     //is this name already in the file
                     itNames = namesInFile.find((name));
@@ -544,7 +543,7 @@ int ChimeraSlayerCommand::deconvoluteResults(string outputFileName, string accno
 			while (!in3.eof()) {
 				if (m->getControl_pressed()) { in3.close(); out3.close(); util.mothurRemove(outputFileName); util.mothurRemove(accnosFileName); util.mothurRemove((trimFileName+".temp")); return 0; }
 				
-				Sequence seq(in3); util.gobble(in3);
+				Sequence seq(in3); gobble(in3);
 				
 				if (seq.getName() != "") {
                     itNames = namesInFile.find(seq.getName());
@@ -667,7 +666,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			
 			if (m->getControl_pressed()) {  return 0;  }
 			
-			long start = time(NULL);
+			long start = time(nullptr);
 			string thisFastaName = itFile->first;
 			map<string, int> thisPriority = itFile->second;
 			string thisoutputFileName = outputdir + util.getRootName(util.getSimpleName(thisFastaName)) + fileGroup[thisFastaName] + "slayer.chimera";
@@ -687,7 +686,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
                     string name;
                     if (hasCount) {
                         while (!in.eof()) {
-                            in >> name; util.gobble(in);
+                            in >> name; gobble(in);
                             outCountList << name << '\t' << fileGroup[thisFastaName] << endl;
                         }
                         in.close();
@@ -699,7 +698,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
                             ofstream out;
                             util.openOutputFile(thisaccnosFileName+".temp", out);
                             while (!in.eof()) {
-                                in >> name; util.gobble(in);
+                                in >> name; gobble(in);
                                 itN = thisnamemap.find(name);
                                 if (itN != thisnamemap.end()) {
                                     vector<string> tempNames; util.splitAtComma(itN->second, tempNames);
@@ -724,7 +723,7 @@ int ChimeraSlayerCommand::driverGroups(string outputFName, string accnos, string
 			
 			totalSeqs += numSeqs;
 			
-			m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".\n");
+			m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences from group " + fileGroup[thisFastaName] + ".\n");
 		}
 		
         if (hasCount && dups) { outCountList.close(); }
@@ -767,7 +766,7 @@ int ChimeraSlayerCommand::driver(string outputFName, string filename, string acc
 		
 			if (m->getControl_pressed()) {	delete chimera; out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  util.gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 			string candidateAligned = candidateSeq->getAligned();
 			
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
@@ -904,7 +903,7 @@ map<string, int> ChimeraSlayerCommand::sortFastaFile(string thisfastafile, strin
 			
 			if (m->getControl_pressed()) { in.close(); return nameAbund; }
 			
-			Sequence seq(in); util.gobble(in);
+			Sequence seq(in); gobble(in);
 			
             map<string, int>::iterator itNameMap = nameAbund.find(seq.getName());
             

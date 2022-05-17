@@ -29,7 +29,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
 
             while (!inBatchTest.eof()) {
                 
-                nextcommand = util.getline(inBatchTest); util.gobble(inBatchTest);
+                nextcommand = util.getline(inBatchTest); gobble(inBatchTest);
                 
                 if (nextcommand[0] != '#') { //skip comments
                     
@@ -44,7 +44,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
         
         if (noBufferNeeded) {
             if (m->getLogFileName() == "") {
-                time_t ltime = time(NULL); /* calendar time */
+                time_t ltime = time(nullptr); /* calendar time */
                 string outputPath = current->getOutputDir();
                 string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
                 m->setLogFileName(logFileName, false);
@@ -54,7 +54,7 @@ BatchEngine::BatchEngine(string tpath, string batchFile, map<string, string> ev)
         
         setEnvironmentVariables(ev); //inherit environmental variables from nested batch files
 
-        bstart = time(NULL);
+        bstart = time(nullptr);
         numBatches = 0;
     }
     catch(exception& e) {
@@ -71,7 +71,7 @@ BatchEngine::~BatchEngine(){
         batchesOutput = " and " + toString(numBatches) + " batch file";
         if (numBatches > 1) { batchesOutput += "s"; }
     }
-    time_t end = time(NULL);
+    time_t end = time(nullptr);
     m->mothurOut("\n\nIt took " + toString(end-bstart) + " seconds to run " + toString(numCommandsRun) + " commands" + batchesOutput + " from " + batchFileName  + " batch file.\n\n");
 }
 
@@ -129,7 +129,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
             if (!inputBatchFile.eof()) {
                 
                 nextcommand = util.getline(inputBatchFile);
-                util.gobble(inputBatchFile);
+                gobble(inputBatchFile);
                 
             }else { nextcommand = "quit()"; break; } //end of file, quit
         }

@@ -60,7 +60,7 @@ class FileFile {
     
 public:
     FileFile(string, string); //provide file file and read file, mode (ie. contigs) mode options include: mimarks,contigs,parseFastq,renameSeqs,sra,parsefastqpacbio
-    ~FileFile() {}
+    ~FileFile() = default;
     
     vector< vector<string> > getFiles() { return files; }
     

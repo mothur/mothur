@@ -26,7 +26,7 @@ class DesignMap {
 public:
 	DesignMap() { m = MothurOut::getInstance(); defaultClass = "not found"; }
 	DesignMap(string); //reads file as well
-	~DesignMap() {}
+	~DesignMap() = default;
     
     //read designfile name
     int read(string);

@@ -303,7 +303,7 @@ int SummaryCommand::execute(){
             
 			if (m->getControl_pressed()) {  if (!subsample) { outputFileHandle.close(); } else { outAve.close(); } for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]);  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }  delete sabund;    return 0;  }
             
-            while (sabund != NULL) {
+            while (sabund != nullptr) {
                        
                 if (m->getControl_pressed()) { delete sabund; break; }
                        
@@ -550,7 +550,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
             files[group] = (sharedFileRoot + group + ".rabund");
         }
         
-        while(lookup != NULL) {
+        while(lookup != nullptr) {
             
             vector<SharedRAbundVector*> data = lookup->getSharedRAbundVectors();
             for (int i = 0; i < data.size(); i++) {
@@ -600,7 +600,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
                 else{  newLabel += '\t' + theseLabels[j];	}
             }
 			
-			util.gobble(temp);
+			gobble(temp);
 			
             int stop = numLines;
             if (theseLabels.size() != numCols+1) {  stop = numLines*2; }
@@ -623,7 +623,7 @@ vector<string> SummaryCommand::createGroupSummaryFile(int numLines, int numCols,
 				
 				thisFilesLines.push_back(thisLine);
 					
-				util.gobble(temp);
+				gobble(temp);
 			}
             
             string extension = util.getExtension(outputNames[i]);

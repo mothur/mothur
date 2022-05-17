@@ -14,7 +14,7 @@
 InteractEngine::InteractEngine(string tpath, map<string, string> ev) : Engine(tpath) {
     
     if (m->getLogFileName() == "") {
-        time_t ltime = time(NULL); /* calendar time */
+        time_t ltime = time(nullptr); /* calendar time */
         string outputPath = current->getOutputDir();
         string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
         m->setLogFileName(logFileName, false);
@@ -81,10 +81,10 @@ string InteractEngine::getCommand()  {
         string returnCommand = "";
         #if defined NON_WINDOWS
             #ifdef USE_READLINE
-                char* nextCommand = NULL;
+                char* nextCommand = nullptr;
                 nextCommand = readline("\nmothur > ");
                 
-                if(nextCommand != NULL) {  add_history(nextCommand);  }
+                if(nextCommand != nullptr) {  add_history(nextCommand);  }
                 else{ //^D causes null string and we want it to quit mothur
                     nextCommand = strdup("quit()");
                 }

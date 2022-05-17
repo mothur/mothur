@@ -51,7 +51,7 @@ bool FlowData::getNext(ifstream& flowFile){
         
         //read flowgrams
         for(int i=0;i<numFlows;i++)	{ flowFile >> flowData[i]; if (m->getDebug()) {  m->mothurOut(toString(flowData[i]) + " "); } } if (m->getDebug()) {  m->mothurOut("\n"); }
-        util.gobble(flowFile);
+        gobble(flowFile);
         
         //process flowgrams
         updateEndFlow();

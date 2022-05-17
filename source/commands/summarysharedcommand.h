@@ -62,7 +62,7 @@ class SummarySharedCommand : public Command {
 
 public:
 	SummarySharedCommand(string);
-	~SummarySharedCommand() {}
+	~SummarySharedCommand() = default;
 	
 	vector<string> setParameters();
 	string getCommandName()			{ return "summary.shared";			}

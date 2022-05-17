@@ -24,7 +24,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		taxFile = tfile;
         templateFile = tempFile;
 
-        long start = time(NULL); m->mothurOut("Generating search database...    "); cout.flush();
+        long start = time(nullptr); m->mothurOut("Generating search database...    "); cout.flush();
         
         //need to know number of template seqs for suffixdb
         if (method == "suffix") {
@@ -64,7 +64,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile); util.gobble(fastaFile);
+                    Sequence temp(fastaFile); gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                     
@@ -82,7 +82,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
                 ifstream fastaFile; util.openInputFile(tempFile, fastaFile);
                 
                 while (!fastaFile.eof()) {
-                    Sequence temp(fastaFile); util.gobble(fastaFile);
+                    Sequence temp(fastaFile); gobble(fastaFile);
                     
                     names.push_back(temp.getName());
                 }
@@ -90,7 +90,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
             }
             database->setNumSeqs(names.size());
             
-            m->mothurOut("DONE.\nIt took " + toString(time(NULL) - start) + " seconds generate search database.\n");
+            m->mothurOut("DONE.\nIt took " + toString(time(nullptr) - start) + " seconds generate search database.\n");
             
             readTaxonomy(taxFile);
             
@@ -106,7 +106,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 	}
 }
 /**************************************************************************************************/
-Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	phyloTree=NULL;   maxLevel = 0; }
+Classify::Classify() {		m = MothurOut::getInstance();	database = nullptr;	phyloTree=nullptr;   maxLevel = 0; }
 /**************************************************************************************************/
 
 int Classify::readTaxonomy(string file) {

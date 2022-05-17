@@ -20,7 +20,7 @@ ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, strin
         
         if (noBufferNeeded) {
             if (m->getLogFileName() == "") {
-                time_t ltime = time(NULL); /* calendar time */
+                time_t ltime = time(nullptr); /* calendar time */
                 string outputPath = current->getOutputDir();
                 string logFileName = outputPath + "mothur." + toString(ltime) + ".logfile";
                 m->setLogFileName(logFileName, false);
@@ -38,7 +38,7 @@ ScriptEngine::ScriptEngine(string tpath, string commandString, map<string, strin
 /***********************************************************************/
 
 ScriptEngine::~ScriptEngine(){
-    time_t end = time(NULL);
+    time_t end = time(nullptr);
     m->mothurOut("\n\nIt took " + toString(end-start) + " seconds to run " + toString(numCommandsRun) + " commands from your script.\n\n");
 }
 

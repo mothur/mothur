@@ -363,7 +363,7 @@ int ChimeraPerseusCommand::execute(){
         
         m->mothurOut("Checking sequences from " + fastafile + " ...\n" );
         
-        long start = time(NULL);
+        long start = time(nullptr);
         if (outputdir == "") { outputdir = util.hasPath(fastafile);  }
         map<string, string> variables;
         variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(fastafile));
@@ -417,7 +417,7 @@ int ChimeraPerseusCommand::execute(){
                         
                         string name, group;
                         while (!in2.eof()) {
-                            in2 >> name; util.gobble(in2); in2 >> group; util.gobble(in2);
+                            in2 >> name; gobble(in2); in2 >> group; gobble(in2);
                             newCount.setAbund(name, group, 0);
                         }
                         in2.close();
@@ -428,12 +428,12 @@ int ChimeraPerseusCommand::execute(){
                     vector<string> namesInTable = newCount.printTable(newCountFile);  //returns non zeroed names
                     outputNames.push_back(newCountFile); outputTypes["count"].push_back(newCountFile);
                     
-                    set<string> doNotRemove = util.mothurConvert(namesInTable);
+                    unordered_set<string> doNotRemove = util.mothurConvert(namesInTable);
                    
                     //remove names we want to keep from accnos file.
-                    set<string> accnosNames = util.readAccnos(accnosFileName);
+                    unordered_set<string> accnosNames = util.readAccnos(accnosFileName);
                     ofstream out2; util.openOutputFile(accnosFileName, out2);
-                    for (set<string>::iterator it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
+                    for (auto it = accnosNames.begin(); it != accnosNames.end(); it++) { if (doNotRemove.count(*it) == 0) {  out2 << (*it) << endl; } }
                     out2.close();
                 }
                 
@@ -461,7 +461,7 @@ int ChimeraPerseusCommand::execute(){
         
         if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
         outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
         outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
         
@@ -611,15 +611,14 @@ vector<seqData> loadSequences(map<string, int>& nameMap, string thisGroupsFastaF
         bool error = false;
         vector<seqData> sequences;
         
-        ifstream in;
-        params->util.openInputFile(thisGroupsFastaFile, in);
+        ifstream in; params->util.openInputFile(thisGroupsFastaFile, in);
         
         vector<seqPriorityNode> nameVector;
         map<string, int>::iterator itNameMap;
         while (!in.eof()) {
             if (params->m->getControl_pressed()) { break; }
             
-            Sequence seq(in); params->util.gobble(in);
+            Sequence seq(in); gobble(in);
             
             itNameMap = nameMap.find(seq.getName());
             
@@ -662,7 +661,7 @@ void driverGroups(perseusGroupsData* params){
         if (params->hasCount && params->dups) { params->util.openOutputFile(params->countlist, outCountList); }
 		
         for (map<string, vector<string> >::iterator it = params->parsedFiles.begin(); it != params->parsedFiles.end(); it++) {
-            long start = time(NULL);	 if (params->m->getControl_pressed()) {  break; }
+            long start = time(nullptr);	 if (params->m->getControl_pressed()) {  break; }
             
             
             string thisGroup = it->first;
@@ -693,7 +692,7 @@ void driverGroups(perseusGroupsData* params){
                     string name;
                     if (params->hasCount) {
                         while (!in.eof()) {
-                            in >> name; params->util.gobble(in);
+                            in >> name; gobble(in);
                             outCountList << name << '\t' << thisGroup << endl;
                         }
                         in.close();
@@ -705,7 +704,7 @@ void driverGroups(perseusGroupsData* params){
 			params->util.appendFiles(driverParams->chimeraFileName, params->chimeraFileName); params->util.mothurRemove(driverParams->chimeraFileName);
 			params->util.appendFiles(driverParams->accnosFileName, params->accnosFileName); params->util.mothurRemove(driverParams->accnosFileName);
 			
-			params->m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to check " + toString(driverParams->count) + " sequences from group " + thisGroup + ".\n");
+			params->m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(driverParams->count) + " sequences from group " + thisGroup + ".\n");
             delete driverParams;
 		}	
 		
@@ -727,15 +726,14 @@ vector<seqData> ChimeraPerseusCommand::readFiles(string inputFile, map<string, i
 		//read fasta file and create sequenceData structure - checking for file mismatches
 		vector<seqData> sequences;
 		bool error = false;
-		ifstream in;
-		util.openInputFile(inputFile, in);
+		ifstream in; util.openInputFile(inputFile, in);
 		alignLength = 0;
         
 		while (!in.eof()) {
 			
 			if (m->getControl_pressed()) { in.close(); return sequences; }
 			
-			Sequence temp(in); util.gobble(in);
+			Sequence temp(in); gobble(in);
 			
 			it = nameMap.find(temp.getName());
 			if (it == nameMap.end()) { error = true; m->mothurOut("[ERROR]: " + temp.getName() + " is in your fasta file and not in your namefile, please correct.\n");  }
@@ -861,15 +859,12 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 	try {
         int total = 0;
 		
-        set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
+        unordered_set<string> chimerasInFile = util.readAccnos(accnosFileName);//this is so if a sequence is found to be chimera in several samples we dont write it to the results file more than once
         util.printAccnos(accnosFileName, chimerasInFile);
     
 		//edit chimera file
-		ifstream in; 
-		util.openInputFile(outputFileName, in);
-		
-		ofstream out;
-		util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		ifstream in;  util.openInputFile(outputFileName, in);
+		ofstream out; util.openOutputFile(outputFileName+".temp", out); out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		int DiffsToBestMatch, BestMatchIndex, DiffstToChimera, IndexofLeftParent, IndexOfRightParent;
 		float temp1,temp2, temp3, temp4, temp5, temp6, temp7, temp8;
@@ -887,7 +882,7 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 		 */
 		
 		//get and print headers
-		BestMatchName = util.getline(in); util.gobble(in);
+		BestMatchName = util.getline(in); gobble(in);
 		out << BestMatchName << endl;
 		
 		while (!in.eof()) {
@@ -895,28 +890,28 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 			if (m->getControl_pressed()) { in.close(); out.close(); util.mothurRemove((outputFileName+".temp")); return 0; }
 			
 			bool print = false;
-			in >> index;	util.gobble(in);
+			in >> index;	gobble(in);
 			
 			if (index != "SequenceIndex") { //if you are not a header line, there will be a header line for each group if group file is given
-				in >> name;		util.gobble(in);
-				in >> DiffsToBestMatch; util.gobble(in);
-				in >> BestMatchIndex; util.gobble(in);
-				in >> BestMatchName; util.gobble(in);
-				in >> DiffstToChimera; util.gobble(in);
-				in >> IndexofLeftParent; util.gobble(in);
-				in >> IndexOfRightParent; util.gobble(in);
-				in >> parent1;	util.gobble(in);
-				in >> parent2;	util.gobble(in);
-				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; util.gobble(in);
+				in >> name;		gobble(in);
+				in >> DiffsToBestMatch; gobble(in);
+				in >> BestMatchIndex; gobble(in);
+				in >> BestMatchName; gobble(in);
+				in >> DiffstToChimera; gobble(in);
+				in >> IndexofLeftParent; gobble(in);
+				in >> IndexOfRightParent; gobble(in);
+				in >> parent1;	gobble(in);
+				in >> parent2;	gobble(in);
+				in >> temp1 >> temp2 >> temp3 >> temp4 >> temp5 >> temp6 >> temp7 >> temp8 >> flag; gobble(in);
 				
 				
                 //is this name already in the file
-                set<string>::iterator itNames = namesInFile.find((name));
+                auto itNames = namesInFile.find((name));
                 
                 if (itNames == namesInFile.end()) { //no not in file
                     if (flag == "good") { //are you really a no??
                         //is this sequence really not chimeric??
-                        set<string>::iterator itChimeras = chimerasInFile.find(name);
+                        auto itChimeras = chimerasInFile.find(name);
                         
                         //then you really are a no so print, otherwise skip
                         if (itChimeras == chimerasInFile.end()) { print = true; }
@@ -929,7 +924,7 @@ int ChimeraPerseusCommand::deconvoluteResults(string outputFileName, string accn
 					out << BestMatchName << '\t' << DiffstToChimera << '\t' << IndexofLeftParent << '\t' << IndexOfRightParent << '\t' << parent1 << '\t' << parent2 << '\t';
 					out << temp1 << '\t' << temp2 << '\t' << temp3 << '\t' << temp4 << '\t' << temp5 << '\t' << temp6 << '\t' << temp7 << '\t' << temp8 << '\t' << flag << endl;	
 				}
-			}else { index = util.getline(in); util.gobble(in); }
+			}else { index = util.getline(in); gobble(in); }
 		}
 		in.close();
 		out.close();

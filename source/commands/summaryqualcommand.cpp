@@ -118,7 +118,7 @@ int SummaryQualCommand::execute(){
 		
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
-		long start = time(NULL);
+		long start = time(nullptr);
 		long long numSeqs = 0;
         hasNameMap = false;
 		
@@ -158,7 +158,7 @@ int SummaryQualCommand::execute(){
 		}
 		
         outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
-		m->mothurOut("\nIt took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n\n");
+		m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to create the summary file for " + toString(numSeqs) + " sequences.\n\n");
 		m->mothurOut("Output File Names: \n");
 		m->mothurOut(summaryFile+"\n\n");
         
@@ -201,13 +201,12 @@ struct seqSumQualData {
 /**************************************************************************************/
 void driverCreateSummary(seqSumQualData* params) {
 	try {
-		ifstream in;
-		params->util.openInputFile(params->filename, in);
+		ifstream in; params->util.openInputFile(params->filename, in);
 		
 		in.seekg(params->start);
         
         //adjust start if null strings
-        if (params->start == 0) {  params->util.zapGremlins(in); params->util.gobble(in);  }
+        if (params->start == 0) {  params->util.zapGremlins(in); gobble(in);  }
 		
 		bool done = false;
 		params->count = 0;
@@ -217,7 +216,7 @@ void driverCreateSummary(seqSumQualData* params) {
 			
 			if (params->m->getControl_pressed()) { in.close(); break; }
 			
-			QualityScores current(in); params->util.gobble(in);
+			QualityScores current(in); gobble(in);
 			
 			if (current.getName() != "") {
 				

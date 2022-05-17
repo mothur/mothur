@@ -185,7 +185,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
 			bool printHeaders = true;
-            while (lookup != NULL) {
+            while (lookup != nullptr) {
                 
                 if (m->getControl_pressed()) { delete lookup; break; }
                 
@@ -212,7 +212,7 @@ int NormalizeSharedCommand::execute(){
 			}
 			
             bool printHeaders = true;
-            while (lookupFloat != NULL) {
+            while (lookupFloat != nullptr) {
                     
                 if (m->getControl_pressed()) { delete lookupFloat; break; }
 

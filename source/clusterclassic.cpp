@@ -50,7 +50,7 @@ void ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 
 		matrixNames.push_back(name);
 
-		if(nameMap == NULL){
+		if(nameMap == nullptr){
 				list = new ListVector(nseqs);
 				list->set(0, name);
 		}
@@ -95,7 +95,7 @@ void ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		
 
 						//there's A LOT of repeated code throughout this method...
-						if(nameMap == NULL){
+						if(nameMap == nullptr){
 								list->set(i, name);
 						
 								for(int j=0;j<i;j++){
@@ -152,7 +152,7 @@ void ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 						fileHandle >> name;                
 						matrixNames.push_back(name);
 						
-						if(nameMap == NULL){
+						if(nameMap == nullptr){
 								list->set(i, name);
 								for(int j=0;j<nseqs;j++){
 										fileHandle >> distance;
@@ -234,7 +234,7 @@ void ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
         
 		matrixNames.push_back(name);
         
-		if(countTable == NULL){
+		if(countTable == nullptr){
             list = new ListVector(nseqs);
             list->set(0, name);
         }
@@ -281,7 +281,7 @@ void ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                 
                 
                 //there's A LOT of repeated code throughout this method...
-                 if(countTable == NULL){
+                 if(countTable == nullptr){
                     list->set(i, name);
                     
                     for(int j=0;j<i;j++){
@@ -333,7 +333,7 @@ void ClusterClassic::readPhylipFile(string filename, CountTable* countTable) {
                 fileHandle >> name;                
                 matrixNames.push_back(name);
                 
-                if(countTable == NULL){
+                if(countTable == nullptr){
                     list->set(i, name);
                     for(int j=0;j<nseqs;j++){
                         fileHandle >> distance;

@@ -17,7 +17,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
         string holdLabel, groupN;
         int numUserGroups = userGroups.size();
         
-        for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i];  lookup[i] = NULL; } }  lookup.clear();
+        for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != nullptr) { delete lookup[i];  lookup[i] = nullptr; } }  lookup.clear();
         
         //are we at the beginning of the file??
         if (nextLabel == "") {
@@ -26,20 +26,20 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             //is this a shared file that has headers
             if (label == "label") {
                 //gets "group"
-                f >> label; util.gobble(f);
+                f >> label; gobble(f);
                 
                 //gets "numOtus"
-                f >> label; util.gobble(f);
+                f >> label; gobble(f);
                 
                 //eat rest of line
-                label = util.getline(f); util.gobble(f);
+                label = util.getline(f); gobble(f);
                 
                 //parse labels to save
                 istringstream iStringStream(label);
                 while(!iStringStream.eof()){
                     if (m->getControl_pressed()) { break; }
                     string temp;
-                    iStringStream >> temp;  util.gobble(iStringStream);
+                    iStringStream >> temp;  gobble(iStringStream);
                     
                     currentLabels.push_back(temp);
                 }
@@ -95,7 +95,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
             SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
             push_back(temp);
         } else { util.getline(f); }
-        util.gobble(f);
+        gobble(f);
         
         if (!(f.eof())) { f >> nextLabel; }
         
@@ -115,7 +115,7 @@ SharedRAbundFloatVectors::SharedRAbundFloatVectors(ifstream& f, vector<string>& 
                 SharedRAbundFloatVector* temp = new SharedRAbundFloatVector(f, label, groupN, numBins);
                 push_back(temp);
             }else { util.getline(f); }
-            util.gobble(f);
+            gobble(f);
             
             if (f.eof() != true) { f >> nextLabel; }
         }
@@ -508,7 +508,7 @@ void SharedRAbundFloatVectors::removeGroups(vector<string> g){
             //if this sharedrabund is not from a group the user wants then delete it.
             if (util.inUsersGroups((*it)->getGroup(), g) ) {
                 remove = true;
-                delete (*it); (*it) = NULL;
+                delete (*it); (*it) = nullptr;
                 it = lookup.erase(it);
             }else { ++it; }
         }
@@ -532,7 +532,7 @@ int SharedRAbundFloatVectors::removeGroups(int minSize, bool silent){
         for (vector<SharedRAbundFloatVector*>::iterator it = lookup.begin(); it != lookup.end();) {
             if ((*it)->getNumSeqs() < minSize) {
                 if (!silent) { m->mothurOut((*it)->getGroup() + " contains " + toString((*it)->getNumSeqs()) + ". Eliminating.\n");  }
-                delete (*it); (*it) = NULL;
+                delete (*it); (*it) = nullptr;
                 it = lookup.erase(it);
             }else {
                 Groups.push_back((*it)->getGroup());

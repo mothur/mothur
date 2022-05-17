@@ -21,23 +21,20 @@ SequenceCountParser::SequenceCountParser(string countfile, string fastafile, vec
             CountTable ct; ct.testGroups(countfile, groupsSelected); //fills groupsSelected with groups in count table
         }
         
-        inputString += "groups=" + util.getStringFromVector(groupsSelected, "-"); //split.groups is paraplellized, we don't want the thread spinning up threads.
-        inputString += ", fasta=" + fastafile;
-        inputString += ", count=" + countfile;
-        
         m->mothurOut("\n/******************************************/\n");
+        m->mothurOut("Splitting by sample: \n");
+        
         time_t start = time(nullptr);
-        m->mothurOut("Running command: split.groups(" + inputString + ")\n");
         
-        SplitGroupCommand* splitCommand = new SplitGroupCommand(inputString);
-        splitCommand->execute();
-        
+        SplitGroupCommand* splitCommand = new SplitGroupCommand(groupsSelected, fastafile, countfile, "");
+
         //type -> files in groups order. fasta -> vector<string>. fastaFileForGroup1 stored in filenames["fasta"][1]
         map<string, vector<string> > filenames = splitCommand->getOutputFiles();
         
         delete splitCommand;
         
-        m->mothurOut("\nIt took " + toString(time(NULL) - start) + " seconds to split sequences by sample.\n");
+        m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " seconds to split the dataset by sample.\n");
+        
         m->mothurOut("/******************************************/\n");
         
         vector<string> parsedFastaFiles = filenames["fasta"]; //sorted in groups order

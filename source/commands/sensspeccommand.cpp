@@ -186,13 +186,13 @@ int SensSpecCommand::execute(){
 	try{
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 
-        int startTime = time(NULL);
+        int startTime = time(nullptr);
 
 		processListFile();
 
         if (m->getControl_pressed()) { util.mothurRemove(sensSpecFileName); return 0; }
 
-        m->mothurOut("It took " + toString(time(NULL) - startTime) + " to run sens.spec.\n");
+        m->mothurOut("It took " + toString(time(nullptr) - startTime) + " to run sens.spec.\n");
 		m->mothurOut("\nOutput File Names: \n"); m->mothurOut(sensSpecFileName+"\n\n");
 
 		return 0;
@@ -271,7 +271,7 @@ void SensSpecCommand::processListFile(){
         
         ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
                
-        while (list != NULL) {
+        while (list != nullptr) {
                    
             if (m->getControl_pressed()) { delete list; break; }
                    

@@ -98,17 +98,17 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
 			if (label == "label") {
 				
 				//gets "numOtus"
-				f >> label; util.gobble(f);
+				f >> label; gobble(f);
 				
 				//eat rest of line
-				label = util.getline(f); util.gobble(f);
+				label = util.getline(f); gobble(f);
 				
 				//parse labels to save
 				istringstream iStringStream(label);
 				while(!iStringStream.eof()){
 					if (m->getControl_pressed()) { break; }
 					string temp;
-					iStringStream >> temp;  util.gobble(iStringStream);
+					iStringStream >> temp;  gobble(iStringStream);
 					binLabels.push_back(temp);
 				}
                 if (binLabels.size() != 0) {
@@ -138,12 +138,12 @@ ListVector::ListVector(ifstream& f, string& readHeaders, string& labelTag) : Dat
             }
 		}else { f >> label >> thisNumBins; }
 		
-        util.gobble(f);
+        gobble(f);
 		data.assign(thisNumBins, "");
 		string inputData = "";
         otuTag = labelTag;
 	
-        string buffer = util.getline(f); util.gobble(f);
+        string buffer = util.getline(f); gobble(f);
         vector<string> thisListBins = util.splitWhiteSpace(buffer);
         
         if (thisListBins.size() != thisNumBins) {
@@ -527,10 +527,10 @@ SAbundVector ListVector::getSAbundVector(){
 
 /***********************************************************************/
 
-OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
+OrderVector ListVector::getOrderVector(map<string,int>* orderMap = nullptr){
 	try {
         Utils util;
-		if(orderMap == NULL){
+		if(orderMap == nullptr){
 			
             vector<int> ovData;
 			for(int i=0;i<data.size();i++){

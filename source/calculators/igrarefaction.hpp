@@ -20,7 +20,7 @@ class IGRarefaction : public DiversityCalculator {
 public:
     
     IGRarefaction(double c); 
-    ~IGRarefaction() {}
+    ~IGRarefaction() = default;
     
     vector<double> getValues(int ns, vector<mcmcSample>& sampling);
     

@@ -366,7 +366,7 @@ ListVector* OptiFitCluster::getList() {
         ListVector* list = new ListVector();
         ListVector* singleton = matrix->getListSingle();
         
-        if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+        if (singleton != nullptr) { //add in any sequences above cutoff in read. Removing these saves clustering time.
             for (int i = 0; i < singleton->getNumBins(); i++) {
                 if (singleton->get(i) != "") {
                     list->push_back(singleton->get(i));
@@ -463,7 +463,7 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
                 
                 ListVector* unfittedList = clusterUnfitted(unFittedMatrix, label); //unfittedList includes unfitted singletons
                 
-                if (unfittedList != NULL) {
+                if (unfittedList != nullptr) {
                     
                     m->mothurOut("The unfitted sequences clustered into " + toString(unfittedList->getNumBins()) + " new OTUs.\n"); //+unFittedMatrix->getNumSingletons()+ matrix->getNumFitSingletons()
                     
@@ -480,7 +480,7 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
                 //add in fit singletons 
                 ListVector* singleton = matrix->getFitListSingle();
                 
-                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                if (singleton != nullptr) { //add in any sequences above cutoff in read. Removing these saves clustering time.
                     for (int i = 0; i < singleton->getNumBins(); i++) {
                         if (m->getControl_pressed()) { break; }
                         if (singleton->get(i) != "") { list->push_back(singleton->get(i)); }
@@ -496,7 +496,7 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
                 //add in fit singletons
                 ListVector* singleton = matrix->getFitListSingle();
                 
-                if (singleton != NULL) { //add in any sequences above cutoff in read. Removing these saves clustering time.
+                if (singleton != nullptr) { //add in any sequences above cutoff in read. Removing these saves clustering time.
                     for (int i = 0; i < singleton->getNumBins(); i++) {
                         if (m->getControl_pressed()) { break; }
                         if (singleton->get(i) != "") { unfittedNames.insert(singleton->get(i)); }
@@ -529,7 +529,7 @@ ListVector* OptiFitCluster::getFittedList(string label, bool includerefs) {
 /***********************************************************************/
 ListVector* OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix, string label) {
     try {
-        ListVector* list = NULL;
+        ListVector* list = nullptr;
         
         OptiCluster cluster(unfittedMatrix, metric, 0);
         
@@ -551,7 +551,7 @@ ListVector* OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix, string lab
         
         while ((delta > 0.0001) && (iters < 100)) {
             
-            long start = time(NULL);
+            long start = time(nullptr);
             
             if (m->getControl_pressed()) { break; }
             double oldMetric = listVectorMetric;
@@ -564,7 +564,7 @@ ListVector* OptiFitCluster::clusterUnfitted(OptiData* unfittedMatrix, string lab
             results = cluster.getStats(tp, tn, fp, fn);
             numBins = cluster.getNumBins();
             
-            m->mothurOut(toString(iters) + "\t" + toString(time(NULL) - start) + "\t" + label + "\t" + toString(numBins) + "\t" + label + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
+            m->mothurOut(toString(iters) + "\t" + toString(time(nullptr) - start) + "\t" + label + "\t" + toString(numBins) + "\t" + label + "\t"+ toString(tp) + "\t" + toString(tn) + "\t" + toString(fp) + "\t" + toString(fn) + "\t");
             
             for (int i = 0; i < results.size(); i++) { m->mothurOut(toString(results[i]) + "\t");  }
             m->mothurOutEndLine();
@@ -608,7 +608,7 @@ long long OptiFitCluster::getNumFitBins() {
         ListVector* list = getFittedList("", false);
         
         int numBins = 0;
-        if (list != NULL) {
+        if (list != nullptr) {
             numBins = list->getNumBins();
             delete list;
         }

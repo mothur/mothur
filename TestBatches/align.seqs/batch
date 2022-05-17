@@ -6,8 +6,6 @@ set.dir(input=./TestFiles, output=./TestResults/align.seqs, tempdefault=./TestRe
 set.logfile(name=alignseqs.logfile)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta)
 summary.seqs(fasta=current)
-#align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, search=blast)
-#summary.seqs(fasta=current)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, align=needleman)
 summary.seqs(fasta=current)
 align.seqs(fasta=testAlign.fasta, reference=silva.v4.fasta, align=gotoh)

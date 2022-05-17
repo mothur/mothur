@@ -14,19 +14,21 @@
 #include "sparsedistancematrix.h"
 #include "counttable.h"
 
+
+/*
+ #ifdef UNIT_TEST
+     friend class TestOptiMatrix;
+     friend class FakeOptiMatrix;
+ #endif
+     
+ */
 class OptiData {
-    
-#ifdef UNIT_TEST
-    friend class TestOptiMatrix;
-    friend class FakeOptiMatrix;
-#endif
-    
 public:
     
     OptiData(double c)  { m = MothurOut::getInstance(); cutoff = c; }
     virtual ~OptiData(){}
     
-    set<long long> getCloseSeqs(long long i);// { return closeness[i]; }
+    set<long long> getCloseSeqs(long long i);
     bool isClose(long long, long long);
     long long getNumClose(long long);
     map<string, long long> getNameIndexMap();
@@ -42,18 +44,17 @@ public:
     virtual vector< set<long long> > getBlastOverlap() { vector< set<long long> > blank; return blank; }
     virtual string getOverlapName(long long) { return ""; } //name from nameMap index
     
-    virtual void randomizeRefs() {}
+    virtual void randomizeRefs(){};
     virtual vector<string> getRefSingletonNames() { vector<string> temp; return temp;  }
     virtual vector<long long> getTranslatedBins(vector<vector<string> >&, vector< vector<long long> >&) { vector<long long> temp; return temp;  }
-    virtual OptiData* extractRefMatrix() { OptiData* temp = NULL; return temp;  }
-    virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = NULL; return temp;  }
-    virtual OptiData* extractMatrixSubset(set<string>&) { OptiData* temp = NULL; return temp;  }
+    virtual OptiData* extractRefMatrix() { OptiData* temp = nullptr; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<long long>&) { OptiData* temp = nullptr; return temp;  }
+    virtual OptiData* extractMatrixSubset(set<string>&) { OptiData* temp = nullptr; return temp;  }
     virtual long long getNumFitSingletons() { return 0; } //user singletons
-    
     virtual long long getNumFitDists() { return 0; } //user distances under cutoff
     virtual long long getNumRefDists() { return 0; } //ref distances under cutoff
     
-    virtual ListVector* getFitListSingle() { ListVector* list = NULL; return list; }
+    virtual ListVector* getFitListSingle() { ListVector* list = nullptr; return list; }
     virtual long long getNumFitTrueSingletons() { return 0; }
     
     virtual vector<long long> getRefSeqs() { vector<long long> temp; return temp;  }
@@ -67,16 +68,13 @@ public:
     virtual long long print(ostream&);
     
 protected:
-    
-    Utils util;
-    MothurOut* m;
+    Utils util; MothurOut* m;
     vector< set<long long> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
     vector<string> singletons; //name of seqs with NO distances in matrix, if name file is given then it contains 2nd column of namefile
     vector<string> nameMap;  //name of seqs with distances in matrix, if name file is given then it contains 2nd column of namefile
     double cutoff;
     
     set<long long> getIndexes(set<string> seqs);
-    
 };
 
 

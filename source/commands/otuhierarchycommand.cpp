@@ -407,7 +407,7 @@ vector< vector<string> > OtuHierarchyCommand::getListVector(string label, string
         
         ListVector* list = util.getNextList(input, false, userLabels, processedLabels, lastLabel);
                
-        if (list != NULL) {
+        if (list != nullptr) {
                    
             //at this point the list vector has the right distance
             vector<string> bins, listlabels;

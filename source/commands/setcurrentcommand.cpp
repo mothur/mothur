@@ -377,15 +377,13 @@ int SetCurrentCommand::execute(){
 int SetCurrentCommand::readCurrentFiles(){
     try{
         
-        ifstream in;
-        util.openInputFile(currentFile, in);
-        
+        ifstream in; util.openInputFile(currentFile, in);
         
         while(!in.eof()) {
             
             if (m->getControl_pressed()) { break; }
             
-            string line = util.getline(in); util.gobble(in);
+            string line = util.getline(in); gobble(in);
             
             vector<string> pieces;
             util.splitAtChar(line, pieces, '=');

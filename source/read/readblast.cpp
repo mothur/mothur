@@ -19,7 +19,7 @@ inline bool compareOverlap(seqDist left, seqDist right){
 ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(ms) {
 	try {
 		m = MothurOut::getInstance();
-		matrix = NULL;
+		matrix = nullptr;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReadBlast", "ReadBlast");
@@ -65,7 +65,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (!fileHandle.eof()) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			
 			currentRow = firstName;
 			lengthThisSeq = numBases;
@@ -101,7 +101,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
 			
-			util.gobble(fileHandle);
+			gobble(fileHandle);
 			
 			string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
 			
@@ -261,8 +261,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		string name, hold, prevName;
 		int num = 1;
 		
-		ifstream in;
-		util.openInputFile(blastfile, in);
+		ifstream in; util.openInputFile(blastfile, in);
 		
 		//ofstream outName;
 		//util.openOutputFile((blastfile + ".tempOutNames"), outName);
@@ -271,7 +270,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		in >> prevName;
 	
 		for (int i = 0; i < 11; i++) {  in >> hold;  }
-		util.gobble(in);
+		gobble(in);
 				
 		//save name in nameMap
 		nameMap->push_back(prevName);
@@ -283,7 +282,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			in >> name;
 	
 			for (int i = 0; i < 11; i++) {  in >> hold;  }
-			util.gobble(in);
+			gobble(in);
 			
 			//is this a new name?
 			if (name != prevName) {

@@ -91,9 +91,8 @@ int MimarksAttributesCommand::execute(){
         
         if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
-        ifstream in;
-        util.openInputFile(xmlFile, in);
-        string header = util.getline(in); util.gobble(in);
+        ifstream in; util.openInputFile(xmlFile, in);
+        string header = util.getline(in); gobble(in);
         
         if (header != "<BioSampleAttributes>") { m->mothurOut("[ERROR]: " + header + " is not a bioSample attribute file.\n"); m->setControl_pressed(true); }
         
@@ -317,7 +316,7 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         
         
         //read <Attribute>
-        string header = util.getline(in); util.gobble(in);
+        string header = util.getline(in); gobble(in);
         
         if (header == "</BioSampleAttributes>") { Attribute temp; return temp; }
         
@@ -325,14 +324,14 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         
         //read name
         //<Name>wastewater type</Name>
-        util.gobble(in);
-        string name = util.getline(in); util.gobble(in);
+        gobble(in);
+        string name = util.getline(in); gobble(in);
         trimTags(name);
         
         //read hamonized name
         //<HarmonizedName>wastewater_type</HarmonizedName>
-        util.gobble(in);
-        string hname = util.getline(in); util.gobble(in);
+        gobble(in);
+        string hname = util.getline(in); gobble(in);
         trimTags(hname);
         
         //read description
@@ -341,13 +340,13 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //</Description>
         string description = "";
         unsigned long long spot = in.tellg();
-        util.gobble(in);
+        gobble(in);
         char c = in.get(); c = in.get();
         if (c == 'D') { //description
             description += "<D";
             while (!in.eof()) {
-                util.gobble(in);
-                string thisLine = util.getline(in); util.gobble(in);
+                gobble(in);
+                string thisLine = util.getline(in); gobble(in);
                 description += thisLine;
                 if (thisLine.find("</Description>") != string::npos)  { break; }
             }
@@ -359,15 +358,15 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //read format
         //<Format>{text}</Format>
         spot = in.tellg();
-        util.gobble(in);
+        gobble(in);
         c = in.get(); c = in.get();
         string format = "";
         if (c == 'F') { //format
-            format += "<F" + util.getline(in); util.gobble(in);
+            format += "<F" + util.getline(in); gobble(in);
             if (format.find("</Format>") == string::npos) { //format is not on oneline
                 while (!in.eof()) {
-                    util.gobble(in);
-                    string thisLine = util.getline(in); util.gobble(in);
+                    gobble(in);
+                    string thisLine = util.getline(in); gobble(in);
                     format += thisLine;
                     if (thisLine.find("</Format>") != string::npos) { break; }
                 }
@@ -384,11 +383,11 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         bool FirstTime = true;
         while (!in.eof()) {
             unsigned long long thisspot = in.tellg();
-            util.gobble(in);
+            gobble(in);
             char c = in.get(); c = in.get();
             if (c == 'S') { //synonym
                 FirstTime = false;
-                util.getline(in); util.gobble(in);
+                util.getline(in); gobble(in);
             }else { //package
                 if (FirstTime) { in.seekg(spot); }
                 else { in.seekg(thisspot); }
@@ -400,7 +399,7 @@ Attribute MimarksAttributesCommand::readAttribute(ifstream& in){
         //read packages - may be none
         //<Package use="optional" group_name="Air">MIGS.ba.air.4.0</Package>
         while (!in.eof()) {
-            string package = util.getline(in); util.gobble(in);
+            string package = util.getline(in); gobble(in);
             if (package == "</Attribute>") { break; }
             else {
                 Package thisPackage = parsePackage(package);
