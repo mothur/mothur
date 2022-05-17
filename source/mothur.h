@@ -113,6 +113,8 @@ using namespace std;
 #define isnan(x) ((x) != (x))
 #define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
 #define GIG 1073741824
+
+
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux) || (__linux__) || (__unix__) || (__unix)
 #define PATH_SEPARATOR "/"
 #define EXECUTABLE_EXT ""
@@ -137,6 +139,12 @@ using namespace std;
 #define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
 #undef WINDOWS
+
+#if defined (__APPLE__) || (__MACH__)
+#define OSX
+#else
+#undef OSX
+#endif
 
 #else
 #define PATH_SEPARATOR "\\"
