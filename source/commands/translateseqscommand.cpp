@@ -304,7 +304,7 @@ void TranslateSeqsCommand::translateDNAtoAmino() {
         for (int i = 0; i < (positions.size()-1); i++) {    lines.push_back(linePair(positions[i], positions[(i+1)]));    }
 #else
         long long numFastaSeqs = 0;
-        positions = util.setFilePosFasta(filename, numFastaSeqs);
+        positions = util.setFilePosFasta(fastafile, numFastaSeqs);
         if (numFastaSeqs < processors) { processors = numFastaSeqs; m->mothurOut("Reducing processors to " + toString(numFastaSeqs) + ".\n");  }
         
         //figure out how many sequences you have to process
