@@ -812,13 +812,16 @@ int driverPcr(pcrData* params){
         if (params->fileAligned && !params->keepdots) { //print out smallest start value and largest end value
             if (startLocations.size() > 1)  { params->adjustNeeded = true; }
             if (endLocations.size() > 1)    { params->adjustNeeded = true; }
-            if (params->numFPrimers != 0)        {
-                set<int>::iterator it = startLocations.begin();  params->pstart = *it;
-                if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(startLocations, " ")+"\n"); }
-            }
-            if (params->numRPrimers != 0)      {
-                set<int>::reverse_iterator it = endLocations.rbegin();  params->pend = *it;
-                if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(endLocations, " ")+"\n"); }
+            
+            if (params->adjustNeeded) {
+                if (params->numFPrimers != 0)        {
+                    set<int>::iterator it = startLocations.begin();  params->pstart = *it;
+                    if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(startLocations, " ")+"\n"); }
+                }
+                if (params->numRPrimers != 0)      {
+                    set<int>::reverse_iterator it = endLocations.rbegin();  params->pend = *it;
+                    if (params->m->getDebug()) {  params->m->mothurOut("[DEBUG]: " + params->util.getStringFromSet(endLocations, " ")+"\n"); }
+                }
             }
         }
         

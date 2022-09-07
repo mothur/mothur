@@ -11,7 +11,7 @@
 //**********************************************************************************************************************
 vector<string> MakeFileCommand::setParameters(){
     try {
-        CommandParameter ptype("type", "Multiple", "fastq-gz", "fastq", "", "", "","",false,false); parameters.push_back(ptype);
+        CommandParameter ptype("type", "Multiple", "fasta-fastq-gz", "fastq", "", "", "","",false,false); parameters.push_back(ptype);
         CommandParameter pnumcols("numcols", "Multiple", "2-3", "3", "", "", "","",false,false, true); parameters.push_back(pnumcols);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pprefix("prefix", "String", "", "", "", "", "","",false,false); parameters.push_back(pprefix);
@@ -37,11 +37,11 @@ vector<string> MakeFileCommand::setParameters(){
 string MakeFileCommand::getHelpString(){
     try {
         string helpString = "";
-        helpString += "The make.file command takes a input directory and creates a file file containing the fastq or gz files in the directory.\n";
+        helpString += "The make.file command takes a input directory and creates a file file containing the fasta, fastq or gz files in the directory.\n";
         helpString += "The make.file command parameters are inputdir, numcols, type and prefix.  inputdir is required.\n";
         helpString += "May create more than one file. Mothur will attempt to match paired files. \n";
-        helpString += "The type parameter allows you to set the type of files to look for. Options are fastq or gz.  Default=fastq. \n";
-        helpString += "The numcols parameter allows you to set number of columns you mothur to make in the file.  Default=3, meaning groupName forwardFastq reverseFastq. The groupName is made from the beginning part of the forwardFastq file. Everything up to the first '_' or if no '_' is found then the root of the forwardFastq filename.\n";
+        helpString += "The type parameter allows you to set the type of files to look for. Options are fasta, fastq or gz.  Default=fastq. \n";
+        helpString += "The numcols parameter allows you to set number of columns you mothur to make in the file.  Default=3 for fastq and gz, meaning groupName forwardFastq reverseFastq. The groupName is made from the beginning part of the forwardFastq file. Everything up to the first '_' or if no '_' is found then the root of the forwardFastq filename. Default=2 for fasta files, meaning groupName fastaFile.\n";
         helpString += "The prefix parameter allows you to enter your own prefix for the output filename. Default=stability.";
         helpString += "The delim parameter allow you to enter the character you would like to use to create the sample name. Default='_'. For example, M6D7_S163_L001_R2_001.fastq.gz would produce the sample name M6D7. Set delim=* to indicate you want mothur to create unique names for each file pair. (no pooling)\n";
         helpString += "The make.file command should be in the following format: \n";
@@ -94,9 +94,9 @@ MakeFileCommand::MakeFileCommand(string option) : Command()  {
             typeFile = validParameter.valid(parameters, "type");
             if (typeFile == "not found"){	typeFile = "fastq";		}
             
-            if ((typeFile != "fastq") && (typeFile != "gz")) { m->mothurOut(typeFile + " is not a valid type. Options are fastq or gz. I will use fastq.\n");  typeFile = "fastq"; }
+            if ((typeFile != "fastq") && (typeFile != "gz") && (typeFile != "fasta")) { m->mothurOut(typeFile + " is not a valid type. Options are fasta, fastq or gz. I will use fastq.\n");  typeFile = "fastq"; }
             
-            string temp = validParameter.valid(parameters, "numcols");		if(temp == "not found"){	temp = "3"; }
+            string temp = validParameter.valid(parameters, "numcols");		if(temp == "not found"){ temp = "3"; if (typeFile == "fasta") {	temp = "2"; } }
             if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3.\n");  temp = "3";  }
             util.mothurConvert(temp, numCols);
             
