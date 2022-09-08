@@ -3982,11 +3982,11 @@
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release/;/Users/swestcott/Desktop/mothurbugs/\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/MothurStuff/release/;/Users/swestcott/Desktop/MothurStuff/mothurbugs/\\\"\"",
 					"VERSION=\"\\\"1.48.0\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur/tools/;/Users/swestcott/Desktop/release/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/MothurStuff/mothur/tools/;/Users/swestcott/Desktop/release/\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -4034,12 +4034,12 @@
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = "${SRCROOT}/mothur_resources_10.14/libs";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/MothurStuff/release\\\"\"",
 					"VERSION=\"\\\"1.48.0\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/MothurStuff/mothur/tools/\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
@@ -4105,7 +4105,7 @@
 				GCC_ENABLE_SSE41_EXTENSIONS = NO;
 				GCC_ENABLE_SSE42_EXTENSIONS = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
 					"VERSION=\"\\\"1.47.0\\\"\"",
@@ -4196,7 +4196,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = "";
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"VERSION=\"\\\"1.47.0\\\"\"",
 					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/release\\\"\"",
