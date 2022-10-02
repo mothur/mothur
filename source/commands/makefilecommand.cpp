@@ -122,94 +122,25 @@ int MakeFileCommand::execute(){
         fillAccnosFile(tempFile);
         
         //read in list of files
-        vector<string> fastqFiles;
-        util.readAccnos(tempFile, fastqFiles, "no error");
+        vector<string> files;
+        util.readAccnos(tempFile, files, "no error");
         util.mothurRemove(tempFile);
         
         if (m->getDebug()) {
-            m->mothurOut("[DEBUG]: Found " + toString(fastqFiles.size()) + " files of type " + typeFile + ".\n");
-            for (int i = 0; i < fastqFiles.size(); i++) { m->mothurOut("[DEBUG]: " + toString(i) + " = " + fastqFiles[i] + "\n");}
+            m->mothurOut("[DEBUG]: Found " + toString(files.size()) + " files of type " + typeFile + ".\n");
+            for (int i = 0; i < files.size(); i++) { m->mothurOut("[DEBUG]: " + toString(i) + " = " + files[i] + "\n");}
         }
         
-        if (fastqFiles.size() == 0) { m->mothurOut("[WARNING]: Unable to find any " + typeFile + " files in your directory.\n"); }
+        if (files.size() == 0) { m->mothurOut("[WARNING]: Unable to find any " + typeFile + " files in your directory.\n"); }
         else {
             
             //sort into alpha order to put pairs togther if they exist
-            sort(fastqFiles.begin(), fastqFiles.end());
+            sort(files.begin(), files.end());
             
-            vector< vector<string> > paired;
-            vector<string> singles;
-            set<string> groups;
-            string lastFile = "";
-            for (int i = 0; i < fastqFiles.size()-1; i++) {
-                
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + fastqFiles[i] + ".\n"); }
-                
-                if (m->getControl_pressed()) { break; }
-                
-                string simpleName1 = util.getRootName(util.getSimpleName(fastqFiles[i]));
-                string simpleName2 = util.getRootName(util.getSimpleName(fastqFiles[i+1]));
-                
-                //possible pair
-                if (simpleName1.length() == simpleName2.length()) {
-                    int numDiffs = 0;
-                    for (int j = 0; j < simpleName1.length(); j++) {
-                        if (numDiffs > 1) { break; }
-                        else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
-                    }
-                    if (numDiffs > 1) { singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i]; }
-                    else { //only one diff = paired files
-                        vector<string> temp;
-                        temp.push_back(util.getSimpleName(fastqFiles[i])); temp.push_back(util.getSimpleName(fastqFiles[i+1])); lastFile = fastqFiles[i+1];
-                        if (m->getDebug()) { m->mothurOut("[DEBUG]: Pairing " + fastqFiles[i] + " with " + fastqFiles[i+1] + ".\n"); }
-                        paired.push_back(temp);
-                        i++;
-                    }
-                }else{
-                    if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + fastqFiles[i] + ".\n"); }
-                    singles.push_back(util.getSimpleName(fastqFiles[i])); lastFile = fastqFiles[i];
-                }
-            }
-            if (lastFile != fastqFiles[fastqFiles.size()-1]) {
-                if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + fastqFiles[fastqFiles.size()-1] + ".\n"); }
-                singles.push_back(util.getSimpleName(fastqFiles[fastqFiles.size()-1])); }
-            
-            if (singles.size() != 0) {
-                map<string, string> variables;
-                variables["[filename]"] = outputdir + prefix + ".";
-                if (paired.size() != 0) { variables["[tag]"] = "single"; }
-                string filename = getOutputFileName("file",variables);
-                
-                ofstream out; util.openOutputFile(filename, out);
-                
-                for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; } out.close();
-                
-                if (util.isBlank(filename)) {  util.mothurRemove(filename); }
-                else {
-                    outputNames.push_back(filename); outputTypes["file"].push_back(filename);
-                    m->mothurOut("\n[WARNNG]: mothur found unpaired files in your input directory. Outputting list of filenames to " + filename + " for your review.\n\n");
-                }
-            }
-            
-            //generates unique group names
-            if (numCols == 3) { paired = findGroupNames(paired); }
-
-            if (paired.size() != 0) {
-                map<string, string> variables;
-                variables["[filename]"] = outputdir + prefix + ".";
-                string filename = getOutputFileName("file",variables);
-                
-                ofstream out; util.openOutputFile(filename, out);
-                outputNames.push_back(filename); outputTypes["file"].push_back(filename);
-                current->setFileFile(filename);
-                
-                for (int i = 0; i < paired.size(); i++) {
-                    for (int j = 0; j < paired[i].size(); j++) { out << paired[i][j] << '\t'; } out << endl;
-                }
-                out.close();
-            }
-            
+            if (typeFile == "fasta")    { createFastaFile(files);   }
+            else                        { createFastqGzFile(files); }
         }
+        
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); } return 0; }
         
         m->mothurOut("\nOutput File Names: \n");
@@ -224,119 +155,307 @@ int MakeFileCommand::execute(){
     }
 }
 //**********************************************************************************************************************
+
+void MakeFileCommand::createFastaFile(vector<string> files){
+    try {
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + prefix + ".";
+        string filename = getOutputFileName("file",variables);
+        
+        ofstream out; util.openOutputFile(filename, out);
+        outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+        current->setFileFile(filename);
+        
+        vector< vector<string> > outputs;
+        if (numCols == 3) {
+            vector<string> singles;
+            vector< vector<string> > paired = pairFiles(files, singles);
+            outputs = prepareOutputs(paired);
+        }else {
+            outputs = prepareOutputs(files);
+        }
+        
+        for (int i = 0; i < outputs.size(); i++) {
+            for (int j = 0; j < outputs[i].size(); j++) { out << outputs[i][j] << '\t'; } out << endl;
+        }
+        out.close();
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "createFastaFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+void MakeFileCommand::createFastqGzFile(vector<string> files){
+    try {
+        vector<string> singles;
+        vector< vector<string> > paired = pairFiles(files, singles);
+        
+        if (singles.size() != 0) {
+            map<string, string> variables;
+            variables["[filename]"] = outputdir + prefix + ".";
+            if (paired.size() != 0) { variables["[tag]"] = "single"; }
+            string filename = getOutputFileName("file",variables);
+            
+            ofstream out; util.openOutputFile(filename, out);
+            
+            for (int i = 0; i < singles.size(); i++) { out << singles[i] << endl; } out.close();
+            
+            if (util.isBlank(filename)) {  util.mothurRemove(filename); }
+            else {
+                outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+                m->mothurOut("\n[WARNNG]: mothur found unpaired files in your input directory. Outputting list of filenames to " + filename + " for your review.\n\n");
+            }
+        }
+        
+        //generates unique group names
+        if (numCols == 3) { paired = prepareOutputs(paired); }
+
+        if (paired.size() != 0) {
+            map<string, string> variables;
+            variables["[filename]"] = outputdir + prefix + ".";
+            string filename = getOutputFileName("file",variables);
+            
+            ofstream out; util.openOutputFile(filename, out);
+            outputNames.push_back(filename); outputTypes["file"].push_back(filename);
+            current->setFileFile(filename);
+            
+            for (int i = 0; i < paired.size(); i++) {
+                for (int j = 0; j < paired[i].size(); j++) { out << paired[i][j] << '\t'; } out << endl;
+            }
+            out.close();
+        }
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "createFastqGzFile");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+vector< vector<string> > MakeFileCommand::pairFiles(vector<string> files, vector<string>& singles){
+    try {
+        vector< vector<string> > paired;
+        string lastFile = "";
+        
+        for (int i = 0; i < files.size()-1; i++) {
+            
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: File " + toString(i) + " = " + files[i] + ".\n"); }
+            
+            if (m->getControl_pressed()) { break; }
+            
+            string simpleName1 = util.getRootName(util.getSimpleName(files[i]));
+            string simpleName2 = util.getRootName(util.getSimpleName(files[i+1]));
+            
+            //possible pair
+            if (simpleName1.length() == simpleName2.length()) {
+                int numDiffs = 0;
+                for (int j = 0; j < simpleName1.length(); j++) {
+                    if (numDiffs > 1) { break; }
+                    else if (simpleName1[j] != simpleName2[j]) { numDiffs++; }
+                }
+                if (numDiffs > 1) { singles.push_back(util.getSimpleName(files[i])); lastFile = files[i]; }
+                else { //only one diff = paired files
+                    vector<string> temp;
+                    temp.push_back(util.getSimpleName(files[i])); temp.push_back(util.getSimpleName(files[i+1])); lastFile = files[i+1];
+                    if (m->getDebug()) { m->mothurOut("[DEBUG]: Pairing " + files[i] + " with " + files[i+1] + ".\n"); }
+                    paired.push_back(temp);
+                    i++;
+                }
+            }else{
+                if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + files[i] + ".\n"); }
+                singles.push_back(util.getSimpleName(files[i])); lastFile = files[i];
+            }
+        }
+        
+        if (lastFile != files[files.size()-1]) {
+            if (m->getDebug()) { m->mothurOut("[DEBUG]: Adding single " + files[files.size()-1] + ".\n"); }
+            singles.push_back(util.getSimpleName(files[files.size()-1]));
+        }
+        
+        return paired;
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "pairFiles");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
 //groupName defaults to "noGroup"+toString(i);
-vector< vector<string> > MakeFileCommand::findGroupNames(vector< vector<string> > paired){
+vector< vector<string> > MakeFileCommand::prepareOutputs(vector<string> files){
+    try {
+        vector< vector<string> > results; results.resize(files.size());
+        
+        vector<string> groupNames;
+        if (delim == "*") {
+            groupNames = denoiseGroupNames(files);
+        }else {
+            groupNames = createDefaultGroupNames(files);
+        }
+        
+        for (int i = 0; i < files.size(); i++) {
+            results[i].push_back(groupNames[i]); results[i].push_back(util.getSimpleName(files[i]));
+        }
+        
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "prepareOutputs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+//groupName defaults to "noGroup"+toString(i);
+vector< vector<string> > MakeFileCommand::prepareOutputs(vector< vector<string> > paired){
     try {
         vector< vector<string> > results; results.resize(paired.size());
         
+        vector<string> forwardNames;
+        for (int i = 0; i < paired.size(); i++) {
+            forwardNames.push_back(util.getRootName(util.getSimpleName(paired[i][0])));
+        }
+        
+        vector<string> groupNames;
         if (delim == "*") {
-            //remove any "words" in filenames that is the same in all filenames separated by delim(_ .)
-            //MI.M00833_0261.001.FLD0207.TRIN-META_16S_R2.fastq
-            //MI.M00833_0261.001.FLD0223.ERIFF-META_16S_R2.fastq
-            //would become...
-            //FLD0207.TRIN-META
-            //FLD0223.ERIFF-META
+            groupNames = denoiseGroupNames(forwardNames);
+        }else {
+            groupNames = createDefaultGroupNames(forwardNames);
+        }
+        
+        for (int i = 0; i < paired.size(); i++) {
+            results[i].push_back(groupNames[i]); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
+        }
+        
+        return results;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "prepareOutputs");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+vector<string> MakeFileCommand::createDefaultGroupNames(vector<string> files){
+    try {
+        set<string> groups;
+        vector<string> groupNames;
+        for (int i = 0; i < files.size(); i++) {
             
-            //split all forward names into pieces
-            vector<vector<string> > words; words.resize(paired.size());
-            map<int, set<string> > posToWord;
+            string groupName = "Group_" + toString(i);
+            string filename = util.getSimpleName(files[i]);
+            int pos = filename.find(delim);
             
-            for (int i = 0; i < paired.size(); i++) {
-                if (m->getControl_pressed()) { break; }
-                
-                string filename = util.getRootName(util.getSimpleName(paired[i][0]));
-                
-                int pos = 0;
-                string individual = "";
-                for(int j=0;j<filename.length();j++){
-                    if((filename[j] == '.') || (filename[j] == '_')){
-                        words[i].push_back(individual);
-                        
-                        map<int, set<string> >::iterator it = posToWord.find(pos);
-                        if (it != posToWord.end()) { posToWord[pos].insert(individual); }
-                        else {
-                            set<string> temp; temp.insert(individual);
-                            posToWord[pos] = temp;
-                        }
-                        individual = "";
-                        pos++;
-                    }
-                    else{
-                        individual += filename[j];
-                    }
+            if (pos != string::npos) { groupName = filename.substr(0, pos); }
+            
+            if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
+            else {
+                //look for another delim
+                string tempFilename = filename.substr(pos+1); //grab rest of name
+                pos = tempFilename.find(delim);
+                if (pos != string::npos) {
+                    groupName += "_" + tempFilename.substr(0, pos);
+                    if (groups.count(groupName) != 0) {  groupName += "_"+ toString(i);  } //already have this name
                 }
-                if (!util.allSpaces(individual)) {
+                else { groupName += "_"+ toString(i); }
+                util.checkName(groupName);
+                groups.insert(groupName);
+            }
+            
+            groupNames.push_back(groupName);
+        }
+        
+        return groupNames;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "MakeFileCommand", "createGroupNames");
+        exit(1);
+    }
+}
+//**********************************************************************************************************************
+
+vector<string> MakeFileCommand::denoiseGroupNames(vector<string> files){
+    try {
+        //remove any "words" in filenames that is the same in all filenames separated by delim(_ .)
+        //MI.M00833_0261.001.FLD0207.TRIN-META_16S_R2.fastq
+        //MI.M00833_0261.001.FLD0223.ERIFF-META_16S_R2.fastq
+        //would become...
+        //FLD0207.TRIN-META
+        //FLD0223.ERIFF-META
+        
+        //split all names into pieces
+        vector<vector<string> > words; words.resize(files.size());
+        map<int, set<string> > posToWord;
+        
+        for (int i = 0; i < files.size(); i++) {
+            if (m->getControl_pressed()) { break; }
+            
+            string filename = util.getRootName(util.getSimpleName(files[i]));
+            
+            int pos = 0;
+            string individual = "";
+            for(int j=0;j<filename.length();j++){
+                if((filename[j] == '.') || (filename[j] == '_')){
                     words[i].push_back(individual);
+                    
                     map<int, set<string> >::iterator it = posToWord.find(pos);
                     if (it != posToWord.end()) { posToWord[pos].insert(individual); }
                     else {
                         set<string> temp; temp.insert(individual);
                         posToWord[pos] = temp;
                     }
+                    individual = "";
+                    pos++;
+                }
+                else{
+                    individual += filename[j];
                 }
             }
-            
-            //remove duplicate pieces
-            set<int> goodIndexes;
-            for (map<int, set<string> >::iterator it = posToWord.begin(); it != posToWord.end(); it++) {
-                set<string> w = it->second;;
-                if (w.size() != 1) { goodIndexes.insert(it->first);  }
-            }
-            
-            set<string> groups;
-            for (int i = 0; i < words.size(); i++) {
-                
-                //assemble groupNames
-                string groupName = "";
-                for (int j = 0; j < words[i].size(); j++) {
-                    //include word
-                    if (goodIndexes.count(j) != 0) { groupName += words[i][j] + "_"; }
-                }
-                
-                if (groupName != "") { groupName = groupName.substr(0, groupName.length()-1); }
-               
-                //is this name unique
-                if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
-                else { groupName = "Group_"+ toString(i); util.checkName(groupName); groups.insert(groupName); }
-                
-                results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
-            }
-            
-        }else { //separate by the user selected deliminator. default='_'
-            set<string> groups;
-            for (int i = 0; i < paired.size(); i++) {
-                
-                string groupName = "Group_" + toString(i);
-                string filename = util.getSimpleName(paired[i][0]);
-                int pos = filename.find(delim);
-                
-                if (pos != string::npos) { groupName = filename.substr(0, pos); }
-                
-                if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
+            if (!util.allSpaces(individual)) {
+                words[i].push_back(individual);
+                map<int, set<string> >::iterator it = posToWord.find(pos);
+                if (it != posToWord.end()) { posToWord[pos].insert(individual); }
                 else {
-                    //look for another delim
-                    string tempFilename = filename.substr(pos+1); //grab rest of name
-                    pos = tempFilename.find(delim);
-                    if (pos != string::npos) {
-                        groupName += "_" + tempFilename.substr(0, pos);
-                        if (groups.count(groupName) != 0) {  groupName += "_"+ toString(i);  } //already have this name
-                    }
-                    else { groupName += "_"+ toString(i); }
-                    util.checkName(groupName);
-                    groups.insert(groupName);
+                    set<string> temp; temp.insert(individual);
+                    posToWord[pos] = temp;
                 }
-                
-                results[i].push_back(groupName); results[i].push_back(paired[i][0]); results[i].push_back(paired[i][1]);
             }
         }
-        return results;
+        
+        //remove duplicate pieces
+        set<int> goodIndexes;
+        for (map<int, set<string> >::iterator it = posToWord.begin(); it != posToWord.end(); it++) {
+            set<string> w = it->second;;
+            if (w.size() != 1) { goodIndexes.insert(it->first);  }
+        }
+        
+        set<string> groups;
+        vector<string> orderedGroups;
+        for (int i = 0; i < words.size(); i++) {
+            
+            //assemble groupNames
+            string groupName = "";
+            for (int j = 0; j < words[i].size(); j++) {
+                //include word
+                if (goodIndexes.count(j) != 0) { groupName += words[i][j] + "_"; }
+            }
+            
+            if (groupName != "") { groupName = groupName.substr(0, groupName.length()-1); }
+           
+            //is this name unique
+            if (groups.count(groupName) == 0) { util.checkName(groupName); groups.insert(groupName);  }
+            else { groupName = "Group_"+ toString(i); util.checkName(groupName); groups.insert(groupName); }
+            
+            orderedGroups.push_back(groupName);
+        }
+        
+        return orderedGroups;
     }
     catch(exception& e) {
-        m->errorOut(e, "MakeFileCommand", "findGroupName");
+        m->errorOut(e, "MakeFileCommand", "denoiseGroupNames");
         exit(1);
     }
 }
-
 //**********************************************************************************************************************
 
 int MakeFileCommand::fillAccnosFile(string tempFile){
