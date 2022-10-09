@@ -48,7 +48,7 @@ private:
     GroupMap* groupMap;
     Oligos oligos;
     
-    map<int, string> file2Group;
+    vector<string> file2Group;
     vector< vector<string> > readFile();
     string ffqnoMatchFile, rfqnoMatchFile, ffnoMatchFile, rfnoMatchFile, fqnoMatchFile, rqnoMatchFile;
     vector<string> Groups;

@@ -1028,7 +1028,7 @@ vector< vector<string> > ParseFastaQCommand::readFile(){
         
         FileFile dataFile(inputfile, mode);
         vector< vector<string> > files = dataFile.getFiles(); //if pacbio 2 columns, files[x][0] = filename, files[x][1] = "", files[x][2] = "", files[x][3] = "",
-        file2Group = dataFile.getFile2Group();
+        file2Group = dataFile.getGroupNames();
         createFileGroup = dataFile.isColumnWithGroupNames();
         hasIndex = dataFile.containsIndexFiles();
         int dataFileFormat = dataFile.getFileFormat();

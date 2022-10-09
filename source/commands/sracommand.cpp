@@ -911,7 +911,7 @@ int SRACommand::readFile(map<string, vector<string> >& files){
         FileFile dataFile(inputfile, "sra");
         vector< vector<string> > dataFiles = dataFile.getFiles();
         int dataFileFormat = dataFile.getFileFormat();
-        map<int, string> file2Group = dataFile.getFile2Group();
+        vector<string> file2Group = dataFile.getGroupNames();
         
         if (dataFile.containsIndexFiles() && (!setOligosParameter)) { m->mothurOut("[ERROR]: You must have an oligosfile with the index file option. Aborting. \n"); m->setControl_pressed(true);  }
         

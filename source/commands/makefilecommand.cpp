@@ -99,7 +99,7 @@ MakeFileCommand::MakeFileCommand(string option) : Command()  {
             string temp = validParameter.valid(parameters, "numcols");		if(temp == "not found"){ temp = "3"; if (typeFile == "fasta") {	temp = "2"; } }
             if ((temp != "2") && (temp != "3")) { m->mothurOut(temp + " is not a valid numcols. Options are 2 or 3. I will use 3.\n");  temp = "3";  }
             util.mothurConvert(temp, numCols);
-            
+            cout << numCols << endl;
             prefix = validParameter.valid(parameters, "prefix");		if (prefix == "not found") { prefix = "stability"; }
             
             delim = validParameter.valid(parameters, "delim");			if (delim == "not found") { delim = "_"; }

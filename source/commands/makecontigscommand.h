@@ -78,10 +78,10 @@ private:
     unsigned long long processSingleFileOption(string& outFastaFile, string& outScrapFastaFile, string& outQualFile, string& outScrapQualFile, string& outMisMatchFile, string group);
 
     unsigned long long createProcesses(vector<string>, vector<string>, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, string, map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>&, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes,map<int, oligosPair>&, vector<string>& barcodeNames, vector<string>& primerNames);
-    unsigned long long createProcessesGroups(vector< vector<string> >, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<int, string>& file2Groups);
+    unsigned long long createProcessesGroups(vector< vector<string> >, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, vector<string>& file2Groups);
 
     int createCountFile(string outputGroupFile, string resultFastafile);
-    vector< vector<string> > readFileNames(string, map<int, string>&);
+    vector< vector<string> > readFileNames(string, vector<string>&);
     bool getOligos(map<int, oligosPair>& pairedPrimers, map<int, oligosPair>& rpairedPrimers, map<int, oligosPair>&, map<int, oligosPair>& pairedBarcodes, map<int, oligosPair>& rpairedBarcodes, map<int, oligosPair>&, vector<string>& barcodeNames, vector<string>& primerNames);
     int setLines(vector<string>, vector<string>, vector<linePair>& fastaFilePos, vector<linePair>& qfileFilePos, char delim); //the delim let you know whether this is fasta and qual, or fastq and index. linePair entries will always be in sets of two. One for the forward and one for hte reverse.  (fastaFilePos[0] - ffasta, fastaFilePos[1] - rfasta) - processor1
     //bool testGZReadable(vector<string>&, vector<string>&, bool&);

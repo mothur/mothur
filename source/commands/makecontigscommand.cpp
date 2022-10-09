@@ -829,12 +829,12 @@ struct groupContigsData {
     int start, end;
     vector< vector<string> > fileInputs;
     set<string> badNames;
-    map<int, string> file2Groups;
+    vector<string> file2Groups;
     contigsData* bundle;
     long long count;
 
     groupContigsData() = default;
-    groupContigsData(vector< vector<string> > fi, int s, int e, contigsData* cd, map<int, string> f2g) {
+    groupContigsData(vector< vector<string> > fi, int s, int e, contigsData* cd, vector<string> f2g) {
         fileInputs = fi;
         start = s;
         end = e;
@@ -979,7 +979,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
 unsigned long long MakeContigsCommand::processMultipleFileOption(string& compositeFastaFile, string& compositeMisMatchFile) {
     try {
         //read file
-        map<int, string> file2Group;
+        vector<string> file2Group;
         vector< vector<string> > fileInputs = readFileNames(file, file2Group);  if (m->getControl_pressed()) { return 0; }
 
         unsigned long long numReads = 0;
@@ -2191,7 +2191,7 @@ void driverContigsGroups(groupContigsData* gparams) {
 }
 //**********************************************************************************************************************
 //only getting here is gz=true
-unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<int, string>& file2Groups) {
+unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, vector<string>& file2Groups) {
     try {
         map<int, oligosPair> pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes;
         vector<string> barcodeNames, primerNames;
@@ -2641,13 +2641,13 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 // forward.fastq reverse.fastq forward.index.fastq  reverse.index.fastq  -> 4 column
 // forward.fastq reverse.fastq none  reverse.index.fastq  -> 4 column
 // forward.fastq reverse.fastq forward.index.fastq  none  -> 4 column
-vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<int, string>& file2Group){
+vector< vector<string> > MakeContigsCommand::readFileNames(string filename, vector<string>& file2Group){
 	try {
         
         FileFile dataFile(filename, "contigs");
         vector< vector<string> > files = dataFile.getFiles();
         gz = dataFile.isGZ();
-        file2Group = dataFile.getFile2Group();
+        file2Group = dataFile.getGroupNames();
         createFileGroup = dataFile.isColumnWithGroupNames();
         if (dataFile.containsIndexFiles() && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
         
