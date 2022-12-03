@@ -382,7 +382,7 @@ vector<string> MakeFileCommand::denoiseGroupNames(vector<string> files){
         //would become...
         //FLD0207.TRIN-META
         //FLD0223.ERIFF-META
-        
+                     
         //split all names into pieces
         vector<vector<string> > words; words.resize(files.size());
         map<int, set<string> > posToWord;
