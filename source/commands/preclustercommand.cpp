@@ -763,6 +763,7 @@ void print(string newfasta, string newname, preClusterData* params){
             for (int i = 0; i < params->alignSeqs.size(); i++) {
                 if (params->alignSeqs[i]->numIdentical != 0) {
                     ct.push_back(params->alignSeqs[i]->name, params->alignSeqs[i]->numIdentical);
+                    accnosNames.insert(params->alignSeqs[i]->name);
                 }
             }
         }
