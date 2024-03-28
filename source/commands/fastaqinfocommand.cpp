@@ -201,7 +201,9 @@ int ParseFastaQCommand::execute(){
             else                {   trimOligos = new TrimOligos(pdiffs, bdiffs, ldiffs, sdiffs, oligos.getPrimers(), oligos.getBarcodes(), oligos.getReversePrimers(), oligos.getLinkers(), oligos.getSpacers());  numPrimers = oligos.getPrimers().size(); numBarcodes = oligos.getBarcodes().size();  }
             
             if (reorient) {
-                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex); numBarcodes = oligos.getReorientedPairedBarcodes().size();
+                rtrimOligos = new TrimOligos(pdiffs, bdiffs, 0, 0, oligos.getReorientedPairedPrimers(), oligos.getReorientedPairedBarcodes(), hasIndex);
+                numBarcodes = oligos.getReorientedPairedBarcodes().size();
+                numPrimers = oligos.getReorientedPairedPrimers().size();
             }
             
         }else if (groupfile != "")   { readGroup(groupfile);     }
@@ -742,7 +744,7 @@ set<string> ParseFastaQCommand::processFile(string inputfile, TrimOligos*& trimO
                                 seqGroups[copy.getName()] = thisGroup;
                                 
                                 map<string, long long>::iterator it = groupCounts.find(thisGroup);
-                                if (it == groupCounts.end()) {	groupCounts[thisGroup] = 1; }
+                                if (it == groupCounts.end()) {    groupCounts[thisGroup] = 1; }
                                 else { groupCounts[it->first]++; }
                             }
                         }else { addToScrap = true; }
@@ -818,6 +820,7 @@ int ParseFastaQCommand::findGroup(Sequence& currSeq, QualityScores& currQual, st
             else                { success = results[0];                 }
             if(success > bdiffs)		{	trashCode += 'b';	}
             else{ currentSeqsDiffs += success;  }
+            
         }
         
         if(numSpacers != 0){
