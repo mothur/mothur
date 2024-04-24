@@ -109,7 +109,7 @@ endif
     subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
-    CXXFLAGS += -I. $(subDirIncludes)
+    CXXFLAGS += -I. -I./source $(subDirIncludes)
     LDFLAGS += $(subDirLinking)
 
 
@@ -135,7 +135,7 @@ else
 	mv mothur ${INSTALL_DIR}/mothur
 endif
 
-	
+
 %.o : %.c %.h
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
@@ -147,4 +147,4 @@ endif
 
 clean :
 	@rm -f $(OBJECTS)
-	
+
