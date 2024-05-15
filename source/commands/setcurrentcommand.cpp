@@ -431,6 +431,10 @@ int SetCurrentCommand::readCurrentFiles(){
                     current->setAccnosFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "taxonomy") {
                     current->setTaxonomyFile(util.getFullPathName(pieces[1]));
+                }else if (pieces[0] == "constaxonomy") {
+                    current->setConsTaxonomyFile(util.getFullPathName(pieces[1]));
+                }else if (pieces[0] == "contigsreport") {
+                    current->setContigsReportFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "flow") {
                     current->setFlowFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "biom") {
@@ -443,6 +447,7 @@ int SetCurrentCommand::readCurrentFiles(){
                     current->setFileFile(util.getFullPathName(pieces[1]));
                 }else if (pieces[0] == "processors") {
                     current->setProcessors(pieces[1]);
+                
                 }else {
                     m->mothurOut("[ERROR]: mothur does not save a current file for " + util.getFullPathName(pieces[1])); m->mothurOutEndLine();
                 }

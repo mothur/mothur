@@ -167,7 +167,7 @@ string MakeContigsCommand::getHelpString(){
 		helpString += "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n";
         helpString += "The checkorient parameter will look for the reverse compliment of the barcode or primer in the sequence. If found the sequence is flipped. The default is true.\n";
         helpString += "The deltaq parameter allows you to specify the delta allowed between quality scores of a mismatched base.  For example in the overlap, if deltaq=5 and in the alignment seqA, pos 200 has a quality score of 30 and the same position in seqB has a quality score of 20, you take the base from seqA (30-20 >= 5).  If the quality score in seqB is 28 then the base in the consensus will be an N (30-28<5). The default is 6.\n";
-				helpString += "The maxee parameter allows you to specify the maximum number of errors to allow in a sequence. Makes sense to use with deltaq=0. This numbrer is a decimal number. The expected numbrer of errors is based on Edgar's approach used in USEARCH/VSEARCH.";
+				helpString += "The maxee parameter allows you to specify the maximum number of errors to allow in a sequence. Makes sense to use with deltaq=0. This number is a decimal number. The expected number of errors is based on Edgar's approach used in USEARCH/VSEARCH.";
 		helpString += "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n";
 		helpString += "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n";
         helpString += "The insert parameter allows you to set a quality scores threshold. In the case where we are trying to decide whether to keep a base or remove it because the base is compared to a gap in the other fragment, if the base has a quality score equal to or below the threshold we eliminate it. Default=20.\n";
@@ -324,12 +324,10 @@ MakeContigsCommand::MakeContigsCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "pdiffs");		if (temp == "not found") { temp = "0"; }
 			util.mothurConvert(temp, pdiffs);
 
-            sdiffs = 0;
-
 			temp = validParameter.valid(parameters, "tdiffs");		if (temp == "not found") { int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
 			util.mothurConvert(temp, tdiffs);
 
-			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}  //+ ldiffs + sdiffs;
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	} 
 
             temp = validParameter.valid(parameters, "allfiles");		if (temp == "not found") { temp = "F"; }
 			allFiles = util.isTrue(temp);
@@ -829,12 +827,12 @@ struct groupContigsData {
     int start, end;
     vector< vector<string> > fileInputs;
     set<string> badNames;
-    map<int, string> file2Groups;
+    vector<string> file2Groups;
     contigsData* bundle;
     long long count;
 
     groupContigsData() = default;
-    groupContigsData(vector< vector<string> > fi, int s, int e, contigsData* cd, map<int, string> f2g) {
+    groupContigsData(vector< vector<string> > fi, int s, int e, contigsData* cd, vector<string> f2g) {
         fileInputs = fi;
         start = s;
         end = e;
@@ -979,7 +977,7 @@ int setNameType(string forwardFile, string reverseFile, char delim, int& offByOn
 unsigned long long MakeContigsCommand::processMultipleFileOption(string& compositeFastaFile, string& compositeMisMatchFile) {
     try {
         //read file
-        map<int, string> file2Group;
+        vector<string> file2Group;
         vector< vector<string> > fileInputs = readFileNames(file, file2Group);  if (m->getControl_pressed()) { return 0; }
 
         unsigned long long numReads = 0;
@@ -2191,7 +2189,7 @@ void driverContigsGroups(groupContigsData* gparams) {
 }
 //**********************************************************************************************************************
 //only getting here is gz=true
-unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, map<int, string>& file2Groups) {
+unsigned long long MakeContigsCommand::createProcessesGroups(vector< vector<string> > fileInputs, string compositeFastaFile, string compositeScrapFastaFile, string compositeQualFile, string compositeScrapQualFile, string compositeMisMatchFile, vector<string>& file2Groups) {
     try {
         map<int, oligosPair> pairedPrimers, rpairedPrimers, revpairedPrimers, pairedBarcodes, rpairedBarcodes, revpairedBarcodes;
         vector<string> barcodeNames, primerNames;
@@ -2641,13 +2639,13 @@ int MakeContigsCommand::setLines(vector<string> fasta, vector<string> qual, vect
 // forward.fastq reverse.fastq forward.index.fastq  reverse.index.fastq  -> 4 column
 // forward.fastq reverse.fastq none  reverse.index.fastq  -> 4 column
 // forward.fastq reverse.fastq forward.index.fastq  none  -> 4 column
-vector< vector<string> > MakeContigsCommand::readFileNames(string filename, map<int, string>& file2Group){
+vector< vector<string> > MakeContigsCommand::readFileNames(string filename, vector<string>& file2Group){
 	try {
         
         FileFile dataFile(filename, "contigs");
         vector< vector<string> > files = dataFile.getFiles();
         gz = dataFile.isGZ();
-        file2Group = dataFile.getFile2Group();
+        file2Group = dataFile.getGroupNames();
         createFileGroup = dataFile.isColumnWithGroupNames();
         if (dataFile.containsIndexFiles() && (oligosfile == "")) { m->mothurOut("[ERROR]: You need to provide an oligos file if you are going to use an index file.\n"); m->setControl_pressed(true);  }
         

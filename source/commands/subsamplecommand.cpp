@@ -99,7 +99,7 @@ string SubSampleCommand::getOutputPattern(string type) {
         else if (type == "tree")        {   pattern = "[filename],subsample,[extension]";    }
         else if (type == "list")        {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "taxonomy")    {   pattern = "[filename],subsample,[extension]";    }
-        else if (type == "constaxonomy"){   pattern = "[filename],subsample,[extension]";    }
+        else if (type == "constaxonomy"){   pattern = "[filename],subsample,cons.taxonomy";    }
         else if (type == "shared")      {   pattern = "[filename],[distance],subsample,[extension]";    }
         else if (type == "rabund")      {   pattern = "[filename],subsample,[extension]";    }
         else { m->mothurOut("[ERROR]: No definition for type " + type + " output pattern.\n"); m->setControl_pressed(true);  }
@@ -770,7 +770,6 @@ int SubSampleCommand::processShared(SharedRAbundVectors*& thislookup) {
             if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
-            variables["[extension]"] = util.getExtension(constaxonomyfile);
             variables["[distance]"] = thislookup->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             
@@ -1106,7 +1105,6 @@ int SubSampleCommand::processList(ListVector*& list, set<string>& subset) {
             if (outputdir == "") {  thisOutputDir += util.hasPath(constaxonomyfile);  }
             map<string, string> variables;
             variables["[filename]"] = thisOutputDir + util.getRootName(util.getSimpleName(constaxonomyfile));
-            variables["[extension]"] = util.getExtension(constaxonomyfile);
             variables["[distance]"] = list->getLabel();
             string consOutputFileName = getOutputFileName("constaxonomy", variables);
             

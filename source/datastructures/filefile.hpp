@@ -50,7 +50,13 @@
  My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
  ...
  
+ file option 7 - for make.count command
  
+ group fastafile
+ 
+ file option 8 - for make.count command
+ 
+ group forwardFasta reverseFasta
  
  ********* fileOption; //1 -> 2 column(4 forms of 2 column), 2 -> 3 column, 3 -> 4 column ******************
  */
@@ -69,7 +75,7 @@ public:
     
     bool isGZ() { return gz; } //are files listed in file compressed
     bool containsIndexFiles() { return hasIndex; } //indicates oligos file is required
-    map<int, string> getFile2Group() { return file2Group; } //fileIndex2GroupName, files[0]'s group is -> file2Group[0]
+    vector<string> getGroupNames() { return groupNames; } //fileIndex2GroupName, files[0]'s group is -> groupNames[0]
     
 protected:
     
@@ -80,9 +86,9 @@ protected:
     bool gz, hasIndex, columnWithGroups;
     int fileOption; //1 -> 2 column(3 forms of 2 column), 2 -> 3 column, 3 -> 4 column
     vector< vector<string> > files;
-    map<int, string> file2Group;
+    vector<string> groupNames;
     
-    vector< vector<string> > read(string, string); //read file, used with () constructor
+    void read(string, string); //read file, used with () constructor
     bool validateFiles(vector<string> pieces, string& forward, string& reverse, string& findex, string& rindex, string& group); //checks locations, abletoOPen, fileOPtion
     void setGZ(string forward, string reverse, string findex, string rindex, bool&, bool&);
 };

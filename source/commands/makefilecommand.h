@@ -36,8 +36,15 @@ private:
     int numCols;
     bool abort;
     
-    vector< vector<string> > findGroupNames(vector< vector<string> > paired);
+    vector< vector<string> > prepareOutputs(vector< vector<string> > paired);
+    vector< vector<string> > prepareOutputs(vector<string> files);
+    vector<string> denoiseGroupNames(vector<string> files);
+    vector<string> createDefaultGroupNames(vector<string> files);
+
     int fillAccnosFile(string tempFile);
+    vector< vector<string> > pairFiles(vector<string> files, vector<string>& singles);
+    void createFastqGzFile(vector<string>);
+    void createFastaFile(vector<string>);
 };
 
 

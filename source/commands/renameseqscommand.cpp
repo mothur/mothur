@@ -881,7 +881,7 @@ int RenameSeqsCommand::processFile(){
     try {
         ignoreNew = true; //if there are sequences only present in some files, ignore them
         
-        map<int, string> file2Group; gz = false;
+        vector<string> file2Group; gz = false;
         vector< vector<string> > files = readFiles(file2Group, gz);
         
         string thisOutputDir = outputdir;
@@ -953,12 +953,12 @@ int RenameSeqsCommand::processFile(){
     }
 }
 //**********************************************************************************************************************
-vector< vector<string> > RenameSeqsCommand::readFiles(map<int, string>& file2Group, bool& isGZ){
+vector< vector<string> > RenameSeqsCommand::readFiles(vector<string>& file2Group, bool& isGZ){
     try {
         FileFile dataFile(fileFile, "contigs");
         vector< vector<string> > dataFiles = dataFile.getFiles();
         int dataFileFormat = dataFile.getFileFormat();
-        file2Group = dataFile.getFile2Group();
+        file2Group = dataFile.getGroupNames();
         isGZ = dataFile.isGZ();
         
         if (file2Group.size() == 0) { m->setControl_pressed(true);  }

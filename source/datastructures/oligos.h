@@ -84,8 +84,6 @@ protected:
     int indexBarcode;
     int indexPairedPrimer;
     int indexPairedBarcode;
-    set<string> uniquePrimers;
-    set<string> uniqueBarcodes;
     
     int readOligos();
     string reverseOligo(string);

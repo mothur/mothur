@@ -334,8 +334,13 @@ int GetOTURepCommand::execute(){
                 
                 if (method == "distance") { readDist(); }
                 
-                InputData input(listfile, "list", Groups);
-                ListVector* list = input.getListVector(*it);
+                InputData input(listfile, "list", nullVector);
+                set<string> processedLabels;
+                set<string> userLabels; userLabels.insert(*it);
+                string lastLabel = "";
+                
+                ListVector* list = util.getNextList(input, allLines, userLabels, processedLabels, lastLabel);
+
                 if (list != nullptr) {
                     string lastLabel = list->getLabel();
                 

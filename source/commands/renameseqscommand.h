@@ -51,7 +51,7 @@ private:
     string readFastq(map<string, string>&);
     int processFile();
     int readMapFile(map<string, string>&);
-    vector< vector<string> > readFiles(map<int, string>&, bool&);
+    vector< vector<string> > readFiles(vector<string>&, bool&);
     void processNameGroupCountFiles(map<string, string>&, map<string, string>&);
     
 };

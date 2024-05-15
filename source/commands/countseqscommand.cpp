@@ -124,9 +124,6 @@ CountSeqsCommand::CountSeqsCommand(string option) : Command()  {
             
             string temp = validParameter.valid(parameters, "compress");			if (temp == "not found") { temp = "t"; }
             compress = util.isTrue(temp);
-
-			 
-			
 		}
 		
 	}
@@ -263,7 +260,7 @@ unsigned long long CountSeqsCommand::process(string outputFileName){
         if (compress) {
             ct.printCompressedTable(outputFileName);
         }else {
-            ct.printTable(outputFileName);
+            ct.printTable(outputFileName, false);
         }
         
         outputNames.push_back(outputFileName); outputTypes["count"].push_back(outputFileName);

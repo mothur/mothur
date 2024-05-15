@@ -202,7 +202,10 @@ string ValidParameters::valid(map<string, string>& container, string parameter) 
         
         it = container.find(parameter);
         if(it != container.end()){
-            Utils util; it->second = util.getSimpleName(it->second); //remove path from non file options
+            
+            if (it->first == "order") {
+                Utils util; it->second = util.getSimpleName(it->second); //remove path from order because it refers to floworder not order file
+            }
         }
         else { return "not found"; }
         

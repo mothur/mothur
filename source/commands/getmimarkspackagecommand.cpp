@@ -396,8 +396,8 @@ int GetMIMarksPackageCommand::readFile(){
         
         if (fileOption == 2) { // 3 column file with group names
             
-            map<int, string> fileIndex2GroupName = dataFile.getFile2Group();
-            for (map<int, string>::iterator it = fileIndex2GroupName.begin(); it != fileIndex2GroupName.end(); it++)  { Groups.insert(it->second); }
+            vector<string> groupNames = dataFile.getGroupNames();
+            for (auto name : groupNames)  { Groups.insert(name); }
             
         }else if (fileOption == 1) { //2 column format, extract names from oligos file
             

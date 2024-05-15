@@ -32,11 +32,14 @@ public:
 	
 private:
 		
-	string fastaFileName, groups, output, format;
+	string fastaFileName, groups, output, format, fileFile;
 	vector<string> fastaFileNames;
 	vector<string> groupsNames, outputNames;
 	
 	bool abort;
+    
+    void processFastaFiles(map<string, string>&, map<string, long long>&);
+    void processFileFile(map<string, string>&, map<string, long long>&);
 };
 
 #endif

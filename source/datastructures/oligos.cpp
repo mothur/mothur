@@ -220,6 +220,8 @@ int Oligos::readOligos(){
 		
 		string type, oligo, roligo, group;
         bool pfUsesNone = false; bool prUsesNone = false; bool bfUsesNone = false; bool brUsesNone = false;
+        set<string> uniqueBarcodes;
+        set<string> uniquePrimers;
 		
 		while(!inOligos.eof()){
             
@@ -566,6 +568,7 @@ vector<string> Oligos::getPrimers(string groupName){
 map<int, oligosPair> Oligos::getReversedPairedPrimers(){
     try {
         map<int, oligosPair> rpairedPrimers;
+        set<string> uniquePrimers;
         
         for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
             //add reverse compliment barcodes
@@ -607,6 +610,7 @@ map<int, oligosPair> Oligos::getReversedPairedPrimers(){
 map<int, oligosPair> Oligos::getReorientedPairedPrimers(){
 	try {
         map<int, oligosPair> rpairedPrimers;
+        set<string> uniquePrimers;
         
         for (map<int, oligosPair>::iterator it = pairedPrimers.begin(); it != pairedPrimers.end(); it++) {
             string forward = (it->second).reverse;
@@ -703,6 +707,7 @@ map<string, int> Oligos::getReversedPrimers(){
 map<int, oligosPair> Oligos::getReversedPairedBarcodes(){
     try {
         map<int, oligosPair> rpairedBarcodes;
+        set<string> uniqueBarcodes;
         
         for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
             //add reverse compliment barcodes
@@ -744,6 +749,7 @@ map<int, oligosPair> Oligos::getReversedPairedBarcodes(){
 map<int, oligosPair> Oligos::getReorientedPairedBarcodes(){
 	try {
         map<int, oligosPair> rpairedBarcodes;
+        set<string> uniqueBarcodes;
         
         for (map<int, oligosPair>::iterator it = pairedBarcodes.begin(); it != pairedBarcodes.end(); it++) {
             string forward = (it->second).reverse;

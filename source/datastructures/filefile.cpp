@@ -31,101 +31,135 @@ FileFile::FileFile(string f, string md) : filename(f), mode(md) {
 }
 /**************************************************************************************************
 
-FileFile::FileFile(){
-    try {
-        m = MothurOut::getInstance();
-        
-        current = CurrentFile::getInstance();
-        inputDir = current->getInputDir();
-        mpath = current->getProgramPath();
-        
-        fileOption = 0;
-        gz = false;
-        hasIndex = false;
-        filename = ""; mode = "";
-    }
-    catch(exception& e) {
-        m->errorOut(e, "FileFile", "FileFile");
-        exit(1);
-    }
-}
-
- file option 1
- 
- sfffile1   oligosfile1
- sfffile2   oligosfile2
- ...
- 
- file option 2
- 
- fastqfile1 oligosfile1
- fastqfile2 oligosfile2
- ...
- 
- file option 3
- 
- ffastqfile1 rfastqfile1
- ffastqfile2 rfastqfile2
- ...
- 
- file option 4
- 
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- group fastqfile  fastqfile
- ...
- 
- file option 5
- 
- My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
- ...
- */
+ /*
+  file option 1
+  
+  sfffile1   oligosfile1
+  sfffile2   oligosfile2
+  ...
+  
+  file option 2
+  
+  fastqfile1 oligosfile1
+  fastqfile2 oligosfile2
+  ...
+  
+  file option 3
+  
+  ffastqfile1 rfastqfile1
+  ffastqfile2 rfastqfile2
+  ...
+  
+  file option 4 - only vaild if mode is set to parsefastqpacbio
+  
+  group1 pacBiofastqfile1
+  group2 pacBiofastqfile2
+  ...
+  
+  file option 5
+  
+  group fastqfile  fastqfile
+  group fastqfile  fastqfile
+  group fastqfile  fastqfile
+  ...
+  
+  file option 6
+  
+  My.forward.fastq My.reverse.fastq none My.rindex.fastq //none is an option is no forward or reverse index file
+  ...
+  
+  file option 7 - for make.count command
+  
+  group fastafile
+  
+  file option 8 - for make.count command
+  
+  group forwardFasta reverseFasta
+  
+  */
 
 /**************************************************************************************************/
-vector< vector<string> > FileFile::read(string f, string mode){
+void FileFile::read(string f, string mode){
     try {
-        filename = f;
-        
-        bool allGZ = true; bool allPlainTxt = true;
-        
-        ifstream in; util.openInputFile(filename, in);
-        
-        while(!in.eof()) {
+    
+            filename = f;
             
-            if (m->getControl_pressed()) { return files; }
+            bool allGZ = true; bool allPlainTxt = true;
             
-            bool skip = false;
-            string line = util.getline(in);  gobble(in);
+            ifstream in; util.openInputFile(filename, in);
             
-            if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
-            
-            if(line[0] == '#'){  } //ignore
-            else {
+            while(!in.eof()) {
                 
-                vector<string> pieces = util.splitWhiteSpace(line);
+                if (m->getControl_pressed()) { break; }
                 
-                string group = ""; string forward, reverse, findex, rindex;
-                skip = validateFiles(pieces, forward, reverse, findex, rindex, group);
+                bool skip = false;
+                string line = util.getline(in);  gobble(in);
                 
-                if (!skip) { //good pair
-                    file2Group[files.size()] = group;
-                    if (((findex != "") || (rindex != ""))) { hasIndex = true; }
+                if (m->getDebug()) {  m->mothurOut("[DEBUG]: " + line +"\n");  }
+                
+                if(line[0] == '#'){  } //ignore
+                else {
                     
-                    if ((mode == "contigs") || (mode == "sra")) { setGZ(forward, reverse, findex, rindex, allGZ, allPlainTxt); }
+                    vector<string> pieces = util.splitWhiteSpace(line);
                     
-                    vector<string> pair;
-                    pair.push_back(forward); pair.push_back(reverse); pair.push_back(findex); pair.push_back(rindex);
-                    files.push_back(pair);
+                    if (mode == "make.count") {
+                        vector<string> thisGroupsFiles;
+                        
+                        if ((pieces.size() == 2) || (pieces.size() == 3)) {
+                            util.checkGroupName(pieces[0]);
+                            bool skip = false;
+                            
+                            //check to make fasta file opens
+                            bool ableToOpen = util.checkLocations(pieces[1], current->getLocations());
+                            if (ableToOpen) {
+                                if (util.isBlank(pieces[1])) { m->mothurOut("[WARNING]: " + pieces[1] + " is blank, skipping.\n"); skip=true; }
+                            }else { m->mothurOut("[WARNING]: can't find " + pieces[1] + ", ignoring.\n"); skip = true; }
+                            
+                            if (pieces.size() == 3) {
+                                //check to make fasta file opens
+                                ableToOpen = util.checkLocations(pieces[2], current->getLocations());
+                                if (ableToOpen) {
+                                    if (util.isBlank(pieces[2])) { m->mothurOut("[WARNING]: " + pieces[2] + " is blank, skipping.\n"); skip=true; }
+                                }else { m->mothurOut("[WARNING]: can't find " + pieces[2] + ", ignoring.\n"); skip = true; }
+                            }
+                        
+                            if (!skip) {
+                                groupNames.push_back(pieces[0]);
+                                thisGroupsFiles.push_back(pieces[1]);
+                                if (pieces.size() == 3) { thisGroupsFiles.push_back(pieces[2]); }
+                                files.push_back(thisGroupsFiles);
+                            }
+                    
+                        }else {
+                            m->mothurOut("[ERROR]: Found " + toString(pieces.size()) + " columns. mothur expects the file file for make.count to be in 2 or 3 column form.  \n");
+                        }
+                    }else {
+                        string group = ""; string forward, reverse, findex, rindex;
+                        skip = validateFiles(pieces, forward, reverse, findex, rindex, group);
+                        
+                        if (!skip) { //good pair
+                            groupNames.push_back(group);
+                            if (((findex != "") || (rindex != ""))) { hasIndex = true; }
+                            
+                            if ((mode == "contigs") || (mode == "sra")) { setGZ(forward, reverse, findex, rindex, allGZ, allPlainTxt); }
+                            
+                            vector<string> pair;
+                            pair.push_back(forward); pair.push_back(reverse); pair.push_back(findex); pair.push_back(rindex);
+                            files.push_back(pair);
+                        }
+                    }
                 }
             }
+            in.close();
+            
+            if ((mode == "contigs") || (mode == "sra")){ if (allGZ) { gz = true; } else { gz = false; } }
+            
+        if (files.size() == 0) { m->setControl_pressed(true); return; }
+        
+        if (mode == "make.count") {
+            fileOption = 6 + (int)files[0].size(); //either 1 or 2
         }
-        in.close();
         
-        if ((mode == "contigs") || (mode == "sra")){ if (allGZ) { gz = true; } else { gz = false; } }
-        
-        if (files.size() == 0) { m->setControl_pressed(true); }
-        
-        return files;
     }
     catch(exception& e) {
         m->errorOut(e, "FileFile", "read");

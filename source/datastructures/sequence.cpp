@@ -353,6 +353,7 @@ string Sequence::getSequenceString(ifstream& fastaFile, int& numAmbig) {
             //iterate through string
             for_each(line.begin(), line.end(), [&numAmbig](char & c) {
                     c = ::toupper(c);
+		    if(c == 'U'){c = 'T';}
                     if(c != '.' && c != '-' && c != 'A' && c != 'T' && c != 'G'  && c != 'C' && c != 'N'){
                         c = 'N';
                         numAmbig++;

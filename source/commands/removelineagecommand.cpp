@@ -117,7 +117,6 @@ RemoveLineageCommand::RemoveLineageCommand(string option) : Command()  {
 			
 			ValidParameters validParameter;
 			
-			
 			//check for required parameters			
 			fastafile = validParameter.validFile(parameters, "fasta");
 			if (fastafile == "not open") { fastafile = ""; abort = true; }
@@ -234,13 +233,6 @@ int RemoveLineageCommand::execute(){
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (m->getControl_pressed()) { return 0; }
-        
-        if (countfile != "") {
-            if ((fastafile != "") || (listfile != "") || (taxfile != "")) {
-                //m->mothurOut("\n[NOTE]: The count file should contain only unique names, so mothur assumes your fasta, list and taxonomy files also contain only uniques.\n\n");
-                
-            }
-        }
 		
 		//read through the correct file and output lines you want to keep
 		if (taxfile != "")			{
