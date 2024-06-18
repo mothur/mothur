@@ -481,6 +481,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 		vector<string> newFileNames;
 		
 		//find different types of files
+        
 		map<string, map<string, string> > typesFiles;
         map<string, vector< vector<string> > > fileLabels; //combofile name to labels. each label is a vector because it may be unique lci hci.
         vector<string> groupNames;
@@ -494,6 +495,14 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
 			
             string labels = util.getline(in); gobble(in);
             vector<string> theseLabels = util.splitWhiteSpace(labels);
+            
+            // remove group name
+            for (int j = 0; j < theseLabels.size(); j++) {
+                int pos = theseLabels[j].find_last_of('_');
+                if (pos != string::npos) {
+                    theseLabels[j] = theseLabels[j].substr(0, pos);
+                }
+            }
             
             vector< vector<string> > allLabels;
             vector<string> thisSet; thisSet.push_back(theseLabels[0]); allLabels.push_back(thisSet); thisSet.clear(); //makes "numSampled" its own grouping
@@ -588,7 +597,7 @@ vector<string> RareFactSharedCommand::createGroupFile(vector<string>& outputName
             for (int k = 1; k < fileLabels[combineFileName].size(); k++) { //output thing like 0.03-A lci-A hci-A
                 for (int n = 0; n < groupNames.size(); n++) { // for each group
                     for (int l = 0; l < fileLabels[combineFileName][k].size(); l++) { //output modified labels
-                        out  << '\t' << fileLabels[combineFileName][k][l]; // << '-' << groupNames[n];
+                        out  << '\t' << fileLabels[combineFileName][k][l] << '_' << groupNames[n];
                     }
                 }
             }

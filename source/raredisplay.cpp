@@ -47,17 +47,17 @@ void RareDisplay::update(SAbundVector& rank){
 }
 
 /***********************************************************************/
-void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs) {
+void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSamples) {
 	try {
         lock_guard<std::mutex> guard(mutex);
         
 		vector<double> data = estimate->getValues(shared);
 		
-		map<int, vector<double> >::iterator it = results.find(numSeqs);
+		map<int, vector<double> >::iterator it = results.find(numSamples);
         if (it == results.end()) { //first iter for this count
             vector<double> temp;
             temp.push_back(data[0]);
-            results[numSeqs] = temp;
+            results[numSamples] = temp;
         }else {
             it->second.push_back(data[0]);
         }

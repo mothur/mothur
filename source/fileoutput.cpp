@@ -121,7 +121,8 @@ void SharedThreeColumnFile::updateOutput(int nSeqs, vector<double> data){
         }else{ //new row
             nseqsToRow[nSeqs] = results.size();
             vector<double> theseResults;
-            theseResults.push_back(numGroup); numGroup++;
+            numGroup++;
+            theseResults.push_back(numGroup);
             theseResults.push_back(data[0]);
             theseResults.push_back(data[1]);
             theseResults.push_back(data[2]);

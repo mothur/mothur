@@ -131,7 +131,7 @@ void TestDataSet::fillSeqs() {
     while (!in.eof()) {
         if (m->getControl_pressed()) { break; }
         
-        Sequence read(in); util.gobble(in);
+        Sequence read(in); gobble(in);
         seqs.push_back(read);
     }
     in.close();
