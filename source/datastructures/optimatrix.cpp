@@ -57,7 +57,7 @@ int OptiMatrix::readPhylip(){
         
         vector<bool> singleton; singleton.resize(nseqs, true);
         ///////////////////// Read to eliminate singletons ///////////////////////
-        if(square){
+        if(!square){
             
             for(long long i=1;i<nseqs;i++){
                 if (m->getControl_pressed()) {  fileHandle.close();  return 0; }
@@ -124,7 +124,7 @@ int OptiMatrix::readPhylip(){
         nameMap[singletonIndexSwap[0]] = name;
         
         string line = "";
-        if(square){
+        if(!square){
             
             int index = 0;
             
