@@ -10,7 +10,7 @@
 #define testsharedrabundfloatvector_hpp
 
 #include "sharedrabundfloatvector.hpp"
-#include "gtest/gtest.h"
+#include "gtest.h"
 
 
 class TestSharedRabundFloatVector : public SharedRAbundFloatVector {

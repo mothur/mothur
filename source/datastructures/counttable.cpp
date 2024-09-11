@@ -1552,7 +1552,9 @@ int CountTable::removeGroup(string groupName) {
             //save for later in case removing a group means we need to remove a seq.
             map<int, string> reverse;
             map<string, int>::iterator it;
-            for (it = indexNameMap.begin(); it !=indexNameMap.end(); it++) { reverse[it->second] = it->first;  }
+            for (it = indexNameMap.begin(); it !=indexNameMap.end(); it++) {
+                reverse[it->second] = it->first;
+            }
             
             it = indexGroupMap.find(groupName);
             if (it == indexGroupMap.end()) {
@@ -1598,8 +1600,10 @@ int CountTable::removeGroup(string groupName) {
                             totals.erase(totals.begin()+i);
                             uniques--;
                             i--;
-                            if (i == -1) { i = 0; }
-                            indexOfGroup = counts[i].size(); //don't adjust the the group indexes because we removed the read
+                            if (i == -1) { indexOfGroup = counts[0].size(); }
+                            else {
+                                indexOfGroup = counts[i].size(); //don't adjust the the group indexes because we removed the read
+                            }
                         }else { newIndexNameMap[reverse[thisIndex]] = i; }
                     }else { //you don't have this group, nothing to remove
                         

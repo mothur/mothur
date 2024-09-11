@@ -10,7 +10,7 @@
 #define testtrimoligos_hpp
 
 #include "trimoligos.h"
-#include "gtest/gtest.h"
+#include "gtest.h"
 #include "fakeoligos.h"
 
 class TestTrimOligos : public TrimOligos {

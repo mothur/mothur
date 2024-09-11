@@ -9,7 +9,7 @@
 #ifndef testsubsample_hpp
 #define testsubsample_hpp
 
-#include "gtest/gtest.h"
+#include "gtest.h"
 #include "subsample.h"
 
 class TestSubSample : public SubSample   {

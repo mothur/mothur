@@ -9,6 +9,7 @@
 
 
 #Install the zlib static library
+
 1. Download zlib https://zlib.net
 2. cd path/to/zlib
 3. ./configure --static
@@ -18,7 +19,7 @@
 
 1. Download gsl source https://www.gnu.org/software/gsl/
 2. cd path/to/gsl
-3. ./configure -disable-shared
+3. ./configure -disable-shared --prefix=PREFIX (where PREFIX is the path to install)
 4. make
 5. make check
 6. make install
@@ -27,7 +28,7 @@
 
 1. Download HDf5 source https://www.hdfgroup.org/downloads/hdf5/source-code/
 2. cd path/to/hdf5
-3. ./configure -disable-shared --without-szlib --enable-cxx
+3. ./configure -disable-shared --without-szlib --enable-cxx --prefix=PREFIX (where PREFIX is the path to install)
 4. make
 5. make check
 6. make install
