@@ -839,7 +839,7 @@ int ScreenSeqsCommand::getSummaryReport(){
             if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + ".\n"); }
             else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + ".\n"); }
             else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + ".\n");  }
-            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n");  }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getHomop(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n");  }
             else if (optimize[i] == "minlength") {  minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + ".\n");  if (minLength < 0) { m->setControl_pressed(true); } }
             else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + ".\n"); }
         }
@@ -912,7 +912,7 @@ int ScreenSeqsCommand::getSummary(){
             if (optimize[i] == "start") { startPos = sum.getStart(criteriaPercentile); m->mothurOut("Optimizing start to " + toString(startPos) + ".\n"); }
             else if (optimize[i] == "end") {   endPos = sum.getEnd(mincriteriaPercentile); m->mothurOut("Optimizing end to " + toString(endPos) + ".\n"); }
             else if (optimize[i] == "maxambig") { maxAmbig = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + ".\n");  }
-            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getAmbig(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n"); }
+            else if (optimize[i] == "maxhomop") { maxHomoP = sum.getHomop(criteriaPercentile); m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + ".\n"); }
             else if (optimize[i] == "minlength") { minLength = sum.getLength(mincriteriaPercentile); m->mothurOut("Optimizing minlength to " + toString(minLength) + ".\n"); if (minLength < 0) { m->setControl_pressed(true); } }
             else if (optimize[i] == "maxlength") { maxLength = sum.getLength(criteriaPercentile); m->mothurOut("Optimizing maxlength to " + toString(maxLength) + ".\n");  }
             else if (optimize[i] == "maxn") { maxN = sum.getNumNs(criteriaPercentile); m->mothurOut("Optimizing maxn to " + toString(maxN) + ".\n"); }
