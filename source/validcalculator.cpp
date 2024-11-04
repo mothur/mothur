@@ -100,6 +100,7 @@ ValidCalculators::ValidCalculators() {
 		initialDistance();
         initialProtDistance();
 		initialMatrix();
+        initialCLR();
 		initialHeat();
         initialEstimators();
 		
@@ -113,6 +114,7 @@ ValidCalculators::ValidCalculators() {
 		for(it = vennshared.begin(); it != vennshared.end(); it++) { allCalcs.insert(*it); }
 		for(it = treegroup.begin(); it != treegroup.end(); it++) { allCalcs.insert(*it); }
 		for(it = matrix.begin(); it != matrix.end(); it++) { allCalcs.insert(*it); }
+        for(it = clr.begin(); it != clr.end(); it++) { allCalcs.insert(*it); }
 		for(it = heat.begin(); it != heat.end(); it++) { allCalcs.insert(*it); }
 		for(it = distance.begin(); it != distance.end(); it++) { allCalcs.insert(*it); }
         for(it = protdistance.begin(); it != protdistance.end(); it++) { allCalcs.insert(*it); }
@@ -317,7 +319,14 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
                 m->mothurOut(calculator + " is not a valid estimator for the dist.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(matrix, ",") + ".\n");
                 return false;
             }
-		}else if (parameter == "heat") {
+		}else if (parameter == "clr") {
+            //is it valid
+            if ((clr.find(calculator)) != (clr.end())) { return true; }
+            else {
+                m->mothurOut(calculator + " is not a valid estimator for the dist.shared command and will be disregarded. Valid estimators are " + util.getStringFromSet(clr, ",") + ".\n");
+                return false;
+            }
+        }else if (parameter == "heat") {
             //is it valid
             if ((heat.find(calculator)) != (heat.end())) { return true; }
             else {
@@ -748,6 +757,16 @@ void ValidCalculators::initialMatrix() {
 	}
 }
 /********************************************************************/
+void ValidCalculators::initialCLR() {
+    try {
+        clr.insert("structeuclidean");
+    }
+    catch(exception& e) {
+        m->errorOut(e, "ValidCalculator", "initialCLR");
+        exit(1);
+    }
+}
+/********************************************************************/
 void ValidCalculators::initialDistance() {
 	try {	
 		distance.insert("nogaps");
@@ -800,6 +819,7 @@ string ValidCalculators::printCalc(string parameter) {
         else if (parameter == "vennshared")         {  output += util.getStringFromSet(vennshared, ", ");           }
         else if (parameter == "treegroup")          {  output += util.getStringFromSet(treegroup, ", ");            }
         else if (parameter == "matrix")             {  output += util.getStringFromSet(matrix, ", ");               }
+        else if (parameter == "clr")                {  output += util.getStringFromSet(clr, ", ");               }
         else if (parameter == "heat")               {  output += util.getStringFromSet(heat, ", ");                 }
         else if (parameter == "distance")           {  output += util.getStringFromSet(distance, ", ");             }
         else if (parameter == "estimator")          {  output += util.getStringFromSet(estimators, ", ");             }

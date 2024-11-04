@@ -37,4 +37,31 @@ EstOutput StructEuclidean::getValues(vector<SharedRAbundVector*> shared) {
 	}
 }
 /***********************************************************************/
+EstOutput StructEuclidean::getValues(vector<SharedRAbundFloatVector*> clr) {
+    try {
+        data.resize(1,0);
+        
+        double sum = 0.0;
+        
+        for (int i = 0; i < clr[0]->getNumBins(); i++) {
+            
+            float Aij = clr[0]->get(i);
+            float Bij = clr[1]->get(i);
+            
+            //(Aij - Bij) ^ 2
+            sum += ((Aij - Bij) * (Aij - Bij));
+        }
+        
+        data[0] = sqrt(sum);
+        
+        if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
+        
+        return data;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "StructEuclidean", "getValues");
+        exit(1);
+    }
+}
+/***********************************************************************/
 

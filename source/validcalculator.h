@@ -39,6 +39,7 @@ class ValidCalculators {
 		set<string> vennshared;
 		set<string> treegroup;
 		set<string> matrix;
+        set<string> clr;
 		set<string> heat;
 		set<string> distance;
         set<string> protdistance;
@@ -55,6 +56,7 @@ class ValidCalculators {
 		void initialVennShared();
 		void initialTreeGroups();
 		void initialMatrix();
+        void initialCLR();
 		void initialDistance();
         void initialProtDistance();
 		void initialHeat();

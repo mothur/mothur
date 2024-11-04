@@ -13,7 +13,7 @@ vector<string> MakeCLRCommand::setParameters(){
     try {
         CommandParameter pshared("shared", "InputTypes", "", "", "LRSS", "LRSS", "none","clr",false,false,true); parameters.push_back(pshared);
         CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
-        CommandParameter pzero("zero", "Number", "", "0.1", "", "", "","",false,false); parameters.push_back(pzero);
+        CommandParameter pzero("zero", "Number", "", "1", "", "", "","",false,false); parameters.push_back(pzero);
         CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
         CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
@@ -40,7 +40,7 @@ string MakeCLRCommand::getHelpString(){
         helpString += "The make.clr command parameters are shared, groups, zero and label. The shared file is required, unless you have a valid current file.\n";
         helpString += "The groups parameter allows you to specify which of the groups in your sharedfile you would like included. The group names are separated by dashes.\n";
         helpString += "The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n";
-        helpString += "The zero parameter allows you to set an value for zero OTUs. Default is 0.1.\n";
+        helpString += "The zero parameter allows you to set an value for zero OTUs. Default is 1.\n";
         helpString += "The make.clr command should be in the following format: make.clr(shared=yourSharedFile).\n";
         helpString += "Example make.clr(shared=final.opti_mcc.shared, zero=0.25).\n";
         helpString += "The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n";
@@ -108,7 +108,7 @@ MakeCLRCommand::MakeCLRCommand(string option) : Command() {
                 if (Groups.size() != 0) { if (Groups[0]== "all") { Groups.clear(); } }
             }
             
-            string temp = validParameter.valid(parameters, "zero"); if (temp == "not found") { temp = "0.1";  }
+            string temp = validParameter.valid(parameters, "zero"); if (temp == "not found") { temp = "1.0";  }
             util.mothurConvert(temp, zeroReplacementValue);
         }
 
@@ -193,10 +193,14 @@ void MakeCLRCommand::process(SharedRAbundVectors*& thisLookUp, ofstream& out, bo
             if (m->getControl_pressed()) { break; }
             
             vector<float> abunds = lookup[i]->get();
+            for (int j = 0; j < abunds.size(); j++) { abunds[j] += zeroReplacementValue; }
             
             double geoMean = util.geometricMean(abunds, zeroReplacementValue);
             
-            for (int j = 0; j < abunds.size(); j++) { lookup[i]->set(j, log2(abunds[j]/geoMean)); }
+            for (int j = 0; j < abunds.size(); j++) {
+                
+                lookup[i]->set(j, log(abunds[j]/geoMean));
+            }
             
             lookup[i]->print(out);
             

@@ -13,7 +13,8 @@
 //**********************************************************************************************************************
 vector<string> DistSharedCommand::setParameters(){	
 	try {
-		CommandParameter pshared("shared", "InputTypes", "", "", "none", "none", "none","phylip",false,true,true); parameters.push_back(pshared);
+		CommandParameter pshared("shared", "InputTypes", "", "", "shared-clr", "none", "none","phylip",false,true,true); parameters.push_back(pshared);
+        CommandParameter pclr("clr", "InputTypes", "", "", "shared-clr", "none", "none","phylip",false,false,true); parameters.push_back(pclr);
 		CommandParameter plabel("label", "String", "", "", "", "", "","",false,false); parameters.push_back(plabel);
         CommandParameter psubsample("subsample", "String", "", "", "", "", "","",false,false); parameters.push_back(psubsample);
 		CommandParameter pgroups("groups", "String", "", "", "", "", "","",false,false); parameters.push_back(pgroups);
@@ -46,11 +47,11 @@ string DistSharedCommand::getHelpString(){
 	try {
 		string helpString = "";
 		ValidCalculators validCalculator;
-		helpString += "The dist.shared command parameters are shared, groups, calc, output, processors, subsample, iters, mode, and label.  shared is a required, unless you have a valid current file.\n";
+		helpString += "The dist.shared command parameters are shared, clr, groups, calc, output, processors, subsample, iters, mode, and label.  shared or clr are required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
         helpString += "The iters parameter allows you to choose the number of times you would like to run the subsample.\n";
-        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group.\n";
+        helpString += "The subsample parameter allows you to enter the size pergroup of the sample or you can set subsample=T and mothur will use the size of your smallest group. Only valid with shared files.\n";
         helpString += "The withreplacement parameter allows you to indicate you want to subsample your data allowing for the same read to be included multiple times. Default=f. \n";
 		helpString += "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n";
 		helpString += "The output parameter allows you to specify format of your distance matrix. Options are lt, column and square. The default is lt.\n";
@@ -95,18 +96,33 @@ DistSharedCommand::DistSharedCommand(string option) : Command()  {
 			OptionParser parser(option, setParameters());
 			map<string,string> parameters  = parser.getParameters();
 			
-			ValidParameters validParameter;
-			sharedfile = validParameter.validFile(parameters, "shared");
-			if (sharedfile == "not found") { 			
-				//if there is a current shared file, use it
-				sharedfile = current->getSharedFile(); 
-				if (sharedfile != "") { m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n");  }
-				else { 	m->mothurOut("You have no current sharedfile and the shared parameter is required.\n");  abort = true; }
-			}else if (sharedfile == "not open") { sharedfile = ""; abort = true; }
-			else { current->setSharedFile(sharedfile); }
-			
-			 
-            if (outputdir == ""){ outputdir += util.hasPath(sharedfile); }
+            ValidParameters validParameter;
+            sharedfile = validParameter.validFile(parameters, "shared");
+            if (sharedfile == "not open") { abort = true; }
+            else if (sharedfile == "not found") { sharedfile = "";  }
+            else { current->setSharedFile(sharedfile); inputfile = sharedfile; format = "sharedfile";  }
+            
+            clrfile = validParameter.validFile(parameters, "clr");
+            if (clrfile == "not open") { abort = true; }
+            else if (clrfile == "not found") { clrfile = "";  }
+            else {
+                current->setCLRFile(clrfile); inputfile = clrfile; format = "clrfile";
+            }
+            
+            if ((sharedfile == "") && (clrfile == "")) {
+                //is there are current file available for any of these?
+                //give priority to shared, then clr
+                //if there is a current shared file, use it
+                sharedfile = current->getSharedFile();
+                if (sharedfile != "") { inputfile = sharedfile; format = "sharedfile"; m->mothurOut("Using " + sharedfile + " as input file for the shared parameter.\n"); }
+                else {
+                    clrfile = current->getCLRFile();
+                    if (clrfile != "") { inputfile = clrfile; format = "clrfile"; m->mothurOut("Using " + clrfile + " as input file for the clr parameter.\n"); }
+                    else { m->mothurOut("No valid current files. You must provide a clrfile or shared file.\n"); abort = true; }
+                }
+            }
+               
+            if (outputdir == ""){ outputdir += util.hasPath(inputfile); }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -121,7 +137,7 @@ DistSharedCommand::DistSharedCommand(string option) : Command()  {
 			if ((output != "lt") && (output != "square") && (output != "column")) { m->mothurOut(output + " is not a valid output form. Options are lt, column and square. I will use lt.\n"); output = "lt"; }
             
             mode = validParameter.valid(parameters, "mode");		if(mode == "not found"){	mode = "average"; }
-			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and medina. I will use average.\n");  output = "average"; }
+			if ((mode != "average") && (mode != "median")) { m->mothurOut(mode + " is not a valid mode. Options are average and median. I will use average.\n");  output = "average"; }
 			
 			groups = validParameter.valid(parameters, "groups");			
 			if (groups == "not found") { groups = ""; }
@@ -134,10 +150,17 @@ DistSharedCommand::DistSharedCommand(string option) : Command()  {
 			processors = current->setProcessors(temp);
 				
 			calc = validParameter.valid(parameters, "calc");
-			if (calc == "not found") { calc = "jclass-thetayc";  }
-			else { 
-				 if (calc == "default")  {  calc = "jclass-thetayc";  }
+            if (calc == "not found") {
+                if (format == "sharedfile") { calc = "jclass-thetayc"; }
+                else { calc = "structeuclidean"; }
+            }
+			else {
+                if (calc == "default")  {
+                    if (format == "sharedfile") { calc = "jclass-thetayc"; }
+                    else { calc = "structeuclidean"; }
+                }
 			}
+            
 			util.splitAtDash(calc, Estimators);
 			if (util.inUsersGroups("citation", Estimators)) { 
 				ValidCalculators validCalc; validCalc.printCitations(Estimators); 
@@ -149,12 +172,19 @@ DistSharedCommand::DistSharedCommand(string option) : Command()  {
 			util.mothurConvert(temp, iters); 
             
             temp = validParameter.valid(parameters, "subsample");		if (temp == "not found") { temp = "F"; }
-			if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
-            else {  
-                if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later 
-                else { subsample = false; }
+            else {
+                if (format == "sharedfile") {
+                    if (util.isNumeric1(temp)) { util.mothurConvert(temp, subsampleSize); subsample = true; }
+                    else {
+                        if (util.isTrue(temp)) { subsample = true; subsampleSize = -1; }  //we will set it to smallest group later
+                        else { subsample = false; }
+                    }
+                }else {
+                    m->mothurOut("[WARNING]: the subsample option is not available with clr files, ignoring.\n");
+                    subsample = false;
+                }
             }
-            
+			
             if (subsample == false) { iters = 1; }
             
             temp = validParameter.valid(parameters, "withreplacement");		if (temp == "not found"){	temp = "f";		}
@@ -181,38 +211,76 @@ int DistSharedCommand::execute(){
 	
         time_t start = time(nullptr);
         
-		InputData input(sharedfile, "sharedfile", Groups);
-		set<string> processedLabels;
-        set<string> userLabels = labels;
-        string lastLabel = "";
-        
-        SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
-        Groups = lookup->getNamesGroups();
-					
-        if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0;}
-        
-        if (subsample) { 
-            if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
-                subsampleSize = lookup->getNumSeqsSmallestGroup();
-                m->mothurOut("\nSetting sample size to " + toString(subsampleSize) + ".\n\n");
-            }else {
-                lookup->removeGroups(subsampleSize);
-                Groups = lookup->getNamesGroups();
+        if (format == "sharedfile") {
+            
+            InputData input(sharedfile, "sharedfile", Groups);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
+            
+            SharedRAbundVectors* lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            Groups = lookup->getNamesGroups();
+            
+            if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0;}
+            
+            if (subsample) {
+                if (subsampleSize == -1) { //user has not set size, set size = smallest samples size
+                    subsampleSize = lookup->getNumSeqsSmallestGroup();
+                    m->mothurOut("\nSetting sample size to " + toString(subsampleSize) + ".\n\n");
+                }else {
+                    lookup->removeGroups(subsampleSize);
+                    Groups = lookup->getNamesGroups();
+                }
+                
+                if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
+            }
+            numGroups = lookup->size();
+            
+            if (m->getControl_pressed()) { delete lookup;  return 0;  }
+            
+            while (lookup != nullptr) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                createProcesses(lookup); delete lookup;
+                
+                lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+        }else {
+            StructEuclidean* matrixCalculator = NULL;
+            ValidCalculators validCalculator;
+            for (int i=0; i< Estimators.size(); i++) {
+                if (validCalculator.isValidCalculator("clr", Estimators[i]) ) {
+                    if (Estimators[i] == "structeuclidean") {
+                        matrixCalculator = new StructEuclidean();
+                    }
+                }
             }
             
-            if (lookup->size() < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n"); m->setControl_pressed(true);  return 0; }
-        }
-		numGroups = lookup->size();
-        
-        if (m->getControl_pressed()) { delete lookup;  return 0;  }
-        
-        while (lookup != nullptr) {
+            if (matrixCalculator == NULL) { m->mothurOut("[ERROR]: No valid calculators. Only valid calculator with clr a file is 'structeuclidean'.\n");  return 0; }
             
-            if (m->getControl_pressed()) { delete lookup; break; }
+            InputData input(inputfile, "relabund", Groups);
+            set<string> processedLabels;
+            set<string> userLabels = labels;
+            string lastLabel = "";
             
-            createProcesses(lookup); delete lookup;
+            SharedRAbundFloatVectors* lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            numGroups = lookup->size();
             
-            lookup = util.getNextShared(input, allLines, userLabels, processedLabels, lastLabel);
+            if (numGroups < 2) { m->mothurOut("[ERROR]: You have not provided enough valid groups.  I cannot run the command.\n");  delete lookup; return 0; }
+            
+            if (m->getControl_pressed()) { delete lookup;  return 0;  }
+            
+            while (lookup != nullptr) {
+                
+                if (m->getControl_pressed()) { delete lookup; break; }
+                
+                runCLR(lookup, matrixCalculator); delete lookup;
+                
+                lookup = util.getNextRelabund(input, allLines, userLabels, processedLabels, lastLabel);
+            }
+            
+            delete matrixCalculator;
         }
 				
 		if (m->getControl_pressed()) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	util.mothurRemove(outputNames[i]); }  return 0;  }
@@ -619,6 +687,58 @@ int DistSharedCommand::createProcesses(SharedRAbundVectors*& thisLookup){
     }
     catch(exception& e) {
         m->errorOut(e, "DistSharedCommand", "createProcesses");
+        exit(1);
+    }
+}
+/***********************************************************/
+void DistSharedCommand::runCLR(SharedRAbundFloatVectors*& lookup, StructEuclidean* calc) {
+    try {
+        //initialize matrix
+        vector< vector<double> > matrix; //square matrix to represent the distance
+        matrix.resize(lookup->size());
+        for (int k = 0; k < lookup->size(); k++) {  matrix[k].resize(lookup->size(), 0.0); }
+        
+        vector<SharedRAbundFloatVector*> thisLookup = lookup->getSharedRAbundFloatVectors();
+        vector<SharedRAbundFloatVector*> subset;
+        
+
+        for (int k = 0; k < thisLookup.size(); k++) { // pass cdd each set of groups to compare
+            
+            for (int l = 0; l < k; l++) {
+                
+                if (k != l) { //we dont need to similarity of a groups to itself
+                    subset.clear(); //clear out old pair of sharedrabunds
+                    //add new pair of sharedrabunds
+                    subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]);
+                        
+                    vector<double> tempdata = calc->getValues(subset); //saves the calculator outputs
+                        
+                    if (m->getControl_pressed()) { return; }
+                    
+                    matrix[l][k] = tempdata[0];
+                    matrix[k][l] = tempdata[0];
+                }
+            }
+        }
+        map<string, string> variables;
+        variables["[filename]"] = outputdir + util.getRootName(util.getSimpleName(clrfile));
+        variables["[distance]"] = lookup->getLabel();
+        variables["[tag2]"] = "";
+        variables["[outputtag]"] = output;
+        variables["[calc]"] = "structeuclidean";
+        
+        string distFileName = getOutputFileName("phylip",variables);
+        outputNames.push_back(distFileName); outputTypes["phylip"].push_back(distFileName);
+            
+        ofstream outDist; util.openOutputFile(distFileName, outDist);
+        outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+            
+        vector<string> groupNames = lookup->getNamesGroups();
+        printDists(outDist, matrix, groupNames); outDist.close();
+        
+    }
+    catch(exception& e) {
+        m->errorOut(e, "DistSharedCommand", "runCLR");
         exit(1);
     }
 }
