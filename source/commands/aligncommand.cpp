@@ -197,6 +197,7 @@ AlignCommand::~AlignCommand(){}
 
 int AlignCommand::execute(){
 	try {
+       
 		if (abort) { if (calledHelp) { return 0; }  return 2;	}
         
         long long before = util.getRAMUsed(); long long total = util.getTotalRAM();

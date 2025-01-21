@@ -12,8 +12,6 @@
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
 #include "distancedb.hpp"
-#include "optidb.hpp"
-
 
 /**************************************************************************************************/
 void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, string version)  {

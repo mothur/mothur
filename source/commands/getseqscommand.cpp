@@ -295,7 +295,7 @@ GetSeqsCommand::GetSeqsCommand(string option) : Command() {
             }
 			
             //read accnos file
-            if (!abort) { names = util.readAccnos(accnosfile);  } 
+            if (!abort) { names = util.readAccnos(accnosfile);  }
 		}
 	}
 	catch(exception& e) {
@@ -319,11 +319,13 @@ int GetSeqsCommand::execute(){
         if (groupfiles.size() != 0)         { groupfile = groupfiles[0];    for (int i = 0; i < groupfiles.size(); i++)     { readGroup(groupfiles[i]);  }  }
         if (taxfiles.size() != 0)           { taxfile = taxfiles[0];    for (int i = 0; i < taxfiles.size(); i++)           { readTax(taxfiles[i]);    }  }
         if (listfiles.size() != 0)          { listfile = listfiles[0];   for (int i = 0; i < listfiles.size(); i++)           { readList(listfiles[i]);    }  }
-
         if (alignfiles.size() != 0)         {    for (int i = 0; i < alignfiles.size(); i++)           { readAlign(alignfiles[i]);    }  }
         if (contigsreportfiles.size() != 0) {    for (int i = 0; i < contigsreportfiles.size(); i++)   { readContigs(contigsreportfiles[i]);    }  }
         if (countfiles.size() != 0)         {    for (int i = 0; i < countfiles.size(); i++)           { readCount(countfiles[i]);    }  }
-        if (fastqfiles.size() != 0)         {    for (int i = 0; i < fastqfiles.size(); i++)            { readFastq(fastqfiles[i]);  }  }
+        if (fastqfiles.size() != 0)         {
+            for (int i = 0; i < fastqfiles.size(); i++)            {
+                readFastq(fastqfiles[i]);  }
+        }
         if (accnosfile2 != "")              {    compareAccnos(namefile);                                       }
 
         if (m->getDebug()) { runSanityCheck(fastafile, namefile, qualfile, taxfile, groupfile, listfile); }
@@ -460,7 +462,8 @@ void GetSeqsCommand::readFastq(string fastqfile){
         ofstream out; util.openOutputFile(outputFileName, out);
         ifstream in; util.openInputFile(fastqfile, in);
 
-        bool wroteSomething = false; int selectedCount = 0; set<string> uniqueNames;
+        bool wroteSomething = false; int selectedCount = 0;
+        set<string> uniqueNames;
         
 		while(!in.eof()){
 			
@@ -469,7 +472,7 @@ void GetSeqsCommand::readFastq(string fastqfile){
 			//read sequence name
             bool ignore;
             FastqRead fread(in, ignore, format); gobble(in);
-            
+ 
 			if (!ignore) {
                 string name = fread.getName();
                 

@@ -683,6 +683,21 @@ string toString(const T&x, int i){
         
         return output.str();
 }
+/**********************************************************************/
+template<typename T>
+string toString(const vector<T>& x, char delim) {
+    string result = "";
+
+    if (x.size() == 0) { return result; }
+
+    result = toString(x[0]);
+
+    for (int i = 1; i < x.size(); i++) {
+        result += delim + toString(x[i]);
+    }
+
+    return result;
+}
 //*************************************************************************
 template<typename T>
 string toHex(const T&x){

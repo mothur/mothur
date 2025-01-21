@@ -194,7 +194,7 @@ PcrSeqsCommand::PcrSeqsCommand(string option) : Command()  {
             if ((oligosfile == "") && (ecolifile == "") && (start < 0) && (end == -1)) { m->mothurOut("[ERROR]: Invalid start value.\n"); abort = true; }
             
             if ((ecolifile != "") && (start != -1) && (end != -1)) {
-                m->mothurOut("[ERROR]: You provided an ecoli file , but set the start or end parameters. Unsure what you intend.  When you provide the ecoli file, mothur thinks you want to use the start and end of the sequence in the ecoli file.\n"); abort = true;
+                m->mothurOut("[ERROR]: You provided an ecoli file, but set the start or end parameters. Unsure what you intend.  When you provide the ecoli file, mothur thinks you want to use the start and end of the sequence in the ecoli file.\n"); abort = true;
             }
 
             

@@ -81,6 +81,7 @@ vector<long long> Summary::getValues(map<int, long long>& positions) {
         for (map<int, long long>::iterator it = positions.begin(); it != positions.end(); it++) {
             int value = it->first; if (value == -1) { value = 0; }
             meanPosition += (value*it->second);
+
             totalSoFar += it->second;
             if (((totalSoFar <= defaults[1]) && (totalSoFar > 1)) || ((lastValue < defaults[1]) && (totalSoFar > defaults[1]))){  results[1] = value;   } //save value
             if (((totalSoFar <= defaults[2]) && (totalSoFar > defaults[1])) ||  ((lastValue < defaults[2]) && (totalSoFar > defaults[2]))) { results[2] = value;  } //save value
@@ -93,6 +94,7 @@ vector<long long> Summary::getValues(map<int, long long>& positions) {
         results[6] = (positions.rbegin())->first;
 
         double meansPosition = meanPosition / (double) total;
+
         results.push_back(meansPosition);
 
         return results;

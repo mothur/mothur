@@ -24,7 +24,7 @@ vector<string> ClearcutCommand::setParameters(){
 		CommandParameter pverbose("verbose", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pverbose);
 		CommandParameter pquiet("quiet", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pquiet);
 		CommandParameter pversion("version", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pversion);
-		CommandParameter prseed("rseed", "String", "", "", "*", "", "","",false,false); parameters.push_back(prseed);
+		CommandParameter prseed("seed", "String", "", "", "*", "", "","",false,false); parameters.push_back(prseed);
 		CommandParameter pnorandom("norandom", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pnorandom);
 		CommandParameter pshuffle("shuffle", "Boolean", "", "F", "", "", "","",false,false); parameters.push_back(pshuffle);
 		CommandParameter pneighbor("neighbor", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pneighbor);
@@ -69,10 +69,10 @@ string ClearcutCommand::getHelpString(){
 		helpString += "The version parameter prints out the version of clearcut you are using, default=F. \n";
 		helpString += "The verbose parameter prints out more output from clearcut, default=F. \n";
 		helpString += "The quiet parameter turns on silent operation mode, default=F. \n";
-		helpString += "The rseed parameter allows you to explicitly set the PRNG seed to a specific value. \n";
+		helpString += "The seed parameter allows you to explicitly set the PRNG seed to a specific value. \n";
 		helpString += "The norandom parameter allows you to attempt joins deterministically, default=F. \n";
 		helpString += "The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n";
-		helpString += "The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=T. \n";
+		helpString += "The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=true. \n";
 		
 		helpString += "The DNA parameter allows you to indicate your fasta file contains DNA sequences, default=F. \n";
 		helpString += "The protein parameter allows you to indicate your fasta file contains protein sequences, default=F. \n";
@@ -162,7 +162,7 @@ ClearcutCommand::ClearcutCommand(string option) : Command()  {
 			temp = validParameter.valid(parameters, "quiet");		if (temp == "not found"){	temp = "F";			}
 			quiet = util.isTrue(temp); 
 			
-			seed = validParameter.valid(parameters, "rseed");			if (seed == "not found"){	seed = "*";			}
+			seed = validParameter.valid(parameters, "seed");			if (seed == "not found"){	seed = "*";			}
 			
 			temp = validParameter.valid(parameters, "norandom");		if (temp == "not found"){	temp = "F";			}
 			norandom = util.isTrue(temp); 
@@ -171,7 +171,7 @@ ClearcutCommand::ClearcutCommand(string option) : Command()  {
 			shuffle = util.isTrue(temp); 
 			
 			temp = validParameter.valid(parameters, "neighbor");		if (temp == "not found"){	temp = "T";			}
-			neighbor = util.isTrue(temp); 
+			neighbor = util.isTrue(temp);
 			
 			temp = validParameter.valid(parameters, "DNA");			if (temp == "not found"){	temp = "F";			}
 			DNA = util.isTrue(temp);
