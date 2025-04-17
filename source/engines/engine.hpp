@@ -66,7 +66,7 @@ public:
    
     virtual void replaceVariables(string& nextCommand) {
         for (map<string, string>::iterator it = environmentalVariables.begin(); it != environmentalVariables.end(); it++) {
-            size_t pos = nextCommand.find("$"+it->first);
+            int pos = nextCommand.find("$"+it->first);
             while (pos != string::npos) { //allow for multiple uses of a environmental variable in a single command
                 nextCommand.replace(pos,it->first.length()+1,it->second); //-1 to grab $char
                 pos = nextCommand.find("$"+it->first);
@@ -74,7 +74,7 @@ public:
         }
         
         //replace mothurhome with mothur executable location
-        unsigned long pos = nextCommand.find("mothurhome");
+        int pos = nextCommand.find("mothurhome");
         while (pos != string::npos) { //allow for multiple uses of mothurhome in a single command
             nextCommand.replace(pos,10,current->getProgramPath()); //
             pos = nextCommand.find("mothurhome");
