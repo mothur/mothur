@@ -526,7 +526,13 @@ int process(string group, string newMapFile, preClusterData* params){
                         
                         if (params->m->getControl_pressed()) { out.close(); return 0; }
                         
-                        if (params->alignSeqs[j]->numIdentical != 0 && (originalCount[j] < originalCount[i])) {  //this sequence has not been merged yet
+                        bool ableToMerge = false;
+                        if (lessThan) { //default
+                            if (originalCount[j] < originalCount[i]) { ableToMerge = true; }
+                        }else { //less than equal to
+                            if (originalCount[j] <= originalCount[i]) { ableToMerge = true; }
+                        }
+                        if (params->alignSeqs[j]->numIdentical != 0 && (ableToMerge)) {  //this sequence has not been merged yet
                             
                             double skew = (double)originalCount[j]/(double)originalCount[i];
                             
@@ -766,6 +772,12 @@ void print(string newfasta, string newname, preClusterData* params){
                     accnosNames.insert(params->alignSeqs[i]->name);
                 }
             }
+        }else {
+            for (int i = 0; i < params->alignSeqs.size(); i++) {
+                if (params->alignSeqs[i]->numIdentical != 0) {
+                    accnosNames.insert(params->alignSeqs[i]->name);
+                }
+            }
         }
         
         if (params->countfile != "")  { ct.printTable(newname); }
@@ -806,6 +818,8 @@ int PreClusterCommand::execute(){
             int max_abund = summary_data.getMaxAbundance();
             
             if(pc_method == "unoise"){
+                // prevents undefined log2(0)
+                if (max_abund < 2) { max_abund = 2; }
                 
                 diffs = int((log2(max_abund)-1) / alpha + 1);
                 
@@ -845,6 +859,9 @@ int PreClusterCommand::execute(){
                     error_dist[i] /= (double)mod_factor;
                 }
                 diffs = error_dist.size();
+                
+                //m->mothurOut("Setting diffs to " + toString(diffs) + ".\n");
+                
             }
         }
         
@@ -896,7 +913,7 @@ int PreClusterCommand::execute(){
             m->mothurOut("It took " + toString(time(nullptr) - start) + " secs to run pre.cluster.\n");
             
         }else {
-            if (processors != 1) { m->mothurOut("When using running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
+            if (processors != 1) { m->mothurOut("When running without group information mothur can only use 1 processor, continuing.\n");  processors = 1; }
             
             vector<string> groups;
             map<string, vector<string> > group2Files;

@@ -635,7 +635,7 @@ int ChimeraUchimeCommand::execute(){
             if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your countfile, aborting.\n"); for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
             
             util.printVsearchFile(nameMapCount, newFasta, "/ab=", "/");
-            fastafile = newFasta;
+            //fastafile = newFasta;
         }
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0;	}
@@ -707,7 +707,7 @@ int ChimeraUchimeCommand::execute(){
             int numChimeras = 0;
             map<string, vector<string> > dummy;
             
-            uchimeData* dataBundle = new uchimeData(dummy, outputFileName, uchimeLocation, templatefile, fastafile, fastafile, countfile, accnosFileName, alnsFileName, nullVector, vars);
+            uchimeData* dataBundle = new uchimeData(dummy, outputFileName, uchimeLocation, templatefile, newFasta, fastafile, countfile, accnosFileName, alnsFileName, nullVector, vars);
             
             numSeqs = driver(dataBundle);
             numChimeras = dataBundle->numChimeras;
@@ -725,7 +725,7 @@ int ChimeraUchimeCommand::execute(){
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} delete vars; return 0; }
             
             //remove file made for uchime
-            if (templatefile == "self") {  util.mothurRemove(fastafile); }
+            if (templatefile == "self") {  util.mothurRemove(newFasta); }
             
             m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check " + toString(numSeqs) + " sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
@@ -1042,8 +1042,8 @@ int ChimeraUchimeCommand::deconvoluteResults(string outputFileName, string accno
 			in3.close();
 			out3.close();
 			
-			util.mothurRemove(alnsFileName);
-			rename((alnsFileName+".temp").c_str(), alnsFileName.c_str());
+			//util.mothurRemove(alnsFileName);
+			//rename((alnsFileName+".temp").c_str(), alnsFileName.c_str());
 		}
 		
 		return total;

@@ -672,6 +672,14 @@ string toString(const T&x){
 		return output.str();
 	
 }
+/**********************************************************************/
+inline string toString(const bool& x) {
+    if (x) {
+        return "TRUE";
+    }else{
+        return "FALSE";
+    }
+}
 //*********************************************************************
 template<typename T>
 string toString(const T&x, int i){

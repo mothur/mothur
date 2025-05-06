@@ -697,14 +697,14 @@ int Sequence::getAlignLength(){
 //********************************************************************************************************************
 
 int Sequence::getAmbigBases(){
-	if(ambigBases == -1){
+	//if(ambigBases == -1){
 		ambigBases = 0;
 		for(int j=0;j<numBases;j++){
 			if(unaligned[j] != 'A' && unaligned[j] != 'T' && unaligned[j] != 'G' && unaligned[j] != 'C'){
 				ambigBases++;
 			}
 		}
-	}	
+	//}
 	
 	return ambigBases;
 }

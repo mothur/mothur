@@ -1292,7 +1292,7 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
 
         //flip the reverse reads
         rSeq.reverseComplement();
-
+        
         //pairwise align
         alignment->align(fSeq.getUnaligned(), rSeq.getUnaligned(), true);
         map<int, int> ABaseMap = alignment->getSeqAAlnBaseMap();
@@ -1357,6 +1357,7 @@ vector<int> assembleFragments(vector< vector<double> >&qual_match_simple_bayesia
                 }else { contig += seq1[i]; } //with no quality info, then we keep it?
             }else if (((seq1[i] != '-') && (seq1[i] != '.')) && ((seq2[i] != '-') && (seq2[i] != '.'))) { //both bases choose one with better quality
                 if (hasQuality) {
+                    
                     if (abs(scores1[ABaseMap[i]] - scores2[BBaseMap[i]]) >= deltaq) { //is the difference in qual scores >= deltaq, if yes choose base with higher score
                         char c = seq1[i];
                         if (scores1[ABaseMap[i]] < scores2[BBaseMap[i]]) { c = seq2[i]; }
@@ -1439,6 +1440,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             bool tignore = false;
             FastqRead fread(inFF, tignore, format);  gobble(inFF);
             FastqRead rread(inRF, ignore, format); gobble(inRF);
+            
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
                 FastqRead f2read(inFF, tignore, format);
                 if (!checkName(f2read, rread, nameType, offByOneTrimLength)) {
@@ -1451,6 +1453,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             if (tignore) { ignore=true; }
             fSeq.setName(fread.getName()); fSeq.setAligned(fread.getSeq());
             rSeq.setName(rread.getName()); rSeq.setAligned(rread.getSeq());
+            
             fQual = new QualityScores(fread.getName(), fread.getScores());
             rQual = new QualityScores(rread.getName(), rread.getScores());
             if (thisfqualindexfile != "") { //forward index file
@@ -1521,6 +1524,7 @@ bool read(Sequence& fSeq, Sequence& rSeq, QualityScores*& fQual, QualityScores*&
             bool tignore;
             FastqRead fread(inFFasta, tignore, format); gobble(inFFasta);
             FastqRead rread(inRFasta, ignore, format); gobble(inRFasta);
+            
             if (!checkName(fread, rread, nameType, offByOneTrimLength)) {
                 FastqRead f2read(inFFasta, tignore, format); gobble(inFFasta);
                 if (!checkName(f2read, rread, nameType, offByOneTrimLength)) {
@@ -1684,7 +1688,7 @@ vector<int> trimBarCodesAndPrimers(Sequence& fSeq, Sequence& rSeq, QualityScores
         return oligosResults;
 
     }catch(exception& e) {
-        m->errorOut(e, "MakeContigsCommand", "read");
+        m->errorOut(e, "MakeContigsCommand", "trimBarCodesAndPrimers");
         exit(1);
     }
 }
@@ -1824,6 +1828,7 @@ void driverContigs(contigsData* params){
                     scores1 = fQual->getScores(); scores2 = rQual->getScores();
                     delete fQual; delete rQual;
                 }
+                
                 vector<int> contigScores = assembleFragments(qual_match_simple_bayesian, qual_mismatch_simple_bayesian, fSeq, rSeq, scores1, scores2, hasQuality, alignment, contig, trashCode, oend, oStart, numMismatches, params->insert, params->deltaq, params->trimOverlap);
 
 								//Note that usearch/vsearch cap the maximum Q value at 41 - perhaps due to ascii
@@ -1841,7 +1846,7 @@ void driverContigs(contigsData* params){
 								if(expected_errors > params->maxee) { trashCode += 'e' ;}
                 
                 if (params->screenSequences) { screenSequence(contig, trashCode, params); }
-
+                
                 if(trashCode.length() == 0){
                     string thisGroup = params->group; //group from file file
                     if (params->createGroupFromOligos) { //overwrite file file group for oligos group
@@ -2829,8 +2834,6 @@ void MakeContigsCommand::debugFunction() {
                 }
             }
         }
-        
-        cout << index.getName() << '\t' << commentString << endl;
         }
         in.close();
         
