@@ -313,6 +313,8 @@ void driver(vsearchData* params){
         string numProcessors = toString(params->processors);
         //are you using a reference file
         if (params->templatefile != "self") {
+            
+            // degap fasta and reference files
             string rootFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
             string outputFileName = rootFileName + ".vsearch_formatted";
             fileToRemove = outputFileName;
@@ -335,7 +337,7 @@ void driver(vsearchData* params){
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--db"));
-            cPara.push_back(params->util.mothurConvert(params->formattedFastaFilename));
+            cPara.push_back(params->util.mothurConvert(params->templatefile));
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--uchime_ref"));
@@ -408,7 +410,7 @@ void driver(vsearchData* params){
 #endif
         
         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
-        
+       
         system(commandString.c_str());
         
         //free memory

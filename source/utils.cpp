@@ -4423,8 +4423,10 @@ string Utils::trimTax(string tax, int trimLevel) {
     try{
         string newTax = "";
         string savedTax = tax;
-        vector<string> taxons; splitAtChar(tax, taxons, ';'); taxons.pop_back();
-    
+        vector<string> taxons; splitAtChar(tax, taxons, ';');
+        
+        if (taxons[taxons.size()-1] == "") { taxons.pop_back(); }
+   
         if (taxons.size() == trimLevel) { return savedTax; }
         else {
             int level = 0;
