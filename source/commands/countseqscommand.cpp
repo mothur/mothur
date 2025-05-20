@@ -237,11 +237,11 @@ unsigned long long CountSeqsCommand::processShared(vector<SharedRAbundVector*>& 
             }
             ct.push_back(currentLabels[j], outputs);
         }
-        
+    
         if (compress) {
             ct.printCompressedTable(outputFileName);
         }else {
-            ct.printTable(outputFileName);
+            ct.printTable(outputFileName, false);
         }
         
         return 0;
