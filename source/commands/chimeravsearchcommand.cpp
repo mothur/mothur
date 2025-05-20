@@ -313,27 +313,24 @@ void driver(vsearchData* params){
         string numProcessors = toString(params->processors);
         //are you using a reference file
         if (params->templatefile != "self") {
-            
-            // degap fasta and reference files
-            string rootFileName = params->formattedFastaFilename.substr(1, params->formattedFastaFilename.length()-2);
-            string outputFileName = rootFileName + ".vsearch_formatted";
-            fileToRemove = outputFileName;
+        
+            string rootFileName = params->util.getRootName(params->templatefile);
+            string outputFileName = rootFileName + "vsearch_formatted";
             
             //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
-            ifstream in; params->util.openInputFile(rootFileName, in);
-            ofstream out; params->util.openOutputFile(outputFileName, out);
+            ifstream in2; params->util.openInputFile(params->templatefile, in2);
+            ofstream out2; params->util.openOutputFile(outputFileName, out2);
             
-            while (!in.eof()) {
+            while (!in2.eof()) {
                 if (params->m->getControl_pressed()) { break;  }
                 
-                Sequence seq(in); gobble(in);
+                Sequence seq(in2); gobble(in2);
                 
-                if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
+                if (seq.getName() != "") { seq.printUnAlignedSequence(out2); }
             }
-            in.close(); out.close();
+            in2.close(); out2.close();
             
-            params->formattedFastaFilename = outputFileName;
-            params->formattedFastaFilename = "\"" + params->formattedFastaFilename + "\"";
+            params->templatefile = outputFileName;
             
             //add reference file
             cPara.push_back(params->util.mothurConvert("--db"));
@@ -500,7 +497,6 @@ int ChimeraVsearchCommand::execute(){
             
             //read namefile
             vector<seqPriorityNode> nameMapCount;
-            //int error;
             if (hasCount) {
                 CountTable ct; ct.readTable(countfile, true, false);
                 for(map<string, string>::iterator it = seqs.begin(); it != seqs.end(); it++) {
@@ -512,6 +508,21 @@ int ChimeraVsearchCommand::execute(){
             if (seqs.size() != nameMapCount.size()) { m->mothurOut( "The number of sequences in your fastafile does not match the number of sequences in your namefile, aborting.\n");  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0; }
             
             util.printVsearchFile(nameMapCount, newFasta, ";size=", ";");
+            
+        }else if ((templatefile != "self")) {
+            // reference mode
+            //vsearch cant handle some of the things allowed in mothurs fasta files so we remove them
+            ifstream in; util.openInputFile(fastafile, in);
+            ofstream out; util.openOutputFile(newFasta, out);
+            
+            while (!in.eof()) {
+                if (m->getControl_pressed()) { break;  }
+                
+                Sequence seq(in); gobble(in);
+                
+                if (seq.getName() != "") { seq.printUnAlignedSequence(out); }
+            }
+            in.close(); out.close();
         }
         
         if (m->getControl_pressed()) {  for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	}  return 0;	}
@@ -610,7 +621,7 @@ int ChimeraVsearchCommand::execute(){
             if (m->getControl_pressed()) { for (int j = 0; j < outputNames.size(); j++) {	util.mothurRemove(outputNames[j]);	} return 0; }
             
             //remove file made for vsearch
-            if (templatefile == "self") {  util.mothurRemove(newFasta); }
+            util.mothurRemove(newFasta); 
             
             m->mothurOut("\nIt took " + toString(time(nullptr) - start) + " secs to check your sequences. " + toString(numChimeras) + " chimeras were found.\n");
         }
@@ -1000,12 +1011,11 @@ void driverGroups(vsearchData* params){
                 nameMap = ct.getNameMap();
             }
             else { nameMap = util.readNames(it->second[1]); }
-            
+         
             int error = getSeqsVsearch(nameMap, params->formattedFastaFilename, ";size=", ";", thisGroupsSeqs, it->second[0], params->m);
             if ((error == 1) || params->m->getControl_pressed()) {  return; }
             
             totalSeqs += thisGroupsSeqs;
-            //driver((outputFName + thisGroup), filename, (accnos+thisGroup), (alns+thisGroup), numChimeras);
             params->setDriverNames((params->outputFName + thisGroup), (params->alns+thisGroup), (params->accnos+thisGroup));
             driver(params);
             

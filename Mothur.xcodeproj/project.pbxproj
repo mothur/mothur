@@ -3976,9 +3976,9 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/MothurStuff/release/;/Users/swestcott/Desktop/MothurStuff/mothurbugs/\\\"\"",
-					"VERSION=\"\\\"1.48.0\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/MothurStuff/mothur/tools/;/Users/swestcott/Desktop/release/\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/data/;\\\"\"",
+					"VERSION=\"\\\"1.48.3\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/Desktop/mothur_exe/;\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
 				);
 				GCC_VERSION = "";
@@ -4029,10 +4029,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/MothurStuff/release\\\"\"",
+					"MOTHUR_FILES=\"\\\"/Users/swestcott/Desktop/data\\\"\"",
 					"VERSION=\"\\\"1.48.2\\\"\"",
 					"LOGFILE_NAME=\"\\\"./mothur.logfile\\\"\"",
-					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/MothurStuff/mothur/tools/\\\"\"",
+					"MOTHUR_TOOLS=\"\\\"/Users/swestcott/desktop/mothur_exe\\\"\"",
 				);
 				GCC_VERSION = "";
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = NO;
