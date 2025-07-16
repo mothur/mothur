@@ -109,8 +109,8 @@ endif
     subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
-    CXXFLAGS += -I. $(subDirIncludes)
-    LDFLAGS += $(subDirLinking)
+    CXXFLAGS += -I. -Isource $(subDirIncludes)
+    LDFLAGS += -Lsource $(subDirLinking)
 
 
 #
@@ -120,6 +120,8 @@ endif
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
+    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard source/*.cpp))
+    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard source/*.c))
 
 mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
