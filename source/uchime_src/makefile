@@ -1,4 +1,4 @@
-CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -DNDEBUG=1 -DUCHIMES=1
+CXXFLAGS = -O3 -D_FILE_OFFSET_BITS=64 -DNDEBUG=1 -DUCHIMES=1 -std=c++11
 LDFLAGS = -g
 
 #
@@ -26,4 +26,4 @@ install : uchime
 
 clean :
 	@rm -f $(OBJECTS)
-	
+
