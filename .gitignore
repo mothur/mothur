@@ -21,8 +21,7 @@ mothur.entitlements
 tools
 Products
 
-mothur_resources_11.1
-mothur_resources_10.14
+mothur_resources_*
 
 *.stdout
 
