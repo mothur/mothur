@@ -2220,7 +2220,7 @@ vector< vector<double> > LinearAlgebra::lda(vector< vector<double> >& a, vector<
         //X <- temp * scaledMeans
         X.clear(); X = scaledMeans; //[numGroups]["good"columns]
         for (int i = 0; i < X.size(); i++) {
-            for (int j = 0; j < X[i].size(); j++) {  X[i][j] *= temp[j];  }
+            for (int j = 0; j < X[i].size(); j++) {  X[i][j] *= temp[i];  }
         }
         
         

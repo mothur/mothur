@@ -1067,14 +1067,15 @@ void LefseCommand::printResultsAll(vector< vector<double> > means, map<int, doub
         outputNames.push_back(outputFileName); outputTypes["summary"].push_back(outputFileName);
         
         //output headers
-        out << "OTU\tlogMaxMean\tLDA\tpValue\n";
+        out << "OTU\tlogMaxMean\tClass\tLDA\tpValue\n";
         
         string temp = "";
         
         for (int i = 0; i < means.size(); i++) { //[numOTUs]
             //find max mean of classes
-            double maxMean = -1.0;
-            for (int j = 0; j < means[i].size(); j++) {   if (means[i][j] > maxMean) { maxMean = means[i][j]; } }
+            double maxMean = -1.0; int maxClassIndex = 0;
+            for (int j = 0; j < means[i].size(); j++) {   if (means[i][j] > maxMean) { maxMean = means[i][j]; maxClassIndex = j; } }
+
             
             //str(math.log(max(max(v),1.0),10.0))
             double logMaxMean = 1.0;
@@ -1082,8 +1083,8 @@ void LefseCommand::printResultsAll(vector< vector<double> > means, map<int, doub
             logMaxMean = log10(logMaxMean);
             
             //print maximum first
-            out << currentLabels[i] << '\t' << logMaxMean << '\t';
-            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t'; }
+            out << currentLabels[i] << '\t' << logMaxMean << '\t' << classes[maxClassIndex] << '\t';
+            if (m->getDebug()) { temp = currentLabels[i] + '\t' + toString(logMaxMean) + '\t' + classes[maxClassIndex] + '\t'; }
             map<int, double>::iterator it = sigLDA.find(i);
             if (it != sigLDA.end()) {
                 out << it->second << '\t' << sigKW[i] << endl; //sigLDA is a subset of sigKW so no need to look

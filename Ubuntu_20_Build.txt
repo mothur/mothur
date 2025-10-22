@@ -2,7 +2,7 @@ Ubuntu 20
 
 Install dependancies
 
-To use GSL:  		sudo apt-get install lib-gsl-dev
+To use GSL:  		sudo apt-get install libgsl-dev
 To use Boost: 		sudo apt-get install libboost-all-dev
 To use Readline: 	sudo apt-get install libreadline-dev
 To use HDF5: 		sudo apt-get install libhdf5-dev
