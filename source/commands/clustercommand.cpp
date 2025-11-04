@@ -793,34 +793,6 @@ int ClusterCommand::runOptiCluster(){
         string distfile = columnfile;
         if (format == "phylip") { distfile = phylipfile; }
         
-        if (outputdir == "") { outputdir += util.hasPath(distfile); }
-        fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
-        tag = "opti_" + metric->getName();
-        
-        string listFileName = fileroot+ tag + ".list";
-        
-        ofstream listFile;
-        util.openOutputFile(listFileName,	listFile);
-        outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
-        
-        map<string, string> variables;
-        variables["[filename]"] = fileroot;
-        variables["[clustertag]"] = tag;
-        string outputName = getOutputFileName("steps", variables);
-        outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
-        ofstream outStep;
-        util.openOutputFile(outputName, outStep);
-        
-        string sensspecFilename = fileroot+ tag + ".sensspec";
-        ofstream sensFile;
-        util.openOutputFile(sensspecFilename,	sensFile);
-        outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
-        
-        sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-        m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
-        outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
-
-        bool printHeaders = true;
         for (set<string>::iterator it = cutoffs.begin(); it != cutoffs.end(); it++) {
             
             m->mothurOut("\n" + *it + "\n");
@@ -828,6 +800,44 @@ int ClusterCommand::runOptiCluster(){
             
             OptiData* matrix = new OptiMatrix(distfile, thisNamefile, nameOrCount, format, cutoff, false);
             
+            // check for state where mcc is not the correct default
+            // This occurs is all distances are below the cutoff meaning nothing is "far"
+            // Inital setup of all singletons - badState <- TN == 0, FP == 0, FN == totalClose/2, TP = 0
+            // Inital setup of one otu - badState <- TN == 0, FP == 0, FN == 0, TP = totalClose/2
+            if (!matrix->mccValidCalc()) {
+                m->mothurOut("[WARNING]: The mcc metric is not suitible for your data with a cutoff of " + toString(cutoff) + " using tptn instead.");
+                m->mothurOutEndLine();
+                delete metric;
+                metric = new TPTN();
+            }
+            
+            if (outputdir == "") { outputdir += util.hasPath(distfile); }
+            fileroot = outputdir + util.getRootName(util.getSimpleName(distfile));
+            tag = "opti_" + metric->getName() + "." + *it;
+            
+            string listFileName = fileroot+ tag + ".list";
+            
+            ofstream listFile;
+            util.openOutputFile(listFileName,    listFile);
+            outputNames.push_back(listFileName); outputTypes["list"].push_back(listFileName);
+            
+            map<string, string> variables;
+            variables["[filename]"] = fileroot;
+            variables["[clustertag]"] = tag;
+            string outputName = getOutputFileName("steps", variables);
+            outputNames.push_back(outputName); outputTypes["steps"].push_back(outputName);
+            ofstream outStep;
+            util.openOutputFile(outputName, outStep);
+            
+            string sensspecFilename = fileroot+ tag + ".sensspec";
+            ofstream sensFile;
+            util.openOutputFile(sensspecFilename,    sensFile);
+            outputNames.push_back(sensspecFilename); outputTypes["sensspec"].push_back(sensspecFilename);
+            
+            sensFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+            m->mothurOut("\n\niter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n");
+            outStep << "iter\ttime\tlabel\tnum_otus\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
+
             OptiCluster cluster(matrix, metric, 0);
             
             int iters = 0;
@@ -872,9 +882,7 @@ int ClusterCommand::runOptiCluster(){
             ListVector* list = cluster.getList();
             list->setLabel(toString(cutoff));
             
-            if (printHeaders) { //only print headers the first time
-                printHeaders = false;
-            }else {  list->setPrintedLabels(printHeaders);  }
+            list->setPrintedLabels(true);
             
             if(countfile != "") { list->print(listFile, counts); }
             else { list->print(listFile); }
@@ -885,16 +893,14 @@ int ClusterCommand::runOptiCluster(){
             sensFile << cutoff << '\t' << cutoff << '\t' << tp << '\t' << tn << '\t' << fp << '\t' << fn << '\t';
             for (int i = 0; i < results.size(); i++) {  sensFile << results[i] << '\t'; } sensFile << '\n';
             
-            
             delete matrix;
+            
+            listFile.close();
+            sensFile.close();
+            outStep.close();
         }
         
-        listFile.close();
-        sensFile.close();
-        outStep.close();
-        
         return 0;
-        
     }
     catch(exception& e) {
         m->errorOut(e, "ClusterCommand", "runOptiCluster");

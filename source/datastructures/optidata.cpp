@@ -64,7 +64,7 @@ set<long long> OptiData::getCloseSeqs(long long i){
         return closeness[i];
     }
     catch(exception& e) {
-        m->errorOut(e, "OptiData", "getNumClose");
+        m->errorOut(e, "OptiData", "getCloseSeqs");
         exit(1);
     }
 }
@@ -165,5 +165,31 @@ ListVector* OptiData::getListSingle() {
     }
 }
 /***********************************************************************/
-
+bool OptiData::mccValidCalc() {
+    try {
+        bool valid = true;
+        
+        long long numSeqs = getNumSeqs();
+        double numDists = numSeqs * (numSeqs-1)/2;
+        
+        double totalClose = 0;
+        //for each sequence (singletons removed on read)
+        for (int i = 0; i < closeness.size(); i++) {
+            totalClose += closeness[i].size();
+        }
+        
+        // Inital setup of all singletons - badState <- TN == 0, FP == 0, FN == totalClose/2, TP = 0
+        // Inital setup of one otu - badState <- TN == 0, FP == 0, FN == 0, TP = totalClose/2
+        if ((numDists - (totalClose/2)) == 0) {
+            return false;
+        }
+        
+        return valid;
+    }
+    catch(exception& e) {
+        m->errorOut(e, "OptiData", "mccValidCalc");
+        exit(1);
+    }
+}
+/***********************************************************************/
 

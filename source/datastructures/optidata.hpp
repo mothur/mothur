@@ -67,6 +67,11 @@ public:
     virtual bool isCloseFit(long long j, long long i, bool&) { return false; }
     virtual long long print(ostream&);
     
+    // in the case of all distances being below the cutoff, the TN and FP will always be 0
+    // This is because nothing is considered "far apart". The mcc score will always be 0.
+    // In this case we need to select a different calculator to cluster
+    bool mccValidCalc();
+    
 protected:
     Utils util; MothurOut* m;
     vector< set<long long> > closeness;  //closeness[0] contains indexes of seqs "close" to seq 0.
