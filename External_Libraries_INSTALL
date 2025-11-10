@@ -4,7 +4,7 @@
 1. Download boost source https://www.boost.org/users/download/
 2. cd path/to/boost_1_xx_0
 3. $ ./bootstrap.sh --help (for options)
-4. $ ./bootstrap.sh
+4. $ ./bootstrap.sh --prefix=/usr/local
 5. $ ./b2 link=static
 
 
@@ -28,7 +28,7 @@
 
 1. Download HDf5 source https://www.hdfgroup.org/downloads/hdf5/source-code/
 2. cd path/to/hdf5
-3. ./configure -disable-shared --without-szlib --enable-cxx --prefix=PREFIX (where PREFIX is the path to install)
+3. ./configure -disable-shared --without-szlib -- without-zlib --enable-cxx --prefix=PREFIX (where PREFIX is the path to install)
 4. make
 5. make check
 6. make install
