@@ -23,7 +23,7 @@
 INSTALL_DIR ?= "\"Enter_your_mothur_install_path_here\""
 
 OPTIMIZE ?= yes
-USEREADLINE ?= yes
+USEREADLINE ?= no
 USEBOOST ?= no
 USEHDF5 ?= no
 USEGSL ?= no
@@ -102,26 +102,19 @@ endif
 
 #
 # INCLUDE directories for mothur
-#
-#
+
 	VPATH=source/calculators:source/chimera:source/classifier:source/clearcut:source/commands:source/communitytype:source/datastructures:source/engines:source/metastats:source/read:source/svm:source/
     skipUchime := source/uchime_src/
-    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/)))) source/
+    subdirs :=  $(sort $(dir $(filter-out  $(skipUchime), $(wildcard source/*/))))
     subDirIncludes = $(patsubst %, -I %, $(subdirs))
     subDirLinking =  $(patsubst %, -L%, $(subdirs))
-    CXXFLAGS += -I. -Isource $(subDirIncludes)
-    LDFLAGS += -Lsource $(subDirLinking)
+    CXXFLAGS += -I. $(subDirIncludes)
+    LDFLAGS += $(subDirLinking)
 
-
-#
-# Get the list of all .cpp files, rename to .o files
-#
-    OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
+		OBJECTS=$(patsubst %.cpp,%.o,$(wildcard $(addsuffix *.cpp,$(subdirs))))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard $(addsuffix *.c,$(subdirs))))
     OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
     OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
-    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard source/*.cpp))
-    OBJECTS+=$(patsubst %.cpp,%.o,$(wildcard source/*.c))
 
 mothur : $(OBJECTS) uchime
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
