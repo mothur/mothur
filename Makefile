@@ -37,8 +37,8 @@ GSL_LIBRARY_DIR ?= "\"Enter_your_GSL_library_path_here\""
 GSL_INCLUDE_DIR ?= "\"Enter_your_GSL_include_path_here\""
 MOTHUR_FILES="\"Enter_your_default_path_here\""
 MOTHUR_TOOLS="\"Enter_your_mothur_tools_path_here\""
-VERSION = "\"1.48.4\""
-RELEASE_DATE = "\"11/04/25\""
+VERSION = "\"1.48.5\""
+RELEASE_DATE = "\"1/13/26\""
 
 
 # Set a static logfile name
