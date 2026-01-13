@@ -158,16 +158,17 @@ int QualityScores::read(ifstream& qFile){
                 
                 qScoreString +=  ' ' + temp;
             }
-            
+
             istringstream qScoreStringStream(qScoreString);
             int count = 0;
+
+            qScores.clear();
             while(!qScoreStringStream.eof()){
                 if (m->getControl_pressed()) { break; }
                 string temp;
                 qScoreStringStream >> temp;  gobble(qScoreStringStream);
 
                 
-
                 //check temp to make sure its a number
                 if (!util.isContainingOnlyDigits(temp)) { m->mothurOut("[ERROR]: In sequence " + seqName + "'s quality scores, expected a number and got " + temp + ", setting score to 0.\n");  temp = "0"; }
                 convert(temp, score);
@@ -614,9 +615,9 @@ void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, 
 
 		int qIndex = start - 1;
 
-		for(int i=0;i<seqLength;i++){
+    for(int i=0;i<seqLength;i++){
 
-			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[qIndex]] += weight;	}
+      if(errorSeq[i] == 'm')		  {	qualErrorMap['m'][qScores[qIndex]] += weight;	}
 			else if(errorSeq[i] == 's')	{	qualErrorMap['s'][qScores[qIndex]] += weight;	}
 			else if(errorSeq[i] == 'i')	{	qualErrorMap['i'][qScores[qIndex]] += weight;	}
 			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[qIndex]] += weight;	}

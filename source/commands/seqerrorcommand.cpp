@@ -21,12 +21,12 @@ vector<string> SeqErrorCommand::setParameters(){
 		CommandParameter pqfile("qfile", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(pqfile);
 		CommandParameter preport("report", "InputTypes", "", "", "none", "none", "QualReport","",false,false); parameters.push_back(preport);
 		CommandParameter pname("name", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pname);
-        CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
+    CommandParameter pcount("count", "InputTypes", "", "", "namecount", "none", "none","",false,false,true); parameters.push_back(pcount);
 		CommandParameter pignorechimeras("ignorechimeras", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(pignorechimeras);
 		CommandParameter pthreshold("threshold", "Number", "", "1.0", "", "", "","",false,false); parameters.push_back(pthreshold);
 		CommandParameter paligned("aligned", "Boolean", "", "T", "", "", "","",false,false); parameters.push_back(paligned);
 		CommandParameter pseed("seed", "Number", "", "0", "", "", "","",false,false); parameters.push_back(pseed);
-        CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
+    CommandParameter pinputdir("inputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(pinputdir);
 		CommandParameter poutputdir("outputdir", "String", "", "", "", "", "","",false,false); parameters.push_back(poutputdir);
         
         abort = false; calledHelp = false;
@@ -65,7 +65,7 @@ string SeqErrorCommand::getHelpString(){
 		helpString += "The qfile parameter ...\n";
 		helpString += "The report parameter...\n";
 		helpString += "The name parameter allows you to provide a name file associated with the fasta file.\n";
-        helpString += "The count parameter allows you to provide a count file associated with the fasta file.\n";
+    helpString += "The count parameter allows you to provide a count file associated with the fasta file.\n";
 		helpString += "The ignorechimeras parameter...\n";
 		helpString += "The threshold parameter...\n";
 		helpString += "Example seq.error(...).\n";
@@ -201,11 +201,11 @@ int SeqErrorCommand::execute(){
 		totalBases = 0;
 		totalMatches = 0;
                 
-        substitutionMatrix.resize(6);
-        for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
-		
-        string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
-        map<string, string> variables; 
+    substitutionMatrix.resize(6);
+    for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
+
+    string fileNameRoot = outputdir + util.getRootName(util.getSimpleName(queryFileName));
+    map<string, string> variables; 
 		variables["[filename]"] = fileNameRoot;
 		string errorSummaryFileName = getOutputFileName("errorsummary",variables);
 		outputNames.push_back(errorSummaryFileName); outputTypes["errorsummary"].push_back(errorSummaryFileName);
@@ -219,7 +219,7 @@ int SeqErrorCommand::execute(){
         vector<Sequence> referenceSeqs = getReferences(referenceFileName);	//read in reference sequences - make sure there's no ambiguous bases
         
         if (m->getControl_pressed()) { return 0; }
-        
+
         long long numSeqs = process(queryFileName, qualFileName, reportFileName, errorSummaryFileName, errorSeqFileName, errorChimeraFileName, referenceSeqs);
 
         if (m->getControl_pressed()) { for (int i = 0; i < outputNames.size(); i++) { util.mothurRemove(outputNames[i]); } return 0; }
@@ -564,7 +564,7 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
         
         bool moreSeqs = 1;
         while (moreSeqs) {
-            
+
             Sequence query(queryFile);
             int numParentSeqs = -1;
             int closestRefIndex = -1;
@@ -617,6 +617,10 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
                 
                 quality.read(qualFile);
                 
+                if(report.getQueryName() != query.getName()){   m->mothurOut("[ERROR]: - report and align sequence names do not match: " + report.getQueryName() + '\t' + query.getName() + '\n');   m->setControl_pressed(true);  }
+                if(quality.getName() != query.getName()){   m->mothurOut("[ERROR]: - quality and align sequence names do not match: " + quality.getName() + '\t' + query.getName() + '\n');   m->setControl_pressed(true);  }
+                if(quality.getName() != report.getQueryName()){   m->mothurOut("[ERROR]: - quality and report sequence names do not match: " + quality.getName() + '\t' + report.getQueryName() + '\n');  m->setControl_pressed(true);   }
+
                 if(!ignoreSeq){
                     quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
                     quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
@@ -632,7 +636,7 @@ long long SeqErrorCommand::process(string filename, string qFileName, string rFi
                 
                 int startBase = 1;
                 int endBase = qualityLength;
-                
+
                 if(!ignoreSeq){
                     quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
                     quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
