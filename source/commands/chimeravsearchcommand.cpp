@@ -407,14 +407,14 @@ void driver(vsearchData* params){
 #endif
         
         if (params->m->getDebug()) { params->m->mothurOut("[DEBUG]: vsearch command = " + commandString + ".\n"); }
-       
+      
         system(commandString.c_str());
         
         //free memory
         for(int i = 0; i < cPara.size(); i++)  {  delete cPara[i];  }
         delete[] vsearchParameters;
         
-        if (fileToRemove != "") { params->util.mothurRemove(fileToRemove); }
+        if (!params->m->getDebug() && fileToRemove != "") { params->util.mothurRemove(fileToRemove); }
         
         //remove "" from filenames
         params->driverOutputFName = params->driverOutputFName.substr(1, params->driverOutputFName.length()-2);

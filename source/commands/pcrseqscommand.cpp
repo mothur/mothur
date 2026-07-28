@@ -244,12 +244,15 @@ int PcrSeqsCommand::execute(){
         //don't write or keep if blank
         bool wroteAccnos = false;
         if (badNames.size() != 0)   { writeAccnos(badNames, outputFileName);    wroteAccnos = true;   outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);  }
-        else { m->mothurOut("[NOTE]: no sequences were bad, removing " + outputFileName + "\n\n"); }
+        else {
+            if (nomatch != "keep") {
+                m->mothurOut("[NOTE]: no sequences were bad, removing " + outputFileName + "\n\n"); }
+        }
         
         if (util.isBlank(badSeqFile)) { util.mothurRemove(badSeqFile);  }
         else { outputNames.push_back(badSeqFile); outputTypes["fasta"].push_back(badSeqFile); }
         
-        if (wroteAccnos) {
+        if (wroteAccnos && (nomatch != "keep")) {
             string inputStringTemp = "";
             if (countfile != "")            {   inputStringTemp += ", count=" + countfile;  }
             else{
@@ -552,10 +555,6 @@ bool trimStartEnd(Sequence& seq, pcrData* params) {
             
             if ((seq.getStartPos() > params->start) || (seq.getEndPos() < params->end)) {
                 good = false;
-                if (params->m->getDebug()) {
-                    params->m->mothurOut("[DEBUG]: " + seq.getName()+ " values at locations (" + toString(params->start) + "," + toString(params->end) + ") = (" + alignedString[params->start] + "," + alignedString[params->end] + ")\n");
-                    
-                }
             }
             else {
                 if (params->end != -1) {
@@ -600,7 +599,6 @@ vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>
             
             string trashCode = ""; string commentString = "";
             int currentSeqsDiffs = 0; int reverseIndex = 0; int primerIndex = 0;
-            bool goodSeq = true;
             
             if(params->numFPrimers != 0){
                 int primerStart = 0; int primerEnd = 0;
@@ -610,7 +608,7 @@ vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>
                 currentSeqsDiffs += results[0];
                 commentString += "fpdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], params->pdiffs) + ") ";
                 
-                if(!good){    if (params->nomatch == "reject") { goodSeq = false; } trashCode += "f";    }
+                if(!good){   trashCode += "f";    }
                 else{
                     //are you aligned
                     if (aligned) {
@@ -649,7 +647,7 @@ vector<string> trimPrimers(Sequence& seq, vector<TrimOligos*> trims, vector<int>
                 currentSeqsDiffs += results[0];
                 commentString += "rpdiffs=" + toString(results[0]) + "(" + trims[i]->getCodeValue(results[1], params->rdiffs) + ") ";
                 
-                if(!good){    if (params->nomatch == "reject") { goodSeq = false; } trashCode += "r";    }
+                if(!good){  trashCode += "r";    }
                 else{
                     //are you aligned
                     if (aligned) {
@@ -753,7 +751,7 @@ int driverPcr(pcrData* params){
                         currSeq.setComment("\t" + commentString + "\t" + seqComment);
                     }
                     
-                    if (trashCode != "") { goodSeq = false; }
+                    if (trashCode != "") { if (params->nomatch == "reject") { goodSeq = false; } }
      
                 }else if (params->ecoli.getName() != "filler") {
                     //make sure the seqs are aligned
@@ -771,11 +769,17 @@ int driverPcr(pcrData* params){
                         }
                     }
                 }else{ //using start and end to trim
-                    goodSeq = trimStartEnd(currSeq, params); //error message if seqs unaligned
+                    //error message if seqs unaligned
+                    if (!trimStartEnd(currSeq, params)) {
+                        if (params->nomatch == "reject") { goodSeq = false; }
+                    }
                 }
                 
                 //remove super short reads
-                if (currSeq.getUnaligned() == "") { goodSeq = false;  currSeq.setAligned("NNNNNNN"); }
+                if (currSeq.getUnaligned() == "") {
+                    if (params->nomatch == "reject") { goodSeq = false; }
+                    currSeq.setAligned("NNNNNNN");
+                }
                 
                 if(goodSeq)    {
                     currSeq.printSequence(params->goodFasta);
