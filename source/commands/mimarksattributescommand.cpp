@@ -19,6 +19,11 @@ vector<string> MimarksAttributesCommand::setParameters(){
         
         abort = false; calledHelp = false;
         
+        //register the output type this command creates, without it
+        //Command::getOutputFileName("source", ...) refuses to hand out a filename
+        vector<string> tempOutNames;
+        outputTypes["source"] = tempOutNames;
+        
         vector<string> myArray;
         for (int i = 0; i < parameters.size(); i++) {	myArray.push_back(parameters[i].name);		}
         return myArray;
